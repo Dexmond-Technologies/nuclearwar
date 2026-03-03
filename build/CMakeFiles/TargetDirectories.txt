@@ -1,0 +1,3 @@
+/home/dexmond/Documents/Dexmond_Technologies/nuclearwar/build/CMakeFiles/NuclearConflict.dir
+/home/dexmond/Documents/Dexmond_Technologies/nuclearwar/build/CMakeFiles/edit_cache.dir
+/home/dexmond/Documents/Dexmond_Technologies/nuclearwar/build/CMakeFiles/rebuild_cache.dir

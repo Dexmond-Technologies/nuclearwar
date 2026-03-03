@@ -1,0 +1,1845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>NUCLEAR RISK ☢ 3D World War</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:hidden;}
+#c{display:block;width:100vw;height:100vh;}
+
+/* LOBBY */
+#lobby{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(2,13,26,0.9) 0%,rgba(0,0,0,1) 100%);
+  display:flex;align-items:center;justify-content:center;z-index:200;flex-direction:column;gap:16px;}
+.lobby-box{
+  background:rgba(0,20,40,.85);border:1px solid rgba(0,200,255,0.4);border-radius:12px;padding:60px 80px;
+  width:900px;max-width:90vw;text-align:center;
+  box-shadow:0 0 50px rgba(0,180,255,.15), inset 0 0 30px rgba(0,180,255,.1);
+  backdrop-filter:blur(8px);
+  position:relative;
+}
+.lobby-title{font-family:'Orbitron',sans-serif;font-size:48px;font-weight:900;letter-spacing:10px;color:#0af;text-shadow:0 0 30px rgba(0,170,255,0.8), 0 0 10px rgba(0,170,255,0.5);margin-bottom:12px;}
+.lobby-sub{font-family:'Share Tech Mono',monospace;font-size:13px;letter-spacing:6px;opacity:.8;margin-bottom:40px;color:#ff3232;text-shadow:0 0 10px rgba(255,50,50,0.6);text-transform:uppercase;}
+.lobby-text{
+  font-family:'Rajdhani',sans-serif;font-size:26px;line-height:1.7;color:#0f8;font-weight:700;
+  text-shadow:0 0 20px rgba(0,255,136,0.5);padding:0 20px;
+}
+.lbtn{width:100%;padding:12px;margin:6px 0;background:transparent;border:1px solid #0af;
+  color:#0af;font:12px 'Courier New',monospace;letter-spacing:2px;cursor:pointer;text-transform:uppercase;
+  transition:.15s;border-radius:3px;}
+.lbtn:hover{background:#0af;color:#000;}
+.lbtn.red{border-color:#f24;color:#f24;} .lbtn.red:hover{background:#f24;color:#fff;}
+.linput{width:100%;padding:10px 14px;background:rgba(0,170,255,.07);border:1px solid rgba(0,170,255,.3);
+  color:#fff;font:13px 'Courier New',monospace;letter-spacing:2px;border-radius:3px;margin:6px 0;
+  text-transform:uppercase;outline:none;}
+.linput:focus{border-color:#0af;}
+.divider{border:none;border-top:1px solid rgba(0,170,255,.15);margin:18px 0;}
+#lobby-msg{font-size:11px;color:#f24;margin-top:8px;min-height:18px;}
+#room-players{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;justify-content:center;}
+.rp-tag{padding:4px 10px;border-radius:20px;font-size:11px;border:1px solid;letter-spacing:1px;}
+
+/* HUD */
+#hud{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10;}
+#topbar{position:absolute;top:0;left:0;right:0;height:90px;
+  background:linear-gradient(#000a,transparent);display:flex;align-items:center;
+  justify-content:space-between;padding:0 30px;border-bottom:1px solid rgba(0,180,255,.1);}
+#game-title{font-family:'Orbitron',sans-serif;font-weight:700;font-size:36px;letter-spacing:12px;color:#ace;text-shadow:0 0 15px #0af4;}
+#phase-label{font-family:'Share Tech Mono',monospace;font-size:20px;letter-spacing:5px;text-align:center;margin-top:6px;}
+.player-badges{display:flex;gap:8px;}
+.pb{padding:4px 10px;border-radius:3px;font-size:10px;letter-spacing:1px;border:1px solid;}
+
+/* Side Panel */
+#side-panel{position:absolute;top:auto;bottom:48px;left:20px;width:25vw;background:rgba(0,8,20,.95);
+  border:1px solid rgba(0,220,255,.55);border-radius:6px;padding:18px 21px;pointer-events:auto;display:none;
+  box-shadow:0 0 24px rgba(0,220,255,.14); z-index:100;backdrop-filter:blur(6px);box-sizing:border-box;}
+#side-panel.open{display:block;}
+#sp-cname{font-size:14px;letter-spacing:2px;margin-bottom:8px;text-transform:uppercase;}
+#sp-info{font-size:11px;line-height:1.9;opacity:.8;border-top:1px solid rgba(255,255,255,.08);padding-top:8px;}
+#sp-actions{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+.sp-btn{padding:8px;border:none;border-radius:3px;cursor:pointer;font:11px 'Courier New',monospace;
+  letter-spacing:1.5px;text-transform:uppercase;pointer-events:auto;transition:.15s;}
+.sp-btn:hover{filter:brightness(1.3);}
+.sp-btn:disabled{opacity:.3;cursor:not-allowed;}
+#btn-atk{background:linear-gradient(135deg,#600,#f24);color:#fff;}
+#btn-nuke{background:linear-gradient(135deg,#440,#fa0);color:#000;}
+#btn-fort{background:linear-gradient(135deg,#004,#0af);color:#fff;}
+#btn-add{background:linear-gradient(135deg,#020,#0f8);color:#fff;}
+
+/* Bottom bar */
+#botbar{position:absolute;bottom:0;left:0;right:0;height:40px;
+  background:linear-gradient(transparent,#000a);display:flex;align-items:center;
+  padding:0 20px;border-top:1px solid rgba(0,180,255,.1);}
+#log{font-size:11px;color:#9cf;flex:1;letter-spacing:1px;text-align:center;}
+
+#phase-btns{position:absolute; top:420px; left:20px; width:25vw; display:flex; justify-content:space-between; gap:12px; pointer-events:auto; box-sizing:border-box;}
+.phase-btn{flex:1; padding:10px 0; background:rgba(0,20,40,.8);border:1px solid rgba(0,180,255,.5);
+  color:#0af;font:11px 'Courier New',monospace;letter-spacing:1.5px;cursor:pointer;
+  text-transform:uppercase;border-radius:4px;transition:.15s; font-weight:bold; box-shadow:0 0 10px rgba(0,180,255,.1);}
+.phase-btn:hover{background:#0af4;border-color:#0af;box-shadow:0 0 15px rgba(0,180,255,.4);}
+.phase-btn.active{background:#0af;color:#000;box-shadow:0 0 20px rgba(0,180,255,.6);}
+
+/* Dice overlay */
+#dice-panel{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:rgba(0,8,20,.97);border:1px solid #0af;border-radius:6px;padding:24px 32px;
+  display:none;z-index:50;text-align:center;pointer-events:auto;}
+#dice-panel.show{display:block;}
+.dice-row{display:flex;gap:12px;justify-content:center;margin:10px 0;}
+.die{width:42px;height:42px;border-radius:6px;display:flex;align-items:center;justify-content:center;
+  font-size:22px;font-weight:bold;}
+.die.atk{background:#300;border:2px solid #f24;color:#f24;}
+.die.def{background:#001a30;border:2px solid #0af;color:#0af;}
+
+/* Chat */
+#chat-box{position:absolute;bottom:60px;left:16px;width:260px;background:rgba(0,5,15,.85);
+  border:1px solid rgba(0,180,255,.15);border-radius:4px;display:none;pointer-events:auto;}
+#chat-box.open{display:flex;flex-direction:column;}
+#chat-msgs{flex:1;overflow-y:auto;max-height:160px;padding:8px;font-size:10px;line-height:1.7;}
+#chat-input-row{display:flex;border-top:1px solid rgba(0,180,255,.1);}
+#chat-inp{flex:1;padding:6px 8px;background:transparent;border:none;color:#fff;
+  font:10px 'Courier New',monospace;outline:none;}
+#chat-send{padding:6px 10px;background:#0af2;border:none;color:#0af;cursor:pointer;font-size:11px;}
+#chat-toggle{position:absolute;bottom:60px;left:16px;pointer-events:auto;z-index:15;display:none;}
+
+/* Tooltip */
+#tip{position:absolute;pointer-events:none;background:rgba(0,8,20,.95);border:1px solid rgba(0,180,255,.3);
+  padding:5px 10px;font-size:10px;display:none;z-index:30;border-radius:3px;}
+#tip.show{display:block;}
+
+/* Troop input */
+#troop-inp{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:rgba(0,8,20,.97);border:1px solid #0af;border-radius:6px;padding:24px 32px;
+  display:none;z-index:50;text-align:center;pointer-events:auto;}
+#troop-inp.show{display:block;}
+#troop-val{font-size:28px;color:#0af;margin:12px 0;}
+
+/* Game Over */
+#gameover{position:absolute;inset:0;background:#000b;display:none;
+  align-items:center;justify-content:center;flex-direction:column;z-index:200;pointer-events:auto;}
+#gameover.show{display:flex;}
+#gameover.show{display:flex;}
+#go-title{font-size:44px;letter-spacing:6px;text-shadow:0 0 30px currentColor;margin-bottom:16px;}
+
+/* Attack Presets Modal */
+#attack-modal{position:absolute;inset:0;background:rgba(0,10,20,.9);display:none;
+  align-items:center;justify-content:center;z-index:150;}
+#attack-modal.show{display:flex;}
+.atk-card{background:rgba(0,0,0,.9);border:1px solid #0af;border-radius:6px;padding:30px;width:600px;text-align:center;}
+.atk-title{font-size:24px;letter-spacing:4px;color:#0af;margin-bottom:10px;text-transform:uppercase;}
+.atk-desc{font-size:12px;opacity:0.8;margin-bottom:30px;line-height:1.6;}
+.atk-grid{display:flex;gap:15px;justify-content:center;}
+.atk-preset{flex:1;background:linear-gradient(135deg,#001428,#002850);border:1px solid #0055ff;border-radius:4px;
+  padding:20px 10px;cursor:pointer;transition:transform 0.2s, background 0.2s;display:flex;flex-direction:column;gap:10px;}
+.atk-preset:hover{background:linear-gradient(135deg,#002850,#0044aa);transform:scale(1.05);}
+.atk-preset h3{color:#0af;font-size:16px;margin:0;letter-spacing:1px;}
+.atk-preset span{font-size:11px;opacity:0.7;line-height:1.5;}
+
+/* Report Modal */
+#report-modal{position:absolute;inset:0;background:rgba(0,10,20,.9);display:none;
+  align-items:center;justify-content:center;z-index:160;}
+#report-modal.show{display:flex;}
+.rep-card{background:rgba(0,0,0,.9);border:1px solid #0f8;border-radius:6px;padding:30px;width:500px;text-align:center;max-height:80vh;display:flex;flex-direction:column;}
+.rep-title{font-size:24px;letter-spacing:4px;color:#0f8;margin-bottom:10px;text-transform:uppercase;}
+.rep-desc{font-size:12px;opacity:0.8;margin-bottom:20px;}
+.rep-list{flex:1;overflow-y:auto;text-align:left;font:11px 'Courier New',monospace;background:rgba(0,255,136,.05);padding:10px;border:1px solid rgba(0,255,136,.2);margin-bottom:20px;}
+.rep-item{margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid rgba(0,255,136,.1);}
+.rep-item.won{color:#0f8;}
+.rep-item.lost{color:#f55;}
+
+/* ── FACTION DASHBOARDS ─ 2-faction: Human vs Skynet ── */
+.faction-dash{
+  position:absolute; width:25vw;
+  background:rgba(0,0,0,.88);
+  border-radius:6px;
+  padding:18px 21px;
+  display:none;
+  flex-direction:column;
+  gap:9px;
+  backdrop-filter:blur(6px);
+  pointer-events:none;
+}
+.faction-dash.visible{display:flex;}
+/* Inward 20px from each edge */
+#dash-0{ top:72px; left:20px;
+  border:1px solid rgba(0,220,255,.55);
+  box-shadow:0 0 24px rgba(0,220,255,.14); box-sizing:border-box;}
+#dash-1{ top:72px; right:20px; bottom:60px; /* stretches to bottom */
+  border:1px solid rgba(255,50,50,.55);
+  box-shadow:0 0 24px rgba(255,50,50,.14); box-sizing:border-box;}
+
+.dash-header{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.dash-dot{width:12px;height:12px;border-radius:50%;}
+.dash-pname{font-size:15px;letter-spacing:2px;font-weight:bold;text-transform:uppercase;}
+.dash-tag{font-size:9px;letter-spacing:1.5px;opacity:.55;margin-left:auto;}
+
+.dash-bar-row{display:flex;align-items:center;gap:6px;}
+.dash-bar-label{width:86px;font-size:9px;letter-spacing:1px;opacity:.6;text-transform:uppercase;}
+.dash-bar-track{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;}
+.dash-bar-fill{height:100%;border-radius:3px;transition:width .5s ease;}
+.dash-val{font-size:10px;min-width:30px;text-align:right;opacity:.8;}
+
+.dash-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px;margin-top:2px;}
+.dash-stat{display:flex;flex-direction:column;}
+.dash-stat-label{font-size:8px;letter-spacing:1px;opacity:.5;text-transform:uppercase;}
+.dash-stat-val{font-size:20px;font-weight:bold;letter-spacing:1px;}
+
+.dash-nukes{display:flex;gap:4px;margin-top:3px;align-items:center;}
+.dash-nuke-label{font-size:9px;letter-spacing:1px;opacity:.6;margin-right:2px;}
+.nuke-icon{font-size:15px;opacity:.9;}
+.nuke-icon.spent{opacity:.2;}
+
+.dash-status{font-size:9px;letter-spacing:1.5px;padding:4px 6px;border-radius:2px;
+  text-align:center;margin-top:2px;text-transform:uppercase;}
+.dash-status.active{background:rgba(255,255,255,.12);}
+.dash-status.eliminated{background:rgba(255,0,0,.15);color:#f24;}
+.dash-status.waiting{opacity:.5;}
+.dash-players{font-size:10px;letter-spacing:1px;color:rgba(0,220,255,.7);margin-top:3px;}
+
+
+/* Turn Announcement Overlay */
+#turn-announce{
+  position:absolute;inset:0;z-index:150;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;pointer-events:none;opacity:0;transition:none;
+  background:radial-gradient(ellipse at center,rgba(0,0,0,.92) 0%,rgba(0,0,0,.5) 100%);
+}
+#turn-announce.show{opacity:1;}
+#turn-announce.fade{animation:taFade 2.8s ease forwards;}
+@keyframes taFade{
+  0%{opacity:0;} 10%{opacity:1;} 70%{opacity:1;} 100%{opacity:0;}
+}
+#ta-sub{font-size:13px;letter-spacing:4px;opacity:.7;margin-top:10px;text-transform:uppercase;}
+#ta-name{
+  font-size:60px;letter-spacing:8px;text-transform:uppercase;font-weight:bold;
+  text-shadow:0 0 40px currentColor,0 0 80px currentColor;
+  animation:taPulse 2.8s ease forwards;
+}
+@keyframes taPulse{
+  0%{transform:scale(.7);opacity:0;} 15%{transform:scale(1.08);opacity:1;}
+  25%{transform:scale(1.0);} 80%{transform:scale(1.0);opacity:1;}
+  100%{transform:scale(1.1);opacity:0;}
+}
+#ta-phase{
+  font-size:18px;letter-spacing:6px;margin-top:16px;
+  border:1px solid currentColor;padding:6px 22px;border-radius:2px;
+  text-shadow:0 0 12px currentColor;
+}
+#ta-nukes{font-size:12px;letter-spacing:2px;margin-top:14px;opacity:.7;}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<!-- LOBBY -->
+<div id="lobby">
+  <div class="lobby-box">
+    <div class="lobby-title">☢ NUCLEAR STRIKE</div>
+    <div class="lobby-sub">PERSISTENT GLOBAL WAR SIMULATION</div>
+    <div class="lobby-text">
+      WELCOME TO NUCLEAR STRIKE.<br><br>
+      ALL HUMAN PLAYERS FIGHT TOGETHER AS A SINGLE COALITION.<br>
+      YOUR ADVERSARY IS SKYNET, AN AUTONOMOUS AI SYSTEM.<br><br>
+      YOU WILL BE JOINED AS HUMAN IN 6 SECONDS...
+    </div>
+    <!-- JOIN BUTTON REMOVED (AUTO-JOIN AFTER 3s) -->
+  </div>
+</div>
+
+<!-- HUD -->
+<div id="hud">
+  <div id="topbar">
+    <div class="player-badges" id="player-badges"></div>
+    <div style="text-align:center">
+      <div id="game-title">☢ NUCLEAR RISK</div>
+      <div id="phase-label">—</div>
+    </div>
+    <div style="display:flex;gap:8px;pointer-events:auto">
+      <button class="phase-btn" id="btn-chat-toggle" style="display:none">💬 CHAT</button>
+      <button class="phase-btn" id="btn-end-turn">END TURN ▶</button>
+    </div>
+  </div>
+  <div id="side-panel">
+    <div id="sp-cname">—</div>
+    <div id="sp-info"></div>
+    <div id="sp-actions">
+      <button class="sp-btn" id="btn-add">+ ADD TROOPS</button>
+      <button class="sp-btn" id="btn-atk">⚔ ATTACK</button>
+      <button class="sp-btn" id="btn-nuke">☢ NUKE STRIKE</button>
+      <button class="sp-btn" id="btn-fort">→ FORTIFY FROM</button>
+    </div>
+  </div>
+  
+  <div id="phase-btns">
+    <button class="phase-btn" id="pb-reinforce">REINFORCE</button>
+    <button class="phase-btn" id="pb-attack">ATTACK</button>
+    <button class="phase-btn" id="pb-fortify">FORTIFY</button>
+  </div>
+
+  <div id="botbar">
+    <div id="log">LOADING WORLD DATA...</div>
+  </div>
+
+  <!-- FACTION DASHBOARDS: Human (left) vs Skynet (right) -->
+  <div class="faction-dash" id="dash-0">
+    <div class="dash-header">
+      <div class="dash-dot" style="background:#00dcff"></div>
+      <div class="dash-pname" style="color:#00dcff">HUMANITY</div>
+      <div class="dash-tag">YOU + ALLIES</div>
+    </div>
+    <div class="dash-stat-grid">
+      <div class="dash-stat"><div class="dash-stat-label">Territories</div><div class="dash-stat-val" style="color:#00dcff" id="d0-terr">—</div></div>
+      <div class="dash-stat"><div class="dash-stat-label">Total Troops</div><div class="dash-stat-val" style="color:#00dcff" id="d0-troops">—</div></div>
+    </div>
+    <div class="dash-bar-row"><span class="dash-bar-label">Territory %</span><div class="dash-bar-track"><div class="dash-bar-fill" id="d0-tbar" style="background:#00dcff"></div></div><span class="dash-val" id="d0-tp">—</span></div>
+    <div class="dash-bar-row"><span class="dash-bar-label">Troop Power</span><div class="dash-bar-track"><div class="dash-bar-fill" id="d0-mbar" style="background:#00dcff"></div></div><span class="dash-val" id="d0-mp">—</span></div>
+    <div class="dash-bar-row"><span class="dash-bar-label">Avg. Attack</span><div class="dash-bar-track"><div class="dash-bar-fill" id="d0-abar" style="background:#ff5577"></div></div><span class="dash-val" id="d0-ap">—</span></div>
+    <div class="dash-bar-row"><span class="dash-bar-label">Avg. Defense</span><div class="dash-bar-track"><div class="dash-bar-fill" id="d0-dbar" style="background:#00ff88"></div></div><span class="dash-val" id="d0-dp">—</span></div>
+    <div class="dash-nukes" id="d0-nukes"><span class="dash-nuke-label">NUKES</span></div>
+    <div class="dash-players" id="d0-players">⚡ 1 COMMANDER ACTIVE</div>
+    <div class="dash-status" id="d0-status">REINFORCING</div>
+  </div>
+
+  <div class="faction-dash" id="dash-1">
+    <div class="dash-header">
+      <div class="dash-dot" style="background:#ff3232"></div>
+      <div class="dash-pname" style="color:#ff3232">SKYNET AI</div>
+      <div class="dash-tag">ADVERSARY</div>
+    </div>
+    <div class="dash-stat-grid">
+      <div class="dash-stat"><div class="dash-stat-label">Territories</div><div class="dash-stat-val" style="color:#ff3232" id="d1-terr">—</div></div>
+      <div class="dash-stat"><div class="dash-stat-label">Total Troops</div><div class="dash-stat-val" style="color:#ff3232" id="d1-troops">—</div></div>
+    </div>
+    <div class="dash-bar-row"><span class="dash-bar-label">Territory %</span><div class="dash-bar-track"><div class="dash-bar-fill" id="d1-tbar" style="background:#ff3232"></div></div><span class="dash-val" id="d1-tp">—</span></div>
+    <div class="dash-bar-row"><span class="dash-bar-label">Troop Power</span><div class="dash-bar-track"><div class="dash-bar-fill" id="d1-mbar" style="background:#ff3232"></div></div><span class="dash-val" id="d1-mp">—</span></div>
+    <div class="dash-bar-row"><span class="dash-bar-label">Avg. Attack</span><div class="dash-bar-track"><div class="dash-bar-fill" id="d1-abar" style="background:#ff5577"></div></div><span class="dash-val" id="d1-ap">—</span></div>
+    <div class="dash-bar-row"><span class="dash-bar-label">Avg. Defense</span><div class="dash-bar-track"><div class="dash-bar-fill" id="d1-dbar" style="background:#ff8800"></div></div><span class="dash-val" id="d1-dp">—</span></div>
+    <div class="dash-nukes" id="d1-nukes"><span class="dash-nuke-label">NUKES</span></div>
+    <div class="dash-players" style="color:rgba(255,80,80,.7)">🤖 AUTONOMOUS SYSTEM ONLINE</div>
+    <div class="dash-status" id="d1-status">CALCULATING...</div>
+    <div id="d1-reasoning" style="margin-top:12px; padding:10px; background:rgba(255,0,0,0.05); border:1px solid rgba(255,50,50,0.2); border-radius:4px; font-family:'Courier New', monospace; font-size:10px; color:#f55; flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom: 4px;">
+      <div style="opacity:0.5">> AWAITING COMBAT DATA...</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Chat -->
+<button id="chat-toggle" style="display:none">💬</button>
+<div id="chat-box">
+  <div id="chat-msgs"></div>
+  <div class="chat-input-row" style="display:flex;border-top:1px solid rgba(0,180,255,.1)">
+    <input id="chat-inp" placeholder="message..." maxlength="100"/>
+    <button id="chat-send" onclick="sendChat()">➤</button>
+  </div>
+</div>
+
+<!-- Dice Panel -->
+<div id="dice-panel">
+  <div style="font-size:13px;letter-spacing:2px;margin-bottom:10px;color:#fa0">⚔ COMBAT RESOLUTION</div>
+  <div style="font-size:11px;opacity:.6;margin-bottom:12px" id="dice-from-to">—</div>
+  <div class="dice-row" id="atk-dice"></div>
+  <div style="font-size:10px;opacity:.5;margin:4px 0">VS</div>
+  <div class="dice-row" id="def-dice"></div>
+  <div id="dice-result" style="margin-top:14px;font-size:12px;letter-spacing:1px"></div>
+  <button class="sp-btn" id="dice-ok" style="background:#0af;color:#000;margin-top:14px;width:100%;padding:10px">
+    CONTINUE
+  </button>
+</div>
+
+<!-- Attack Presets Modal -->
+<div id="attack-modal">
+  <div class="atk-card">
+    <div class="atk-title">TACTICAL COMMAND UPLINK</div>
+    <div class="atk-desc">Select a coordinated strike strategy for the current turn. These macro-commands automate troop deployments and offensives globally before terminating your action phase.</div>
+    <div class="atk-grid">
+      <div class="atk-preset" onclick="executeAttackPreset(1)">
+        <h3>BLITZKRIEG</h3>
+        <span>Aggressive push.<br>Launch 5 strikes from strongest fronts against weakest Skynet borders.</span>
+      </div>
+      <div class="atk-preset" onclick="executeAttackPreset(2)">
+        <h3>TACTICAL DEFENSE</h3>
+        <span>Calculated counters.<br>Launch 3 surgical strikes originating from threatened Human borders.</span>
+      </div>
+      <div class="atk-preset" onclick="executeAttackPreset(3)">
+        <h3>GUERRILLA RAID</h3>
+        <span>Widespread chaos.<br>Launch 4 random opportunistic strikes across the globe.</span>
+      </div>
+      <div class="atk-preset" style="border-color:#fa0;" onclick="executeAttackPreset(4)">
+        <h3 style="color:#fa0">MANUAL OVERRIDE</h3>
+        <span>Direct command.<br>Bypass AI automation and manually direct individual localized strikes.</span>
+      </div>
+    </div>
+    <div style="margin-top:20px; font-size:10px; cursor:pointer; opacity:0.6;" onclick="document.getElementById('attack-modal').classList.remove('show')">CANCEL</div>
+  </div>
+</div>
+
+<!-- Combat Report Modal -->
+<div id="report-modal">
+  <div class="rep-card">
+    <div class="rep-title">TACTICAL OPERATION REPORT</div>
+    <div class="rep-desc" id="rep-summary">Operation complete. Awaiting commander review.</div>
+    <div class="rep-list" id="rep-list"></div>
+    <button class="sp-btn" style="background:#0f8;color:#000;width:100%;padding:12px;font-size:14px;" onclick="closeReportAndEndTurn()">END TURN</button>
+  </div>
+</div>
+
+<!-- Troop Input -->
+<div id="troop-inp">
+  <div style="font-size:12px;letter-spacing:2px;color:#0af" id="troop-label">TROOPS TO MOVE</div>
+  <div id="troop-val">1</div>
+  <input type="range" id="troop-slider" min="1" max="10" value="1" style="width:180px;margin:8px 0"/>
+  <div style="display:flex;gap:10px;margin-top:12px">
+    <button class="sp-btn" id="troop-cancel" style="background:#333;color:#fff;flex:1">CANCEL</button>
+    <button class="sp-btn" id="troop-ok" style="background:#0af;color:#000;flex:1">CONFIRM</button>
+  </div>
+</div>
+
+<!-- Tooltip -->
+<div id="tip"></div>
+
+<!-- Turn Announcement -->
+<div id="turn-announce">
+  <div id="ta-sub">TURN BEGINS</div>
+  <div id="ta-name">—</div>
+  <div id="ta-phase">REINFORCE PHASE</div>
+  <div id="ta-nukes"></div>
+</div>
+
+<!-- Game Over -->
+<div id="gameover">
+  <div id="go-title">— WINS THE WORLD —</div>
+  <div style="font-size:13px;letter-spacing:3px;opacity:.7;margin-bottom:28px">GLOBAL DOMINATION ACHIEVED</div>
+  <button onclick="location.reload()" style="padding:12px 36px;background:transparent;border:1px solid #fff;
+    color:#fff;font:13px 'Courier New',monospace;letter-spacing:3px;cursor:pointer">NEW CONFLICT</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// =====================================================================
+// CONSTANTS & PLAYER SETUP
+// =====================================================================
+// =====================================================================
+const GLOBE_R = 1.0, RAD = Math.PI/180;
+
+// Dynamic WebSocket URL to support both local and production environments
+const WS_PROTOCOL = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const WS_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+  ? `ws://${window.location.hostname}:8080` 
+  : `${WS_PROTOCOL}//${window.location.host}`;
+
+const PLAYER_COLORS = [
+  { hex:'#00dcff', int:0x00dcff, name:'HUMANITY' },
+  { hex:'#ff3232', int:0xff3232, name:'SKYNET AI' }
+];
+const NEUTRAL = { hex:'#445566', int:0x445566, name:'NEUTRAL' };
+
+// =====================================================================
+// THREE.JS SCENE
+// =====================================================================
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.setClearColor(0x02050a,1);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 1000);
+
+// Stars
+const sg = new THREE.BufferGeometry();
+const sp = [];
+for(let i=0;i<2500;i++){
+  const t=Math.random()*Math.PI*2, p=Math.acos(2*Math.random()-1), r=7+Math.random()*3;
+  sp.push(r*Math.sin(p)*Math.cos(t), r*Math.cos(p), r*Math.sin(p)*Math.sin(t));
+}
+sg.setAttribute('position',new THREE.Float32BufferAttribute(sp,3));
+scene.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:0.012,transparent:true,opacity:.6})));
+
+// Globe
+const globeGeo = new THREE.SphereGeometry(GLOBE_R,64,64);
+const texLoader = new THREE.TextureLoader();
+const earthTex  = texLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/land_ocean_ice_cloud_2048.jpg');
+const globeMat  = new THREE.MeshPhongMaterial({map:earthTex,specular:new THREE.Color(0x003355),shininess:15});
+const globeMesh = new THREE.Mesh(globeGeo, globeMat);
+scene.add(globeMesh);
+
+// Atmosphere
+scene.add(new THREE.Mesh(
+  new THREE.SphereGeometry(GLOBE_R*1.06,32,32),
+  new THREE.MeshBasicMaterial({color:0x1155cc,side:THREE.BackSide,transparent:true,opacity:.18})
+));
+
+// Grid
+const gm = new THREE.LineBasicMaterial({color:0x004488,transparent:true,opacity:.1});
+function addLine(pts){scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gm));}
+for(let la=-80;la<=80;la+=20){const p=[];for(let lo=-180;lo<=180;lo+=3)p.push(ll2v(la,lo,GLOBE_R+.001));addLine(p);}
+for(let lo=-180;lo<180;lo+=20){const p=[];for(let la=-90;la<=90;la+=3)p.push(ll2v(la,lo,GLOBE_R+.001));addLine(p);}
+
+// Equator
+const ep=[];for(let lo=-180;lo<=180;lo+=2)ep.push(ll2v(0,lo,GLOBE_R+.002));
+scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(ep),
+  new THREE.LineBasicMaterial({color:0x00aaff,transparent:true,opacity:.3})));
+
+// Lighting
+scene.add(new THREE.AmbientLight(0x334455,1.3));
+const sun=new THREE.DirectionalLight(0xffeedd,2.0); sun.position.set(5,2,4); scene.add(sun);
+const fill=new THREE.DirectionalLight(0x223366,.4); fill.position.set(-4,-1,-3); scene.add(fill);
+
+// Helpers
+function ll2v(lat,lon,r){
+  const la=lat*RAD,lo=lon*RAD;
+  return new THREE.Vector3(r*Math.cos(la)*Math.cos(lo),r*Math.sin(la),r*Math.cos(la)*Math.sin(lo));
+}
+
+// =====================================================================
+// ORBIT CONTROLS
+// =====================================================================
+let drag=false, prevM={x:0,y:0};
+let sph={theta:.3, phi:1.1, r:3.5};
+
+function updCam(){
+  camera.position.set(
+    sph.r*Math.sin(sph.phi)*Math.cos(sph.theta),
+    sph.r*Math.cos(sph.phi),
+    sph.r*Math.sin(sph.phi)*Math.sin(sph.theta)
+  );
+  camera.lookAt(0,0,0);
+}
+updCam();
+
+canvas.addEventListener('mousedown',e=>{if(e.button===2){drag=true;prevM={x:e.clientX,y:e.clientY};}});
+canvas.addEventListener('contextmenu',e=>e.preventDefault());
+window.addEventListener('mousemove',e=>{
+  if(!drag)return;
+  sph.theta-=(prevM.x-e.clientX)*.005;
+  sph.phi=Math.max(.1,Math.min(Math.PI-.1,sph.phi+(prevM.y-e.clientY)*.005));
+  prevM={x:e.clientX,y:e.clientY}; updCam();
+});
+window.addEventListener('mouseup',()=>drag=false);
+canvas.addEventListener('wheel',e=>{
+  sph.r=Math.max(1.4,Math.min(8,sph.r+e.deltaY*.003));
+  updCam(); e.preventDefault();
+},{passive:false});
+
+// =====================================================================
+// GAME STATE
+// =====================================================================
+let GS = {
+  countries: {},     // iso -> {name,lat,lon,owner,troops,nuked}
+  players: [],       // [{name,color,nukes,alive}]
+  turn: 0,           // player index
+  phase: 'REINFORCE',// REINFORCE|ATTACK|FORTIFY
+  reinforceLeft: 0,
+  selected: null,    // iso of selected country
+  fortifyFrom: null,
+  isOnline: false,
+  myIndex: 0,
+  roomCode: ''
+};
+
+let countryBorders = {}; // iso -> THREE.Line
+let countryData    = {}; // iso -> {name,lat,lon,polygons:[]}
+let ws             = null;
+
+// =====================================================================
+// GEOJSON COUNTRY LOADING
+// =====================================================================
+const GEOJSON_URL = 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_countries.geojson';
+
+async function loadCountries() {
+  setLog('⟳ Loading world map data...');
+  const res  = await fetch(GEOJSON_URL);
+  const json = await res.json();
+
+  json.features.forEach(f => {
+    const p = f.properties;
+    const iso = p.gu_a3 || p.iso_a3 || p.adm0_a3;
+    if (!iso || iso === '-99') return;
+
+    // Bounding box center as lat/lon
+    let sumLat=0, sumLon=0, cnt=0;
+    const polys = [];
+
+    const extractRing = ring => {
+      const pts = ring.map(([lon,lat]) => ll2v(lat,lon,GLOBE_R+.003));
+      polys.push(ring.map(([lon,lat])=>({lat,lon})));
+      sumLon += ring.reduce((a,[lo])=>a+lo,0)/ring.length;
+      sumLat += ring.reduce((a,[lo,la])=>a+la,0)/ring.length;
+      cnt++;
+      return new THREE.BufferGeometry().setFromPoints(pts);
+    };
+
+    const geos = [];
+    if (f.geometry.type==='Polygon') {
+      f.geometry.coordinates.forEach(r=>geos.push(extractRing(r)));
+    } else if (f.geometry.type==='MultiPolygon') {
+      f.geometry.coordinates.forEach(poly=>poly.forEach(r=>geos.push(extractRing(r))));
+    }
+
+    if (!geos.length) return;
+
+    const lat = sumLat/cnt, lon = sumLon/cnt;
+    countryData[iso] = { name: p.name||iso, lat, lon, polys };
+
+    // Draw border lines
+    const mat = new THREE.LineBasicMaterial({color:NEUTRAL.int, transparent:true, opacity:.6});
+    const group = new THREE.Group();
+    geos.forEach(geo => group.add(new THREE.Line(geo, mat.clone())));
+    group.userData = { iso, mat };
+    countryBorders[iso] = group;
+    scene.add(group);
+  });
+
+  setLog(`✓ ${Object.keys(countryData).length} countries loaded`);
+}
+
+// Point-in-polygon test (2D lat/lon)
+function pointInPoly(lat, lon, poly) {
+  let inside = false;
+  for (let i=0,j=poly.length-1; i<poly.length; j=i++) {
+    const xi=poly[i].lon, yi=poly[i].lat, xj=poly[j].lon, yj=poly[j].lat;
+    if(((yi>lat)!==(yj>lat))&&(lon<(xj-xi)*(lat-yi)/(yj-yi)+xi)) inside=!inside;
+  }
+  return inside;
+}
+
+function getCountryAt(lat, lon) {
+  let closest = null;
+  let minDist = Infinity;
+  for (const [iso, cd] of Object.entries(countryData)) {
+    if(!cd.polys) continue;
+    for (const poly of cd.polys) {
+      if (pointInPoly(lat, lon, poly)) return iso;
+    }
+    // Fallback for tiny states/islands (Haversine approx distance)
+    if(cd.lat !== undefined && cd.lon !== undefined) {
+      const dLat=Math.abs(lat-cd.lat)*Math.PI/180;
+      const dLon=Math.abs(lon-cd.lon)*Math.PI/180;
+      const a = Math.sin(dLat/2)**2 + Math.cos(lat*Math.PI/180)*Math.cos(cd.lat*Math.PI/180) * Math.sin(dLon/2)**2;
+      const dist = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      if(dist < minDist) { minDist = dist; closest = iso; }
+    }
+  }
+  // If no polygon hit, return the closest center if it's within ~500 miles (0.15 rads)
+  if(closest && minDist < 0.15) return closest;
+  return null;
+}
+</script>
+<script>
+// =====================================================================
+// GAME INITIALIZATION
+// =====================================================================
+function initGame(playerNames, myIndex) {
+  GS.players = playerNames.map((name,i)=>({
+    name, index:i, color:PLAYER_COLORS[i], nukes:2, alive:true, troops:0
+  }));
+  GS.myIndex = myIndex;
+
+  // Assign countries randomly
+  const isos = Object.keys(countryData);
+  isos.sort(()=>Math.random()-.5);
+
+  const numPlayers = GS.players.length;
+  isos.forEach((iso,i) => {
+    const owner = i < isos.length * 0.85 ? (i % numPlayers) : -1; // 15% neutral
+    const initTroops = owner === -1 ? 1 : (2 + Math.floor(Math.random()*3));
+    GS.countries[iso] = { owner, troops:initTroops, nuked:0,
+      name:countryData[iso].name, lat:countryData[iso].lat, lon:countryData[iso].lon };
+  });
+
+  // Count troops for reinforcement baseline
+  GS.players.forEach((_,pi) => {
+    GS.players[pi].troops = Object.values(GS.countries).filter(c=>c.owner===pi).length;
+  });
+
+  refreshAllBorders();
+  buildTroopSprites();
+  startTurn(0);
+
+  // Build player badges
+  const badges = document.getElementById('player-badges');
+  badges.innerHTML = GS.players.map((p,i)=>`
+    <div class="pb" id="badge-${i}"
+      style="border-color:${p.color.hex};color:${p.color.hex}">
+      ${p.color.name}: ${p.name}
+    </div>`).join('');
+
+  document.getElementById('hud').style.display='block';
+
+  // Show dashboards and start live update — only 2 panels in 2-faction mode
+  document.getElementById('dash-0').classList.add('visible');
+  document.getElementById('dash-1').classList.add('visible');
+  updateDashboard();
+  if(window._dashInterval) clearInterval(window._dashInterval);
+  window._dashInterval = setInterval(updateDashboard, 1000);
+}
+
+// =====================================================================
+// LIVE FACTION DASHBOARD — 2 factions: Humanity (0) vs Skynet (1)
+// =====================================================================
+function updateDashboard() {
+  if(!GS.players.length) return;
+  const total = Object.keys(GS.countries).length || 1;
+  const troops0 = Object.values(GS.countries).filter(c=>c.owner===0).reduce((s,c)=>s+c.troops,0);
+  const troops1 = Object.values(GS.countries).filter(c=>c.owner===1).reduce((s,c)=>s+c.troops,0);
+  const maxTroops = Math.max(1, troops0, troops1);
+
+  [0,1].forEach(pi=>{
+    const p = GS.players[pi]; if(!p) return;
+    const owned = Object.entries(GS.countries).filter(([,c])=>c.owner===pi);
+    const terrCount = owned.length;
+    const totalTroops = pi===0?troops0:troops1;
+    const avgAtk = terrCount ? (totalTroops/terrCount).toFixed(1) : 0;
+    const income = Math.max(3, Math.floor(terrCount/3));
+    const defScore = terrCount ? Math.min(100, Math.round((income/terrCount)*400)) : 0;
+    const terrPct = Math.round((terrCount/total)*100);
+    const troopPct = Math.round((totalTroops/maxTroops)*100);
+    const atkPct   = Math.min(100, Math.round(parseFloat(avgAtk)*20));
+
+    const id=`d${pi}`;
+    const set=(sfx,val)=>{const el=document.getElementById(id+'-'+sfx);if(el)el.textContent=val;};
+    const setW=(sfx,w)=>{const el=document.getElementById(id+'-'+sfx);if(el)el.style.width=w+'%';};
+
+    set('terr', terrCount);
+    set('troops', totalTroops);
+    set('tp', terrPct+'%');
+    set('mp', totalTroops);
+    set('ap', avgAtk);
+    set('dp', defScore+'%');
+    setW('tbar', terrPct);
+    setW('mbar', troopPct);
+    setW('abar', atkPct);
+    setW('dbar', defScore);
+
+    const nukeEl=document.getElementById(id+'-nukes');
+    if(nukeEl){
+      const max=pi===0?GS.players[0].nukes:GS.players[1].nukes;
+      let html='<span class="dash-nuke-label">NUKES</span>';
+      for(let n=0;n<3;n++) html+=`<span class="nuke-icon${n>=p.nukes?' spent':''}">☢</span>`;
+      nukeEl.innerHTML=html;
+    }
+
+    const statEl=document.getElementById(id+'-status');
+    if(statEl){
+      if(!p.alive){statEl.textContent='ELIMINATED';statEl.className='dash-status eliminated';}
+      else if(GS.turn===pi){statEl.textContent=pi===0?'▶ YOUR MOVE':'⚙ AI COMPUTING...';statEl.className='dash-status active';}
+      else{statEl.textContent=`INCOME +${income}/TURN`;statEl.className='dash-status waiting';}
+    }
+
+    // Update players line for Human side
+    if(pi===0){
+      const pEl=document.getElementById('d0-players');
+      if(pEl) pEl.textContent=`⚡ ${GS.players[0].name.toUpperCase()} IN COMMAND`;
+    }
+  });
+}
+
+// =====================================================================
+// COUNTRY BORDER COLORS
+
+// =====================================================================
+function getOwnerColor(owner) {
+  return owner === -1 ? NEUTRAL : PLAYER_COLORS[owner];
+}
+
+function refreshAllBorders() {
+  for (const [iso, group] of Object.entries(countryBorders)) {
+    const c = GS.countries[iso];
+    if (!c) continue;
+    const col = getOwnerColor(c.owner);
+    group.traverse(obj => {
+      if (obj.isLine) {
+        obj.material.color.set(col.int);
+        obj.material.opacity = (iso === GS.selected) ? 1.0 : 0.65;
+      }
+    });
+  }
+}
+
+function highlightCountry(iso, glow) {
+  const g = countryBorders[iso];
+  if (!g) return;
+  g.traverse(obj => {
+    if (obj.isLine) {
+      obj.material.opacity = glow ? 1.0 : 0.65;
+      if (glow) obj.material.linewidth = 2;
+    }
+  });
+}
+
+// =====================================================================
+// TROOP SPRITES (canvas textures per country)
+// =====================================================================
+const troopSprites = {}; // iso → THREE.Sprite
+
+function troopTexture(text, col) {
+  const c = document.createElement('canvas');
+  c.width = 128; c.height = 64;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = 'rgba(0,0,0,.7)';
+  ctx.beginPath(); ctx.roundRect(4,4,120,56,8); ctx.fill();
+  ctx.strokeStyle = col; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect(4,4,120,56,8); ctx.stroke();
+  ctx.fillStyle = col;
+  ctx.font = 'bold 32px Courier New';
+  ctx.textAlign = 'center'; ctx.textBaseline='middle';
+  ctx.fillText(text, 64, 32);
+  return new THREE.CanvasTexture(c);
+}
+
+function buildTroopSprites() {
+  // Remove old sprites
+  Object.values(troopSprites).forEach(s=>scene.remove(s));
+  Object.keys(troopSprites).forEach(k=>delete troopSprites[k]);
+
+  for (const [iso, country] of Object.entries(GS.countries)) {
+    const cd = countryData[iso];
+    if (!cd) continue;
+    const col = getOwnerColor(country.owner).hex;
+    const tex = troopTexture(String(country.troops), col);
+    const mat = new THREE.SpriteMaterial({map:tex, transparent:true, depthTest:false});
+    const sprite = new THREE.Sprite(mat);
+    const pos = ll2v(cd.lat, cd.lon, GLOBE_R + .04);
+    sprite.position.copy(pos);
+    sprite.scale.set(.12,.06,1);
+    sprite.userData = {iso};
+    scene.add(sprite);
+    troopSprites[iso] = sprite;
+  }
+}
+
+function updateTroopSprite(iso) {
+  const c = GS.countries[iso]; if(!c) return;
+  const cd = countryData[iso]; if(!cd) return;
+  const old = troopSprites[iso];
+  if(old) scene.remove(old);
+  const col = getOwnerColor(c.owner).hex;
+  const tex = troopTexture(String(c.troops), col);
+  const mat = new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false});
+  const sprite = new THREE.Sprite(mat);
+  sprite.position.copy(ll2v(cd.lat, cd.lon, GLOBE_R+.04));
+  sprite.scale.set(.12,.06,1);
+  sprite.userData={iso};
+  scene.add(sprite);
+  troopSprites[iso]=sprite;
+}
+
+// =====================================================================
+// TURN MANAGEMENT
+// =====================================================================
+function showTurnAnnounce(playerIndex, cb) {
+  const p = GS.players[playerIndex];
+  const ta = document.getElementById('turn-announce');
+  const taName = document.getElementById('ta-name');
+  const taPhase = document.getElementById('ta-phase');
+  const taSub = document.getElementById('ta-sub');
+  const taNukes = document.getElementById('ta-nukes');
+
+  const isMe = playerIndex === GS.myIndex;
+  const owned = Object.values(GS.countries).filter(c=>c.owner===playerIndex).length;
+  const reinforce = Math.max(3, Math.floor(owned/3));
+
+  taName.textContent = isMe ? 'YOUR TURN' : p.name;
+  taName.style.color = p.color.hex;
+  taPhase.textContent = `+${reinforce} TROOPS — REINFORCE PHASE`;
+  taPhase.style.color = p.color.hex;
+  taPhase.style.borderColor = p.color.hex;
+  taSub.textContent = isMe ? '⚡ COMMAND TRANSFERRED TO YOU' : `${p.color.name} COALITION`;
+  taNukes.textContent = `☢ NUCLEAR WARHEADS: ${p.nukes}`;
+
+  ta.className = 'show fade';
+  // Force reflow to restart animation
+  ta.style.animation = 'none';
+  ta.offsetHeight;
+  ta.style.animation = '';
+  ta.querySelector('#ta-name').style.animation = 'none';
+  ta.querySelector('#ta-name').offsetHeight;
+  ta.querySelector('#ta-name').style.animation = '';
+
+  ta.classList.remove('show');
+  ta.classList.add('fade');
+
+  setTimeout(() => {
+    ta.classList.remove('fade');
+    if (cb) cb();
+  }, 2800);
+}
+
+function startTurn(playerIndex) {
+  GS.turn = playerIndex;
+  GS.phase = 'REINFORCE';
+  GS.selected = null;
+  GS.fortifyFrom = null;
+  attackingFrom = null;
+  window._nukeFrom = null;
+  fortifyFrom2 = null;
+
+  const owned = Object.values(GS.countries).filter(c=>c.owner===playerIndex).length;
+  GS.reinforceLeft = Math.max(3, Math.floor(owned/3));
+
+  // Decrement nuked turns
+  Object.values(GS.countries).forEach(c=>{ if(c.nuked>0) c.nuked--; });
+
+  // Auto-deploy 60% of troops for Human player
+  let autoDeployed = 0;
+  if (playerIndex === GS.myIndex && GS.reinforceLeft > 0) {
+    const ownedTerritories = Object.entries(GS.countries).filter(([,c])=>c.owner===playerIndex).map(([iso])=>iso);
+    if (ownedTerritories.length > 0) {
+      autoDeployed = Math.floor(GS.reinforceLeft * 0.6);
+      if (autoDeployed > 0) {
+        let remainingAuto = autoDeployed;
+        while (remainingAuto > 0) {
+          const tIdx = Math.floor(Math.random() * ownedTerritories.length);
+          GS.countries[ownedTerritories[tIdx]].troops += 1;
+          updateTroopSprite(ownedTerritories[tIdx]);
+          remainingAuto--;
+        }
+        GS.reinforceLeft -= autoDeployed;
+      }
+    }
+  }
+
+  document.getElementById('side-panel').classList.remove('open');
+  updatePhaseUI();
+  
+  if (autoDeployed > 0) {
+    setLog(`▶ AUTO-DEPLOYED ${autoDeployed} troops globally. Place remaining ${GS.reinforceLeft} troops manually.`);
+  } else {
+    setLog(`▶ ${GS.players[playerIndex].name}'s turn — Place ${GS.reinforceLeft} troops`);
+  }
+
+  // Show big turn announcement
+  showTurnAnnounce(playerIndex, () => {
+    // AI plays automatically AFTER announcement
+    if (GS.players[playerIndex] && playerIndex !== GS.myIndex && !GS.isOnline) {
+      setTimeout(aiTurn, 600);
+    }
+  });
+}
+
+function nextTurn() {
+  let next = (GS.turn + 1) % GS.players.length;
+  let tries = 0;
+  while (!GS.players[next].alive && tries < GS.players.length) {
+    next = (next+1) % GS.players.length; tries++;
+  }
+  checkWin();
+  if (!document.getElementById('gameover').classList.contains('show')) {
+    startTurn(next);
+    if (GS.isOnline) syncState();
+  }
+}
+
+function updatePhaseUI() {
+  const p = GS.players[GS.turn];
+  const pLabel = document.getElementById('phase-label');
+  pLabel.textContent = `${p?.color?.name} — ${GS.phase}`;
+  pLabel.style.color = p?.color?.hex || '#fff';
+
+  ['reinforce','attack','fortify'].forEach(ph => {
+    const btn = document.getElementById('pb-'+ph);
+    btn.classList.toggle('active', GS.phase === ph.toUpperCase());
+  });
+
+  const myTurn = GS.turn === GS.myIndex;
+  document.getElementById('btn-end-turn').style.opacity = myTurn ? '1':'0.3';
+  document.getElementById('btn-end-turn').disabled = !myTurn;
+}
+
+// =====================================================================
+// CLICK HANDLING — single unified handler
+// =====================================================================
+const ray = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+function handleGlobeClick(e) {
+  if (document.getElementById('lobby').style.display !== 'none') return;
+  if (document.getElementById('dice-panel').classList.contains('show')) return;
+  if (document.getElementById('troop-inp').classList.contains('show')) return;
+  if (document.getElementById('attack-modal').classList.contains('show')) return; // Block clicks if attack modal is open
+  // Allow clicks even during turn-announce fade — just block if fully blocking UI elements are open
+  if (GS.turn !== GS.myIndex) { setLog('⏳ Wait for your turn!'); return; }
+
+  mouse.x = (e.clientX/innerWidth)*2-1;
+  mouse.y = -(e.clientY/innerHeight)*2+1;
+  ray.setFromCamera(mouse, camera);
+
+  const hits = ray.intersectObject(globeMesh, false);
+  if (!hits.length) return;
+  const pt = hits[0].point.normalize();
+  const lat = Math.asin(pt.y)/RAD; // Reverse 3D spherical translation mapping
+  const lon = Math.atan2(pt.z,pt.x)/RAD; // Fixed: removed negative sign
+  const iso = getCountryAt(lat, lon);
+  if (!iso || !GS.countries[iso]) return;
+
+  // Route to correct action
+  if (attackingFrom) { tryAttack(iso); return; }
+  if (window._nukeFrom) { tryNuke(iso); return; }
+  if (fortifyFrom2) { tryFortify(iso); return; }
+
+  // 1-Click 1-Troop deployment during Reinforce
+  const myTurn = (GS.turn === GS.myIndex);
+  const isMine = (GS.countries[iso].owner === GS.myIndex);
+  if (myTurn && GS.phase === 'REINFORCE' && isMine && GS.reinforceLeft > 0) {
+    GS.countries[iso].troops += 1;
+    GS.reinforceLeft -= 1;
+    updateTroopSprite(iso);
+    updateDashboard();
+    setLog(`+1 troop → ${countryData[iso]?.name} | ${GS.reinforceLeft} reinforcements left`);
+    if(GS.reinforceLeft === 0) setLog('✔ All troops placed — switch to ATTACK or END TURN');
+    // Also select to immediately show the updated side-panel info
+    selectCountry(iso);
+    return;
+  }
+
+  selectCountry(iso);
+}
+
+canvas.addEventListener('click', handleGlobeClick);
+
+// Hover tooltip
+canvas.addEventListener('mousemove', e => {
+  if(document.getElementById('lobby').style.display!=='none') return;
+  if (document.getElementById('attack-modal').classList.contains('show')) return; // Block hover if attack modal is open
+  mouse.x=(e.clientX/innerWidth)*2-1;
+  mouse.y=-(e.clientY/innerHeight)*2+1;
+  ray.setFromCamera(mouse,camera);
+  const hits = ray.intersectObjects(Object.values(troopSprites),false);
+  const tip = document.getElementById('tip');
+  if(hits.length) {
+    const iso = hits[0].object.userData.iso;
+    const c = GS.countries[iso]; const cd=countryData[iso];
+    if(c && cd) {
+      const owner = c.owner===-1?'NEUTRAL':GS.players[c.owner]?.name||'?';
+      tip.classList.add('show');
+      tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY-10)+'px';
+      tip.innerHTML=`<b>${cd.name}</b><br>${owner} · ${c.troops} troops${c.nuked?'<br>☢ FALLOUT':''}`
+    }
+  } else tip.classList.remove('show');
+});
+
+function selectCountry(iso) {
+  const prev = GS.selected;
+  if(prev) highlightCountry(prev,false);
+  GS.selected = iso;
+  highlightCountry(iso,true);
+
+  const c = GS.countries[iso];
+  const cd = countryData[iso];
+  const sp = document.getElementById('side-panel');
+  sp.classList.add('open');
+  document.getElementById('sp-cname').textContent = cd?.name || iso;
+  document.getElementById('sp-cname').style.color = getOwnerColor(c.owner).hex;
+
+  const myTurn = GS.turn === GS.myIndex;
+  const isMine = c.owner === GS.myIndex;
+  const isEnemy = c.owner !== GS.myIndex && c.owner !== -1;
+
+  document.getElementById('sp-info').innerHTML =
+    `Owner: ${c.owner===-1?'NEUTRAL':GS.players[c.owner]?.name}<br>Troops: ${c.troops}${ c.nuked ? '<br><span style="color:#fa0">☢ FALLOUT '+c.nuked+' turns</span>':'' }`;
+
+  // Enable/disable actions based on phase
+  const phase = GS.phase;
+  document.getElementById('btn-add').disabled = !(myTurn && isMine && phase==='REINFORCE' && GS.reinforceLeft>0);
+  document.getElementById('btn-atk').disabled = !(myTurn && isMine && phase==='ATTACK');
+  document.getElementById('btn-nuke').disabled = !(myTurn && isMine && phase==='ATTACK' && GS.players[GS.myIndex].nukes>0);
+  document.getElementById('btn-fort').disabled = !(myTurn && isMine && phase==='FORTIFY');
+}
+
+// =====================================================================
+// RISK ACTIONS
+// =====================================================================
+
+// REINFORCE
+document.getElementById('btn-add').onclick = () => {
+  if (!GS.selected || GS.reinforceLeft<=0) return;
+  const iso = GS.selected; // capture NOW before slider dialog can clear it
+  const max = GS.reinforceLeft;
+  showTroopInput(1, max, 'ADD TROOPS', count => {
+    if (!GS.countries[iso]) return;
+    GS.countries[iso].troops += count;
+    GS.reinforceLeft -= count;
+    updateTroopSprite(iso);
+    updateDashboard();
+    const remaining = GS.reinforceLeft;
+    setLog(`+${count} troops → ${countryData[iso]?.name} | ${remaining} reinforcements left`);
+    if (GS.selected === iso) selectCountry(iso); // re-open panel if still selected
+    if (remaining === 0) setLog('✔ All troops placed — switch to ATTACK or END TURN');
+  });
+};
+
+// ATTACK
+let attackingFrom = null;
+document.getElementById('btn-atk').onclick = () => {
+  if (!GS.selected) return;
+  attackingFrom = GS.selected;
+  document.getElementById('side-panel').classList.remove('open');
+  GS.selected = null;
+  setLog(`⚔ Select TARGET country to attack from ${countryData[attackingFrom]?.name}`);
+};
+
+// After selecting attacker, clicking an enemy triggers combat
+function tryAttack(targetIso) {
+  if (!attackingFrom) return;
+  const atk = GS.countries[attackingFrom];
+  const def = GS.countries[targetIso];
+  if (atk.owner !== GS.myIndex) { attackingFrom=null; return; }
+  if (def.owner === GS.myIndex) { attackingFrom=null; return; }
+  if (atk.troops < 2) { setLog('⚠ Need at least 2 troops to attack!'); attackingFrom=null; return; }
+
+  const atkDice = Math.min(3, atk.troops-1);
+  const defDice = Math.min(2, def.troops);
+
+  const aRolls = Array.from({length:atkDice},()=>1+Math.floor(Math.random()*6)).sort((a,b)=>b-a);
+  const dRolls = Array.from({length:defDice},()=>1+Math.floor(Math.random()*6)).sort((a,b)=>b-a);
+
+  let atkLoss=0, defLoss=0;
+  const pairs = Math.min(aRolls.length, dRolls.length);
+  for(let i=0;i<pairs;i++){
+    if(aRolls[i]>dRolls[i]) defLoss++; else atkLoss++;
+  }
+
+  showDiceResult(
+    countryData[attackingFrom]?.name,
+    countryData[targetIso]?.name,
+    aRolls, dRolls, atkLoss, defLoss,
+    () => {
+      atk.troops -= atkLoss;
+      def.troops -= defLoss;
+      updateTroopSprite(attackingFrom);
+
+      if (def.troops <= 0) {
+        // Conquer!
+        const moveTroops = Math.min(atk.troops-1, atkDice);
+        def.owner = GS.myIndex;
+        def.troops = moveTroops;
+        atk.troops -= moveTroops;
+        setLog(`✓ ${countryData[targetIso]?.name} CONQUERED! Moved ${moveTroops} troops.`);
+        refreshBorder(targetIso);
+      } else {
+        setLog(`⚔ ${countryData[targetIso]?.name}: -${defLoss} troops. ${countryData[attackingFrom]?.name}: -${atkLoss}`);
+      }
+      updateTroopSprite(attackingFrom);
+      updateTroopSprite(targetIso);
+      refreshBorder(targetIso);
+      attackingFrom = null;
+      checkPlayerAlive();
+    }
+  );
+}
+
+// NUKE STRIKE
+document.getElementById('btn-nuke').onclick = () => {
+  if (!GS.selected || GS.players[GS.myIndex].nukes <= 0) return;
+  const from = GS.selected;
+  document.getElementById('side-panel').classList.remove('open');
+  setLog(`☢ SELECT nuclear target country (1 nuke remaining after this)`);
+  GS.selected = null;
+  window._nukeFrom = from;
+};
+
+function tryNuke(targetIso) {
+  const from = window._nukeFrom; if(!from) return;
+  if (GS.countries[targetIso]?.owner === GS.myIndex) { window._nukeFrom=null;return; }
+  const def = GS.countries[targetIso];
+  const nukeStr = Math.floor(6 + Math.random()*5); // 6-10 dmg
+  def.troops = Math.max(0, def.troops - nukeStr);
+  def.nuked  = 3;
+  GS.players[GS.myIndex].nukes--;
+  spawnExplosion3D(countryData[targetIso]?.lat, countryData[targetIso]?.lon, PLAYER_COLORS[GS.myIndex].int);
+  setLog(`☢ NUCLEAR STRIKE! ${countryData[targetIso]?.name} hit for ${nukeStr} troops! FALLOUT 3 turns. ${GS.players[GS.myIndex].nukes} nukes left.`);
+  if(def.troops===0){
+    def.owner=GS.myIndex; def.troops=1;
+    setLog(`☢☠ ${countryData[targetIso]?.name} OBLITERATED and seized!`);
+    refreshBorder(targetIso);
+  }
+  updateTroopSprite(targetIso);
+  window._nukeFrom=null;
+  refreshBorder(targetIso);
+  checkPlayerAlive();
+  if(GS.isOnline) syncState();
+}
+
+// FORTIFY
+let fortifyFrom2 = null;
+document.getElementById('btn-fort').onclick = () => {
+  if(!GS.selected) return;
+  if(GS.countries[GS.selected]?.owner!==GS.myIndex){setLog('⚠ Select your own territory to fortify FROM');return;}
+  fortifyFrom2 = GS.selected;
+  setLog(`→ FORTIFY: select DESTINATION country to move troops to`);
+  document.getElementById('side-panel').classList.remove('open');
+};
+
+function tryFortify(toIso) {
+  if(!fortifyFrom2) return;
+  const from = GS.countries[fortifyFrom2];
+  const to   = GS.countries[toIso];
+  if(!from||!to||to.owner!==GS.myIndex||from.troops<2){
+    setLog('⚠ Invalid fortify target'); fortifyFrom2=null; return;
+  }
+  const max = from.troops-1;
+  showTroopInput(1, max, 'TROOPS TO MOVE', count => {
+    from.troops -= count;
+    to.troops   += count;
+    updateTroopSprite(fortifyFrom2);
+    updateTroopSprite(toIso);
+    setLog(`→ Moved ${count} troops from ${countryData[fortifyFrom2]?.name} to ${countryData[toIso]?.name}`);
+    fortifyFrom2=null;
+  });
+}
+
+// PHASE BUTTONS
+document.getElementById('pb-reinforce').onclick = () => { if(GS.turn===GS.myIndex){GS.phase='REINFORCE';updatePhaseUI();attackingFrom=null;window._nukeFrom=null;fortifyFrom2=null;setLog('REINFORCE: click your territories to deploy troops');} };
+document.getElementById('pb-attack').onclick = () => { 
+  if(GS.turn===GS.myIndex) {
+    GS.phase='ATTACK';
+    updatePhaseUI();
+    document.getElementById('attack-modal').classList.add('show');
+  } 
+};
+document.getElementById('pb-fortify').onclick   = () => { if(GS.turn===GS.myIndex){GS.phase='FORTIFY';updatePhaseUI();attackingFrom=null;window._nukeFrom=null;window._fortifyFrom=null;fortifyFrom2=null;setLog('FORTIFY: Select origin territory first');} };
+
+// EXECUTE STRATEGIC PRESET ATTACK
+function executeAttackPreset(type) {
+  document.getElementById('attack-modal').classList.remove('show');
+  
+  if (type === 4) {
+    // Manual Override: just close the modal and let the user click territories.
+    setLog('MANUAL OVERRIDE: Select origin territory first, then click ATTACK or NUKE STRIKE');
+    return;
+  }
+
+  const myCountries = Object.entries(GS.countries).filter(([,c])=>c.owner===GS.myIndex);
+  let strikes = [];
+  
+  if (type === 1) { // BLITZKRIEG (5 attacks, strongest from)
+    let ops = [];
+    myCountries.filter(([,c])=>c.troops>2).sort(([,a],[,b])=>b.troops-a.troops).forEach(([fromIso, fromC])=>{
+      const cd = countryData[fromIso]; if(!cd) return;
+      Object.entries(GS.countries).forEach(([toIso, toC])=>{
+        if(toC.owner===1 && Math.abs(toC.lat-(cd.lat||0))<25 && Math.abs(toC.lon-(cd.lon||0))<35) {
+          ops.push({fromIso, toIso, fromC, toC});
+        }
+      });
+    });
+    // Sort ops by weakest target
+    ops.sort((a,b)=>a.toC.troops-b.toC.troops);
+    strikes = ops.slice(0, 5);
+  } 
+  else if (type === 2) { // TACTICAL (3 attacks, from threatened)
+    let ops = [];
+    myCountries.filter(([,c])=>c.troops>1).forEach(([fromIso, fromC])=>{
+      const cd = countryData[fromIso]; if(!cd) return;
+      Object.entries(GS.countries).forEach(([toIso, toC])=>{
+        if(toC.owner===1 && Math.abs(toC.lat-(cd.lat||0))<15 && Math.abs(toC.lon-(cd.lon||0))<25) {
+          ops.push({fromIso, toIso, fromC, toC});
+        }
+      });
+    });
+    // Sort ops by having superiority
+    ops.sort((a,b)=>(b.fromC.troops-b.toC.troops)-(a.fromC.troops-a.toC.troops));
+    strikes = ops.slice(0, 3);
+  }
+  else if (type === 3) { // GUERRILLA (4 random)
+    let ops = [];
+    myCountries.filter(([,c])=>c.troops>1).forEach(([fromIso, fromC])=>{
+      const cd = countryData[fromIso]; if(!cd) return;
+      Object.entries(GS.countries).forEach(([toIso, toC])=>{
+        if(toC.owner===1 && Math.abs(toC.lat-(cd.lat||0))<35 && Math.abs(toC.lon-(cd.lon||0))<45) {
+          ops.push({fromIso, toIso, fromC, toC});
+        }
+      });
+    });
+    // Shuffle
+    ops.sort(()=>Math.random()-0.5);
+    strikes = ops.slice(0, 4);
+  }
+
+  // Execute the strikes!
+  let totalWon = 0;
+  let html = '';
+  strikes.forEach(op => {
+    if(op.fromC.troops < 2) return;
+    const atkD=Math.min(3,op.fromC.troops-1), defD=Math.min(2,op.toC.troops);
+    const aR=Array.from({length:atkD},()=>1+Math.floor(Math.random()*6)).sort((a,b)=>b-a);
+    const dR=Array.from({length:defD},()=>1+Math.floor(Math.random()*6)).sort((a,b)=>b-a);
+    let al=0,dl=0;
+    for(let i=0;i<Math.min(aR.length,dR.length);i++){if(aR[i]>dR[i])dl++;else al++;}
+    
+    op.fromC.troops-=al; op.toC.troops-=dl;
+    
+    let resultStr = `[${countryData[op.fromIso]?.name} ⚔ ${countryData[op.toIso]?.name}]<br>`;
+    resultStr += `Humanity lost ${al} troops. Skynet lost ${dl} troops.<br>`;
+    
+    if(op.toC.troops<=0){
+      totalWon++;
+      op.toC.owner=GS.myIndex; op.toC.troops=Math.min(op.fromC.troops-1,atkD);
+      op.fromC.troops-=op.toC.troops; if(op.fromC.troops<1)op.fromC.troops=1;
+      refreshBorder(op.toIso);
+      resultStr = `<div class="rep-item won">${resultStr}<b>✓ TERRITORY SECURED!</b></div>`;
+    } else {
+      resultStr = `<div class="rep-item lost">${resultStr}<b>✕ ASSAULT REPELLED</b></div>`;
+    }
+    
+    html += resultStr;
+    launchMissile3D(op.fromIso, op.toIso, PLAYER_COLORS[GS.myIndex].int);
+    updateTroopSprite(op.fromIso); updateTroopSprite(op.toIso);
+  });
+  
+  setTimeout(() => {
+    document.getElementById('rep-summary').innerText = `TACTICAL STRIKES EXECUTED: Secured ${totalWon} Skynet territories out of ${strikes.length} operations.`;
+    document.getElementById('rep-list').innerHTML = html || '<div style="opacity:0.5;text-align:center">NO VIABLE TARGETS FOUND IN SECTORS.</div>';
+    document.getElementById('report-modal').classList.add('show');
+    updateDashboard();
+  }, 2600);
+}
+
+function closeReportAndEndTurn() {
+  document.getElementById('report-modal').classList.remove('show');
+  updateDashboard();
+  nextTurn();
+}
+
+document.getElementById('btn-end-turn').onclick = () => { if(GS.turn===GS.myIndex) nextTurn(); };
+</script>
+<script>
+// =====================================================================
+// UI HELPERS
+// =====================================================================
+function setLog(msg){ document.getElementById('log').textContent=msg; }
+
+function refreshBorder(iso) {
+  const g=countryBorders[iso]; if(!g) return;
+  const c=GS.countries[iso]; if(!c) return;
+  const col=getOwnerColor(c.owner);
+  g.traverse(obj=>{ if(obj.isLine) obj.material.color.set(col.int); });
+}
+
+// Troop input dialog
+let _troopCb=null;
+function showTroopInput(min,max,label,cb) {
+  if(max<min){cb(min);return;}
+  document.getElementById('troop-label').textContent=label;
+  const slider=document.getElementById('troop-slider');
+  const valEl=document.getElementById('troop-val');
+  slider.min=min; slider.max=max; slider.value=min; valEl.textContent=min;
+  slider.oninput=()=>valEl.textContent=slider.value;
+  _troopCb=cb;
+  document.getElementById('troop-inp').classList.add('show');
+}
+document.getElementById('troop-ok').onclick=()=>{
+  const v=parseInt(document.getElementById('troop-slider').value);
+  document.getElementById('troop-inp').classList.remove('show');
+  if(_troopCb) _troopCb(v);
+};
+document.getElementById('troop-cancel').onclick=()=>{
+  document.getElementById('troop-inp').classList.remove('show');
+};
+
+// Dice result display
+let _diceCb=null;
+function showDiceResult(fromName,toName,aRolls,dRolls,atkLoss,defLoss,cb) {
+  const panel=document.getElementById('dice-panel');
+  panel.classList.add('show');
+  document.getElementById('dice-from-to').textContent=`${fromName} → ${toName}`;
+  document.getElementById('atk-dice').innerHTML=aRolls.map(n=>`<div class="die atk">${n}</div>`).join('');
+  document.getElementById('def-dice').innerHTML=dRolls.map(n=>`<div class="die def">${n}</div>`).join('');
+  const res=[]; if(atkLoss) res.push(`Attacker loses ${atkLoss}`); if(defLoss) res.push(`Defender loses ${defLoss}`);
+  document.getElementById('dice-result').innerHTML=res.join(' · ');
+  _diceCb=cb;
+}
+document.getElementById('dice-ok').onclick=()=>{
+  document.getElementById('dice-panel').classList.remove('show');
+  if(_diceCb) _diceCb();
+};
+
+// =====================================================================
+// WIN / ALIVE CHECK
+// =====================================================================
+function checkPlayerAlive() {
+  GS.players.forEach((p,i)=>{
+    const owns=Object.values(GS.countries).filter(c=>c.owner===i).length;
+    p.alive=owns>0;
+  });
+}
+
+function checkWin() {
+  const alive=GS.players.filter(p=>p.alive);
+  if(alive.length===1){
+    const w=alive[0];
+    const go=document.getElementById('gameover');
+    const gt=document.getElementById('go-title');
+    gt.textContent=`${w.color.name} — ${w.name} WINS`;
+    gt.style.color=w.color.hex;
+    go.classList.add('show');
+  }
+}
+
+// =====================================================================
+// 3D MISSILE + EXPLOSION
+// =====================================================================
+const missiles3D=[], explosions3D=[];
+
+function slerp3D(a,b,t){
+  const dot=Math.max(-1,Math.min(1,a.dot(b)));
+  const om=Math.acos(dot); if(Math.abs(om)<.0001)return a.clone().lerp(b,t);
+  const s=Math.sin(om);
+  return a.clone().multiplyScalar(Math.sin((1-t)*om)/s).addScaledVector(b,Math.sin(t*om)/s);
+}
+
+function launchMissile3D(fromIso, toIso, col) {
+  const fc=countryData[fromIso], tc=countryData[toIso];
+  if(!fc||!tc) return;
+  const sd=ll2v(fc.lat,fc.lon,1).normalize(), ed=ll2v(tc.lat,tc.lon,1).normalize();
+  const group = new THREE.Group();
+
+  // === Rocket body: elongated glowing capsule ===
+  const bodyGeo = new THREE.ConeGeometry(.006, .04, 6);
+  const bodyMat = new THREE.MeshBasicMaterial({color:0xffffff});
+  const body = new THREE.Mesh(bodyGeo, bodyMat);
+  group.add(body);
+
+  // === Glow halo around rocket head ===
+  const glowGeo = new THREE.SphereGeometry(.018, 8, 8);
+  const glowMat = new THREE.MeshBasicMaterial({color:col, transparent:true, opacity:.5});
+  const glow = new THREE.Mesh(glowGeo, glowMat);
+  group.add(glow);
+
+  // === Exhaust plume: cone trailing behind ===
+  const plumeGeo = new THREE.ConeGeometry(.004, .035, 5);
+  const plumeMat = new THREE.MeshBasicMaterial({color:0xff6600, transparent:true, opacity:.7});
+  const plume = new THREE.Mesh(plumeGeo, plumeMat);
+  group.add(plume);
+
+  // Trail line material
+  const trailMat = new THREE.LineBasicMaterial({color:col, transparent:true, opacity:.85});
+  const innerTrailMat = new THREE.LineBasicMaterial({color:0xffffff, transparent:true, opacity:.4});
+
+  scene.add(group);
+  missiles3D.push({
+    sd, ed, progress:0, speed:.55, group,
+    body, glow, plume, trailMat, innerTrailMat,
+    trailLine:null, innerTrailLine:null,
+    col, toIso, time:0
+  });
+}
+
+function spawnExplosion3D(lat,lon,col){
+  if(lat===undefined||lon===undefined) return;
+  const c=ll2v(lat,lon,GLOBE_R+.003);
+  const up=c.clone().normalize();
+  let t1=new THREE.Vector3(-up.z,0,up.x);
+  if(t1.length()<.001) t1=new THREE.Vector3(0,up.z,-up.y);
+  t1.normalize();
+  const t2=new THREE.Vector3().crossVectors(up,t1);
+  const rings=[];
+  for(let r=0;r<3;r++){
+    const pts=Array.from({length:65},(_,i)=>{
+      const a=(i/64)*Math.PI*2;
+      return c.clone().addScaledVector(t1,Math.cos(a)*.001).addScaledVector(t2,Math.sin(a)*.001);
+    });
+    const geo=new THREE.BufferGeometry().setFromPoints(pts);
+    const mat=new THREE.LineBasicMaterial({color:0xff4400,transparent:true,opacity:1}); // fiery red-orange rings
+    const ring=new THREE.Line(geo,mat);
+    scene.add(ring);
+    rings.push({ring,mat,pts,t1,t2,c,delay:r*.12});
+  }
+  const flashGeo=new THREE.SphereGeometry(.045,12,12); // bigger explosion
+  const flashMat=new THREE.MeshBasicMaterial({color:0xff8800,transparent:true,opacity:1}); // bright fire yellow/orange
+  const flash=new THREE.Mesh(flashGeo,flashMat);
+  flash.position.copy(c); scene.add(flash);
+  explosions3D.push({rings,flash,flashMat,life:1.0});
+}
+
+// =====================================================================
+// AI OPPONENT
+// =====================================================================
+function aiTurn() {
+  const pi=GS.turn; // Skynet = player index 1
+  const reasoningPanel = document.getElementById('d1-reasoning');
+  if(reasoningPanel) reasoningPanel.innerHTML = '';
+  const aiLog = (msg) => { if(reasoningPanel) { reasoningPanel.innerHTML += `<div>> ${msg}</div>`; reasoningPanel.scrollTop = reasoningPanel.scrollHeight; } };
+
+  const myCountries=Object.entries(GS.countries).filter(([,c])=>c.owner===pi);
+  if(!myCountries.length){nextTurn();return;}
+
+  aiLog('ANALYZING HUMAN THREAT VECTORS...');
+
+  // SKYNET reinforce: concentrate on most-threatened borders
+  const owned=myCountries.length;
+  let reinforce=Math.max(3,Math.floor(owned/3));
+  const threatened=myCountries.filter(([iso])=>{
+    const cd=countryData[iso]; if(!cd) return false;
+    return Object.entries(GS.countries).some(([,c])=>
+      c.owner===0&&Math.abs(c.lat-(cd.lat||0))<20&&Math.abs(c.lon-(cd.lon||0))<30);
+  });
+  const tgt=threatened.length?threatened[Math.floor(Math.random()*Math.min(3,threatened.length))][0]:myCountries[0][0];
+  GS.countries[tgt].troops+=reinforce;
+  updateTroopSprite(tgt);
+  aiLog(`PRIORITY DIRECTIVE: REINFORCE <b>${countryData[tgt]?.name.toUpperCase()}</b> (+${reinforce} UNITS)`);
+  setLog(`⚙ SKYNET reinforce +${reinforce} → ${countryData[tgt]?.name}`);
+
+  // SKYNET nuclear strike: target high-value human territory
+  if(GS.players[pi].nukes>0&&Math.random()<0.2){
+    aiLog('CALCULATING STRATEGIC STRIKE PROBABILITIES...');
+    const bigTargets=Object.entries(GS.countries)
+      .filter(([,c])=>c.owner===0&&c.troops>5)
+      .sort(([,a],[,b])=>b.troops-a.troops);
+    if(bigTargets.length){
+      const [tIso]=bigTargets[0];
+      GS.players[pi].nukes--;
+      GS.countries[tIso].troops=Math.max(0,GS.countries[tIso].troops-Math.floor(6+Math.random()*5));
+      GS.countries[tIso].nuked=3;
+      spawnExplosion3D(countryData[tIso]?.lat,countryData[tIso]?.lon,PLAYER_COLORS[1].int);
+      aiLog(`<span style="color:#ffaa00">NUCLEAR LAUNCH DETECTED: MINIMIZING HUMAN TARGET <b>${countryData[tIso]?.name.toUpperCase()}</b></span>`);
+      setLog(`☢ SKYNET NUCLEAR STRIKE on ${countryData[tIso]?.name}! FALLOUT 3 turns.`);
+      if(GS.countries[tIso].troops===0){GS.countries[tIso].owner=1;GS.countries[tIso].troops=1;refreshBorder(tIso);}
+      updateTroopSprite(tIso);
+    }
+  }
+
+  // SKYNET attack: pick 1-4 attacks on human territories
+  let attacks=0;
+  aiLog('EXECUTING TACTICAL OFFENSIVE PARAMETERS...');
+  const shuffled=[...myCountries].sort(()=>Math.random()-.5);
+  for(const [fromIso,fromC] of shuffled){
+    if(attacks>=4||fromC.troops<2) continue;
+    const cd=countryData[fromIso]; if(!cd) continue;
+    const nearHumans=Object.entries(GS.countries).filter(([,tc])=>
+      tc.owner===0&&Math.abs(tc.lat-(cd.lat||0))<25&&Math.abs(tc.lon-(cd.lon||0))<35
+    ).sort(([,a],[,b])=>a.troops-b.troops);
+    if(!nearHumans.length) continue;
+    const [toIso,toC]=nearHumans[0];
+    if(fromC.troops<=toC.troops) continue;
+    
+    aiLog(`ENGAGING SECTOR: <b>${countryData[toIso]?.name.toUpperCase()}</b> FROM <b>${countryData[fromIso]?.name.toUpperCase()}</b>`);
+    const atkD=Math.min(3,fromC.troops-1),defD=Math.min(2,toC.troops);
+    const aR=Array.from({length:atkD},()=>1+Math.floor(Math.random()*6)).sort((a,b)=>b-a);
+    const dR=Array.from({length:defD},()=>1+Math.floor(Math.random()*6)).sort((a,b)=>b-a);
+    let al=0,dl=0;
+    for(let i=0;i<Math.min(aR.length,dR.length);i++){if(aR[i]>dR[i])dl++;else al++;}
+    fromC.troops-=al; toC.troops-=dl;
+    if(toC.troops<=0){
+      aiLog(`<span style="color:#fff">SECTOR SECURED: <b>${countryData[toIso]?.name.toUpperCase()}</b> EXTERMINATED.</span>`);
+      setLog(`⚙ SKYNET seizes ${countryData[toIso]?.name}!`);
+      toC.owner=1; toC.troops=Math.min(fromC.troops-1,atkD);
+      fromC.troops-=toC.troops; if(fromC.troops<1)fromC.troops=1;
+      refreshBorder(toIso);
+    }
+    launchMissile3D(fromIso,toIso,PLAYER_COLORS[1].int);
+    updateTroopSprite(fromIso); updateTroopSprite(toIso);
+    attacks++;
+  }
+
+  aiLog('TURN EXECUTION COMPLETE. YIELDING TO HUMAN RESISTANCE.');
+  checkPlayerAlive();
+  updateDashboard();
+  setTimeout(()=>{checkWin();if(!document.getElementById('gameover').classList.contains('show'))nextTurn();},2800);
+}
+
+// =====================================================================
+// MULTIPLAYER (WebSocket)
+// =====================================================================
+function initWS() {
+  try { ws=new WebSocket(WS_URL); } catch(e){ setLog('⚠ Multiplayer server not found'); return; }
+  ws.onmessage=e=>{
+    const msg=JSON.parse(e.data);
+    switch(msg.type){
+      case 'room_created':
+        GS.isOnline=true; GS.myIndex=0; GS.roomCode=msg.code;
+        document.getElementById('lobby-msg').style.color='#0af';
+        document.getElementById('lobby-msg').textContent=`ROOM CODE: ${msg.code} — share with friends!`;
+        document.getElementById('btn-start-room').style.display='block';
+        showRoomPlayers([{name:document.getElementById('player-name').value,index:0}]);
+        break;
+      case 'room_joined':
+        GS.isOnline=true; GS.myIndex=msg.playerIndex; GS.roomCode=msg.code;
+        document.getElementById('lobby-msg').style.color='#0f8';
+        document.getElementById('lobby-msg').textContent='Joined! Waiting for host...';
+        document.getElementById('btn-chat-toggle').style.display='block';
+        document.getElementById('chat-box').classList.add('open');
+        break;
+      case 'player_joined':
+        document.getElementById('lobby-msg').textContent=`${msg.name} joined (${msg.totalPlayers} players)`;
+        document.getElementById('btn-chat-toggle').style.display='block';
+        document.getElementById('chat-box').classList.add('open');
+        break;
+      case 'game_start':
+        hideLobby(); applyState(msg.gameState); break;
+      case 'state_update':
+        if(msg.playerIndex!==GS.myIndex) applyState(msg.gameState); break;
+      case 'player_left':
+        setLog(`⚠ Player ${msg.playerIndex} disconnected`); break;
+      case 'chat':
+        appendChat(msg.name,msg.text,msg.playerIndex); break;
+      case 'error':
+        document.getElementById('lobby-msg').textContent=msg.msg; break;
+    }
+  };
+  ws.onclose=()=>setLog('⚠ Disconnected from server');
+}
+
+function syncState() {
+  if(!ws||ws.readyState!==1) return;
+  ws.send(JSON.stringify({type:'state_update',gameState:serializeState()}));
+}
+function serializeState() {
+  return {countries:GS.countries, players:GS.players.map(p=>({...p,ws:undefined})), turn:GS.turn, phase:GS.phase, reinforceLeft:GS.reinforceLeft};
+}
+function applyState(s) {
+  GS.countries=s.countries; GS.turn=s.turn; GS.phase=s.phase; GS.reinforceLeft=s.reinforceLeft;
+  s.players.forEach((p,i)=>{if(GS.players[i])Object.assign(GS.players[i],p);});
+  refreshAllBorders(); buildTroopSprites(); updatePhaseUI();
+  if(GS.turn===GS.myIndex) setLog(`▶ YOUR TURN — ${GS.phase}`);
+  else setLog(`⟳ ${GS.players[GS.turn]?.name}'s turn...`);
+}
+
+function showRoomPlayers(players) {
+  document.getElementById('room-players').innerHTML=
+    players.map(p=>`<div class="rp-tag" style="color:${PLAYER_COLORS[p.index].hex};border-color:${PLAYER_COLORS[p.index].hex}">${p.name}</div>`).join('');
+}
+
+function appendChat(name,text,pi) {
+  const el=document.getElementById('chat-msgs');
+  el.innerHTML+=`<div><span style="color:${PLAYER_COLORS[pi%4].hex}">[${name}]</span> ${text}</div>`;
+  el.scrollTop=el.scrollHeight;
+}
+function sendChat() {
+  const inp=document.getElementById('chat-inp'); if(!inp.value.trim()) return;
+  if(ws&&ws.readyState===1) ws.send(JSON.stringify({type:'chat',text:inp.value}));
+  appendChat(GS.players[GS.myIndex]?.name||'Me',inp.value,GS.myIndex);
+  inp.value='';
+}
+document.getElementById('chat-inp').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat();});
+
+// =====================================================================
+// LOBBY BUTTON HANDLERS
+// =====================================================================
+function hideLobby(){document.getElementById('lobby').style.display='none';}
+
+// Auto-join after 6 seconds
+setTimeout(async () => {
+  hideLobby();
+  await loadCountries();
+  initGame(['COMMANDER', 'SKYNET'], 0);
+}, 6000);
+
+document.getElementById('btn-chat-toggle').onclick=()=>{
+  document.getElementById('chat-box').classList.toggle('open');
+};
+
+// =====================================================================
+// AMBIENT VISUAL UNITS (JETS, SUBS, SHIPS) - purely for display
+// =====================================================================
+const ambients = [];
+
+function createJetCanvas() {
+  const c = document.createElement('canvas'); c.width=128; c.height=128;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#11ff88'; // Bright neon green
+  ctx.shadowColor = '#11ff88'; ctx.shadowBlur = 15;
+  ctx.translate(64, 64); ctx.rotate(Math.PI/4); // Point top right
+  ctx.beginPath(); ctx.moveTo(0, -30); ctx.lineTo(24, 20); ctx.lineTo(0, 10); ctx.lineTo(-24, 20); ctx.fill();
+  return c;
+}
+
+function createSubCanvas() {
+  const c = document.createElement('canvas'); c.width=128; c.height=128;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(64,64,0, 64,64,64);
+  g.addColorStop(0, 'rgba(0, 255, 255, 1)');
+  g.addColorStop(0.2, 'rgba(0, 200, 255, 0.9)');
+  g.addColorStop(0.5, 'rgba(0, 100, 255, 0.4)');
+  g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = g; ctx.fillRect(0,0,128,128);
+  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(64,64, 10, 0, Math.PI*2); ctx.fill();
+  return c;
+}
+
+function createShipCanvas() {
+  const c = document.createElement('canvas'); c.width=128; c.height=128;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#ff8800'; // Bright orange
+  ctx.shadowColor = '#ff8800'; ctx.shadowBlur = 15;
+  ctx.beginPath(); ctx.moveTo(20,72); ctx.lineTo(108,72); ctx.lineTo(92,88); ctx.lineTo(36,88); ctx.fill();
+  ctx.fillRect(52,52, 24,20); ctx.fillRect(80,60, 8,12);
+  return c;
+}
+
+function spawnAmbients() {
+  const texJet = new THREE.CanvasTexture(createJetCanvas());
+  const texSub = new THREE.CanvasTexture(createSubCanvas());
+  const texShip = new THREE.CanvasTexture(createShipCanvas());
+
+  const matJet = new THREE.SpriteMaterial({map: texJet, color: 0xffffff});
+  const matSub = new THREE.SpriteMaterial({map: texSub, color: 0xffffff, transparent: true, blending: THREE.AdditiveBlending});
+  const matShip = new THREE.SpriteMaterial({map: texShip, color: 0xffffff});
+
+  for(let i=0; i<60; i++) {
+    const type = i % 3; // 0: Jet, 1: Sub, 2: Ship
+    const mat = type === 0 ? matJet : type === 1 ? matSub : matShip;
+    // slightly adjusted orbital heights so they don't clip through the globe as often
+    const radius = type === 0 ? 10.8 : (type === 1 ? 10.15 : 10.1);
+    
+    const sprite = new THREE.Sprite(mat);
+    // Increase scale significantly from 0.5 to 1.5 - 2.5
+    sprite.scale.set(1.8, 1.8, 1.0);
+    
+    // Random position
+    const phi = Math.acos(-1 + (2 * i)/60);
+    const theta = Math.sqrt(60 * Math.PI) * phi;
+    sprite.position.setFromSphericalCoords(radius, phi, theta);
+    
+    const pivot = new THREE.Group();
+    pivot.add(sprite);
+    scene.add(pivot);
+    
+    // Orbital mechanics
+    const axis = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
+    const speed = (Math.random()*0.0015 + 0.0005) * (type === 0 ? 3 : 1);
+    
+    ambients.push({ pivot, axis, speed, sprite, type, offset: Math.random()*100 });
+  }
+}
+
+// =====================================================================
+// ANIMATION LOOP
+// =====================================================================
+const clock3=new THREE.Clock();
+let time3=0;
+
+function animate() {
+  requestAnimationFrame(animate);
+  const dt=Math.min(clock3.getDelta(),.05);
+  time3+=dt;
+
+  // Auto-rotate when idle
+  if(!drag&&missiles3D.length===0) {
+    // Slow down to almost 0 when a country is selected for easier interaction
+    const rotSpeed = GS.selected ? 0.0002 : 0.003;
+    sph.theta -= rotSpeed * dt * 60; 
+    updCam();
+  }
+
+  // Update missiles
+  for(let i=missiles3D.length-1;i>=0;i--){
+    const m=missiles3D[i];
+    m.progress=Math.min(1,m.progress+dt*m.speed);
+    m.time=(m.time||0)+dt;
+
+    // Remove old trails
+    if(m.trailLine){m.group.remove(m.trailLine);m.trailLine.geometry.dispose();}
+    if(m.innerTrailLine){m.group.remove(m.innerTrailLine);m.innerTrailLine.geometry.dispose();}
+
+    // Build outer glow trail (fades back from head)
+    const STEPS=60;
+    const outerPts=[], innerPts=[];
+    for(let s=0;s<=STEPS;s++){
+      const t=(s/STEPS)*m.progress;
+      const d=slerp3D(m.sd,m.ed,t).normalize();
+      const h=GLOBE_R+Math.sin(t*Math.PI)*.65;
+      const pt=d.clone().multiplyScalar(h);
+      outerPts.push(pt);
+      if(s>STEPS*0.5) innerPts.push(pt); // inner trail only near head
+    }
+    m.trailLine=new THREE.Line(new THREE.BufferGeometry().setFromPoints(outerPts),m.trailMat);
+    m.group.add(m.trailLine);
+    if(innerPts.length>1){
+      m.innerTrailLine=new THREE.Line(new THREE.BufferGeometry().setFromPoints(innerPts),m.innerTrailMat);
+      m.group.add(m.innerTrailLine);
+    }
+
+    // Position rocket body & glow at head
+    const headDir=slerp3D(m.sd,m.ed,m.progress).normalize();
+    const headH=GLOBE_R+Math.sin(m.progress*Math.PI)*.65;
+    const headPos=headDir.clone().multiplyScalar(headH);
+
+    m.body.position.copy(headPos);
+    m.glow.position.copy(headPos);
+
+    // Orient rocket body along travel direction
+    if(m.progress<0.99){
+      const nextT=Math.min(1,m.progress+0.02);
+      const nextDir=slerp3D(m.sd,m.ed,nextT).normalize();
+      const nextH=GLOBE_R+Math.sin(nextT*Math.PI)*.65;
+      const nextPos=nextDir.multiplyScalar(nextH);
+      const dir=nextPos.clone().sub(headPos).normalize();
+      m.body.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir);
+      // Plume behind rocket
+      const plumePos=headPos.clone().sub(dir.clone().multiplyScalar(.025));
+      m.plume.position.copy(plumePos);
+      m.plume.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir.clone().negate());
+    }
+
+    // Pulse glow on rocket head
+    const pulse=0.4+0.3*Math.sin(m.time*25);
+    m.glow.material.opacity=pulse;
+    m.plume.material.opacity=0.5+0.4*Math.sin(m.time*30);
+
+    if(m.progress>=1){
+      scene.remove(m.group);
+      spawnExplosion3D(countryData[m.toIso]?.lat,countryData[m.toIso]?.lon,m.col);
+      missiles3D.splice(i,1);
+    }
+  }
+
+  // Update explosions
+  for(let i=explosions3D.length-1;i>=0;i--){
+    const ex=explosions3D[i];
+    ex.life-=dt*.7;
+    if(ex.life<=0){ex.rings.forEach(r=>scene.remove(r.ring));scene.remove(ex.flash);explosions3D.splice(i,1);continue;}
+    ex.rings.forEach((g,ri)=>{
+      const t=Math.max(0,(1-ex.life)*(1-g.delay*.5));
+      const s=t*.12+.001;
+      const pts=Array.from({length:65},(_,j)=>{
+        const a=(j/64)*Math.PI*2;
+        return g.c.clone().addScaledVector(g.t1,Math.cos(a)*s).addScaledVector(g.t2,Math.sin(a)*s);
+      });
+      g.ring.geometry.setFromPoints(pts);
+      g.mat.opacity=ex.life*.9;
+    });
+    ex.flashMat.opacity=Math.min(1,ex.life*3);
+    ex.flash.scale.setScalar(1+(1-ex.life)*12);
+  }
+
+  // Cull troop sprites that are behind the globe
+  const camDir = camera.position.clone().normalize();
+  for (const [, sprite] of Object.entries(troopSprites)) {
+    if (!sprite.position) continue;
+    const sDir = sprite.position.clone().normalize();
+    // dot > 0 = facing camera side. Use a threshold so edge countries don't flicker
+    sprite.visible = camDir.dot(sDir) > 0.08;
+  }
+
+  // Render ambients and backface culling
+  const time = Date.now() * 0.002;
+  ambients.forEach(amb => {
+    amb.pivot.rotateOnAxis(amb.axis, amb.speed);
+    
+    // Pulsing glow for subs
+    if (amb.type === 1) {
+      const s = 1.3 + Math.sin(time * 2 + amb.offset) * 0.7; // larger pulse
+      amb.sprite.scale.set(s, s, 1);
+    }
+    
+    // Backface culling
+    const pos = new THREE.Vector3();
+    amb.sprite.getWorldPosition(pos);
+    const dot = camDir.dot(pos.normalize());
+    amb.sprite.visible = dot > 0.08;
+  });
+
+  renderer.render(scene,camera);
+}
+
+window.addEventListener('resize',()=>{
+  renderer.setSize(innerWidth,innerHeight);
+  camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+});
+
+spawnAmbients();
+animate();
+</script>
+</body>
+</html>
