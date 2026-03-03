@@ -356,6 +356,9 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     <div class="dash-nukes" id="d0-nukes"><span class="dash-nuke-label">NUKES</span></div>
     <div class="dash-players" id="d0-players">⚡ 1 COMMANDER ACTIVE</div>
     <div class="dash-status" id="d0-status">REINFORCING</div>
+    <div id="d0-reasoning" style="margin-top:12px; padding:10px; background:rgba(0,220,255,0.05); border:1px solid rgba(0,220,255,0.2); border-radius:4px; font-family:'Courier New', monospace; font-size:10px; color:#0af; flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom: 4px;">
+      <div style="opacity:0.5">> AWAITING COMMAND INPUT...</div>
+    </div>
   </div>
 
   <div class="faction-dash" id="dash-1">
@@ -1583,7 +1586,23 @@ document.getElementById('btn-end-turn').onclick = () => { if(GS.turn===GS.myInde
 // =====================================================================
 // UI HELPERS
 // =====================================================================
-function setLog(msg){ document.getElementById('log').textContent=msg; }
+function setLog(msg){ 
+  document.getElementById('log').textContent=msg;
+  // Mirror human-relevant messages into the Humanity reasoning panel
+  const humanPanel = document.getElementById('d0-reasoning');
+  if (humanPanel && msg && !msg.startsWith('⟳') && !msg.startsWith('✓ ') && !msg.startsWith('⚙') && !msg.startsWith('LOADING')) {
+    const entry = document.createElement('div');
+    entry.textContent = '> ' + msg;
+    // Color code by action type
+    if (msg.includes('CONQUERED') || msg.includes('seizes') || msg.includes('nuclear')) entry.style.color = '#0f8';
+    else if (msg.includes('casualties') || msg.includes('NUCLEAR')) entry.style.color = '#fa0';
+    else if (msg.includes('☢') || msg.includes('NUKE')) entry.style.color = '#f24';
+    humanPanel.appendChild(entry);
+    // Keep only last 20 entries
+    while (humanPanel.children.length > 20) humanPanel.removeChild(humanPanel.firstChild);
+    humanPanel.scrollTop = humanPanel.scrollHeight;
+  }
+}
 
 function refreshBorder(iso) {
   const g=countryBorders[iso]; if(!g) return;
