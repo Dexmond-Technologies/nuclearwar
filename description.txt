@@ -1,4 +1,4 @@
-NUCLEAR RISK ☢ — 3D World War Simulation
+NUCLEAR WAR ☢ — 3D World War Simulation
 ==========================================
 
 A real-time 3D nuclear war strategy game playable in any web browser.
@@ -7,7 +7,7 @@ Built with Three.js, WebGL, and a Node.js WebSocket server for multiplayer.
 
 WHAT IT IS
 ----------
-Nuclear Risk is a Risk-inspired global domination game rendered on a real 3D Earth globe.
+NUCLEAR WAR is a Risk-inspired global domination game rendered on a real 3D Earth globe.
 Every country in the world (~180 nations) is a playable territory with its own troop count,
 faction color, and vulnerability to nuclear strikes. The game uses NASA Earth satellite
 imagery as the globe texture, with Natural Earth GeoJSON borders overlaid on top.

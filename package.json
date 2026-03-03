@@ -1,7 +1,7 @@
 {
   "name": "nuclear-risk-server",
   "version": "1.0.0",
-  "description": "WebSocket multiplayer server for 3D Nuclear Risk",
+  "description": "WebSocket multiplayer server for 3D NUCLEAR WAR",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

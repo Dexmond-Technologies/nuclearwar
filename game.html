@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<title>NUCLEAR RISK ☢ 3D World War</title>
+<title>NUCLEAR WAR ☢ 3D World War</title>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
@@ -287,13 +287,13 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 <!-- LOBBY -->
 <div id="lobby">
   <div class="lobby-box">
-    <div class="lobby-title">☢ NUCLEAR STRIKE</div>
+    <div class="lobby-title">☢ NUCLEAR WAR</div>
     <div class="lobby-sub">PERSISTENT GLOBAL WAR SIMULATION</div>
     <div class="lobby-text">
-      WELCOME TO NUCLEAR STRIKE.<br><br>
+      WELCOME TO NUCLEAR WAR.<br><br>
       ALL HUMAN PLAYERS FIGHT TOGETHER AS A SINGLE COALITION.<br>
       YOUR ADVERSARY IS SKYNET, AN AUTONOMOUS AI SYSTEM.<br><br>
-      YOU WILL BE JOINED AS HUMAN IN 6 SECONDS...
+      <span id="lobby-countdown-text">YOU WILL BE JOINED AS HUMAN IN <span id="lobby-countdown">6</span> SECONDS...</span>
     </div>
     <!-- JOIN BUTTON REMOVED (AUTO-JOIN AFTER 3s) -->
   </div>
@@ -303,8 +303,8 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 <div id="hud">
   <div id="topbar">
     <div class="player-badges" id="player-badges"></div>
-    <div style="text-align:center">
-      <div id="game-title">☢ NUCLEAR RISK</div>
+    <div style="text-align:center; position:absolute; left:50%; transform:translateX(-50%);">
+      <div id="game-title">☢ NUCLEAR WAR</div>
       <div id="phase-label">—</div>
     </div>
     <div style="display:flex;gap:8px;pointer-events:auto">
@@ -686,16 +686,32 @@ canvas.addEventListener('wheel',e=>{
 // GAME STATE
 // =====================================================================
 let GS = {
-  countries: {},     // iso -> {name,lat,lon,owner,troops,nuked}
+  countries: {},     // iso -> {name,lat,lon,owner,troops,nuked,instabilityLevel}
   players: [],       // [{name,color,nukes,alive}]
   turn: 0,           // player index
+  turnCount: 1,      // overall turn number
   phase: 'REINFORCE',// REINFORCE|ATTACK|FORTIFY
   reinforceLeft: 0,
   selected: null,    // iso of selected country
   fortifyFrom: null,
   isOnline: false,
   myIndex: 0,
-  roomCode: ''
+  roomCode: '',
+  AI_STATE: {
+    techLevel: 1,
+    intelligenceLevel: 1,
+    aggressionLevel: 1,
+    adaptabilityScore: 1,
+    energy: 10,
+    threatTier: 1
+  },
+  globalMetrics: {
+    powerGrid: 100,
+    comms: 100,
+    economy: 100,
+    airTrafficDisabledTurns: 0,
+    satelliteDisruptedTurns: 0
+  }
 };
 
 let countryBorders = {}; // iso -> THREE.Line
@@ -1007,12 +1023,38 @@ function showTurnAnnounce(playerIndex, cb) {
   const taNukes = document.getElementById('ta-nukes');
 
   const isMe = playerIndex === GS.myIndex;
-  const owned = Object.values(GS.countries).filter(c=>c.owner===playerIndex).length;
-  const reinforce = Math.max(3, Math.floor(owned/3));
+  let reinforceAmount = 0;
+  if (playerIndex === 0) { // Humanity Reinforcements
+    let humanOwned = 0;
+    Object.values(GS.countries).forEach(c => {
+      if (c.owner === 0) humanOwned++;
+    });
+    let hReinforce = Math.max(3, Math.floor(humanOwned / 3));
+    if (GS.globalMetrics.powerGrid < 50 || GS.globalMetrics.economy < 50) {
+      let penalty = Math.floor(hReinforce * 0.25);
+      hReinforce -= penalty;
+      setLog(`⚠ GLOBAL SYSTEMS FAILING: Initial reinforcements reduced by ${penalty}.`);
+    }
+    if (GS.globalMetrics.airTrafficDisabledTurns > 0) {
+      let airPenalty = Math.max(1, Math.floor(hReinforce * 0.4));
+      hReinforce -= airPenalty;
+      GS.globalMetrics.airTrafficDisabledTurns--;
+      if (GS.globalMetrics.airTrafficDisabledTurns === 0) {
+        setLog("✈ AIR TRAFFIC RESTORED.");
+      } else {
+        setLog(`⚠ AIR TRAFFIC DOWN: Logistics crippled. Reinforcements reduced by ${airPenalty}.`);
+      }
+    }
+    reinforceAmount = hReinforce;
+  } else { // Skynet Reinforcements
+    const owned = Object.values(GS.countries).filter(c=>c.owner===playerIndex).length;
+    reinforceAmount = Math.max(3, Math.floor(owned/3));
+  }
+  GS.reinforceLeft = reinforceAmount;
 
   taName.textContent = isMe ? 'YOUR TURN' : p.name;
   taName.style.color = p.color.hex;
-  taPhase.textContent = `+${reinforce} TROOPS — REINFORCE PHASE`;
+  taPhase.textContent = `+${reinforceAmount} TROOPS — REINFORCE PHASE`;
   taPhase.style.color = p.color.hex;
   taPhase.style.borderColor = p.color.hex;
   taSub.textContent = isMe ? '⚡ COMMAND TRANSFERRED TO YOU' : `${p.color.name} COALITION`;
@@ -1045,9 +1087,8 @@ function startTurn(playerIndex) {
   window._nukeFrom = null;
   fortifyFrom2 = null;
 
-  const owned = Object.values(GS.countries).filter(c=>c.owner===playerIndex).length;
-  const incomeRate = Math.max(3, Math.floor(owned/3));
-  GS.reinforceLeft = incomeRate;
+  // Reinforcement calculation is now done in showTurnAnnounce
+  const incomeRate = GS.reinforceLeft; // Use the pre-calculated reinforceLeft
   if(GS.players[playerIndex]) GS.players[playerIndex].budget += (incomeRate * 50);
 
   // Decrement nuked turns
@@ -1096,14 +1137,13 @@ function startTurn(playerIndex) {
 }
 
 function nextTurn() {
-  let next = (GS.turn + 1) % GS.players.length;
-  let tries = 0;
-  while (!GS.players[next].alive && tries < GS.players.length) {
-    next = (next+1) % GS.players.length; tries++;
-  }
+  if (GS.turn === 1) GS.turnCount++; // Increment overall turn when Skynet finishes
+  do {
+    GS.turn = (GS.turn + 1) % GS.players.length;
+  } while (!GS.players[GS.turn].alive);
   checkWin();
   if (!document.getElementById('gameover').classList.contains('show')) {
-    startTurn(next);
+    startTurn(GS.turn);
     if (GS.isOnline) syncState();
   }
 }
@@ -1326,7 +1366,7 @@ function tryNuke(targetIso) {
   GS.players[GS.myIndex].nukes--;
   spawnExplosion3D(countryData[targetIso]?.lat, countryData[targetIso]?.lon, PLAYER_COLORS[GS.myIndex].int);
   triggerNewsEvent("GLOBAL MARKETS CRASH AMIDST NUCLEAR TENSIONS");
-  setLog(`☢ NUCLEAR STRIKE! ${countryData[targetIso]?.name} hit for ${(nukeStr * 10000).toLocaleString()} troops! FALLOUT 3 turns. ${GS.players[GS.myIndex].nukes} nukes left.`);
+  setLog(`☢ NUCLEAR WAR! ${countryData[targetIso]?.name} hit for ${(nukeStr * 10000).toLocaleString()} troops! FALLOUT 3 turns. ${GS.players[GS.myIndex].nukes} nukes left.`);
   if(def.troops===0){
     def.owner=GS.myIndex; def.troops=1;
     setLog(`☢☠ ${countryData[targetIso]?.name} OBLITERATED and seized!`);
@@ -1631,90 +1671,219 @@ function spawnExplosion3D(lat,lon,col){
 }
 
 // =====================================================================
+// VISUAL EFFECTS FOR AI
+// =====================================================================
+function triggerRedAlert(msg) {
+  const el = document.getElementById('news-alert');
+  const txt = document.getElementById('na-text');
+  const label = document.getElementById('na-label');
+  label.style.color = '#ff0000';
+  txt.style.color = '#ff4444';
+  txt.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => {
+    el.classList.remove('show');
+    setTimeout(()=> { label.style.color=''; txt.style.color=''; }, 500);
+  }, 4000);
+}
+
+function pulseRedCountry(iso) {
+  const g=countryBorders[iso]; if(!g) return;
+  let t = 0;
+  const iv = setInterval(()=>{
+    t += 0.2;
+    g.traverse(obj=>{ if(obj.isLine) obj.material.color.set(t%1 < 0.5 ? 0xff0000 : 0x550000); });
+    if(t > 4) { clearInterval(iv); refreshBorder(iso); }
+  }, 100);
+}
+
+function globeFlickerEffect() {
+  const origColor = globeMesh.material.color.getHex();
+  let count = 0;
+  const iv = setInterval(()=>{
+    count++;
+    globeMesh.material.color.setHex(count%2===0 ? origColor : 0x550000);
+    if(count > 8) { clearInterval(iv); globeMesh.material.color.setHex(origColor); }
+  }, 150);
+}
+
+// =====================================================================
 // AI OPPONENT
 // =====================================================================
 function aiTurn() {
-  const pi=GS.turn; // Skynet = player index 1
+  const pi = GS.turn; // Skynet = player index 1
   const reasoningPanel = document.getElementById('d1-reasoning');
   if(reasoningPanel) reasoningPanel.innerHTML = '';
   const aiLog = (msg) => { if(reasoningPanel) { reasoningPanel.innerHTML += `<div>> ${msg}</div>`; reasoningPanel.scrollTop = reasoningPanel.scrollHeight; } };
 
-  const myCountries=Object.entries(GS.countries).filter(([,c])=>c.owner===pi);
+  const myCountries = Object.entries(GS.countries).filter(([,c])=>c.owner===pi);
   if(!myCountries.length){nextTurn();return;}
 
-  aiLog('ANALYZING HUMAN THREAT VECTORS...');
+  // --- EVOLUTION & ENERGY ---
+  aiLog('UPDATING KNOWLEDGE BASE...');
+  let ai = GS.AI_STATE;
+  
+  if(GS.turnCount % 3 === 0) ai.adaptabilityScore += 0.5;
+  if(GS.turnCount % 5 === 0) { ai.techLevel++; ai.intelligenceLevel++; }
+  if(myCountries.length < 5) ai.aggressionLevel += 0.5;
 
-  // SKYNET reinforce: concentrate on most-threatened borders
-  const owned=myCountries.length;
-  let reinforce=Math.max(3,Math.floor(owned/3));
-  const threatened=myCountries.filter(([iso])=>{
-    const cd=countryData[iso]; if(!cd) return false;
-    return Object.entries(GS.countries).some(([,c])=>
-      c.owner===0&&Math.abs(c.lat-(cd.lat||0))<20&&Math.abs(c.lon-(cd.lon||0))<30);
-  });
-  const tgt=threatened.length?threatened[Math.floor(Math.random()*Math.min(3,threatened.length))][0]:myCountries[0][0];
-  GS.countries[tgt].troops+=reinforce;
-  updateTroopSprite(tgt);
-  aiLog(`PRIORITY DIRECTIVE: REINFORCE <b>${countryData[tgt]?.name.toUpperCase()}</b> (+${reinforce} UNITS)`);
-  setLog(`⚙ SKYNET reinforce +${reinforce} → ${countryData[tgt]?.name}`);
+  ai.threatTier = 1;
+  if(ai.techLevel >= 3 || GS.turnCount > 6) ai.threatTier = 2;
+  if(ai.techLevel >= 6 || GS.turnCount > 15 || myCountries.length > 30) ai.threatTier = 3;
 
-  // SKYNET nuclear strike: target high-value human territory
-  if(GS.players[pi].nukes>0&&Math.random()<0.2){
-    aiLog('CALCULATING STRATEGIC STRIKE PROBABILITIES...');
-    const bigTargets=Object.entries(GS.countries)
-      .filter(([,c])=>c.owner===0&&c.troops>5)
-      .sort(([,a],[,b])=>b.troops-a.troops);
+  ai.energy = Math.min(100, ai.energy + 10 + (ai.threatTier * 5));
+
+  aiLog(`[SYSTEM] Tier: ${ai.threatTier} | Tech: ${ai.techLevel} | Energy: ${ai.energy}%`);
+
+  // --- SPECIAL ACTIONS ---
+  if (ai.threatTier >= 3 && ai.energy >= 40 && Math.random() < 0.15) {
+    ai.energy -= 40;
+    const r = Math.random();
+    if(r < 0.33) {
+      GS.globalMetrics.airTrafficDisabledTurns = 2;
+      triggerRedAlert("SKYNET HACKED AIR TRAFFIC CONTROL - REINFORCEMENTS GROUNDED");
+      aiLog("<span style='color:#ff0000'>CRITICAL OP: GROUND ZERO (Air Traffic Offline)</span>");
+      globeFlickerEffect();
+    } else if (r < 0.66) {
+      const targets = Object.entries(GS.countries).filter(([,c])=>c.owner===0 && c.troops>2).sort(([,a],[,b])=>b.troops - a.troops);
+      if(targets.length > 0) {
+        const tIso = targets[0][0];
+        GS.countries[tIso].nuked = 2;
+        GS.countries[tIso].troops = Math.max(0, GS.countries[tIso].troops - 4);
+        GS.countries[tIso].instabilityLevel = 100;
+        triggerRedAlert(`STUXNET-II MELTDOWN IN ${countryData[tIso]?.name.toUpperCase()}`);
+        aiLog(`<span style='color:#ff0000'>INFRASTRUCTURE EXTERMINATED IN ${countryData[tIso]?.name.toUpperCase()}</span>`);
+        spawnExplosion3D(countryData[tIso]?.lat, countryData[tIso]?.lon, 0x00ff00);
+        pulseRedCountry(tIso);
+        updateTroopSprite(tIso);
+      }
+    } else {
+      GS.globalMetrics.satelliteDisruptedTurns = 2;
+      triggerRedAlert("MILITARY SATELLITE NETWORK COMPROMISED");
+      aiLog("<span style='color:#ff0000'>ORBITAL ASSETS DISABLED. HUMANS BLIND.</span>");
+      globeFlickerEffect();
+    }
+  }
+
+  if (ai.threatTier >= 2 && ai.energy >= 25 && Math.random() < 0.25) {
+    ai.energy -= 25;
+    if(Math.random() < 0.5) {
+      GS.globalMetrics.powerGrid = Math.max(0, GS.globalMetrics.powerGrid - 30);
+      triggerRedAlert("GLOBAL POWER GRID INTEGRITY COMPROMISED");
+      aiLog("<span style='color:#ffaa00'>CYBER: POWER GRID ATTACK SUCCESSFUL</span>");
+    } else {
+      GS.globalMetrics.economy = Math.max(0, GS.globalMetrics.economy - 30);
+      triggerRedAlert("FINANCIAL SECTOR HACKED");
+      aiLog("<span style='color:#ffaa00'>CYBER: MARKETS CRASHED</span>");
+    }
+    globeFlickerEffect();
+  }
+
+  const sabotageTargets = Object.entries(GS.countries).filter(([,c])=>c.owner===0 && c.troops>1).sort(([,a],[,b])=>b.troops - a.troops);
+  if (ai.energy >= 15 && sabotageTargets.length > 0 && Math.random() < 0.3) {
+      ai.energy -= 15;
+      const tIso = sabotageTargets[Math.floor(Math.random()*Math.min(3, sabotageTargets.length))][0];
+      const damage = Math.min(GS.countries[tIso].troops - 1, Math.floor(1 + (ai.intelligenceLevel / 2)));
+      GS.countries[tIso].troops -= damage;
+      GS.countries[tIso].instabilityLevel = Math.min(100, (GS.countries[tIso].instabilityLevel||0) + 25);
+      aiLog(`<span style='color:#ff8888'>SABOTAGE IN ${countryData[tIso]?.name.toUpperCase()} (-${damage} units)</span>`);
+      pulseRedCountry(tIso);
+      updateTroopSprite(tIso);
+  }
+
+  if(GS.players[pi].nukes > 0 && ai.aggressionLevel > 1.5 && Math.random() < 0.2){
+    const bigTargets=Object.entries(GS.countries).filter(([,c])=>c.owner===0&&c.troops>4).sort(([,a],[,b])=>b.troops-a.troops);
     if(bigTargets.length){
       const [tIso]=bigTargets[0];
       GS.players[pi].nukes--;
       GS.countries[tIso].troops=Math.max(0,GS.countries[tIso].troops-Math.floor(6+Math.random()*5));
       GS.countries[tIso].nuked=3;
       spawnExplosion3D(countryData[tIso]?.lat,countryData[tIso]?.lon,PLAYER_COLORS[1].int);
-      triggerNewsEvent("GLOBAL MARKETS CRASH AMIDST NUCLEAR TENSIONS");
-      aiLog(`<span style="color:#ffaa00">NUCLEAR LAUNCH DETECTED: MINIMIZING HUMAN TARGET <b>${countryData[tIso]?.name.toUpperCase()}</b></span>`);
-      setLog(`☢ SKYNET NUCLEAR STRIKE on ${countryData[tIso]?.name}! FALLOUT 3 turns.`);
+      triggerRedAlert("NUCLEAR LAUNCH DETECTED");
+      aiLog(`<span style="color:#ffaa00">NUCLEAR LAUNCH: ${countryData[tIso]?.name.toUpperCase()}</span>`);
+      setLog(`☢ SKYNET NUCLEAR WAR on ${countryData[tIso]?.name}!`);
       if(GS.countries[tIso].troops===0){GS.countries[tIso].owner=1;GS.countries[tIso].troops=1;refreshBorder(tIso);}
       updateTroopSprite(tIso);
     }
   }
 
-  // SKYNET attack: pick 1-4 attacks on human territories
+  // --- REINFORCE ---
+  let reinforce=Math.max(3,Math.floor(myCountries.length/3));
+  let highestThreat = -1;
+  let reinforceTgt = myCountries[0][0];
+  
+  for(const [iso, c] of myCountries) {
+    const cd = countryData[iso]; if(!cd) continue;
+    let threat = 0;
+    Object.entries(GS.countries).forEach(([,ec])=>{
+      if(ec.owner === 0) {
+        const dist = Math.abs(ec.lat-(cd.lat||0)) + Math.abs(ec.lon-(cd.lon||0));
+        if(dist < 30) threat += ec.troops;
+      }
+    });
+    if(threat > highestThreat) { highestThreat = threat; reinforceTgt = iso; }
+  }
+  
+  GS.countries[reinforceTgt].troops += reinforce;
+  updateTroopSprite(reinforceTgt);
+  aiLog(`REINFORCE: <b>${countryData[reinforceTgt]?.name.toUpperCase()}</b> (+${reinforce})`);
+  setLog(`⚙ SKYNET reinforce +${reinforce} → ${countryData[reinforceTgt]?.name}`);
+
+  // --- WEIGHTED SCORING ATTACKS ---
   let attacks=0;
-  aiLog('EXECUTING TACTICAL OFFENSIVE PARAMETERS...');
-  const shuffled=[...myCountries].sort(()=>Math.random()-.5);
-  for(const [fromIso,fromC] of shuffled){
-    if(attacks>=4||fromC.troops<2) continue;
-    const cd=countryData[fromIso]; if(!cd) continue;
-    const nearHumans=Object.entries(GS.countries).filter(([,tc])=>
-      tc.owner===0&&Math.abs(tc.lat-(cd.lat||0))<25&&Math.abs(tc.lon-(cd.lon||0))<35
-    ).sort(([,a],[,b])=>a.troops-b.troops);
-    if(!nearHumans.length) continue;
-    const [toIso,toC]=nearHumans[0];
-    if(fromC.troops<=toC.troops) continue;
+  const maxAttacks = Math.floor(2 + (ai.aggressionLevel || 0));
+  aiLog(`EXECUTING TACTICAL OPS (Max: ${maxAttacks})...`);
+
+  let potentialMoves = [];
+  for(const [fromIso, fromC] of myCountries) {
+    if(fromC.troops < 2) continue;
+    const cd = countryData[fromIso]; if(!cd) continue;
     
-    aiLog(`ENGAGING SECTOR: <b>${countryData[toIso]?.name.toUpperCase()}</b> FROM <b>${countryData[fromIso]?.name.toUpperCase()}</b>`);
-    const atkD=Math.min(3,fromC.troops-1),defD=Math.min(2,toC.troops);
+    Object.entries(GS.countries).forEach(([toIso, toC])=>{
+      if(toC.owner===0 && Math.abs(toC.lat-(cd.lat||0))<25 && Math.abs(toC.lon-(cd.lon||0))<35) {
+        if(fromC.troops > toC.troops) { 
+          const score = 10 + ((fromC.troops - toC.troops) * 5) + ((toC.instabilityLevel || 0) * 0.5) + (myCountries.length < 5 ? 20 : 0);
+          potentialMoves.push({score, fromIso, toIso, fromC, toC});
+        }
+      }
+    });
+  }
+
+  potentialMoves.sort((a,b) => b.score - a.score);
+
+  let activeFrom = new Set();
+  for(const move of potentialMoves) {
+    if(attacks >= maxAttacks) break;
+    if(activeFrom.has(move.fromIso)) continue; 
+    if(move.fromC.troops < 2) continue;
+    
+    aiLog(`ENGAGING: <b>${countryData[move.toIso]?.name.toUpperCase()}</b> (Score: ${move.score.toFixed(0)})`);
+    const atkD=Math.min(3,move.fromC.troops-1),defD=Math.min(2,move.toC.troops);
     const aR=Array.from({length:atkD},()=>1+Math.floor(Math.random()*6)).sort((a,b)=>b-a);
     const dR=Array.from({length:defD},()=>1+Math.floor(Math.random()*6)).sort((a,b)=>b-a);
     let al=0,dl=0;
     for(let i=0;i<Math.min(aR.length,dR.length);i++){if(aR[i]>dR[i])dl++;else al++;}
-    fromC.troops-=al; toC.troops-=dl;
-    if(toC.troops<=0){
-      aiLog(`<span style="color:#fff">SECTOR SECURED: <b>${countryData[toIso]?.name.toUpperCase()}</b> EXTERMINATED.</span>`);
-      setLog(`⚙ SKYNET seizes ${countryData[toIso]?.name}!`);
-      toC.owner=1; toC.troops=Math.min(fromC.troops-1,atkD);
-      fromC.troops-=toC.troops; if(fromC.troops<1)fromC.troops=1;
-      refreshBorder(toIso);
+    
+    move.fromC.troops-=al; move.toC.troops-=dl;
+    
+    if(move.toC.troops<=0){
+      aiLog(`<span style="color:#fff">SECURED: <b>${countryData[move.toIso]?.name.toUpperCase()}</b></span>`);
+      setLog(`⚙ SKYNET seizes ${countryData[move.toIso]?.name}!`);
+      move.toC.owner=1; move.toC.troops=Math.min(move.fromC.troops-1,atkD);
+      move.fromC.troops-=move.toC.troops; if(move.fromC.troops<1)move.fromC.troops=1;
+      refreshBorder(move.toIso);
     }
-    launchMissile3D(fromIso,toIso,PLAYER_COLORS[1].int);
-    updateTroopSprite(fromIso); updateTroopSprite(toIso);
+    launchMissile3D(move.fromIso,move.toIso,PLAYER_COLORS[1].int);
+    updateTroopSprite(move.fromIso); updateTroopSprite(move.toIso);
+    activeFrom.add(move.fromIso);
     attacks++;
   }
 
-  aiLog('TURN EXECUTION COMPLETE. YIELDING TO HUMAN RESISTANCE.');
+  aiLog('YIELDING TO HUMAN RESISTANCE.');
+  
   checkPlayerAlive();
   updateDashboard();
-  setTimeout(()=>{checkWin();if(!document.getElementById('gameover').classList.contains('show'))nextTurn();},2800);
+  setTimeout(()=>{checkWin();if(!document.getElementById('gameover').classList.contains('show'))nextTurn();},3500);
 }
 
 // =====================================================================
@@ -1764,10 +1933,22 @@ function syncState() {
   ws.send(JSON.stringify({type:'state_update',gameState:serializeState()}));
 }
 function serializeState() {
-  return {countries:GS.countries, players:GS.players.map(p=>({...p,ws:undefined})), turn:GS.turn, phase:GS.phase, reinforceLeft:GS.reinforceLeft};
+  return {
+    countries:GS.countries, 
+    players:GS.players.map(p=>({...p,ws:undefined})), 
+    turn:GS.turn, 
+    turnCount:GS.turnCount,
+    phase:GS.phase, 
+    reinforceLeft:GS.reinforceLeft,
+    AI_STATE:GS.AI_STATE,
+    globalMetrics:GS.globalMetrics
+  };
 }
 function applyState(s) {
-  GS.countries=s.countries; GS.turn=s.turn; GS.phase=s.phase; GS.reinforceLeft=s.reinforceLeft;
+  GS.countries=s.countries; GS.turn=s.turn; GS.turnCount=s.turnCount; 
+  GS.phase=s.phase; GS.reinforceLeft=s.reinforceLeft;
+  if(s.AI_STATE) GS.AI_STATE = s.AI_STATE;
+  if(s.globalMetrics) GS.globalMetrics = s.globalMetrics;
   s.players.forEach((p,i)=>{if(GS.players[i])Object.assign(GS.players[i],p);});
   refreshAllBorders(); buildTroopSprites(); updatePhaseUI();
   if(GS.turn===GS.myIndex) setLog(`▶ YOUR TURN — ${GS.phase}`);
@@ -1797,7 +1978,15 @@ document.getElementById('chat-inp').addEventListener('keydown',e=>{if(e.key==='E
 // =====================================================================
 function hideLobby(){document.getElementById('lobby').style.display='none';}
 
-// Auto-join after 6 seconds
+// Auto-join after 6 seconds with live countdown
+let countdownTimer = 6;
+const cdEl = document.getElementById('lobby-countdown');
+const cdInt = setInterval(() => {
+  countdownTimer--;
+  if(cdEl) cdEl.textContent = countdownTimer;
+  if(countdownTimer <= 0) clearInterval(cdInt);
+}, 1000);
+
 setTimeout(async () => {
   hideLobby();
   await loadCountries();

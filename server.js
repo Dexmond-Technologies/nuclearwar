@@ -1,5 +1,5 @@
 /**
- * NUCLEAR RISK — WebSocket Multiplayer Server
+ * NUCLEAR WAR — WebSocket Multiplayer Server
  * Run: node server.js
  * Listens on ws://localhost:8080
  */
@@ -166,5 +166,5 @@ wss.on('connection', ws => {
 });
 
 server.listen(PORT, () => {
-  console.log(`☢ NUCLEAR RISK Multi-Service running on port ${PORT}`);
+  console.log(`☢ NUCLEAR WAR Multi-Service running on port ${PORT}`);
 });
