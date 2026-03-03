@@ -73,7 +73,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   padding:0 20px;border-top:1px solid rgba(0,180,255,.1);}
 #log{font-size:11px;color:#9cf;flex:1;letter-spacing:1px;text-align:center;}
 
-#phase-btns{position:absolute; top:420px; left:20px; width:25vw; display:flex; justify-content:space-between; gap:12px; pointer-events:auto; box-sizing:border-box;}
+#phase-btns{display:flex; justify-content:space-between; gap:12px; pointer-events:auto; box-sizing:border-box; margin-top:8px;}
 .phase-btn{flex:1; padding:10px 0; background:rgba(0,20,40,.8);border:1px solid rgba(0,180,255,.5);
   color:#0af;font:11px 'Courier New',monospace;letter-spacing:1.5px;cursor:pointer;
   text-transform:uppercase;border-radius:4px;transition:.15s; font-weight:bold; box-shadow:0 0 10px rgba(0,180,255,.1);}
@@ -323,12 +323,6 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     </div>
   </div>
   
-  <div id="phase-btns">
-    <button class="phase-btn" id="pb-reinforce">REINFORCE</button>
-    <button class="phase-btn" id="pb-attack">ATTACK</button>
-    <button class="phase-btn" id="pb-fortify">FORTIFY</button>
-  </div>
-
   <div id="botbar">
     <div id="log">LOADING WORLD DATA...</div>
     <div style="position:absolute; right:20px; display:flex; align-items:center; gap:10px; pointer-events:auto; z-index:100;">
@@ -358,6 +352,11 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     <div class="dash-status" id="d0-status">REINFORCING</div>
     <div id="d0-reasoning" style="margin-top:12px; padding:10px; background:rgba(0,220,255,0.05); border:1px solid rgba(0,220,255,0.2); border-radius:4px; font-family:'Courier New', monospace; font-size:10px; color:#0af; flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom: 4px;">
       <div style="opacity:0.5">> AWAITING COMMAND INPUT...</div>
+    </div>
+    <div id="phase-btns">
+      <button class="phase-btn" id="pb-reinforce">REINFORCE</button>
+      <button class="phase-btn" id="pb-attack">ATTACK</button>
+      <button class="phase-btn" id="pb-fortify">FORTIFY</button>
     </div>
   </div>
 
