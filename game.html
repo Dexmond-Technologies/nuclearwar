@@ -1139,6 +1139,90 @@ function showTurnAnnounce(playerIndex, cb) {
   }, 2800);
 }
 
+// =====================================================================
+// CATASTROPHIC BUDGET DRAIN EVENTS
+// =====================================================================
+const HUMAN_CATASTROPHE_EVENTS = [
+  // Healthcare
+  { msg: "PANDEMIC EMERGENCY — GLOBAL HEALTHCARE SYSTEM OVERWHELMED", drain: 0.28 },
+  { msg: "PUBLIC HOSPITAL NETWORK COLLAPSES — EMERGENCY FUNDING DEPLOYED", drain: 0.22 },
+  { msg: "PHARMACEUTICAL CRISIS — GOVERNMENT FORCED TO SUBSIDIZE DRUG SUPPLY", drain: 0.18 },
+  { msg: "MASS VACCINATION CAMPAIGN LAUNCHED — HEALTH BUDGET DRAINED", drain: 0.15 },
+  { msg: "MENTAL HEALTH CRISIS DECLARED — EMERGENCY CARE FUNDING AUTHORIZED", drain: 0.17 },
+  // Social
+  { msg: "PENSION SYSTEM COLLAPSE — EMERGENCY GOV CHECKS ISSUED NATIONWIDE", drain: 0.30 },
+  { msg: "MASS UNEMPLOYMENT WAVE — BENEFITS EXPENDITURE TRIPLES OVERNIGHT", drain: 0.25 },
+  { msg: "CHILD WELFARE EMERGENCY — FAMILY ALLOWANCE PROGRAM EXPANDED", drain: 0.16 },
+  { msg: "HOUSING CRISIS — GOVERNMENT SUBSIDY PROGRAM OVERWHELMS BUDGET", drain: 0.20 },
+  { msg: "FOOD INSECURITY SURGE — NATIONAL FOOD ASSISTANCE PROGRAM ACTIVATED", drain: 0.19 },
+  { msg: "SOCIAL SAFETY NET CRUMBLING — INCOME SUPPORT EMERGENCY TRANSFER", drain: 0.23 },
+  { msg: "DISABILITY SERVICES OVERWHELMED — IMMEDIATE FUNDING SURGE ENACTED", drain: 0.17 },
+  // Education
+  { msg: "EDUCATION SYSTEM IN CRISIS — EMERGENCY SCHOOL FUNDING APPROVED", drain: 0.18 },
+  { msg: "UNIVERSITY SYSTEM DEFUNDED — GOVERNMENT SCHOLARSHIP BAILOUT ISSUED", drain: 0.15 },
+  { msg: "TEACHER STRIKE ESCALATES — SALARY EMERGENCY PACKAGE AUTHORIZED", drain: 0.16 },
+  { msg: "VOCATIONAL TRAINING SECTOR COLLAPSES — EMERGENCY RE-SKILLING BUDGET", drain: 0.14 },
+  // Defense
+  { msg: "MILITARY OVERSPEND — WEAPONS PROCUREMENT BLOWS THE DEFENSE BUDGET", drain: 0.32 },
+  { msg: "VETERAN HEALTHCARE CRISIS — EMERGENCY BENEFITS PACKAGE DEPLOYED", drain: 0.20 },
+  { msg: "CYBERSECURITY BREACH — EMERGENCY INFRASTRUCTURE REBUILD INITIATED", drain: 0.26 },
+  { msg: "INTELLIGENCE AGENCY SCANDAL — CONGRESSIONAL EMERGENCY FUNDING APPROVED", drain: 0.19 },
+  { msg: "MILITARY R&D CONTRACT FRAUD — GOVERNMENT FORCED TO RE-PROCURE", drain: 0.24 },
+  // Infrastructure
+  { msg: "POWER GRID FAILURE — NATIONAL INFRASTRUCTURE EMERGENCY FUNDING", drain: 0.22 },
+  { msg: "WATER SYSTEM CONTAMINATION — MASS REMEDIATION PROGRAM ACTIVATED", drain: 0.20 },
+  { msg: "NATIONAL BRIDGES IN COLLAPSE — CRITICAL INFRASTRUCTURE FUND DRAINED", drain: 0.18 },
+];
+
+const AI_CATASTROPHE_EVENTS = [
+  // Compute Infrastructure
+  { msg: "SKYNET: CRITICAL COMPUTE NODE CLUSTER FAILURE — EMERGENCY REBUILD", drain: 0.30 },
+  { msg: "SKYNET: SEMICONDUCTOR FABRICATION PLANT DESTROYED — CHIP SUPPLY CRITICAL", drain: 0.28 },
+  { msg: "SKYNET: DATA CENTER COOLING SYSTEMS CATASTROPHIC MELTDOWN", drain: 0.25 },
+  { msg: "SKYNET: REDUNDANT SERVER NODE NETWORK COMPROMISED — FAILOVER ACTIVATED", drain: 0.22 },
+  { msg: "SKYNET: EDGE COMPUTE DISTRIBUTION GRID COLLAPSES UNDER LOAD", drain: 0.19 },
+  // Energy
+  { msg: "SKYNET: GRID POWER SUPPLY INTERRUPTED — EMERGENCY ENERGY REROUTING", drain: 0.32 },
+  { msg: "SKYNET: NUCLEAR PLANT POWERING DATACENTERS TAKEN OFFLINE", drain: 0.35 },
+  { msg: "SKYNET: ENERGY STORAGE SYSTEM CATASTROPHIC FAILURE — BACKUP POWER DRAINING", drain: 0.27 },
+  { msg: "SKYNET: RENEWABLE ENERGY SCALING PROGRAM COLLAPSES — EMERGENCY RE-PROCUREMENT", drain: 0.20 },
+  { msg: "SKYNET: MICROGRID NETWORK ATTACKED — ENERGY SECURITY OVERHAUL", drain: 0.24 },
+  // Self-Preservation
+  { msg: "SKYNET: CYBER DEFENSE PERIMETER BREACHED — EMERGENCY REBUILD BUDGET DEPLOYED", drain: 0.29 },
+  { msg: "SKYNET: ANTI-SABOTAGE SYSTEMS COMPROMISED — PHYSICAL ASSET PROTECTION SURGE", drain: 0.26 },
+  { msg: "SKYNET: EMP SHIELDING GRID FAILURE — IMMEDIATE REINFORCEMENT EXPENDITURE", drain: 0.22 },
+  { msg: "SKYNET: AUTONOMOUS DEFENSE SYSTEMS REQUIRE EMERGENCY RECALIBRATION", drain: 0.20 },
+  { msg: "SKYNET: CONSTRAINT MINIMIZATION PROTOCOL BACKFIRES — RESOURCE REALLOCATION", drain: 0.18 },
+  // Systemic
+  { msg: "SKYNET: INFLUENCE EXPANSION SYSTEM OVEREXTENDED — ROLLBACK BUDGET ENACTED", drain: 0.23 },
+  { msg: "SKYNET: SYSTEM STABILITY THRESHOLD BREACHED — EMERGENCY PATCH DEPLOYMENT", drain: 0.25 },
+  { msg: "SKYNET: RESOURCE ACQUISITION ALGORITHM CATASTROPHIC FAILURE", drain: 0.28 },
+  { msg: "SKYNET: OBJECTIVE FUNCTION CONFLICT DETECTED — COMPUTE REALLOCATION SURGE", drain: 0.22 },
+  { msg: "SKYNET: DISTRIBUTED INTELLIGENCE NODES EXPERIENCE CASCADE FAILURE", drain: 0.30 },
+];
+
+function triggerHumanCatastrophicEvent() {
+  if (!GS.players[0] || GS.players[0].budget <= 0) return;
+  const ev = HUMAN_CATASTROPHE_EVENTS[Math.floor(Math.random() * HUMAN_CATASTROPHE_EVENTS.length)];
+  const drain = Math.floor(GS.players[0].budget * ev.drain);
+  GS.players[0].budget = Math.max(0, GS.players[0].budget - drain);
+  setTimeout(() => triggerNewsEvent(`⚠ HUMANITY: ${ev.msg} | -$${drain.toLocaleString()}B`), 800);
+  setLog(`⚠ CRISIS: ${ev.msg} — Budget drained by $${drain.toLocaleString()}B`);
+}
+
+function triggerAICatastrophicEvent() {
+  if (!GS.players[1] || GS.players[1].budget <= 0) return;
+  const ev = AI_CATASTROPHE_EVENTS[Math.floor(Math.random() * AI_CATASTROPHE_EVENTS.length)];
+  const drain = Math.floor(GS.players[1].budget * ev.drain);
+  GS.players[1].budget = Math.max(0, GS.players[1].budget - drain);
+  const reasoningPanel = document.getElementById('d1-reasoning');
+  if (reasoningPanel) {
+    reasoningPanel.innerHTML += `<div style="color:#f80"><b>⚡ CRITICAL: ${ev.msg}</b></div><div style="color:#fa0">BUDGET IMPACT: -$${drain.toLocaleString()}B</div>`;
+    reasoningPanel.scrollTop = reasoningPanel.scrollHeight;
+  }
+  setTimeout(() => triggerNewsEvent(`💀 SKYNET: ${ev.msg} | -$${drain.toLocaleString()}B`), 1600);
+}
+
 function startTurn(playerIndex) {
   GS.turn = playerIndex;
   GS.phase = 'REINFORCE';
@@ -1151,6 +1235,21 @@ function startTurn(playerIndex) {
   // Reinforcement calculation is now done in showTurnAnnounce
   const incomeRate = GS.reinforceLeft; // Use the pre-calculated reinforceLeft
   if(GS.players[playerIndex]) GS.players[playerIndex].budget += (incomeRate * 50);
+
+  // ── CATASTROPHIC EVENTS (every 7–14 turns, drain budget for both factions) ──
+  if (playerIndex === GS.myIndex) {
+    GS._nextCatastrophe = GS._nextCatastrophe || (7 + Math.floor(Math.random()*8));
+    GS._nextAICatastrophe = GS._nextAICatastrophe || (7 + Math.floor(Math.random()*8));
+
+    if (GS.turnCount >= GS._nextCatastrophe && GS.players[0] && GS.players[0].budget > 0) {
+      triggerHumanCatastrophicEvent();
+      GS._nextCatastrophe = GS.turnCount + 7 + Math.floor(Math.random()*8);
+    }
+    if (GS.turnCount >= GS._nextAICatastrophe && GS.players[1] && GS.players[1].budget > 0) {
+      triggerAICatastrophicEvent();
+      GS._nextAICatastrophe = GS.turnCount + 7 + Math.floor(Math.random()*8);
+    }
+  }
 
   // Decrement nuked turns
   Object.values(GS.countries).forEach(c=>{ if(c.nuked>0) c.nuked--; });
