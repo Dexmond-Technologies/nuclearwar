@@ -1303,7 +1303,7 @@ function nextTurn() {
   checkWin();
   if (!document.getElementById('gameover').classList.contains('show')) {
     startTurn(GS.turn);
-    if (GS.isOnline) syncState();
+    syncState(); // Always sync — persists to DB in solo mode too
   }
 }
 
@@ -2066,9 +2066,25 @@ function aiTurn() {
 // =====================================================================
 function initWS() {
   try { ws=new WebSocket(WS_URL); } catch(e){ setLog('⚠ Multiplayer server not found'); return; }
+
+  ws.onopen = () => {
+    // Request any persisted game state from the server on connect
+    ws.send(JSON.stringify({ type: 'get_saved_state' }));
+  };
+
   ws.onmessage=e=>{
     const msg=JSON.parse(e.data);
     switch(msg.type){
+      case 'saved_state': {
+        // Resume from persisted state if it exists and we haven't started yet
+        if (msg.gameState && GS.turnCount === 0 && Object.keys(GS.countries).length > 0) {
+          applyState(msg.gameState);
+          hideLobby();
+          setLog('✓ GAME RESUMED FROM LAST SESSION');
+          triggerNewsEvent('COMMAND UPLINK RESTORED — RESUMING OPERATION');
+        }
+        break;
+      }
       case 'room_created':
         GS.isOnline=true; GS.myIndex=0; GS.roomCode=msg.code;
         document.getElementById('lobby-msg').style.color='#0af';

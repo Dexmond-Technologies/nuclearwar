@@ -9,6 +9,56 @@ const fs = require('fs');
 const path = require('path');
 const WebSocket = require('ws');
 
+// ── PostgreSQL persistence (optional — only active if DATABASE_URL is set) ──
+let pgPool = null;
+if (process.env.DATABASE_URL) {
+  const { Pool } = require('pg');
+  pgPool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
+  });
+  pgPool.query(`
+    CREATE TABLE IF NOT EXISTS game_state (
+      id INTEGER PRIMARY KEY DEFAULT 1,
+      state JSONB NOT NULL,
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `).then(() => {
+    console.log('☢ PostgreSQL connected — game_state table ready');
+  }).catch(err => {
+    console.error('⚠ PostgreSQL table creation failed:', err.message);
+  });
+} else {
+  console.log('ℹ No DATABASE_URL — running without persistence (state resets on restart)');
+}
+
+async function loadGameState() {
+  if (!pgPool) return null;
+  try {
+    const res = await pgPool.query('SELECT state FROM game_state WHERE id = 1');
+    if (res.rows.length > 0) {
+      console.log('✓ Loaded persisted game state from PostgreSQL');
+      return res.rows[0].state;
+    }
+  } catch (err) {
+    console.error('⚠ Failed to load game state:', err.message);
+  }
+  return null;
+}
+
+async function saveGameState(gs) {
+  if (!pgPool) return;
+  try {
+    await pgPool.query(`
+      INSERT INTO game_state (id, state, updated_at)
+      VALUES (1, $1, NOW())
+      ON CONFLICT (id) DO UPDATE SET state = $1, updated_at = NOW()
+    `, [JSON.stringify(gs)]);
+  } catch (err) {
+    console.error('⚠ Failed to save game state:', err.message);
+  }
+}
+
 const PORT = process.env.PORT || 8080;
 
 // Create HTTP server to serve the static frontend
@@ -120,14 +170,28 @@ wss.on('connection', ws => {
       }
 
       case 'state_update': {
-        // Full state sync (sent by active player after resolving their turn)
+        // Full state sync — save to DB and relay to other players
         if (!currentRoom) return;
         currentRoom.gameState = msg.gameState;
+        saveGameState(msg.gameState); // persist to PostgreSQL
         broadcast(currentRoom, {
           type: 'state_update',
           gameState: msg.gameState,
           playerIndex
         }, ws);
+        break;
+      }
+
+      case 'get_saved_state': {
+        // Client requests persisted game state on connect
+        loadGameState().then(savedState => {
+          if (savedState) {
+            ws.send(JSON.stringify({ type: 'saved_state', gameState: savedState }));
+            console.log('✓ Sent saved state to connecting client');
+          } else {
+            ws.send(JSON.stringify({ type: 'saved_state', gameState: null }));
+          }
+        });
         break;
       }
 
