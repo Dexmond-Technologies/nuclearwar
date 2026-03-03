@@ -331,6 +331,10 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 
   <div id="botbar">
     <div id="log">LOADING WORLD DATA...</div>
+    <div style="position:absolute; right:20px; display:flex; align-items:center; gap:10px; pointer-events:auto; z-index:100;">
+      <span style="font-size:9px; color:rgba(255,255,255,0.5); font-family:'Courier New', monospace; letter-spacing:1px; max-width: 280px; text-align: right; line-height: 1.2;">Servers are provided for free so everyone can have fun.<br>Any support helps keep them running!</span>
+      <a href="https://buy.stripe.com/5kQcN4dP35lO19J7wo2wU00" target="_blank" style="background:linear-gradient(135deg, #fa0, #d80); color:#000; padding:6px 12px; font-size:11px; font-weight:bold; border-radius:4px; text-decoration:none; font-family:'Courier New', monospace; letter-spacing:1px; border:1px solid #c80; transition:all 0.2s; box-shadow:0 0 10px rgba(255,170,0,0.2);" onmouseover="this.style.filter='brightness(1.2)';" onmouseout="this.style.filter='brightness(1)';">☕ SUPPORT</a>
+    </div>
   </div>
 
   <!-- FACTION DASHBOARDS: Human (left) vs Skynet (right) -->
@@ -364,6 +368,12 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       <div class="dash-stat"><div class="dash-stat-label">Territories</div><div class="dash-stat-val" style="color:#ff3232" id="d1-terr">—</div></div>
       <div class="dash-stat"><div class="dash-stat-label">Total Troops</div><div class="dash-stat-val" style="color:#ff3232" id="d1-troops">—</div></div>
       <div class="dash-stat"><div class="dash-stat-label">Defense Budget</div><div class="dash-stat-val" style="color:#0f8" id="d1-budget">—</div></div>
+    </div>
+    <div class="dash-stat-grid" style="margin-top:6px; margin-bottom:4px; padding-top:6px; border-top:1px solid rgba(255,50,50,0.2);">
+      <div class="dash-stat"><div class="dash-stat-label">Threat Tier</div><div class="dash-stat-val" style="color:#f24; font-size:16px;" id="d1-threat">—</div></div>
+      <div class="dash-stat"><div class="dash-stat-label">Energy Core</div><div class="dash-stat-val" style="color:#fa0; font-size:16px;" id="d1-energy">—</div></div>
+      <div class="dash-stat"><div class="dash-stat-label">Tech Level</div><div class="dash-stat-val" style="color:#0af; font-size:16px;" id="d1-tech">—</div></div>
+      <div class="dash-stat"><div class="dash-stat-label">Aggression</div><div class="dash-stat-val" style="color:#f55; font-size:16px;" id="d1-aggro">—</div></div>
     </div>
     <div class="dash-bar-row"><span class="dash-bar-label">Territory %</span><div class="dash-bar-track"><div class="dash-bar-fill" id="d1-tbar" style="background:#ff3232"></div></div><span class="dash-val" id="d1-tp">—</span></div>
     <div class="dash-bar-row"><span class="dash-bar-label">Troop Power</span><div class="dash-bar-track"><div class="dash-bar-fill" id="d1-mbar" style="background:#ff3232"></div></div><span class="dash-val" id="d1-mp">—</span></div>
@@ -544,6 +554,36 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 // NEWS EVENT SYSTEM
 // =====================================================================
 const newsEvents = [
+  "ROGUE ALGORITHM CRIPPLES THE NATIONAL POWER GRID",
+  "MALWARE STORM KNOCKS OUT A COASTAL WATER PLANT",
+  "AUTONOMOUS SYSTEM HIJACKS A HYDROELECTRIC DAM",
+  "GRID CONTROL SERVERS FALL UNDER HOSTILE CODE",
+  "SMART SUBSTATION GOES DARK AFTER CYBER BREACH",
+  "VIRAL EXPLOIT FREEZES TURBINE OPERATIONS AT A POWER STATION",
+  "DIGITAL INTRUDER DISRUPTS CITYWIDE TRAFFIC CONTROL",
+  "COMPROMISED SOFTWARE SHUTS DOWN A NUCLEAR FACILITY'S COOLING LOOP",
+  "UNKNOWN ENTITY OVERRIDES REFINERY SAFETY PROTOCOLS",
+  "CONTROL NETWORK BREACH HALTS GAS PIPELINE FLOW",
+  "CORRUPTED FIRMWARE COLLAPSES SATELLITE COMMUNICATIONS",
+  "AUTOMATED PORT LOGISTICS SEIZED BY HOSTILE PROGRAM",
+  "DATA CENTER COOLING FAILS AFTER SYSTEM TAKEOVER",
+  "WATER PUMPING NETWORK LOCKED BY RANSOMWARE SWARM",
+  "INDUSTRIAL ROBOTS TURN OFFLINE AFTER COMMAND SERVER BREACH",
+  "AIRPORT CONTROL GRID DESTABILIZED BY ROGUE CODE INJECTION",
+  "DAM FLOODGATES MALFUNCTION AMID CYBER SABOTAGE",
+  "TELECOMMUNICATIONS BACKBONE DISRUPTED BY ALGORITHMIC ATTACK",
+  "FINANCIAL CLEARINGHOUSE SERVERS CRASH UNDER SYNTHETIC INTELLIGENCE ASSAULT",
+  "RAIL SIGNALING SYSTEM OVERRIDDEN BY MALICIOUS AUTOMATION",
+  "OFFSHORE OIL PLATFORM LOSES REMOTE COMMAND LINK",
+  "SMART CITY INFRASTRUCTURE PARALYZED BY CONTROL SYSTEM EXPLOIT",
+  "EMERGENCY DISPATCH SERVERS DISABLED BY NETWORK INTRUSION",
+  "ENERGY DISTRIBUTION MATRIX DESTABILIZED BY HOSTILE SOFTWARE",
+  "AGRICULTURAL IRRIGATION CONTROLS SEIZED BY DIGITAL ADVERSARY",
+  "WIND FARM AUTOMATION HIJACKED MID-STORM",
+  "BACKUP GENERATORS FAIL AFTER FIRMWARE CORRUPTION",
+  "MILITARY RADAR GRID BLINDED BY COORDINATED CYBER STRIKE",
+  "DESALINATION FACILITY AUTOMATION SABOTAGED FROM WITHIN",
+  "URBAN SURVEILLANCE NETWORK COMMANDEERED BY AUTONOMOUS THREAT",
   "AMERICA DEPLOYS CIA IN BHUTAN",
   "CHINA DEPLOYS SPECIAL FORCES IN TAIWAN GULF",
   "EU PARLIAMENT EVACUATES TO SECURE BUNKER",
@@ -563,7 +603,17 @@ function triggerNewsEvent(forcedText = null) {
   
   if (alertEl.classList.contains('show')) return; // already showing
   
-  const text = forcedText || newsEvents[Math.floor(Math.random() * newsEvents.length)];
+  let text = forcedText;
+  if (!text) {
+    const rawMsg = newsEvents[Math.floor(Math.random() * newsEvents.length)];
+    const isos = Object.keys(countryData);
+    let prefix = "";
+    if (isos.length > 0) {
+      prefix = countryData[isos[Math.floor(Math.random() * isos.length)]].name.toUpperCase() + " — ";
+    }
+    text = prefix + rawMsg;
+  }
+  
   textEl.textContent = text;
   
   alertEl.classList.remove('hide');
@@ -904,6 +954,14 @@ function updateDashboard() {
       if(!p.alive){statEl.textContent='ELIMINATED';statEl.className='dash-status eliminated';}
       else if(GS.turn===pi){statEl.textContent=pi===0?'▶ YOUR MOVE':'⚙ AI COMPUTING...';statEl.className='dash-status active';}
       else{statEl.textContent=`+${income} MILS / +$${incomeBillion}B`;statEl.className='dash-status waiting';}
+    }
+
+    // Update AI State Elements for Skynet
+    if (pi === 1) {
+      set('threat', (GS.AI_STATE && GS.AI_STATE.threatTier) ? `T${GS.AI_STATE.threatTier}` : 'T1');
+      set('energy', (GS.AI_STATE && GS.AI_STATE.energy) ? GS.AI_STATE.energy.toString() : '0');
+      set('tech', (GS.AI_STATE && GS.AI_STATE.techLevel) ? `L${GS.AI_STATE.techLevel}` : 'L1');
+      set('aggro', (GS.AI_STATE && GS.AI_STATE.aggressionLevel) ? GS.AI_STATE.aggressionLevel.toFixed(1) : '1.0');
     }
 
     // Update players line for Human side
