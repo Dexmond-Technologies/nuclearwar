@@ -122,18 +122,36 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 #go-title{font-size:44px;letter-spacing:6px;text-shadow:0 0 30px currentColor;margin-bottom:16px;}
 
 /* Attack Presets Modal */
-#attack-modal{position:absolute;inset:0;background:rgba(0,10,20,.9);display:none;
-  align-items:center;justify-content:center;z-index:150;}
-#attack-modal.show{display:flex;}
-.atk-card{background:rgba(0,0,0,.9);border:1px solid #0af;border-radius:6px;padding:30px;width:600px;text-align:center;}
-.atk-title{font-size:24px;letter-spacing:4px;color:#0af;margin-bottom:10px;text-transform:uppercase;}
-.atk-desc{font-size:12px;opacity:0.8;margin-bottom:30px;line-height:1.6;}
-.atk-grid{display:flex;gap:15px;justify-content:center;}
-.atk-preset{flex:1;background:linear-gradient(135deg,#001428,#002850);border:1px solid #0055ff;border-radius:4px;
-  padding:20px 10px;cursor:pointer;transition:transform 0.2s, background 0.2s;display:flex;flex-direction:column;gap:10px;}
-.atk-preset:hover{background:linear-gradient(135deg,#002850,#0044aa);transform:scale(1.05);}
-.atk-preset h3{color:#0af;font-size:16px;margin:0;letter-spacing:1px;}
-.atk-preset span{font-size:11px;opacity:0.7;line-height:1.5;}
+#attack-modal{position:absolute;inset:0;background:rgba(0,10,20,.95);display:none;
+  align-items:center;justify-content:center;z-index:150;backdrop-filter:blur(8px);}
+#attack-modal.show{display:flex; animation: fadeInModal 0.3s ease-out;}
+@keyframes fadeInModal { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.atk-card{background:linear-gradient(135deg,rgba(0,5,10,.95),rgba(0,15,30,.95));border:1px solid #0af;
+  border-radius:12px;padding:40px;width:95vw;height:88vh;max-width:1600px;
+  display:flex;flex-direction:column;box-shadow:0 0 50px rgba(0,180,255,.15), inset 0 0 30px rgba(0,180,255,.1);}
+.atk-title{font-size:36px;font-family:'Orbitron',sans-serif;font-weight:900;letter-spacing:8px;color:#0af;margin-bottom:10px;text-transform:uppercase;text-shadow:0 0 20px rgba(0,170,255,0.8);}
+.atk-desc{font-size:14px;font-family:'Share Tech Mono',monospace;color:#0f8;opacity:0.9;margin-bottom:30px;line-height:1.6;letter-spacing:1px;text-transform:uppercase;}
+.atk-grid{display:flex;gap:20px;flex:1;min-height:0;}
+.atk-preset{flex:1;background:linear-gradient(180deg,rgba(0,20,40,.8),rgba(0,10,20,.9));border:1px solid rgba(0,170,255,0.4);border-radius:8px;
+  padding:25px;cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;gap:15px;text-align:left;position:relative;overflow-y:auto;}
+.atk-preset::before{content:'';position:absolute;top:0;left:0;width:100%;height:4px;background:#0af;opacity:0.5;transition:opacity 0.2s;}
+.atk-preset:hover{background:linear-gradient(180deg,rgba(0,40,80,.9),rgba(0,20,40,.95));transform:translateY(-5px);border-color:#0af;box-shadow:0 10px 30px rgba(0,170,255,0.2);}
+.atk-preset:hover::before{opacity:1;box-shadow:0 0 15px #0af;}
+.atk-preset h3{color:#0af;font-size:24px;margin:0;letter-spacing:2px;font-family:'Orbitron',sans-serif;text-shadow:0 0 10px rgba(0,170,255,0.5);}
+.atk-badge{display:inline-block;padding:4px 8px;background:rgba(0,170,255,0.15);border:1px solid #0af;color:#fff;font-size:10px;letter-spacing:2px;border-radius:3px;margin-bottom:10px;}
+.atk-summary{font-size:13px;color:#fff;opacity:0.9;line-height:1.5;margin-bottom:15px;font-style:italic;}
+.atk-stat-row{font-size:11px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(0,170,255,0.15);padding:8px 0;}
+.atk-stat-row span{color:#0af;opacity:0.8;font-weight:bold;letter-spacing:1.5px;}
+.atk-stat-val{color:#ddd;text-align:right;}
+.atk-details{margin-top:15px;font-size:11px;color:#aaa;line-height:1.6;background:rgba(0,0,0,0.4);padding:15px;border-radius:4px;border-left:2px solid #0af;}
+.atk-override{border-color:#fa0;}
+.atk-override::before{background:#fa0;}
+.atk-override h3{color:#fa0;text-shadow:0 0 10px rgba(255,170,0,0.5);}
+.atk-override .atk-stat-row span{color:#fa0;}
+.atk-override .atk-badge{background:rgba(255,170,0,0.15);border-color:#fa0;}
+.atk-override .atk-details{border-left-color:#fa0;}
+.atk-cancel{margin-top:20px;padding:15px;text-align:center;background:rgba(255,50,50,0.1);border:1px solid rgba(255,50,50,0.3);color:#f24;font-size:14px;letter-spacing:4px;cursor:pointer;transition:all 0.2s;border-radius:4px;font-family:'Share Tech Mono',monospace;text-transform:uppercase;}
+.atk-cancel:hover{background:rgba(255,50,50,0.3);border-color:#f24;color:#fff;box-shadow:0 0 15px rgba(255,50,50,0.4);}
 
 /* Report Modal */
 #report-modal{position:absolute;inset:0;background:rgba(0,10,20,.9);display:none;
@@ -349,27 +367,92 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 <!-- Attack Presets Modal -->
 <div id="attack-modal">
   <div class="atk-card">
-    <div class="atk-title">TACTICAL COMMAND UPLINK</div>
-    <div class="atk-desc">Select a coordinated strike strategy for the current turn. These macro-commands automate troop deployments and offensives globally before terminating your action phase.</div>
+    <div style="text-align:center;">
+      <div class="atk-title">TACTICAL COMMAND UPLINK</div>
+      <div class="atk-desc">GLOBAL ASSAULT DASHBOARD: DESIGNATE MACRO-STRATEGY FOR CURRENT OPERATIONAL CYCLE.</div>
+    </div>
+    
     <div class="atk-grid">
+      <!-- 1 -->
       <div class="atk-preset" onclick="executeAttackPreset(1)">
-        <h3>BLITZKRIEG</h3>
-        <span>Aggressive push.<br>Launch 5 strikes from strongest fronts against weakest Skynet borders.</span>
+        <div>
+          <h3>BLITZKRIEG</h3>
+          <div class="atk-badge">OFFENSIVE MANEUVER</div>
+        </div>
+        <div class="atk-summary">Overwhelming multi-front push to fracture enemy defensive lines and seize key logistics hubs.</div>
+        <div style="flex:1;">
+          <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">5 Weakest Skynet Sectors</div></div>
+          <div class="atk-stat-row"><span>ORIGIN</span><div class="atk-stat-val">Strongest Human Fronts</div></div>
+          <div class="atk-stat-row"><span>MUNITIONS</span><div class="atk-stat-val">Heavy Armor, Carpet Bombing</div></div>
+          <div class="atk-stat-row"><span>TROOPS COMMITTED</span><div class="atk-stat-val">Max Available per Front</div></div>
+          <div class="atk-stat-row"><span>RANGE THRESHOLD</span><div class="atk-stat-val">Regional (Δ Lat: 25°)</div></div>
+          <div class="atk-details">
+            Initiates 5 simultaneous strikes originating from highly fortified human populations directly into under-defended Skynet adjoining territories. Focuses on rapid ground acquisition and immediate sector dominance before AI reinforces.
+          </div>
+        </div>
       </div>
+
+      <!-- 2 -->
       <div class="atk-preset" onclick="executeAttackPreset(2)">
-        <h3>TACTICAL DEFENSE</h3>
-        <span>Calculated counters.<br>Launch 3 surgical strikes originating from threatened Human borders.</span>
+        <div>
+          <h3>TACTICAL DEFENSE</h3>
+          <div class="atk-badge">PREEMPTIVE COUNTER</div>
+        </div>
+        <div class="atk-summary">Calculated surgical strikes neutralizing imminent Skynet incursions before they materialize.</div>
+        <div style="flex:1;">
+          <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">3 High-Threat Skynet Hubs</div></div>
+          <div class="atk-stat-row"><span>ORIGIN</span><div class="atk-stat-val">Threatened Human Borders</div></div>
+          <div class="atk-stat-row"><span>MUNITIONS</span><div class="atk-stat-val">Drone Swarms, EMP Blasts</div></div>
+          <div class="atk-stat-row"><span>TROOPS COMMITTED</span><div class="atk-stat-val">Calculated Superiority</div></div>
+          <div class="atk-stat-row"><span>RANGE THRESHOLD</span><div class="atk-stat-val">Local (Δ Lat: 15°)</div></div>
+          <div class="atk-details">
+            Analyzes borders where humanity is out-numbered or at parity, launching 3 preemptive strikes into Skynet staging grounds. Significantly reduces frontline pressure by breaking enemy buildup and maintaining vital defensive integrity.
+          </div>
+        </div>
       </div>
+
+      <!-- 3 -->
       <div class="atk-preset" onclick="executeAttackPreset(3)">
-        <h3>GUERRILLA RAID</h3>
-        <span>Widespread chaos.<br>Launch 4 random opportunistic strikes across the globe.</span>
+        <div>
+          <h3>GUERRILLA RAID</h3>
+          <div class="atk-badge">ASYMMETRIC WARFARE</div>
+        </div>
+        <div class="atk-summary">Widespread chaos. Random, opportunistic strikes generating systemic strain on the AI grid.</div>
+        <div style="flex:1;">
+          <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">4 Random Global Nodes</div></div>
+          <div class="atk-stat-row"><span>ORIGIN</span><div class="atk-stat-val">Scattered Insurgencies</div></div>
+          <div class="atk-stat-row"><span>MUNITIONS</span><div class="atk-stat-val">Sabotage, Precision Lasers</div></div>
+          <div class="atk-stat-row"><span>TROOPS COMMITTED</span><div class="atk-stat-val">Minimal / Opportunistic</div></div>
+          <div class="atk-stat-row"><span>RANGE THRESHOLD</span><div class="atk-stat-val">Global (Δ Lat: 35°)</div></div>
+          <div class="atk-details">
+            Distributes operational capacity across 4 entirely randomized and widely separated vectors. Designed to confuse Skynet threat assessment algorithms, stretching their logic processors by introducing unpredictable, chaotic variables.
+          </div>
+        </div>
       </div>
-      <div class="atk-preset" style="border-color:#fa0;" onclick="executeAttackPreset(4)">
-        <h3 style="color:#fa0">MANUAL OVERRIDE</h3>
-        <span>Direct command.<br>Bypass AI automation and manually direct individual localized strikes.</span>
+
+      <!-- 4 -->
+      <div class="atk-preset atk-override" onclick="executeAttackPreset(4)">
+        <div>
+          <h3>MANUAL OVERRIDE</h3>
+          <div class="atk-badge">DIRECT COMMAND</div>
+        </div>
+        <div class="atk-summary">Bypass autonomous command routing and manually direct specific, localized strikes.</div>
+        <div style="flex:1;">
+          <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">Commander's Choice</div></div>
+          <div class="atk-stat-row"><span>ORIGIN</span><div class="atk-stat-val">Commander's Choice</div></div>
+          <div class="atk-stat-row"><span>MUNITIONS</span><div class="atk-stat-val">Variable Loadouts</div></div>
+          <div class="atk-stat-row"><span>TROOPS COMMITTED</span><div class="atk-stat-val">Manual Allocation</div></div>
+          <div class="atk-stat-row"><span>RANGE THRESHOLD</span><div class="atk-stat-val">Any Accessible</div></div>
+          <div class="atk-details">
+            Disengages the macro-AI assistance entirely. Returns control to standard HUD interface for granular, piece-by-piece tactical maneuvering. Recommended only for veteran commanders or in highly specific endgame scenarios requiring extreme precision.
+          </div>
+        </div>
       </div>
     </div>
-    <div style="margin-top:20px; font-size:10px; cursor:pointer; opacity:0.6;" onclick="document.getElementById('attack-modal').classList.remove('show')">CANCEL</div>
+    
+    <div class="atk-cancel" onclick="document.getElementById('attack-modal').classList.remove('show')">
+      ABORT OPERATION
+    </div>
   </div>
 </div>
 
