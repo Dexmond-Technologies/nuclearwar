@@ -182,9 +182,26 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 #dash-0{ top:72px; left:20px;
   border:1px solid rgba(0,220,255,.55);
   box-shadow:0 0 24px rgba(0,220,255,.14); box-sizing:border-box;}
-#dash-1{ top:72px; right:20px; bottom:60px; /* stretches to bottom */
+#dash-1{ top:72px; right:20px; bottom:95px; /* stretched shorter to fit button beneath */
   border:1px solid rgba(255,50,50,.55);
   box-shadow:0 0 24px rgba(255,50,50,.14); box-sizing:border-box;}
+
+/* War Room Button */
+.war-room-btn {
+  position:absolute; right:20px; bottom:45px; width:25vw;
+  background:linear-gradient(135deg, rgba(200,0,0,0.8), rgba(100,0,0,0.9));
+  border:1px solid #f24; color:#fff; padding:10px; text-align:center;
+  font:12px 'Courier New', monospace; font-weight:bold; letter-spacing:2px;
+  text-decoration:none; text-transform:uppercase; border-radius:4px;
+  pointer-events:auto; z-index:100; box-shadow:0 0 15px rgba(255, 50, 50, 0.4);
+  transition:0.2s; animation:pulseRedBtn 2s infinite; box-sizing:border-box;
+}
+.war-room-btn:hover { background:#f24; color:#000; box-shadow:0 0 25px rgba(255,50,50,0.8); }
+@keyframes pulseRedBtn {
+  0% { box-shadow:0 0 10px rgba(255,50,50,0.2); }
+  50% { box-shadow:0 0 20px rgba(255,50,50,0.6); }
+  100% { box-shadow:0 0 10px rgba(255,50,50,0.2); }
+}
 
 .dash-header{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
 .dash-dot{width:12px;height:12px;border-radius:50%;}
@@ -197,7 +214,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 .dash-bar-fill{height:100%;border-radius:3px;transition:width .5s ease;}
 .dash-val{font-size:10px;min-width:30px;text-align:right;opacity:.8;}
 
-.dash-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px;margin-top:2px;}
+.dash-stat-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:5px 10px;margin-top:2px;}
 .dash-stat{display:flex;flex-direction:column;}
 .dash-stat-label{font-size:8px;letter-spacing:1px;opacity:.5;text-transform:uppercase;}
 .dash-stat-val{font-size:20px;font-weight:bold;letter-spacing:1px;}
@@ -243,9 +260,28 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   text-shadow:0 0 12px currentColor;
 }
 #ta-nukes{font-size:12px;letter-spacing:2px;margin-top:14px;opacity:.7;}
+/* Cinematic News Alert */
+#news-alert{position:absolute;top:15%;left:0;width:100%;background:rgba(200,0,0,0.85);color:#fff;
+  z-index:999;text-align:center;padding:25px 0;border-top:2px solid #f00;border-bottom:2px solid #f00;
+  display:none;align-items:center;justify-content:center;box-shadow:0 0 50px rgba(255,0,0,0.8);
+  backdrop-filter:blur(10px);overflow:hidden;}
+#news-alert.show{display:flex;animation:slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, alertFlash 1s infinite alternate;}
+#news-alert.hide{animation:slideOut 0.4s ease-in forwards;}
+#na-label{position:absolute;top:4px;left:20px;font-size:10px;font-family:'Share Tech Mono',monospace;letter-spacing:4px;color:#ffb8b8;}
+#na-text{font-size:42px;font-family:'Orbitron',sans-serif;font-weight:900;letter-spacing:8px;text-transform:uppercase;text-shadow:0 0 20px #fff;}
+.na-stripe{position:absolute;width:100%;height:100%;background:repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(0,0,0,0.15) 20px, rgba(0,0,0,0.15) 40px);pointer-events:none;}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+@keyframes slideOut{from{transform:translateX(0);opacity:1;}to{transform:translateX(-100%);opacity:0;}}
+@keyframes alertFlash{from{background:rgba(180,0,0,0.85);}to{background:rgba(230,0,0,0.95);}}
+
 </style>
 </head>
 <body>
+<div id="news-alert">
+  <div class="na-stripe"></div>
+  <div id="na-label">▶ INCOMING TRANSMISSION</div>
+  <div id="na-text">EVENT TEXT</div>
+</div>
 <canvas id="c"></canvas>
 
 <!-- LOBBY -->
@@ -307,6 +343,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     <div class="dash-stat-grid">
       <div class="dash-stat"><div class="dash-stat-label">Territories</div><div class="dash-stat-val" style="color:#00dcff" id="d0-terr">—</div></div>
       <div class="dash-stat"><div class="dash-stat-label">Total Troops</div><div class="dash-stat-val" style="color:#00dcff" id="d0-troops">—</div></div>
+      <div class="dash-stat"><div class="dash-stat-label">Defense Budget</div><div class="dash-stat-val" style="color:#0f8" id="d0-budget">—</div></div>
     </div>
     <div class="dash-bar-row"><span class="dash-bar-label">Territory %</span><div class="dash-bar-track"><div class="dash-bar-fill" id="d0-tbar" style="background:#00dcff"></div></div><span class="dash-val" id="d0-tp">—</span></div>
     <div class="dash-bar-row"><span class="dash-bar-label">Troop Power</span><div class="dash-bar-track"><div class="dash-bar-fill" id="d0-mbar" style="background:#00dcff"></div></div><span class="dash-val" id="d0-mp">—</span></div>
@@ -326,6 +363,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     <div class="dash-stat-grid">
       <div class="dash-stat"><div class="dash-stat-label">Territories</div><div class="dash-stat-val" style="color:#ff3232" id="d1-terr">—</div></div>
       <div class="dash-stat"><div class="dash-stat-label">Total Troops</div><div class="dash-stat-val" style="color:#ff3232" id="d1-troops">—</div></div>
+      <div class="dash-stat"><div class="dash-stat-label">Defense Budget</div><div class="dash-stat-val" style="color:#0f8" id="d1-budget">—</div></div>
     </div>
     <div class="dash-bar-row"><span class="dash-bar-label">Territory %</span><div class="dash-bar-track"><div class="dash-bar-fill" id="d1-tbar" style="background:#ff3232"></div></div><span class="dash-val" id="d1-tp">—</span></div>
     <div class="dash-bar-row"><span class="dash-bar-label">Troop Power</span><div class="dash-bar-track"><div class="dash-bar-fill" id="d1-mbar" style="background:#ff3232"></div></div><span class="dash-val" id="d1-mp">—</span></div>
@@ -338,6 +376,10 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       <div style="opacity:0.5">> AWAITING COMBAT DATA...</div>
     </div>
   </div>
+  
+  <a href="https://worldmonitor-qt6l.onrender.com/" target="_blank" class="war-room-btn" id="btn-war-room">
+    ► VISIT WAR-ROOM LIVE 🎥
+  </a>
 
 </div>
 
@@ -469,7 +511,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 <!-- Troop Input -->
 <div id="troop-inp">
   <div style="font-size:12px;letter-spacing:2px;color:#0af" id="troop-label">TROOPS TO MOVE</div>
-  <div id="troop-val">1</div>
+  <div id="troop-val">10K</div>
   <input type="range" id="troop-slider" min="1" max="10" value="1" style="width:180px;margin:8px 0"/>
   <div style="display:flex;gap:10px;margin-top:12px">
     <button class="sp-btn" id="troop-cancel" style="background:#333;color:#fff;flex:1">CANCEL</button>
@@ -499,6 +541,42 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 // =====================================================================
+// NEWS EVENT SYSTEM
+// =====================================================================
+const newsEvents = [
+  "AMERICA DEPLOYS CIA IN BHUTAN",
+  "CHINA DEPLOYS SPECIAL FORCES IN TAIWAN GULF",
+  "EU PARLIAMENT EVACUATES TO SECURE BUNKER",
+  "CYBERATTACK CRIPPLES GLOBAL BANKING GRID",
+  "MASSIVE TROOP BUILDUP DETECTED NEAR BORDERS",
+  "STEALTH BOMBER SQUADRON GOES DARK OVER PACIFIC",
+  "UN SECURITY COUNCIL DECLARES MARTIAL LAW",
+  "CIVILIAN PROTESTS SUPPRESSED BY DRONE SWARMS",
+  "EMERGENCY CONSCRIPTION ENACTED WORLDWIDE",
+  "SATELLITE DOWNED OFF THE COAST OF MADAGASCAR"
+];
+
+let newsTimeout = null;
+function triggerNewsEvent(forcedText = null) {
+  const alertEl = document.getElementById('news-alert');
+  const textEl = document.getElementById('na-text');
+  
+  if (alertEl.classList.contains('show')) return; // already showing
+  
+  const text = forcedText || newsEvents[Math.floor(Math.random() * newsEvents.length)];
+  textEl.textContent = text;
+  
+  alertEl.classList.remove('hide');
+  alertEl.classList.add('show');
+  
+  if (newsTimeout) clearTimeout(newsTimeout);
+  newsTimeout = setTimeout(() => {
+    alertEl.classList.remove('show');
+    alertEl.classList.add('hide');
+  }, 4500);
+}
+
+// =====================================================================
 // CONSTANTS & PLAYER SETUP
 // =====================================================================
 // =====================================================================
@@ -507,7 +585,7 @@ const GLOBE_R = 1.0, RAD = Math.PI/180;
 // Dynamic WebSocket URL to support both local and production environments
 const WS_PROTOCOL = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
 const WS_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-  ? `ws://${window.location.hostname}:8080` 
+  ? `ws://${window.location.host}` 
   : `${WS_PROTOCOL}//${window.location.host}`;
 
 const PLAYER_COLORS = [
@@ -531,12 +609,12 @@ const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 1000
 // Stars
 const sg = new THREE.BufferGeometry();
 const sp = [];
-for(let i=0;i<2500;i++){
-  const t=Math.random()*Math.PI*2, p=Math.acos(2*Math.random()-1), r=7+Math.random()*3;
+for(let i=0;i<4000;i++){
+  const t=Math.random()*Math.PI*2, p=Math.acos(2*Math.random()-1), r=7+Math.random()*4;
   sp.push(r*Math.sin(p)*Math.cos(t), r*Math.cos(p), r*Math.sin(p)*Math.sin(t));
 }
 sg.setAttribute('position',new THREE.Float32BufferAttribute(sp,3));
-scene.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:0.012,transparent:true,opacity:.6})));
+scene.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:0.018,transparent:true,opacity:.7})));
 
 // Globe
 const globeGeo = new THREE.SphereGeometry(GLOBE_R,64,64);
@@ -714,7 +792,7 @@ function getCountryAt(lat, lon) {
 // =====================================================================
 function initGame(playerNames, myIndex) {
   GS.players = playerNames.map((name,i)=>({
-    name, index:i, color:PLAYER_COLORS[i], nukes:2, alive:true, troops:0
+    name, index:i, color:PLAYER_COLORS[i], nukes:2, alive:true, troops:0, budget: 500
   }));
   GS.myIndex = myIndex;
 
@@ -771,12 +849,14 @@ function updateDashboard() {
     const p = GS.players[pi]; if(!p) return;
     const owned = Object.entries(GS.countries).filter(([,c])=>c.owner===pi);
     const terrCount = owned.length;
-    const totalTroops = pi===0?troops0:troops1;
-    const avgAtk = terrCount ? (totalTroops/terrCount).toFixed(1) : 0;
+    const totalTroopsRaw = pi===0?troops0:troops1;
+    const totalTroops = totalTroopsRaw * 10000;
+    const avgAtk = terrCount ? (totalTroopsRaw/terrCount).toFixed(1) : 0;
     const income = Math.max(3, Math.floor(terrCount/3));
+    const incomeBillion = income * 50;
     const defScore = terrCount ? Math.min(100, Math.round((income/terrCount)*400)) : 0;
     const terrPct = Math.round((terrCount/total)*100);
-    const troopPct = Math.round((totalTroops/maxTroops)*100);
+    const troopPct = Math.round((totalTroopsRaw/maxTroops)*100);
     const atkPct   = Math.min(100, Math.round(parseFloat(avgAtk)*20));
 
     const id=`d${pi}`;
@@ -784,9 +864,10 @@ function updateDashboard() {
     const setW=(sfx,w)=>{const el=document.getElementById(id+'-'+sfx);if(el)el.style.width=w+'%';};
 
     set('terr', terrCount);
-    set('troops', totalTroops);
+    set('troops', totalTroops.toLocaleString());
+    set('budget', `$${p.budget.toLocaleString()} B`);
     set('tp', terrPct+'%');
-    set('mp', totalTroops);
+    set('mp', formatTroops(totalTroopsRaw));
     set('ap', avgAtk);
     set('dp', defScore+'%');
     setW('tbar', terrPct);
@@ -806,7 +887,7 @@ function updateDashboard() {
     if(statEl){
       if(!p.alive){statEl.textContent='ELIMINATED';statEl.className='dash-status eliminated';}
       else if(GS.turn===pi){statEl.textContent=pi===0?'▶ YOUR MOVE':'⚙ AI COMPUTING...';statEl.className='dash-status active';}
-      else{statEl.textContent=`INCOME +${income}/TURN`;statEl.className='dash-status waiting';}
+      else{statEl.textContent=`+${income} MILS / +$${incomeBillion}B`;statEl.className='dash-status waiting';}
     }
 
     // Update players line for Human side
@@ -855,6 +936,13 @@ function highlightCountry(iso, glow) {
 // =====================================================================
 const troopSprites = {}; // iso → THREE.Sprite
 
+function formatTroops(num) {
+  const scaled = num * 10000;
+  if (scaled >= 1000000) return (scaled / 1000000).toFixed(scaled % 1000000 === 0 ? 0 : 1) + 'M';
+  if (scaled >= 1000) return (scaled / 1000).toFixed(0) + 'K';
+  return scaled.toString();
+}
+
 function troopTexture(text, col) {
   const c = document.createElement('canvas');
   c.width = 128; c.height = 64;
@@ -879,7 +967,7 @@ function buildTroopSprites() {
     const cd = countryData[iso];
     if (!cd) continue;
     const col = getOwnerColor(country.owner).hex;
-    const tex = troopTexture(String(country.troops), col);
+    const tex = troopTexture(formatTroops(country.troops), col);
     const mat = new THREE.SpriteMaterial({map:tex, transparent:true, depthTest:false});
     const sprite = new THREE.Sprite(mat);
     const pos = ll2v(cd.lat, cd.lon, GLOBE_R + .04);
@@ -897,7 +985,7 @@ function updateTroopSprite(iso) {
   const old = troopSprites[iso];
   if(old) scene.remove(old);
   const col = getOwnerColor(c.owner).hex;
-  const tex = troopTexture(String(c.troops), col);
+  const tex = troopTexture(formatTroops(c.troops), col);
   const mat = new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false});
   const sprite = new THREE.Sprite(mat);
   sprite.position.copy(ll2v(cd.lat, cd.lon, GLOBE_R+.04));
@@ -958,7 +1046,9 @@ function startTurn(playerIndex) {
   fortifyFrom2 = null;
 
   const owned = Object.values(GS.countries).filter(c=>c.owner===playerIndex).length;
-  GS.reinforceLeft = Math.max(3, Math.floor(owned/3));
+  const incomeRate = Math.max(3, Math.floor(owned/3));
+  GS.reinforceLeft = incomeRate;
+  if(GS.players[playerIndex]) GS.players[playerIndex].budget += (incomeRate * 50);
 
   // Decrement nuked turns
   Object.values(GS.countries).forEach(c=>{ if(c.nuked>0) c.nuked--; });
@@ -993,6 +1083,11 @@ function startTurn(playerIndex) {
 
   // Show big turn announcement
   showTurnAnnounce(playerIndex, () => {
+    // Random chance to trigger a news event after the announcement fades
+    if (Math.random() < 0.2) {
+      setTimeout(() => triggerNewsEvent(), 1000);
+    }
+    
     // AI plays automatically AFTER announcement
     if (GS.players[playerIndex] && playerIndex !== GS.myIndex && !GS.isOnline) {
       setTimeout(aiTurn, 600);
@@ -1068,7 +1163,7 @@ function handleGlobeClick(e) {
     GS.reinforceLeft -= 1;
     updateTroopSprite(iso);
     updateDashboard();
-    setLog(`+1 troop → ${countryData[iso]?.name} | ${GS.reinforceLeft} reinforcements left`);
+    setLog(`+10,000 troops deployed to ${countryData[iso]?.name} | ${GS.reinforceLeft} reinforcements left`);
     if(GS.reinforceLeft === 0) setLog('✔ All troops placed — switch to ATTACK or END TURN');
     // Also select to immediately show the updated side-panel info
     selectCountry(iso);
@@ -1096,7 +1191,7 @@ canvas.addEventListener('mousemove', e => {
       const owner = c.owner===-1?'NEUTRAL':GS.players[c.owner]?.name||'?';
       tip.classList.add('show');
       tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY-10)+'px';
-      tip.innerHTML=`<b>${cd.name}</b><br>${owner} · ${c.troops} troops${c.nuked?'<br>☢ FALLOUT':''}`
+      tip.innerHTML=`<b>${cd.name}</b><br>${owner} · ${(c.troops * 10000).toLocaleString()} troops${c.nuked?'<br>☢ FALLOUT':''}`
     }
   } else tip.classList.remove('show');
 });
@@ -1119,7 +1214,7 @@ function selectCountry(iso) {
   const isEnemy = c.owner !== GS.myIndex && c.owner !== -1;
 
   document.getElementById('sp-info').innerHTML =
-    `Owner: ${c.owner===-1?'NEUTRAL':GS.players[c.owner]?.name}<br>Troops: ${c.troops}${ c.nuked ? '<br><span style="color:#fa0">☢ FALLOUT '+c.nuked+' turns</span>':'' }`;
+    `Owner: ${c.owner===-1?'NEUTRAL':GS.players[c.owner]?.name}<br>Troops: ${(c.troops * 10000).toLocaleString()}${ c.nuked ? '<br><span style="color:#fa0">☢ FALLOUT '+c.nuked+' turns</span>':'' }`;
 
   // Enable/disable actions based on phase
   const phase = GS.phase;
@@ -1145,7 +1240,7 @@ document.getElementById('btn-add').onclick = () => {
     updateTroopSprite(iso);
     updateDashboard();
     const remaining = GS.reinforceLeft;
-    setLog(`+${count} troops → ${countryData[iso]?.name} | ${remaining} reinforcements left`);
+    setLog(`+${(count * 10000).toLocaleString()} troops deployed to ${countryData[iso]?.name} | ${remaining} reinforcements left`);
     if (GS.selected === iso) selectCountry(iso); // re-open panel if still selected
     if (remaining === 0) setLog('✔ All troops placed — switch to ATTACK or END TURN');
   });
@@ -1197,10 +1292,10 @@ function tryAttack(targetIso) {
         def.owner = GS.myIndex;
         def.troops = moveTroops;
         atk.troops -= moveTroops;
-        setLog(`✓ ${countryData[targetIso]?.name} CONQUERED! Moved ${moveTroops} troops.`);
+        setLog(`✓ ${countryData[targetIso]?.name} CONQUERED! Moved ${(moveTroops * 10000).toLocaleString()} troops.`);
         refreshBorder(targetIso);
       } else {
-        setLog(`⚔ ${countryData[targetIso]?.name}: -${defLoss} troops. ${countryData[attackingFrom]?.name}: -${atkLoss}`);
+        setLog(`⚔ ${countryData[targetIso]?.name}: -${(defLoss * 10000).toLocaleString()} casualties. ${countryData[attackingFrom]?.name}: -${(atkLoss * 10000).toLocaleString()} casualties.`);
       }
       updateTroopSprite(attackingFrom);
       updateTroopSprite(targetIso);
@@ -1230,7 +1325,8 @@ function tryNuke(targetIso) {
   def.nuked  = 3;
   GS.players[GS.myIndex].nukes--;
   spawnExplosion3D(countryData[targetIso]?.lat, countryData[targetIso]?.lon, PLAYER_COLORS[GS.myIndex].int);
-  setLog(`☢ NUCLEAR STRIKE! ${countryData[targetIso]?.name} hit for ${nukeStr} troops! FALLOUT 3 turns. ${GS.players[GS.myIndex].nukes} nukes left.`);
+  triggerNewsEvent("GLOBAL MARKETS CRASH AMIDST NUCLEAR TENSIONS");
+  setLog(`☢ NUCLEAR STRIKE! ${countryData[targetIso]?.name} hit for ${(nukeStr * 10000).toLocaleString()} troops! FALLOUT 3 turns. ${GS.players[GS.myIndex].nukes} nukes left.`);
   if(def.troops===0){
     def.owner=GS.myIndex; def.troops=1;
     setLog(`☢☠ ${countryData[targetIso]?.name} OBLITERATED and seized!`);
@@ -1352,7 +1448,7 @@ function executeAttackPreset(type) {
     op.fromC.troops-=al; op.toC.troops-=dl;
     
     let resultStr = `[${countryData[op.fromIso]?.name} ⚔ ${countryData[op.toIso]?.name}]<br>`;
-    resultStr += `Humanity lost ${al} troops. Skynet lost ${dl} troops.<br>`;
+    resultStr += `Humanity lost ${(al * 10000).toLocaleString()} troops. Skynet lost ${(dl * 10000).toLocaleString()} troops.<br>`;
     
     if(op.toC.troops<=0){
       totalWon++;
@@ -1405,8 +1501,8 @@ function showTroopInput(min,max,label,cb) {
   document.getElementById('troop-label').textContent=label;
   const slider=document.getElementById('troop-slider');
   const valEl=document.getElementById('troop-val');
-  slider.min=min; slider.max=max; slider.value=min; valEl.textContent=min;
-  slider.oninput=()=>valEl.textContent=slider.value;
+  slider.min=min; slider.max=max; slider.value=min; valEl.textContent=formatTroops(min);
+  slider.oninput=()=>valEl.textContent=formatTroops(parseInt(slider.value));
   _troopCb=cb;
   document.getElementById('troop-inp').classList.add('show');
 }
@@ -1427,7 +1523,7 @@ function showDiceResult(fromName,toName,aRolls,dRolls,atkLoss,defLoss,cb) {
   document.getElementById('dice-from-to').textContent=`${fromName} → ${toName}`;
   document.getElementById('atk-dice').innerHTML=aRolls.map(n=>`<div class="die atk">${n}</div>`).join('');
   document.getElementById('def-dice').innerHTML=dRolls.map(n=>`<div class="die def">${n}</div>`).join('');
-  const res=[]; if(atkLoss) res.push(`Attacker loses ${atkLoss}`); if(defLoss) res.push(`Defender loses ${defLoss}`);
+  const res=[]; if(atkLoss) res.push(`Attacker loses ${(atkLoss * 10000).toLocaleString()}`); if(defLoss) res.push(`Defender loses ${(defLoss * 10000).toLocaleString()}`);
   document.getElementById('dice-result').innerHTML=res.join(' · ');
   _diceCb=cb;
 }
@@ -1574,6 +1670,7 @@ function aiTurn() {
       GS.countries[tIso].troops=Math.max(0,GS.countries[tIso].troops-Math.floor(6+Math.random()*5));
       GS.countries[tIso].nuked=3;
       spawnExplosion3D(countryData[tIso]?.lat,countryData[tIso]?.lon,PLAYER_COLORS[1].int);
+      triggerNewsEvent("GLOBAL MARKETS CRASH AMIDST NUCLEAR TENSIONS");
       aiLog(`<span style="color:#ffaa00">NUCLEAR LAUNCH DETECTED: MINIMIZING HUMAN TARGET <b>${countryData[tIso]?.name.toUpperCase()}</b></span>`);
       setLog(`☢ SKYNET NUCLEAR STRIKE on ${countryData[tIso]?.name}! FALLOUT 3 turns.`);
       if(GS.countries[tIso].troops===0){GS.countries[tIso].owner=1;GS.countries[tIso].troops=1;refreshBorder(tIso);}
@@ -1749,14 +1846,30 @@ function createShipCanvas() {
   return c;
 }
 
+function createSatelliteCanvas() {
+  const c = document.createElement('canvas'); c.width=128; c.height=128;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#00f0ff'; // Cyan
+  ctx.shadowColor = '#00f0ff'; ctx.shadowBlur = 10;
+  // Core
+  ctx.fillRect(54, 54, 20, 20);
+  // Solar panels
+  ctx.fillStyle = '#0066aa';
+  ctx.fillRect(10, 60, 40, 8);
+  ctx.fillRect(78, 60, 40, 8);
+  return c;
+}
+
 function spawnAmbients() {
   const texJet = new THREE.CanvasTexture(createJetCanvas());
   const texSub = new THREE.CanvasTexture(createSubCanvas());
   const texShip = new THREE.CanvasTexture(createShipCanvas());
+  const texSat = new THREE.CanvasTexture(createSatelliteCanvas());
 
   const matJet = new THREE.SpriteMaterial({map: texJet, color: 0xffffff});
   const matSub = new THREE.SpriteMaterial({map: texSub, color: 0xffffff, transparent: true, blending: THREE.AdditiveBlending});
   const matShip = new THREE.SpriteMaterial({map: texShip, color: 0xffffff});
+  const matSat = new THREE.SpriteMaterial({map: texSat, color: 0xffffff});
 
   for(let i=0; i<60; i++) {
     const type = i % 3; // 0: Jet, 1: Sub, 2: Ship
@@ -1782,6 +1895,27 @@ function spawnAmbients() {
     const speed = (Math.random()*0.0015 + 0.0005) * (type === 0 ? 3 : 1);
     
     ambients.push({ pivot, axis, speed, sprite, type, offset: Math.random()*100 });
+  }
+
+  // Spawn 15 Satellites in high orbit
+  for(let i=0; i<15; i++) {
+    const sprite = new THREE.Sprite(matSat);
+    sprite.scale.set(1.2, 1.2, 1.0);
+    // High orbit radius
+    const radius = 12.5 + Math.random() * 1.5;
+    
+    const phi = Math.acos(-1 + (2 * i)/15);
+    const theta = Math.sqrt(15 * Math.PI) * phi;
+    sprite.position.setFromSphericalCoords(radius, phi, theta);
+    
+    const pivot = new THREE.Group();
+    pivot.add(sprite);
+    scene.add(pivot);
+    
+    // Satellites move consistently
+    const axis = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
+    const speed = Math.random()*0.0008 + 0.0002;
+    ambients.push({ pivot, axis, speed, sprite, type: 3, offset: Math.random()*100 });
   }
 }
 
