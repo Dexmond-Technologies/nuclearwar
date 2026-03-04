@@ -2913,6 +2913,47 @@ window.addEventListener('resize',()=>{
   camera.updateProjectionMatrix();
 });
 
+function triggerAmbientWarfare() {
+  const isos = Object.keys(countryData);
+  if (isos.length < 2) return;
+
+  // Random delay between 7 and 12 seconds
+  const nextTime = 7000 + Math.random() * 5000;
+  
+  // Choose random effect type: mostly missiles, sometimes just explosions
+  const type = Math.random() > 0.3 ? 1 : 0;
+  
+  // Pick random colors: Humanity Blue, Skynet Red, or Generic Orange
+  const cols = [0x00dcff, 0xff3232, 0xffaa00];
+  const col = cols[Math.floor(Math.random() * cols.length)];
+
+  // 1 to 3 simultaneous effects for dramatic impact
+  const maxEffects = 1 + Math.floor(Math.random() * 3); 
+  
+  for(let i=0; i<maxEffects; i++) {
+    const origin = isos[Math.floor(Math.random() * isos.length)];
+    const target = isos[Math.floor(Math.random() * isos.length)];
+    
+    // Don't launch if identical
+    if (type === 1 && origin !== target) {
+      launchMissile3D(origin, target, col);
+    } else {
+      const cd = countryData[target];
+      if (cd && cd.lat !== undefined) {
+        // Add slight randomness to lat/lon for variety
+        const lat = cd.lat + (Math.random() - 0.5) * 8;
+        const lon = cd.lon + (Math.random() - 0.5) * 8;
+        spawnExplosion3D(lat, lon, col);
+      }
+    }
+  }
+
+  setTimeout(triggerAmbientWarfare, nextTime);
+}
+
+// Start ambient war loop after brief initial delay
+setTimeout(triggerAmbientWarfare, 8000);
+
 spawnAmbients();
 animate();
 </script>
