@@ -177,14 +177,22 @@ function initWebSockets() {
           client.email = payload.email;
           client.picture = payload.picture;
 
+          let attacks = 0;
+          let damage = 0;
           if (pgPool) {
-            // Upsert into our commanders database
-            await pgPool.query(`
+            // Upsert into our commanders database and RETURNING stats
+            const res = await pgPool.query(`
               INSERT INTO commanders (callsign, email, picture_url, last_seen) 
               VALUES ($1, $2, $3, NOW()) 
               ON CONFLICT (callsign) DO UPDATE 
               SET email = EXCLUDED.email, picture_url = EXCLUDED.picture_url, last_seen = NOW()
+              RETURNING attacks, damage
             `, [client.name, client.email, client.picture]);
+            
+            if (res.rows.length > 0) {
+              attacks = res.rows[0].attacks || 0;
+              damage = res.rows[0].damage || 0;
+            }
           }
 
           console.log(`✓ Google Auth Success: ${client.name} (${client.email}) connected.`);
@@ -192,7 +200,8 @@ function initWebSockets() {
           ws.send(JSON.stringify({ 
             type: 'google_auth_success', 
             name: client.name,
-            picture: client.picture
+            picture: client.picture,
+            stats: { attacks, damage }
           }));
           
           // Notify the room that this user was renamed/joined as someone else

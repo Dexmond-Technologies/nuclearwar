@@ -654,6 +654,8 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
         <div class="us-title" id="us-name">COM-—</div>
         <div class="us-row"><span class="us-label">Terr</span> <span class="us-val" id="us-terr">0</span></div>
         <div class="us-row"><span class="us-label">Trp</span> <span class="us-val" id="us-trp">0</span></div>
+        <div class="us-row"><span class="us-label">Atk</span> <span class="us-val" id="us-attacks" style="color:#f55">0</span></div>
+        <div class="us-row"><span class="us-label">Dmg</span> <span class="us-val" id="us-damage" style="color:#fa0">0</span></div>
       </div>
       <div style="display:flex;gap:8px;">
         <button class="phase-btn" id="btn-end-turn" style="padding:10px 15px;">END TURN ▶</button>
@@ -3472,6 +3474,17 @@ function initWS() {
         });
         break;
       }
+      case 'google_auth_success':
+        // The server verified the JWT. We are officially connected.
+        document.getElementById('us-name').textContent = 'COM-' + msg.name.toUpperCase().substring(0, 15);
+        document.getElementById('lobby-auth-status').innerHTML = "✓ UPLINK AUTHENTICATED. READY FOR DEPLOYMENT.";
+        if (msg.stats) {
+          const atkEl = document.getElementById('us-attacks');
+          const dmgEl = document.getElementById('us-damage');
+          if (atkEl) atkEl.textContent = (msg.stats.attacks || 0).toLocaleString();
+          if (dmgEl) dmgEl.textContent = formatTroops(msg.stats.damage || 0) + ' MILS';
+        }
+        break;
       case 'player_joined':
         document.getElementById('lobby-msg').textContent=`${msg.name} connected (${msg.totalPlayers} online)`;
         document.getElementById('btn-chat-toggle').style.display='block';
