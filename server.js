@@ -80,28 +80,53 @@ const server = http.createServer((req, res) => {
 
 const wss = new WebSocket.Server({ server });
 
-const rooms = {}; // roomCode -> { players, gameState, host }
+// MMO Global State
+let globalGameState = null;
+const connectedClients = new Set();
+let playerCounter = 0;
 
-function genCode() {
-  return Math.random().toString(36).substr(2, 4).toUpperCase();
-}
+// On Sever Startup, try load state from DB immediately
+loadGameState().then(state => {
+  if (state) globalGameState = state;
+});
 
-function broadcast(room, msg, excludeWs = null) {
+function broadcast(msg, excludeWs = null) {
   const data = JSON.stringify(msg);
-  room.players.forEach(p => {
-    if (p.ws !== excludeWs && p.ws.readyState === WebSocket.OPEN) {
-      p.ws.send(data);
+  connectedClients.forEach(client => {
+    if (client.ws !== excludeWs && client.ws.readyState === WebSocket.OPEN) {
+      client.ws.send(data);
     }
   });
 }
 
-function broadcastAll(room, msg) {
-  broadcast(room, msg, null);
+function broadcastAll(msg) {
+  broadcast(msg, null);
 }
 
 wss.on('connection', ws => {
-  let currentRoom = null;
-  let playerIndex = -1;
+  playerCounter++;
+  const client = { ws, id: playerCounter, name: `Commander ${playerCounter}`, isHost: false };
+  connectedClients.add(client);
+  
+  if (connectedClients.size === 1) {
+    client.isHost = true; // First person in handles AI ticks if needed by frontend
+  }
+
+  console.log(`${client.name} joined. Total Commanders: ${connectedClients.size}`);
+
+  // Auto-send the current global state (or lack thereof) to the new player
+  ws.send(JSON.stringify({ 
+    type: 'saved_state', 
+    gameState: globalGameState,
+    isHost: client.isHost
+  }));
+  
+  // Notify others
+  broadcast({
+    type: 'player_joined',
+    name: client.name,
+    totalPlayers: connectedClients.size
+  }, ws);
 
   ws.on('message', raw => {
     let msg;
@@ -109,108 +134,50 @@ wss.on('connection', ws => {
 
     switch (msg.type) {
 
-      case 'create_room': {
-        const code = genCode();
-        const player = { ws, name: msg.name || 'Player 1', index: 0 };
-        rooms[code] = {
-          code,
-          players: [player],
-          maxPlayers: msg.maxPlayers || 4,
-          gameState: null,
-          started: false
-        };
-        currentRoom = rooms[code];
-        playerIndex = 0;
-        ws.send(JSON.stringify({ type: 'room_created', code, playerIndex: 0 }));
-        console.log(`Room ${code} created by ${player.name}`);
-        break;
-      }
-
-      case 'join_room': {
-        const room = rooms[msg.code];
-        if (!room) { ws.send(JSON.stringify({ type: 'error', msg: 'Room not found' })); return; }
-        if (room.started) { ws.send(JSON.stringify({ type: 'error', msg: 'Game already started' })); return; }
-        if (room.players.length >= room.maxPlayers) { ws.send(JSON.stringify({ type: 'error', msg: 'Room full' })); return; }
-
-        playerIndex = room.players.length;
-        const player = { ws, name: msg.name || `Player ${playerIndex + 1}`, index: playerIndex };
-        room.players.push(player);
-        currentRoom = room;
-
-        ws.send(JSON.stringify({ type: 'room_joined', code: msg.code, playerIndex }));
-
-        // Notify others of new player
-        broadcast(room, {
-          type: 'player_joined',
-          name: player.name,
-          playerIndex,
-          totalPlayers: room.players.length
-        }, ws);
-        console.log(`${player.name} joined room ${msg.code}`);
+      case 'rename': {
+        client.name = msg.name || client.name;
         break;
       }
 
       case 'start_game': {
-        if (!currentRoom || currentRoom.started) return;
-        currentRoom.started = true;
-        currentRoom.gameState = msg.gameState;
-        broadcastAll(currentRoom, { type: 'game_start', gameState: msg.gameState });
-        break;
-      }
-
-      case 'action': {
-        // Relay any player action to all others
-        if (!currentRoom) return;
-        broadcast(currentRoom, {
-          type: 'action',
-          playerIndex,
-          action: msg.action
-        }, ws);
+        // First player hits "JOIN" and the DB had no state, so they generated a fresh world.
+        // We ingest it as the global truth.
+        globalGameState = msg.gameState;
+        saveGameState(globalGameState);
+        broadcastAll({ type: 'game_start', gameState: globalGameState });
         break;
       }
 
       case 'state_update': {
-        // Full state sync — save to DB and relay to other players
-        if (!currentRoom) return;
-        currentRoom.gameState = msg.gameState;
-        saveGameState(msg.gameState); // persist to PostgreSQL
-        broadcast(currentRoom, {
+        // Full state sync — save to DB and relay to other players immediately
+        globalGameState = msg.gameState;
+        saveGameState(globalGameState);
+        broadcast({
           type: 'state_update',
-          gameState: msg.gameState,
-          playerIndex
+          gameState: globalGameState
         }, ws);
         break;
       }
 
       case 'get_saved_state': {
-        // Client requests persisted game state on connect
-        loadGameState().then(savedState => {
-          if (savedState) {
-            ws.send(JSON.stringify({ type: 'saved_state', gameState: savedState }));
-            console.log('✓ Sent saved state to connecting client');
-          } else {
-            ws.send(JSON.stringify({ type: 'saved_state', gameState: null }));
-          }
-        });
+        // Redundant, but just in case they ask again
+        ws.send(JSON.stringify({ type: 'saved_state', gameState: globalGameState, isHost: client.isHost }));
         break;
       }
 
       case 'chat': {
-        if (!currentRoom) return;
-        broadcastAll(currentRoom, {
+        broadcastAll({
           type: 'chat',
-          playerIndex,
-          name: currentRoom.players[playerIndex]?.name,
+          name: client.name,
           text: msg.text
         });
         break;
       }
 
       case 'get_players': {
-        if (!currentRoom) return;
         ws.send(JSON.stringify({
           type: 'player_list',
-          players: currentRoom.players.map(p => ({ name: p.name, index: p.index }))
+          players: Array.from(connectedClients).map(c => ({ name: c.name }))
         }));
         break;
       }
@@ -218,13 +185,20 @@ wss.on('connection', ws => {
   });
 
   ws.on('close', () => {
-    if (!currentRoom) return;
-    currentRoom.players = currentRoom.players.filter(p => p.ws !== ws);
-    if (currentRoom.players.length === 0) {
-      delete rooms[currentRoom.code];
-      console.log(`Room ${currentRoom.code} closed (empty)`);
-    } else {
-      broadcastAll(currentRoom, { type: 'player_left', playerIndex });
+    connectedClients.delete(client);
+    console.log(`${client.name} disconnected. Remaining: ${connectedClients.size}`);
+    
+    // Pass host flag if host left
+    if (client.isHost && connectedClients.size > 0) {
+      const nextHost = connectedClients.values().next().value;
+      nextHost.isHost = true;
+      if (nextHost.ws.readyState === WebSocket.OPEN) {
+        nextHost.ws.send(JSON.stringify({ type: 'host_migrated' }));
+      }
+    }
+
+    if (connectedClients.size > 0) {
+      broadcastAll({ type: 'player_left', name: client.name, totalPlayers: connectedClients.size });
     }
   });
 });

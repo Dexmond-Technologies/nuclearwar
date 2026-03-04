@@ -334,13 +334,15 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   <div class="lobby-box">
     <div class="lobby-title">☢ NUCLEAR WAR</div>
     <div class="lobby-sub">PERSISTENT GLOBAL WAR SIMULATION</div>
-    <div class="lobby-text">
+    <div class="lobby-text" id="lobby-msg" style="margin-bottom:20px;">
       WELCOME TO NUCLEAR WAR.<br><br>
       ALL HUMAN PLAYERS FIGHT TOGETHER AS A SINGLE COALITION.<br>
-      YOUR ADVERSARY IS SKYNET, AN AUTONOMOUS AI SYSTEM.<br><br>
-      <span id="lobby-countdown-text">YOU WILL BE JOINED AS HUMAN IN <span id="lobby-countdown">6</span> SECONDS...</span>
+      YOUR ADVERSARY IS SKYNET, AN AUTONOMOUS AI SYSTEM.
     </div>
-    <!-- JOIN BUTTON REMOVED (AUTO-JOIN AFTER 3s) -->
+    <div style="margin:20px 0;">
+      <input type="text" id="player-name" class="sp-btn" style="background:#000;color:#0af;border:1px solid #0af;padding:10px;width:80%;font-family:'Courier New', monospace;text-align:center;" placeholder="ENTER CALLSIGN">
+    </div>
+    <button class="sp-btn" style="width:80%;max-width:300px;font-size:16px;padding:15px;background:rgba(0,170,255,0.2);color:#0af;border:1px solid #0af;" onclick="joinGlobalWar()">JOIN GLOBAL WAR</button>
   </div>
 </div>
 
@@ -2221,7 +2223,7 @@ function spawnExplosion3D(lat,lon,col){
     scene.add(ring);
     rings.push({ring,mat,pts,t1,t2,c,delay:r*.12});
   }
-  const flashGeo=new THREE.SphereGeometry(.045,12,12); // bigger explosion
+  const flashGeo=new THREE.SphereGeometry(.0225,12,12); // smaller explosion
   const flashMat=new THREE.MeshBasicMaterial({color:0xff8800,transparent:true,opacity:1}); // bright fire yellow/orange
   const flash=new THREE.Mesh(flashGeo,flashMat);
   flash.position.copy(c); scene.add(flash);
@@ -2451,65 +2453,69 @@ function aiTurn() {
 // =====================================================================
 // MULTIPLAYER (WebSocket)
 // =====================================================================
+let ws_isHost = false;
+
 function initWS() {
   try { ws=new WebSocket(WS_URL); } catch(e){ setLog('⚠ Multiplayer server not found'); return; }
 
   ws.onopen = () => {
-    // Request any persisted game state from the server on connect
-    ws.send(JSON.stringify({ type: 'get_saved_state' }));
+    // Initial connection handled by server auto-sending state
   };
 
   ws.onmessage=e=>{
     const msg=JSON.parse(e.data);
     switch(msg.type){
       case 'saved_state': {
-        // Resume from persisted state if it exists and we haven't started yet
-        if (msg.gameState && GS.turnCount === 0 && Object.keys(GS.countries).length > 0) {
+        ws_isHost = msg.isHost;
+        if (msg.gameState) {
           applyState(msg.gameState);
           hideLobby();
-          setLog('✓ GAME RESUMED FROM LAST SESSION');
+          setLog('✓ CONNECTED TO GLOBAL UPLINK');
           triggerNewsEvent('COMMAND UPLINK RESTORED — RESUMING OPERATION');
+        } else {
+          // No state exists on server, we must generate a fresh world and push it
+          hideLobby();
+          loadCountries().then(() => {
+            initGame(['COMMANDER', 'SKYNET'], 0);
+            syncState(); // immediately populate the server
+          });
         }
         break;
       }
-      case 'room_created':
-        GS.isOnline=true; GS.myIndex=0; GS.roomCode=msg.code;
-        document.getElementById('lobby-msg').style.color='#0af';
-        document.getElementById('lobby-msg').textContent=`ROOM CODE: ${msg.code} — share with friends!`;
-        document.getElementById('btn-start-room').style.display='block';
-        showRoomPlayers([{name:document.getElementById('player-name').value,index:0}]);
-        break;
-      case 'room_joined':
-        GS.isOnline=true; GS.myIndex=msg.playerIndex; GS.roomCode=msg.code;
-        document.getElementById('lobby-msg').style.color='#0f8';
-        document.getElementById('lobby-msg').textContent='Joined! Waiting for host...';
-        document.getElementById('btn-chat-toggle').style.display='block';
-        document.getElementById('chat-box').classList.add('open');
-        break;
       case 'player_joined':
-        document.getElementById('lobby-msg').textContent=`${msg.name} joined (${msg.totalPlayers} players)`;
+        document.getElementById('lobby-msg').textContent=`${msg.name} connected (${msg.totalPlayers} online)`;
         document.getElementById('btn-chat-toggle').style.display='block';
         document.getElementById('chat-box').classList.add('open');
         break;
       case 'game_start':
         hideLobby(); applyState(msg.gameState); break;
       case 'state_update':
-        if(msg.playerIndex!==GS.myIndex) applyState(msg.gameState); break;
+        // If we want to allow all humans to play as Player 0 concurrently, we apply state.
+        // We might want to lock inputs if another human is taking action, but for now we trust them.
+        applyState(msg.gameState); break;
       case 'player_left':
-        setLog(`⚠ Player ${msg.playerIndex} disconnected`); break;
+        setLog(`⚠ ${msg.name} disconnected. ${msg.totalPlayers} remaining.`); break;
+      case 'host_migrated':
+        ws_isHost = true;
+        setLog(`⚙ You are now the primary host for AI computation.`);
+        break;
+      case 'player_list':
+        showRoomPlayers(msg.players);
+        break;
       case 'chat':
-        appendChat(msg.name,msg.text,msg.playerIndex); break;
+        appendChat(msg.name,msg.text, 0); break;
       case 'error':
         document.getElementById('lobby-msg').textContent=msg.msg; break;
     }
   };
-  ws.onclose=()=>setLog('⚠ Disconnected from server');
+  ws.onclose=()=>setLog('⚠ Lost connection to global command');
 }
 
 function syncState() {
   if(!ws||ws.readyState!==1) return;
   ws.send(JSON.stringify({type:'state_update',gameState:serializeState()}));
 }
+
 function serializeState() {
   return {
     countries:GS.countries, 
@@ -2522,33 +2528,42 @@ function serializeState() {
     globalMetrics:GS.globalMetrics
   };
 }
+
 function applyState(s) {
   GS.countries=s.countries; GS.turn=s.turn; GS.turnCount=s.turnCount; 
   GS.phase=s.phase; GS.reinforceLeft=s.reinforceLeft;
+  
+  // Important to establish index so local UI knows we are the Human commander
+  GS.isOnline=true; GS.myIndex=0; 
+  
   if(s.AI_STATE) GS.AI_STATE = s.AI_STATE;
   if(s.globalMetrics) GS.globalMetrics = s.globalMetrics;
   s.players.forEach((p,i)=>{if(GS.players[i])Object.assign(GS.players[i],p);});
   refreshAllBorders(); buildTroopSprites(); updatePhaseUI();
-  if(GS.turn===GS.myIndex) setLog(`▶ YOUR TURN — ${GS.phase}`);
-  else setLog(`⟳ ${GS.players[GS.turn]?.name}'s turn...`);
+  
+  if(GS.turn===0) setLog(`▶ HUMAN FRONT — ${GS.phase}`);
+  else setLog(`⟳ SKYNET PROCESSING...`);
 }
 
 function showRoomPlayers(players) {
   document.getElementById('room-players').innerHTML=
-    players.map(p=>`<div class="rp-tag" style="color:${PLAYER_COLORS[p.index].hex};border-color:${PLAYER_COLORS[p.index].hex}">${p.name}</div>`).join('');
+    players.map(p=>`<div class="rp-tag" style="color:#0af;border-color:#0af">${p.name}</div>`).join('');
 }
 
 function appendChat(name,text,pi) {
   const el=document.getElementById('chat-msgs');
-  el.innerHTML+=`<div><span style="color:${PLAYER_COLORS[pi%4].hex}">[${name}]</span> ${text}</div>`;
+  el.innerHTML+=`<div><span style="color:${PLAYER_COLORS[pi%4]?.hex || '#fff'}">[${name}]</span> ${text}</div>`;
   el.scrollTop=el.scrollHeight;
 }
+
 function sendChat() {
   const inp=document.getElementById('chat-inp'); if(!inp.value.trim()) return;
   if(ws&&ws.readyState===1) ws.send(JSON.stringify({type:'chat',text:inp.value}));
-  appendChat(GS.players[GS.myIndex]?.name||'Me',inp.value,GS.myIndex);
+  // We don't append locally immediately to ensure server receives it first, but we can do optimistic:
+  // appendChat(GS.players[0]?.name||'Commander',inp.value,0);
   inp.value='';
 }
+
 document.getElementById('chat-inp').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat();});
 
 // =====================================================================
@@ -2556,20 +2571,23 @@ document.getElementById('chat-inp').addEventListener('keydown',e=>{if(e.key==='E
 // =====================================================================
 function hideLobby(){document.getElementById('lobby').style.display='none';}
 
-// Auto-join after 6 seconds with live countdown
-let countdownTimer = 6;
-const cdEl = document.getElementById('lobby-countdown');
-const cdInt = setInterval(() => {
-  countdownTimer--;
-  if(cdEl) cdEl.textContent = countdownTimer;
-  if(countdownTimer <= 0) clearInterval(cdInt);
-}, 1000);
+function joinGlobalWar() {
+  const nm = document.getElementById('player-name').value || 'Commander';
+  document.getElementById('lobby-msg').innerHTML = "Establishing secure uplink...";
+  initWS();
+  
+  // Give the ws a second to open and rename
+  setTimeout(() => {
+    if(ws && ws.readyState === 1) ws.send(JSON.stringify({type:'rename', name:nm}));
+  }, 500);
+}
 
-setTimeout(async () => {
-  hideLobby();
-  await loadCountries();
-  initGame(['COMMANDER', 'SKYNET'], 0);
-}, 6000);
+// Ensure the AI turn only triggers if the socket determines we are the "Host"
+const originalAiTurn = aiTurn;
+aiTurn = function() {
+  if (GS.isOnline && !ws_isHost) return; // let the host handle AI
+  originalAiTurn();
+}
 
 document.getElementById('btn-chat-toggle').onclick=()=>{
   document.getElementById('chat-box').classList.toggle('open');
@@ -2774,7 +2792,7 @@ function animate() {
     if(ex.life<=0){ex.rings.forEach(r=>scene.remove(r.ring));scene.remove(ex.flash);explosions3D.splice(i,1);continue;}
     ex.rings.forEach((g,ri)=>{
       const t=Math.max(0,(1-ex.life)*(1-g.delay*.5));
-      const s=t*.12+.001;
+      const s=t*.06+.001;
       const pts=Array.from({length:65},(_,j)=>{
         const a=(j/64)*Math.PI*2;
         return g.c.clone().addScaledVector(g.t1,Math.cos(a)*s).addScaledVector(g.t2,Math.sin(a)*s);
