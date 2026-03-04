@@ -36,6 +36,14 @@ async function loadGameState() {
 }
 
 async function saveGameState(gs) {
+  // Always update global cache and local file fallback
+  globalGameState = gs;
+  try {
+    fs.writeFileSync(path.join(__dirname, 'game_state.json'), JSON.stringify(gs));
+  } catch (e) {
+    console.error('⚠ Failed to save to game_state.json:', e.message);
+  }
+
   if (!pgPool) return;
   try {
     await pgPool.query(`
@@ -44,8 +52,22 @@ async function saveGameState(gs) {
       ON CONFLICT (id) DO UPDATE SET state = $1, updated_at = NOW()
     `, [JSON.stringify(gs)]);
   } catch (err) {
-    console.error('⚠ Failed to save game state:', err.message);
+    console.error('⚠ Failed to save game state to PG:', err.message);
   }
+}
+
+async function loadGameStateFallback() {
+  try {
+    const p = path.join(__dirname, 'game_state.json');
+    if (fs.existsSync(p)) {
+      const data = fs.readFileSync(p, 'utf8');
+      console.log('✓ Loaded persisted game state from local JSON fallback');
+      return JSON.parse(data);
+    }
+  } catch (e) {
+    console.error('⚠ Local fallback load failed:', e.message);
+  }
+  return null;
 }
 
 const PORT = process.env.PORT || 8080;
@@ -128,8 +150,12 @@ wss.on('connection', ws => {
       }
 
       case 'start_game': {
-        // First player hits "JOIN" and the DB had no state, so they generated a fresh world.
-        // We ingest it as the global truth.
+        // Prevent clearing existing world if already active
+        if (globalGameState) {
+           console.log('⚠ Rejected start_game — world is already active');
+           ws.send(JSON.stringify({ type: 'error', msg: 'World already exists' }));
+           break;
+        }
         globalGameState = msg.gameState;
         saveGameState(globalGameState);
         broadcastAll({ type: 'game_start', gameState: globalGameState });
@@ -206,6 +232,7 @@ wss.on('connection', ws => {
 
 // On Sever Startup, init DB and try to load state immediately before listening
 async function startServer() {
+  // 1. Try PostgreSQL
   if (pgPool) {
     try {
       await pgPool.query(`
@@ -216,11 +243,22 @@ async function startServer() {
         )
       `);
       console.log('☢ PostgreSQL connected — game_state table ready');
+      const state = await loadGameState();
+      if (state) globalGameState = state;
     } catch (err) {
-      console.error('⚠ PostgreSQL table creation failed:', err.message);
+      console.error('⚠ PostgreSQL initial load failed:', err.message);
     }
-    const state = await loadGameState();
-    if (state) globalGameState = state;
+  }
+  
+  // 2. Fallback to Local JSON if still empty
+  if (!globalGameState) {
+    globalGameState = await loadGameStateFallback();
+  }
+
+  if (globalGameState) {
+    console.log('☢ Game state recovery complete. World is active.');
+  } else {
+    console.log('☢ No previous state found. Waiting for first commander to initialize world.');
   }
   
   server.listen(PORT, () => {

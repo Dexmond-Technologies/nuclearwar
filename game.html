@@ -856,6 +856,7 @@ const SFX = {
   },
   toggleMute() {
     this.muted = !this.muted;
+    if (!this.muted) this.playClick();
     document.getElementById('btn-vol').innerText = this.muted ? '🔈' : '🔊';
     if (this.ctx) {
       if (this.muted) this.ctx.suspend();
@@ -869,35 +870,93 @@ const SFX = {
     for (let i = 0; i < output.length; i++) output[i] = Math.random() * 2 - 1;
     return b;
   },
+  playClick() {
+    if(this.muted) return; this.init();
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1500, t);
+    osc.frequency.exponentialRampToValueAtTime(800, t + 0.05);
+    gain.gain.setValueAtTime(0.05, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+    osc.connect(gain); gain.connect(this.ctx.destination);
+    osc.start(t); osc.stop(t + 0.05);
+  },
   playLaunch() {
     if(this.muted) return; this.init();
     const t = this.ctx.currentTime;
-    // Whoosh
+    // Layer 1: Engine Rumble
     const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
+    const g1 = this.ctx.createGain();
     osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(150, t);
-    osc.frequency.exponentialRampToValueAtTime(40, t + 0.5);
-    gain.gain.setValueAtTime(0, t);
-    gain.gain.linearRampToValueAtTime(0.3, t + 0.1);
-    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.8);
-    osc.connect(gain); gain.connect(this.ctx.destination);
-    osc.start(t); osc.stop(t + 0.8);
+    osc.frequency.setValueAtTime(180, t);
+    osc.frequency.exponentialRampToValueAtTime(40, t + 1.2);
+    g1.gain.setValueAtTime(0, t);
+    g1.gain.linearRampToValueAtTime(0.2, t + 0.1);
+    g1.gain.exponentialRampToValueAtTime(0.01, t + 1.2);
+    osc.connect(g1); g1.connect(this.ctx.destination);
+    osc.start(t); osc.stop(t + 1.2);
+
+    // Layer 2: Exhaust Shriek/Noise
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = this._createNoiseBuffer(1.0);
+    const hpf = this.ctx.createBiquadFilter();
+    hpf.type = 'highpass';
+    hpf.frequency.setValueAtTime(2000, t);
+    const g2 = this.ctx.createGain();
+    g2.gain.setValueAtTime(0, t);
+    g2.gain.linearRampToValueAtTime(0.15, t + 0.1);
+    g2.gain.exponentialRampToValueAtTime(0.001, t + 0.8);
+    noise.connect(hpf); hpf.connect(g2); g2.connect(this.ctx.destination);
+    noise.start(t);
   },
   playExplosion() {
     if(this.muted) return; this.init();
     const t = this.ctx.currentTime;
-    const noise = this.ctx.createBufferSource();
-    noise.buffer = this._createNoiseBuffer(1.5);
-    const filter = this.ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(800, t);
-    filter.frequency.exponentialRampToValueAtTime(50, t + 1.2);
+    
+    // Layer 1: Sub-thump (Sine)
+    const sub = this.ctx.createOscillator();
+    const gSub = this.ctx.createGain();
+    sub.type = 'sine';
+    sub.frequency.setValueAtTime(100, t);
+    sub.frequency.exponentialRampToValueAtTime(0.01, t + 0.5);
+    gSub.gain.setValueAtTime(0.8, t);
+    gSub.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+    sub.connect(gSub); gSub.connect(this.ctx.destination);
+    sub.start(t); sub.stop(t + 0.5);
+
+    // Layer 2: Noise crackle
+    const n1 = this.ctx.createBufferSource();
+    n1.buffer = this._createNoiseBuffer(2.0);
+    const lpf = this.ctx.createBiquadFilter();
+    lpf.type = 'lowpass';
+    lpf.frequency.setValueAtTime(1500, t);
+    lpf.frequency.exponentialRampToValueAtTime(40, t + 1.8);
+    const gN = this.ctx.createGain();
+    gN.gain.setValueAtTime(1.0, t);
+    gN.gain.exponentialRampToValueAtTime(0.001, t + 2.0);
+    n1.connect(lpf); lpf.connect(gN); gN.connect(this.ctx.destination);
+    n1.start(t);
+  },
+  playSiren() {
+    if(this.muted) return; this.init();
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
-    gain.gain.setValueAtTime(0.8, t);
-    gain.gain.exponentialRampToValueAtTime(0.01, t + 1.4);
-    noise.connect(filter); filter.connect(gain); gain.connect(this.ctx.destination);
-    noise.start(t);
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(500, t);
+    // Oscillating frequency
+    for(let i=0; i<4; i++) {
+       osc.frequency.linearRampToValueAtTime(800, t + i*0.5 + 0.25);
+       osc.frequency.linearRampToValueAtTime(500, t + i*0.5 + 0.5);
+    }
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.1, t + 0.1);
+    gain.gain.setValueAtTime(0.1, t + 1.8);
+    gain.gain.linearRampToValueAtTime(0, t + 2.0);
+    osc.connect(gain); gain.connect(this.ctx.destination);
+    osc.start(t); osc.stop(t + 2.0);
   },
   playAmbientRumble() {
     if(this.muted) return; this.init();
@@ -905,13 +964,43 @@ const SFX = {
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(60, t);
-    osc.frequency.linearRampToValueAtTime(40, t + 2.0);
+    osc.frequency.setValueAtTime(50, t);
+    osc.frequency.linearRampToValueAtTime(30, t + 3.0);
     gain.gain.setValueAtTime(0.0, t);
-    gain.gain.linearRampToValueAtTime(0.1, t + 0.5);
-    gain.gain.linearRampToValueAtTime(0.0, t + 2.0);
+    gain.gain.linearRampToValueAtTime(0.05, t + 1.0);
+    gain.gain.linearRampToValueAtTime(0.0, t + 3.0);
     osc.connect(gain); gain.connect(this.ctx.destination);
-    osc.start(t); osc.stop(t + 2.0);
+    osc.start(t); osc.stop(t + 3.0);
+  },
+  playBlip() {
+    if(this.muted) return; this.init();
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(800, t);
+    osc.frequency.exponentialRampToValueAtTime(1200, t + 0.1);
+    gain.gain.setValueAtTime(0.02, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+    osc.connect(gain); gain.connect(this.ctx.destination);
+    osc.start(t); osc.stop(t + 0.1);
+  },
+  playDice() {
+    if(this.muted) return; this.init();
+    const t = this.ctx.currentTime;
+    // Layered noise bursts for clatter
+    for (let i = 0; i < 3; i++) {
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = this._createNoiseBuffer(0.1);
+      const bpf = this.ctx.createBiquadFilter();
+      bpf.type = 'bandpass';
+      bpf.frequency.setValueAtTime(1000 + Math.random() * 500, t + i * 0.05);
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(0.1, t + i * 0.05);
+      g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.05 + 0.1);
+      noise.connect(bpf); bpf.connect(g); g.connect(this.ctx.destination);
+      noise.start(t + i * 0.05);
+    }
   }
 };
 
@@ -2036,6 +2125,7 @@ document.getElementById('btn-nuke').onclick = () => {
 };
 
 function tryNuke(targetIso) {
+  SFX.playSiren();
   const from = window._nukeFrom; if(!from) return;
   if (GS.countries[targetIso]?.owner === GS.myIndex) { window._nukeFrom=null;return; }
   const def = GS.countries[targetIso];
@@ -2087,18 +2177,20 @@ function tryFortify(toIso) {
 }
 
 // PHASE BUTTONS
-document.getElementById('pb-reinforce').onclick = () => { if(GS.turn===GS.myIndex){GS.phase='REINFORCE';updatePhaseUI();attackingFrom=null;window._nukeFrom=null;fortifyFrom2=null;setLog('REINFORCE: click your territories to deploy troops');} };
+document.getElementById('pb-reinforce').onclick = () => { SFX.playClick(); if(GS.turn===GS.myIndex){GS.phase='REINFORCE';updatePhaseUI();attackingFrom=null;window._nukeFrom=null;fortifyFrom2=null;setLog('REINFORCE: click your territories to deploy troops');} };
 document.getElementById('pb-attack').onclick = () => { 
   if(GS.turn===GS.myIndex) {
+    SFX.playClick();
     GS.phase='ATTACK';
     updatePhaseUI();
     document.getElementById('attack-modal').classList.add('show');
   } 
 };
-document.getElementById('pb-fortify').onclick   = () => { if(GS.turn===GS.myIndex){GS.phase='FORTIFY';updatePhaseUI();attackingFrom=null;window._nukeFrom=null;window._fortifyFrom=null;fortifyFrom2=null;setLog('FORTIFY: Select origin territory first');} };
+document.getElementById('pb-fortify').onclick   = () => { SFX.playClick(); if(GS.turn===GS.myIndex){GS.phase='FORTIFY';updatePhaseUI();attackingFrom=null;window._nukeFrom=null;window._fortifyFrom=null;fortifyFrom2=null;setLog('FORTIFY: Select origin territory first');} };
 
 // EXECUTE STRATEGIC PRESET ATTACK
 function executeAttackPreset(type) {
+  SFX.playClick();
   document.getElementById('attack-modal').classList.remove('show');
   
   if (type === 4) {
@@ -2427,6 +2519,7 @@ document.getElementById('troop-cancel').onclick=()=>{
 // Dice result display
 let _diceCb=null;
 function showDiceResult(fromName,toName,aRolls,dRolls,atkLoss,defLoss,cb) {
+  SFX.playDice();
   const panel=document.getElementById('dice-panel');
   panel.classList.add('show');
   document.getElementById('dice-from-to').textContent=`${fromName} → ${toName}`;
@@ -2946,10 +3039,11 @@ function showRoomPlayers(players) {
     players.map(p=>`<div class="rp-tag" style="color:#0af;border-color:#0af">${p.name}</div>`).join('');
 }
 
-function appendChat(name,text,pi) {
-  const el=document.getElementById('chat-msgs');
-  el.innerHTML+=`<div><span style="color:${PLAYER_COLORS[pi%4]?.hex || '#fff'}">[${name}]</span> ${text}</div>`;
-  el.scrollTop=el.scrollHeight;
+function appendChat(name, text, index) {
+  if (index !== GS.myIndex) SFX.playBlip();
+  const chatMsgs = document.getElementById('chat-msgs');
+  chatMsgs.innerHTML+=`<div><span style="color:${PLAYER_COLORS[index%4]?.hex || '#fff'}">[${name}]</span> ${text}</div>`;
+  chatMsgs.scrollTop=chatMsgs.scrollHeight;
 }
 
 function sendChat() {
@@ -2979,6 +3073,7 @@ function joinGlobalWar() {
 }
 
 function closeOnboarding() {
+  SFX.playClick();
   SFX.init();
   document.getElementById('onboarding-modal').style.display = 'none';
 }
