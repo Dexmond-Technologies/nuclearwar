@@ -1518,8 +1518,10 @@ function startTurn(playerIndex) {
     }
     
     // AI plays automatically AFTER announcement
-    if (GS.players[playerIndex] && playerIndex !== GS.myIndex && !GS.isOnline) {
-      setTimeout(aiTurn, 600);
+    if (GS.players[playerIndex] && playerIndex !== GS.myIndex) {
+      if (!GS.isOnline || ws_isHost) {
+        setTimeout(aiTurn, 600);
+      }
     }
   });
 }
