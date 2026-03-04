@@ -359,13 +359,13 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 #ta-nukes{font-size:12px;letter-spacing:2px;margin-top:14px;opacity:.7;}
 /* Cinematic News Alert */
 #news-alert{position:absolute;top:15%;left:0;width:100%;background:rgba(200,0,0,0.85);color:#fff;
-  z-index:999;text-align:center;padding:25px 0;border-top:2px solid #f00;border-bottom:2px solid #f00;
+  z-index:999;text-align:center;padding:17px 0;border-top:2px solid #f00;border-bottom:2px solid #f00;
   display:none;align-items:center;justify-content:center;box-shadow:0 0 50px rgba(255,0,0,0.8);
   backdrop-filter:blur(10px);overflow:hidden;}
 #news-alert.show{display:flex;animation:slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, alertFlash 1s infinite alternate;}
 #news-alert.hide{animation:slideOut 0.4s ease-in forwards;}
-#na-label{position:absolute;top:4px;left:20px;font-size:10px;font-family:'Share Tech Mono',monospace;letter-spacing:4px;color:#ffb8b8;}
-#na-text{font-size:42px;font-family:'Orbitron',sans-serif;font-weight:900;letter-spacing:8px;text-transform:uppercase;text-shadow:0 0 20px #fff;}
+#na-label{position:absolute;top:3px;left:20px;font-size:8px;font-family:'Share Tech Mono',monospace;letter-spacing:4px;color:#ffb8b8;}
+#na-text{font-size:30px;font-family:'Orbitron',sans-serif;font-weight:900;letter-spacing:6px;text-transform:uppercase;text-shadow:0 0 20px #fff;}
 .na-stripe{position:absolute;width:100%;height:100%;background:repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(0,0,0,0.15) 20px, rgba(0,0,0,0.15) 40px);pointer-events:none;}
 @keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
 @keyframes slideOut{from{transform:translateX(0);opacity:1;}to{transform:translateX(-100%);opacity:0;}}
