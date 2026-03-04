@@ -473,10 +473,11 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     <div id="d0-reasoning" style="margin-top:12px; padding:10px; background:rgba(0,220,255,0.05); border:1px solid rgba(0,220,255,0.2); border-radius:4px; font-family:'Courier New', monospace; font-size:10px; color:#0af; flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom: 4px;">
       <div style="opacity:0.5">> AWAITING COMMAND INPUT...</div>
     </div>
-    <div id="phase-btns">
-      <button class="phase-btn" id="pb-reinforce">REINFORCE</button>
-      <button class="phase-btn" id="pb-attack">ATTACK</button>
-      <button class="phase-btn" id="pb-fortify">FORTIFY</button>
+    <div id="phase-btns" style="display:flex; gap:10px; align-items:center;">
+      <button class="phase-btn" id="pb-reinforce" style="flex:1;">REINFORCE</button>
+      <button class="phase-btn" id="pb-attack" style="flex:1;">ATTACK</button>
+      <button class="phase-btn" id="pb-fortify" style="flex:1;">FORTIFY</button>
+      <button class="phase-btn" id="btn-vol" style="width:36px; height:36px; border-radius:50%; padding:0; flex-shrink:0; font-size:16px;" onclick="SFX.toggleMute()">🔊</button>
     </div>
   </div>
 
@@ -842,6 +843,75 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 // =====================================================================
+// AUDIO ENGINE (Procedural Web Audio)
+// =====================================================================
+const SFX = {
+  ctx: null,
+  muted: false,
+  init() {
+    if (!this.ctx) {
+      window.AudioContext = window.AudioContext || window.webkitAudioContext;
+      this.ctx = new AudioContext();
+    }
+  },
+  toggleMute() {
+    this.muted = !this.muted;
+    document.getElementById('btn-vol').innerText = this.muted ? '🔈' : '🔊';
+  },
+  _createNoiseBuffer(len) {
+    if(!this.ctx) return null;
+    const b = this.ctx.createBuffer(1, this.ctx.sampleRate * len, this.ctx.sampleRate);
+    const output = b.getChannelData(0);
+    for (let i = 0; i < output.length; i++) output[i] = Math.random() * 2 - 1;
+    return b;
+  },
+  playLaunch() {
+    if(this.muted) return; this.init();
+    const t = this.ctx.currentTime;
+    // Whoosh
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(150, t);
+    osc.frequency.exponentialRampToValueAtTime(40, t + 0.5);
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.3, t + 0.1);
+    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.8);
+    osc.connect(gain); gain.connect(this.ctx.destination);
+    osc.start(t); osc.stop(t + 0.8);
+  },
+  playExplosion() {
+    if(this.muted) return; this.init();
+    const t = this.ctx.currentTime;
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = this._createNoiseBuffer(1.5);
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(800, t);
+    filter.frequency.exponentialRampToValueAtTime(50, t + 1.2);
+    const gain = this.ctx.createGain();
+    gain.gain.setValueAtTime(0.8, t);
+    gain.gain.exponentialRampToValueAtTime(0.01, t + 1.4);
+    noise.connect(filter); filter.connect(gain); gain.connect(this.ctx.destination);
+    noise.start(t);
+  },
+  playAmbientRumble() {
+    if(this.muted) return; this.init();
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(60, t);
+    osc.frequency.linearRampToValueAtTime(40, t + 2.0);
+    gain.gain.setValueAtTime(0.0, t);
+    gain.gain.linearRampToValueAtTime(0.1, t + 0.5);
+    gain.gain.linearRampToValueAtTime(0.0, t + 2.0);
+    osc.connect(gain); gain.connect(this.ctx.destination);
+    osc.start(t); osc.stop(t + 2.0);
+  }
+};
+
+// =====================================================================
 // NEWS EVENT SYSTEM
 // =====================================================================
 const newsEvents = [
@@ -963,7 +1033,7 @@ const texLoader = new THREE.TextureLoader();
 const earthTex  = texLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/land_ocean_ice_cloud_2048.jpg');
 const globeMat  = new THREE.MeshPhongMaterial({map:earthTex,specular:new THREE.Color(0x003355),shininess:15});
 const globeMesh = new THREE.Mesh(globeGeo, globeMat);
-globeMesh.rotation.y = Math.PI; // Align texture with GeoJSON borders
+globeMesh.rotation.y = -Math.PI / 2; // Align texture with GeoJSON borders
 scene.add(globeMesh);
 
 // Atmosphere
@@ -2352,6 +2422,7 @@ function slerp3D(a,b,t){
 }
 
 function launchMissile3D(fromIso, toIso, col) {
+  SFX.playLaunch();
   const fc=countryData[fromIso], tc=countryData[toIso];
   if(!fc||!tc) return;
   const sd=ll2v(fc.lat,fc.lon,1).normalize(), ed=ll2v(tc.lat,tc.lon,1).normalize();
@@ -2390,6 +2461,7 @@ function launchMissile3D(fromIso, toIso, col) {
 
 function spawnExplosion3D(lat,lon,col){
   if(lat===undefined||lon===undefined) return;
+  SFX.playExplosion();
   const c=ll2v(lat,lon,GLOBE_R+.003);
   const up=c.clone().normalize();
   let t1=new THREE.Vector3(-up.z,0,up.x);
@@ -2853,6 +2925,7 @@ function joinGlobalWar() {
 }
 
 function closeOnboarding() {
+  SFX.init();
   document.getElementById('onboarding-modal').style.display = 'none';
 }
 
@@ -3115,6 +3188,7 @@ window.addEventListener('resize',()=>{
 });
 
 function triggerAmbientWarfare() {
+  SFX.playAmbientRumble();
   const isos = Object.keys(countryData);
   if (isos.length < 2) return;
 
