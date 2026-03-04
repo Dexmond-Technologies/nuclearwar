@@ -852,7 +852,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 </div>
 
 <!-- Terminal -->
-<button id="btn-term-toggle" style="display:none">&gt;</button>
+<button id="btn-term-toggle" style="display:none" onclick="showTerminalModal()">></button>
 
 <!-- Chat -->
 <button id="btn-chat-toggle" style="display:none">💬</button>
@@ -4466,6 +4466,96 @@ function showTechModal() {
     ${!isMyTurn?'<div style="color:#f55;font-size:10px;margin-bottom:8px;">⚠ Research only available on your turn.</div>':''}
     ${body}
   `);
+}
+
+// =====================================================================
+// TACTICAL AI TERMINAL ADVISOR
+// =====================================================================
+function showTerminalModal() {
+  _sfxClick();
+  const myIndex = GS.myIndex;
+  const p = GS.players[myIndex];
+  if (!p) return;
+
+  // 1) Find Borders
+  const myIsos = Object.keys(GS.countries).filter(iso => GS.countries[iso].owner === myIndex);
+  const threats = [];
+  const opps = [];
+  let totalBorders = 0;
+
+  myIsos.forEach(myIso => {
+    const cMy = GS.countries[myIso];
+    if (!cMy.polygons) return;
+    const enemyNeighbors = new Set();
+    
+    // Very rudimentary distance check for "neighbors" (since actual topology graph is complex)
+    // We'll scan all enemy territories and check lat/lon distance
+    Object.keys(GS.countries).forEach(eIso => {
+      const cE = GS.countries[eIso];
+      if (cE.owner === myIndex || cE.owner === 0) return; // Only AI (owner 1)
+      if (cE.troops === 0) return;
+      
+      const dist = Math.sqrt(Math.pow(cE.lat - cMy.lat, 2) + Math.pow(cE.lon - cMy.lon, 2));
+      if (dist < 15) { // Approximate adjacency
+        totalBorders++;
+        if (cE.troops > cMy.troops * 1.5 && cE.troops > 5) {
+          threats.push(`<b>${cE.name}</b> (${cE.troops} units) threatens <b>${cMy.name}</b> (${cMy.troops} units). <div style="color:#f55;margin-top:2px;">ACTION: Reinforce or Sabotage.</div>`);
+        } else if (cMy.troops > cE.troops * 2 && cMy.troops > 10) {
+          opps.push(`<b>${cE.name}</b> (${cE.troops} units) is vulnerable to <b>${cMy.name}</b> (${cMy.troops} units). <div style="color:#0f8;margin-top:2px;">ACTION: Invade.</div>`);
+        }
+      }
+    });
+  });
+
+  // 2) Economy/Tech Advice
+  const pts = GS.tech ? (GS.tech.points || 0) : 0;
+  const budget = p.budget || 0;
+  const ecoAdvice = [];
+  
+  if (budget >= 100) ecoAdvice.push(`Budget HIGH (${budget} MIL). Recommend deploying Naval Fleets or Air Wings for strategic bombing.`);
+  else if (budget >= 50 && budget < 100) ecoAdvice.push(`Funds sufficient (${budget} MIL) for Espionage (Intel/Cyberattack) or Infrastructure development.`);
+  else ecoAdvice.push(`Budget LOW (${budget} MIL). Hold position and accumulate capital.`);
+
+  if (pts >= 100 && !hasTech('CYBER_WARFARE')) ecoAdvice.push(`Research Points available (${pts}). Prioritize CYBER WARFARE for +30% Espionage success.`);
+  else if (pts >= 200 && !hasTech('NUCLEAR_TRIAD')) ecoAdvice.push(`Research Points available (${pts}). Nuclear tech is accessible.`);
+
+  // 3) Weather Check
+  const s = GS.weather ? GS.weather.season : 'SPRING';
+  let weatherAdvice = `Global Season: <b>${s}</b>. `;
+  if (s === 'WINTER') weatherAdvice += `Ground attacks in Northern blocks face -25% penalty. Use Air/Naval strikes instead.`;
+  else if (s === 'MONSOON') weatherAdvice += `SE-Asian theater suffers -15% ground attack. Proceed with caution.`;
+  else weatherAdvice += `Skies clear. Standard combat resolution in effect.`;
+
+  // Cut lists to top 3
+  const tList = threats.slice(0, 3).map(t => `<li style="margin-bottom:6px; background:rgba(255,0,0,0.1); padding:4px; border-left:2px solid #f00;">${t}</li>`).join('') || `<li style="color:#888;">No immediate catastrophic border threats detected.</li>`;
+  const oList = opps.slice(0, 3).map(o => `<li style="margin-bottom:6px; background:rgba(0,255,136,0.1); padding:4px; border-left:2px solid #0f8;">${o}</li>`).join('') || `<li style="color:#888;">No clear overwhelming tactical advantages on borders.</li>`;
+  const eList = ecoAdvice.map(e => `<li style="margin-bottom:6px; background:rgba(0,170,255,0.1); padding:4px; border-left:2px solid #0af;">${e}</li>`).join('');
+
+  const bodyHtml = `
+    <div style="font-family:'Courier New', monospace; font-size:10px; color:#0f8; line-height:1.4; padding:5px;">
+      <div style="text-align:center; letter-spacing:2px; margin-bottom:12px; font-weight:bold; color:#fff; background:rgba(0,255,136,0.2); padding:5px border:1px solid #0f8;">
+        SYSTEM DIAGNOSTIC: COMPLETE
+      </div>
+      
+      <div style="color:#f55; border-bottom:1px dashed #f55; margin-bottom:5px; font-weight:bold; letter-spacing:1px;">[!] THREAT MATRIX</div>
+      <ul style="list-style-type:none; padding:0; margin:0 0 15px 0;">${tList}</ul>
+
+      <div style="color:#0f8; border-bottom:1px dashed #0f8; margin-bottom:5px; font-weight:bold; letter-spacing:1px;">[+] OPPORTUNITIES</div>
+      <ul style="list-style-type:none; padding:0; margin:0 0 15px 0;">${oList}</ul>
+      
+      <div style="color:#0af; border-bottom:1px dashed #0af; margin-bottom:5px; font-weight:bold; letter-spacing:1px;">[$] LOGISTICS & R&D</div>
+      <ul style="list-style-type:none; padding:0; margin:0 0 15px 0;">${eList}</ul>
+
+      <div style="color:#fa0; border-bottom:1px dashed #fa0; margin-bottom:5px; font-weight:bold; letter-spacing:1px;">[☁] METEOROLOGICAL</div>
+      <div style="background:rgba(255,170,0,0.1); padding:6px; border-left:2px solid #fa0; margin-bottom:10px;">${weatherAdvice}</div>
+      
+      <div style="text-align:center; opacity:0.5; margin-top:15px; font-size:9px;">
+        AI ADVISOR V1.2. OVER AND OUT.
+      </div>
+    </div>
+  `;
+
+  openDrawer('term', '> TACTICAL ADVISOR', bodyHtml);
 }
 
 // =====================================================================
