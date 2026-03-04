@@ -5,6 +5,8 @@
 <title>NUCLEAR WAR ☢ 3D World War</title>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:hidden;}
@@ -552,11 +554,11 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       <button class="phase-btn" id="pb-attack" style="flex:1;">ATTACK</button>
       <button class="phase-btn" id="pb-fortify" style="flex:1;">FORTIFY</button>
       <div id="strategy-toolbar" style="position:absolute; bottom:4px; left:calc(100% + 15px); display:flex; gap:8px; align-items:center; background:rgba(0,10,25,0.85); border:1px solid rgba(0,170,255,0.3); border-radius:30px; padding:6px 12px; box-shadow:0 0 15px rgba(0,170,255,0.15);">
-        <button id="btn-diplomacy" class="strat-icon-btn" onclick="showDiplomacyModal()">🤝<span class="strat-tooltip">DIPLOMACY</span></button>
-        <button id="btn-espionage" class="strat-icon-btn" onclick="showSpyModal()">🔎<span class="strat-tooltip">ESPIONAGE</span></button>
-        <button id="btn-tech" class="strat-icon-btn" onclick="showTechModal()">🔬<span class="strat-tooltip">TECH TREE</span></button>
-        <button id="btn-naval" class="strat-icon-btn" onclick="showNavalModal()">⚓<span class="strat-tooltip">NAVAL / AIR</span></button>
-        <button id="btn-weather" class="strat-icon-btn" onclick="showWeatherInfo()">🌍<span class="strat-tooltip">WEATHER</span></button>
+        <button id="btn-diplomacy" class="strat-icon-btn" onclick="showDiplomacyModal()"><i class="fa-solid fa-handshake"></i><span class="strat-tooltip">DIPLOMACY</span></button>
+        <button id="btn-espionage" class="strat-icon-btn" onclick="showSpyModal()"><i class="fa-solid fa-user-secret"></i><span class="strat-tooltip">ESPIONAGE</span></button>
+        <button id="btn-tech" class="strat-icon-btn" onclick="showTechModal()"><i class="fa-solid fa-microscope"></i><span class="strat-tooltip">TECH TREE</span></button>
+        <button id="btn-naval" class="strat-icon-btn" onclick="showNavalModal()"><i class="fa-solid fa-anchor"></i><span class="strat-tooltip">NAVAL / AIR</span></button>
+        <button id="btn-weather" class="strat-icon-btn" onclick="showWeatherInfo()"><i class="fa-solid fa-cloud-sun"></i><span class="strat-tooltip">WEATHER</span></button>
         <button class="phase-btn" id="btn-vol" style="width:36px; height:36px; border-radius:50%; padding:0; flex-shrink:0; font-size:16px; margin-left:4px;" onclick="SFX.toggleMute()">🔊</button>
       </div>
     </div>
