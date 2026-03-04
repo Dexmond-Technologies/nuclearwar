@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:hidden;}
@@ -590,10 +591,27 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       ALL HUMAN PLAYERS FIGHT TOGETHER AS A SINGLE COALITION.<br>
       YOUR ADVERSARY IS RAINCLOUD, AN AUTONOMOUS AI SYSTEM.
     </div>
-    <div style="margin:20px 0;">
-      <input type="text" id="player-name" class="sp-btn" style="background:#000;color:#0af;border:1px solid #0af;padding:10px;width:80%;font-family:'Courier New', monospace;text-align:center;" placeholder="ENTER CALLSIGN">
+
+    <!-- Google Sign-In Container -->
+    <div style="margin:20px auto; display:flex; justify-content:center; min-height:50px;">
+      <div id="g_id_onload"
+           data-client_id="YOUR_GOOGLE_CLIENT_ID_HERE"
+           data-callback="handleGoogleCredentialResponse"
+           data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin"
+           data-type="standard"
+           data-shape="rectangular"
+           data-theme="filled_black"
+           data-text="continue_with"
+           data-size="large"
+           data-logo_alignment="left">
+      </div>
     </div>
-    <button class="sp-btn" style="width:80%;max-width:300px;font-size:16px;padding:15px;background:rgba(0,170,255,0.2);color:#0af;border:1px solid #0af;" onclick="joinGlobalWar()">JOIN GLOBAL WAR</button>
+    
+    <div id="lobby-auth-status" style="color:#0f8; font-family:'Courier New', monospace; font-size:12px; margin-bottom:15px; min-height:15px;"></div>
+
+    <button id="btn-join-war" class="sp-btn" style="width:80%;max-width:300px;font-size:16px;padding:15px;background:rgba(0,170,255,0.2);color:#0af;border:1px solid #0af; display:none;" onclick="joinGlobalWar()">JOIN GLOBAL WAR</button>
   </div>
 </div>
 
@@ -3393,9 +3411,18 @@ async function aiTurn() {
 }
 
 // =====================================================================
-// MULTIPLAYER (WebSocket)
+// MULTIPLAYER (WebSocket & Google Auth)
 // =====================================================================
 let ws_isHost = false;
+let pendingGoogleToken = null;
+
+// Google Identity Callback
+function handleGoogleCredentialResponse(response) {
+  pendingGoogleToken = response.credential;
+  document.getElementById('lobby-auth-status').innerHTML = "✓ UPLINK AUTHENTICATED. READY FOR DEPLOYMENT.";
+  document.querySelector('.g_id_signin').style.display = 'none'; // hide the google button
+  document.getElementById('btn-join-war').style.display = 'inline-block'; // show the enter button
+}
 
 function initWS() {
   try { ws=new WebSocket(WS_URL); } catch(e){ setLog('⚠ Multiplayer server not found'); return; }
@@ -3410,6 +3437,12 @@ function initWS() {
       case 'saved_state': {
         ws_isHost = msg.isHost;
         hideLobby();
+
+        // Immediately attempt Google Auth passing the JWT to the backend
+        if (pendingGoogleToken) {
+          ws.send(JSON.stringify({ type: 'google_auth', credential: pendingGoogleToken }));
+        }
+
         // Show onboarding when joining from lobby
         if (!document.getElementById('hud').style.display || document.getElementById('hud').style.display === 'none') {
             document.getElementById('onboarding-modal').classList.add('show');
@@ -3588,17 +3621,8 @@ document.getElementById('chat-inp').addEventListener('keydown',e=>{if(e.key==='E
 function hideLobby(){document.getElementById('lobby').style.display='none';}
 
 function joinGlobalWar() {
-  const nm = document.getElementById('player-name').value || 'Commander';
   document.getElementById('lobby-msg').innerHTML = "Establishing secure uplink...";
   initWS();
-  
-  // Give the ws a second to open and rename
-  setTimeout(() => {
-    if(ws && ws.readyState === 1) {
-      ws.send(JSON.stringify({type:'rename', name:nm}));
-      ws.send(JSON.stringify({type:'get_commander_stats', callsign:nm}));
-    }
-  }, 500);
 }
 
 function closeOnboarding() {

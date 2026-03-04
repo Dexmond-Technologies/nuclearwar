@@ -8,6 +8,11 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const WebSocket = require('ws');
+const { OAuth2Client } = require('google-auth-library');
+
+// REPLACE THIS WITH YOUR ACTUAL GOOGLE CLIENT ID
+const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID_HERE';
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 // ── PostgreSQL persistence (optional — only active if DATABASE_URL is set) ──
 let pgPool = null;
@@ -154,6 +159,53 @@ function initWebSockets() {
 
       case 'rename': {
         client.name = msg.name || client.name;
+        break;
+      }
+
+      case 'google_auth': {
+        const token = msg.credential;
+        if (!token) break;
+        try {
+          // Verify Google JWT
+          const ticket = await googleClient.verifyIdToken({
+            idToken: token,
+            audience: GOOGLE_CLIENT_ID
+          });
+          const payload = ticket.getPayload();
+          
+          client.name = payload.name; // Apply the real Google name
+          client.email = payload.email;
+          client.picture = payload.picture;
+
+          if (pgPool) {
+            // Upsert into our commanders database
+            await pgPool.query(`
+              INSERT INTO commanders (callsign, email, picture_url, last_seen) 
+              VALUES ($1, $2, $3, NOW()) 
+              ON CONFLICT (callsign) DO UPDATE 
+              SET email = EXCLUDED.email, picture_url = EXCLUDED.picture_url, last_seen = NOW()
+            `, [client.name, client.email, client.picture]);
+          }
+
+          console.log(`✓ Google Auth Success: ${client.name} (${client.email}) connected.`);
+          
+          ws.send(JSON.stringify({ 
+            type: 'google_auth_success', 
+            name: client.name,
+            picture: client.picture
+          }));
+          
+          // Notify the room that this user was renamed/joined as someone else
+          broadcast({
+            type: 'player_joined',
+            name: client.name,
+            totalPlayers: connectedClients.size
+          }, ws);
+
+        } catch (err) {
+          console.error('⚠ Google Auth Failed:', err.message);
+          ws.send(JSON.stringify({ type: 'error', msg: 'Google Authentication failed.' }));
+        }
         break;
       }
 
@@ -316,6 +368,8 @@ async function startServer() {
       await pgPool.query(`
         CREATE TABLE IF NOT EXISTS commanders (
           callsign VARCHAR(64) PRIMARY KEY,
+          email VARCHAR(255),
+          picture_url TEXT,
           attacks INTEGER DEFAULT 0,
           damage BIGINT DEFAULT 0,
           created_at TIMESTAMPTZ DEFAULT NOW(),
