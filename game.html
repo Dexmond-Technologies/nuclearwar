@@ -857,6 +857,10 @@ const SFX = {
   toggleMute() {
     this.muted = !this.muted;
     document.getElementById('btn-vol').innerText = this.muted ? '🔈' : '🔊';
+    if (this.ctx) {
+      if (this.muted) this.ctx.suspend();
+      else this.ctx.resume();
+    }
   },
   _createNoiseBuffer(len) {
     if(!this.ctx) return null;
