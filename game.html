@@ -95,7 +95,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 .die.def{background:#001a30;border:2px solid #0af;color:#0af;}
 
 /* Chat */
-#chat-box{position:absolute;bottom:120px;left:calc(20px + 25vw + 15px);width:260px;background:rgba(0,5,15,.95);
+#chat-box{position:absolute;bottom:120px;left:calc(20px + 25vw + 80px);width:260px;background:rgba(0,5,15,.95);
   border:1px solid #0af;border-radius:8px;display:none;pointer-events:auto;z-index:200;
   box-shadow:0 0 15px rgba(0,170,255,0.4);}
 #chat-box.open{display:flex;flex-direction:column;}
@@ -104,10 +104,38 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 #chat-inp{flex:1;padding:6px 8px;background:transparent;border:none;color:#fff;
   font:10px 'Courier New',monospace;outline:none;}
 #chat-send{padding:6px 10px;background:#0af2;border:none;color:#0af;cursor:pointer;font-size:11px;}
-#btn-chat-toggle {
+#btn-term-toggle {
   position: absolute;
   left: calc(20px + 25vw + 15px);
-  bottom: 60px;
+  bottom: 450px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(0, 170, 255, 0.15);
+  border: 1px solid #0af;
+  color: #0af;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+  pointer-events: auto;
+  box-shadow: 0 0 15px rgba(0, 170, 255, 0.4);
+  transition: all 0.2s;
+  display: none;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+}
+#btn-term-toggle:hover {
+  background: rgba(0, 170, 255, 0.3);
+  box-shadow: 0 0 25px rgba(0, 170, 255, 0.8);
+  transform: scale(1.1);
+}
+#btn-chat-toggle {
+  position: absolute;
+  left: calc(20px + 25vw + 18px);
+  bottom: 57px;
   width: 50px;
   height: 50px;
   border-radius: 50%;
@@ -263,9 +291,9 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   background:rgba(0,10,20,.85); border:1px solid #0af; border-radius:4px;
   padding:6px 12px; flex-direction:column; gap:3px;
   box-shadow:0 0 15px rgba(0,170,255,0.15); backdrop-filter:blur(4px);
-  pointer-events:none; display:none; min-width:160px;
+  pointer-events:none; min-width:160px;
 }
-#user-stats-box.visible { display:flex; }
+#user-stats-box.visible { display:flex !important; }
 .us-title { font-size:10px; font-weight:bold; color:#0af; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; border-bottom:1px solid rgba(0,170,255,0.3); padding-bottom:2px;}
 .us-row { display:flex; justify-content:space-between; align-items:center; font-size:9px; color:#fff; gap:10px; }
 .us-label { opacity:0.7; letter-spacing:1px; text-transform:uppercase; }
@@ -487,6 +515,61 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   .atk-grid { flex-direction: column !important; overflow-y: auto !important; display: block !important; }
   .atk-preset { margin-bottom: 15px; }
 }
+
+/* ── STRATEGY DRAWER: global styles (all screen sizes) ── */
+.strat-drawer {
+  position:fixed;
+  bottom:80px;
+  left:calc(20px + 25vw + 80px);
+  background:rgba(0,6,18,0.97);
+  border:1px solid rgba(0,180,255,0.4);
+  border-radius:10px;
+  padding:18px 20px;
+  z-index:9999;
+  pointer-events:auto;
+  width:320px;
+  max-height:70vh;
+  overflow-y:auto;
+  font-family:'Courier New',monospace;
+  font-size:11px;
+  color:#9cf;
+  box-shadow:0 0 40px rgba(0,180,255,0.2), 0 0 0 9999px rgba(0,0,0,0.45);
+  animation:drawerSlideUp 0.2s ease-out;
+}
+@keyframes drawerSlideUp {
+  from { opacity:0; transform:translateY(12px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.strat-drawer-title {
+  font-family:'Orbitron',sans-serif; color:#0af; font-size:12px;
+  letter-spacing:3px; margin-bottom:12px; display:flex;
+  align-items:center; justify-content:space-between;
+}
+.strat-drawer-close {
+  background:none; border:none; color:#f55; cursor:pointer; font-size:14px;
+  padding:0; line-height:1;
+}
+.strat-drawer-btn {
+  display:block; width:100%; margin-bottom:5px; padding:7px 10px;
+  background:rgba(0,170,255,0.07); border:1px solid rgba(0,170,255,0.2);
+  color:#0af; cursor:pointer; border-radius:4px; text-align:left;
+  font-family:'Courier New',monospace; font-size:10px; letter-spacing:0.5px;
+  transition:background 0.12s;
+}
+.strat-drawer-btn:hover { background:rgba(0,170,255,0.18); border-color:#0af; }
+.strat-drawer-btn:disabled { opacity:0.4; cursor:not-allowed; }
+.strat-item {
+  margin-bottom:10px; padding:10px; border:1px solid rgba(0,170,255,0.15);
+  border-radius:6px; background:rgba(0,170,255,0.03);
+}
+.strat-item-title { color:#0f8; font-weight:bold; margin-bottom:3px; }
+.strat-item-desc { opacity:0.65; font-size:10px; margin-bottom:5px; line-height:1.4; }
+.strat-item-cost { color:#fa0; font-size:10px; }
+.strat-active-badge { color:#0f8; font-size:10px; margin-left:6px; }
+.modal-btn { padding:5px 12px; margin:3px 0; background:rgba(0,170,255,0.1);
+  border:1px solid #0af; color:#0af; cursor:pointer; border-radius:3px;
+  font-family:'Courier New',monospace; font-size:10px; }
+.modal-btn:hover { background:rgba(0,170,255,0.25); }
 </style>
 </head>
 <body>
@@ -549,6 +632,11 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       <div id="phase-label">—</div>
     </div>
     <div style="display:flex;gap:15px;pointer-events:auto;align-items:center;">
+      <div id="user-stats-box" style="text-align:left;">
+        <div class="us-title" id="us-name">COM-—</div>
+        <div class="us-row"><span class="us-label">Terr</span> <span class="us-val" id="us-terr">0</span></div>
+        <div class="us-row"><span class="us-label">Trp</span> <span class="us-val" id="us-trp">0</span></div>
+      </div>
       <div style="display:flex;gap:8px;">
         <button class="phase-btn" id="btn-end-turn" style="padding:10px 15px;">END TURN ▶</button>
       </div>
@@ -647,8 +735,8 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 <style>
 #ops-sidebar {
   position: fixed;
-  top: 80px;
-  right: calc(20px + 25vw + 10px);
+  bottom: 120px;
+  left: calc(20px + 25vw + 12px);
   display: none;
   flex-direction: column;
   gap: 8px;
@@ -744,6 +832,9 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     <span class="ops-tip">VOLUME</span>
   </button>
 </div>
+
+<!-- Terminal -->
+<button id="btn-term-toggle" style="display:none">&gt;</button>
 
 <!-- Chat -->
 <button id="btn-chat-toggle" style="display:none">💬</button>
@@ -1313,11 +1404,11 @@ function triggerNewsEvent(forcedText = null) {
 // =====================================================================
 // LIVE NEWS INTEGRATION (NewsAPI.world)
 // =====================================================================
-let nextLiveNewsTurn = 1 + Math.floor(Math.random() * 2); // First live news very soon
+let nextLiveNewsTurn = 5 + Math.floor(Math.random() * 4); // First live news between turn 5-8
 
 async function fetchLiveNews() {
   try {
-    const res = await fetch('https://newsdata.io/api/1/latest?apikey=pub_dc77351b8e74408fa6c399d04e1d6cff&language=en');
+    const res = await fetch('https://newsdata.io/api/1/latest?apikey=pub_dc77351b8e74408fa6c399d04e1d6cff&language=en&q=war%20OR%20attack%20OR%20bomb%20OR%20conflict');
     if (!res.ok) return;
     const data = await res.json();
     
@@ -1347,10 +1438,13 @@ async function fetchLiveNews() {
 const GLOBE_R = 1.0, RAD = Math.PI/180;
 
 // Dynamic WebSocket URL to support both local and production environments
-const WS_PROTOCOL = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-const WS_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-  ? `ws://${window.location.host}` 
-  : `${WS_PROTOCOL}//${window.location.host}`;
+let WS_URL = 'ws://localhost:8080';
+if (window.location.protocol !== 'file:') {
+  const WS_PROTOCOL = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  WS_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+    ? `ws://${window.location.host}` 
+    : `${WS_PROTOCOL}//${window.location.host}`;
+}
 
 const PLAYER_COLORS = [
   { hex:'#00dcff', int:0x00dcff, name:'HUMANITY' },
@@ -1808,7 +1902,10 @@ function initGame(playerNames, myIndex) {
   document.getElementById('dash-1').classList.add('visible');
   document.getElementById('user-stats-box').classList.add('visible');
   document.getElementById('ops-sidebar').classList.add('visible');
-  document.getElementById('btn-chat-toggle').style.display = 'block';
+  const termToggle = document.getElementById('btn-term-toggle');
+  if (termToggle) termToggle.style.display = 'flex';
+  const chatToggle = document.getElementById('btn-chat-toggle');
+  if (chatToggle) chatToggle.style.display = 'flex';
   updateDashboard();
   if(window._dashInterval) clearInterval(window._dashInterval);
   window._dashInterval = setInterval(updateDashboard, 1000);
@@ -2245,7 +2342,7 @@ function startTurn(playerIndex) {
     // If it is time for a LIVE news event from the API, we use that.
     if (GS.turnCount >= nextLiveNewsTurn) {
       setTimeout(() => fetchLiveNews(), 1000);
-      nextLiveNewsTurn = GS.turnCount + 1 + Math.floor(Math.random() * 2); // Next live news in 1-2 turns
+      nextLiveNewsTurn = GS.turnCount + 5 + Math.floor(Math.random() * 4); // Next live news in 5-8 turns
     } else if (Math.random() < 0.2) {
       setTimeout(() => triggerNewsEvent(), 1000);
     }
@@ -3447,11 +3544,11 @@ function applyState(s) {
   document.getElementById('hud').style.display='block';
   document.getElementById('dash-0').classList.add('visible');
   document.getElementById('dash-1').classList.add('visible');
-  document.getElementById('user-stats-box').classList.add('visible');
   document.getElementById('ops-sidebar').classList.add('visible');
-  document.getElementById('btn-chat-toggle').style.display = 'block';
-  document.getElementById('user-stats-box').classList.add('visible');
-  document.getElementById('ops-sidebar').classList.add('visible');
+  const termToggle = document.getElementById('btn-term-toggle');
+  if (termToggle) termToggle.style.display = 'flex';
+  const chatToggle = document.getElementById('btn-chat-toggle');
+  if (chatToggle) chatToggle.style.display = 'flex';
   
   refreshAllBorders(); buildTroopSprites(); updatePhaseUI();
   updateDashboard();
@@ -4195,175 +4292,332 @@ window.endTurn = function() {
   if (typeof _origEndTurn === 'function') _origEndTurn();
 };
 
-// Shared drawer open/close
+// =====================================================================
+// STRATEGY OPS — SHARED DRAWER ENGINE
+// =====================================================================
 let _openDrawerId = null;
-function closeAllModals() {
+
+window.closeAllModals = function() {
   document.querySelectorAll('.strat-drawer').forEach(d => d.remove());
   document.querySelectorAll('.ops-btn, .strat-icon-btn').forEach(b => b.classList.remove('active'));
   _openDrawerId = null;
-}
+  // Cancel any pending globe actions
+  window._pendingSpyAction = null;
+  window._pendingNaval = null;
+  const logEl = document.getElementById('log');
+  if (logEl && logEl._pendingHint) { logEl._pendingHint = false; }
+};
+function closeAllModals() { window.closeAllModals(); }
 
 function openDrawer(id, titleHtml, bodyHtml) {
-  // Toggle: if same drawer already open, close it
   if (_openDrawerId === id) { closeAllModals(); return; }
   closeAllModals();
   _openDrawerId = id;
-
-  // Append to body (NOT #hud) so pointer-events work
   const drawer = document.createElement('div');
   drawer.className = 'strat-drawer';
   drawer.id = 'drawer-' + id;
   drawer.innerHTML = `
     <div class="strat-drawer-title">
-      ${titleHtml}
-      <button class="strat-drawer-close" onclick="closeAllModals()">✕</button>
+      <span>${titleHtml}</span>
+      <button class="strat-drawer-close" onclick="window.closeAllModals()">✕</button>
     </div>
-    ${bodyHtml}
+    <div id="drawer-body-${id}">${bodyHtml}</div>
   `;
   document.body.appendChild(drawer);
   const btn = document.getElementById('ops-btn-' + id) || document.getElementById('btn-' + id);
   if (btn) btn.classList.add('active');
 }
 
+function _sfxClick() { try { if(SFX && SFX.playClick) SFX.playClick(); } catch(e) {} }
+
+// =====================================================================
+// DIPLOMACY
+// =====================================================================
 function showDiplomacyModal() {
-  SFX.playClick();
-  const body = Object.entries(TREATY_TYPES).map(([key,t]) => `
-    <div class="strat-item">
-      <div class="strat-item-title">${t.name}${hasTreaty(key)?'<span class="strat-active-badge">✓ ACTIVE</span>':''}</div>
+  _sfxClick();
+  if (GS.turn !== GS.myIndex) {
+    openDrawer('diplomacy', '🤝 DIPLOMACY', `<div style="color:#f55;text-align:center;padding:20px;">Diplomacy only available on YOUR TURN.</div>`);
+    return;
+  }
+  const activeTreaties = (GS.treaties||[]).filter(t=>t.turnsLeft>0);
+  const activeBanner = activeTreaties.length
+    ? `<div style="padding:7px;background:rgba(0,255,136,0.07);border:1px solid rgba(0,255,136,0.2);border-radius:4px;margin-bottom:10px;font-size:10px;color:#0f8;">
+        ACTIVE: ${activeTreaties.map(t=>TREATY_TYPES[t.type]?`${TREATY_TYPES[t.type].name} (${t.turnsLeft}T)`:'').join(' &nbsp;|&nbsp; ')}
+       </div>` : '';
+  const body = Object.entries(TREATY_TYPES).map(([key,t]) => {
+    const active = hasTreaty(key);
+    const canAfford = GS.players[GS.myIndex].budget >= (t.cost||0);
+    return `<div class="strat-item">
+      <div class="strat-item-title">${t.name}${active?'<span class="strat-active-badge">✓ ACTIVE</span>':''}</div>
       <div class="strat-item-desc">${t.desc}</div>
       <div class="strat-item-cost">Cost: ${t.cost||0} MIL · ${t.duration} turns</div>
-      <button class="strat-drawer-btn" onclick="proposeTreaty('${key}');closeAllModals();" ${hasTreaty(key)?'disabled':''}>
-        PROPOSE →
+      <button class="strat-drawer-btn" style="margin-top:5px;${!canAfford?'opacity:0.4;cursor:not-allowed;':''}"
+        ${active||!canAfford?'disabled':''}
+        onclick="proposeTreaty('${key}'); window.closeAllModals();">
+        ${active?'ACTIVE':'PROPOSE →'}${!canAfford?' (insufficient budget)':''}
       </button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   openDrawer('diplomacy', '🤝 DIPLOMACY', `
-    <p style="font-size:10px;opacity:0.6;margin-bottom:10px;">Offer terms to RAINCLOUD. AI acceptance depends on balance of power.</p>
-    ${body}
+    <p style="font-size:10px;opacity:0.6;margin-bottom:8px;">Offer terms to RAINCLOUD. AI acceptance depends on balance of power.</p>
+    ${activeBanner}${body}
   `);
 }
 
+// =====================================================================
+// ESPIONAGE
+// =====================================================================
 function showSpyModal() {
-  SFX.playClick();
-  const body = SPY_ACTIONS.map(a => `
-    <div class="strat-item">
+  _sfxClick();
+  if (GS.turn !== GS.myIndex) {
+    openDrawer('espionage', '🔎 ESPIONAGE', `<div style="color:#f55;text-align:center;padding:20px;">Espionage only available on YOUR TURN.</div>`);
+    return;
+  }
+  const budget = GS.players[GS.myIndex].budget;
+  const intelActive = GS.spyState && GS.spyState.intelActive > 0;
+  const body = SPY_ACTIONS.map(a => {
+    const canAfford = budget >= a.cost;
+    const boostPct = hasTech('CYBER_WARFARE') ? 30 : 0;
+    const effSuccess = Math.min(100, Math.round(a.successBase*100) + boostPct);
+    return `<div class="strat-item">
       <div class="strat-item-title">${a.name}</div>
       <div class="strat-item-desc">${a.desc}</div>
-      <div class="strat-item-cost">${a.cost} MIL · ${Math.round(a.successBase*100)}% success</div>
-      <button class="strat-drawer-btn" onclick="
-        window._pendingSpyAction='${a.id}';
-        closeAllModals();
-        setLog('🔎 Click an ENEMY territory to run: ${a.name}');
-      ">SELECT → CLICK GLOBE</button>
-    </div>`).join('');
+      <div class="strat-item-cost">${a.cost} MIL · ${effSuccess}% success${boostPct?` <span style="color:#0f8">(+${boostPct}% CYBER BOOST)</span>`:''}
+      </div>
+      <button class="strat-drawer-btn" style="margin-top:5px;${!canAfford?'opacity:0.4;cursor:not-allowed;':''}"
+        ${!canAfford?'disabled':''}
+        onclick="window._pendingSpyAction='${a.id}'; window.closeAllModals(); setLog('🔎 Click an ENEMY territory to execute: ${a.name}');">
+        SELECT MISSION → CLICK GLOBE
+      </button>
+    </div>`;
+  }).join('');
   openDrawer('espionage', '🔎 ESPIONAGE', `
-    <p style="font-size:10px;opacity:0.6;margin-bottom:10px;">Select action, then click a target on the globe.</p>
+    <p style="font-size:10px;opacity:0.6;margin-bottom:8px;">Select a mission, then click an enemy territory on the globe.</p>
+    ${intelActive?`<div style="padding:6px;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);border-radius:4px;margin-bottom:8px;font-size:10px;color:#0f8;">👁 INTEL ACTIVE (${GS.spyState.intelActive} turns)</div>`:''}
     ${body}
   `);
 }
 
+// =====================================================================
+// TECH TREE
+// =====================================================================
 function showTechModal() {
-  SFX.playClick();
+  _sfxClick();
   const pts = GS.tech ? (GS.tech.points || 0) : 0;
-  const perTurn = Math.max(1, Math.floor(Object.values(GS.countries||{}).filter(c=>c.owner===GS.myIndex).length/20));
-  const categories = ['MILITARY','CYBER','ECONOMIC','NUCLEAR','AIR','NAVAL'];
-  const body = categories.map(cat => {
+  const owned = Object.values(GS.countries||{}).filter(c=>c.owner===GS.myIndex).length;
+  const perTurn = Math.max(1, Math.floor(owned/20));
+  const isMyTurn = GS.turn === GS.myIndex;
+  const cats = ['MILITARY','CYBER','ECONOMIC','NUCLEAR','AIR','NAVAL'];
+  const body = cats.map(cat => {
     const nodes = TECH_NODES.filter(n => n.cat === cat);
     if (!nodes.length) return '';
-    return `<div style="margin-bottom:8px;">
-      <div style="color:#fa0;font-size:9px;letter-spacing:2px;margin-bottom:4px;">${cat}</div>
+    return `<div style="margin-bottom:10px;">
+      <div style="color:#fa0;font-size:9px;letter-spacing:2px;margin-bottom:5px;border-bottom:1px solid rgba(255,170,0,0.2);padding-bottom:3px;">${cat}</div>
       ${nodes.map(n => {
-        const u = hasTech(n.id);
+        const unlocked = hasTech(n.id);
         const prereqMet = n.requires.every(r => hasTech(r));
-        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;
-          border:1px solid ${u?'#0f8':prereqMet?'rgba(0,170,255,0.2)':'rgba(80,80,80,0.2)'};
-          border-radius:3px;margin-bottom:3px;opacity:${prereqMet||u?1:0.45};">
-          <span style="font-size:10px;">${n.name}<br><span style="opacity:0.6;font-size:9px;">${n.desc}</span></span>
-          ${u ? '<span style="color:#0f8;font-size:10px;">✓</span>' :
-            prereqMet ? `<button class="modal-btn" style="white-space:nowrap;" onclick="unlockTech('${n.id}');showTechModal();">${n.cost}pt</button>` :
-            '<span style="opacity:0.3;font-size:12px;">🔒</span>'}
+        const canAfford = pts >= n.cost;
+        const color = unlocked ? '#0f8' : prereqMet ? 'rgba(0,170,255,0.25)' : 'rgba(60,60,60,0.3)';
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border:1px solid ${color};border-radius:3px;margin-bottom:3px;opacity:${prereqMet||unlocked?1:0.45};">
+          <span>
+            <span style="font-size:10px;color:${unlocked?'#0f8':'#9cf'}">${n.name}</span>
+            <br><span style="opacity:0.6;font-size:9px;">${n.desc}</span>
+            ${n.requires.length&&!unlocked?`<br><span style="font-size:8px;color:#fa0;">Req: ${n.requires.join(', ')}</span>`:''}
+          </span>
+          ${unlocked
+            ? '<span style="color:#0f8;font-size:14px;">✓</span>'
+            : prereqMet && isMyTurn && canAfford
+              ? `<button class="modal-btn" onclick="unlockTech('${n.id}'); showTechModal();" style="white-space:nowrap;">${n.cost}pt</button>`
+              : prereqMet && isMyTurn && !canAfford
+                ? `<span style="color:#f55;font-size:9px;">${n.cost}pt</span>`
+                : '<span style="opacity:0.3;font-size:16px;">🔒</span>'}
         </div>`;
       }).join('')}
     </div>`;
   }).join('');
   openDrawer('tech', '🔬 TECH TREE', `
-    <div style="margin-bottom:10px;padding:7px;background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.15);border-radius:4px;">
-      Research Points: <b style="color:#0f8;">${pts}</b> &nbsp;+${perTurn}/turn
+    <div style="padding:7px;background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.15);border-radius:4px;margin-bottom:10px;font-size:10px;">
+      Research Points: <b style="color:#0f8;">${pts}</b> &nbsp; <span style="opacity:0.7">+${perTurn}/turn · ${owned} territories</span>
     </div>
+    ${!isMyTurn?'<div style="color:#f55;font-size:10px;margin-bottom:8px;">⚠ Research only available on your turn.</div>':''}
     ${body}
   `);
 }
 
+// =====================================================================
+// NAVAL & AIR OPS
+// =====================================================================
 function showNavalModal() {
-  SFX.playClick();
-  const fleets = Object.values(GS.countries||{}).filter(c=>c.owner===GS.myIndex&&c.ships>0).map(c=>`${c.name}(${c.ships}⚓)`).join(', ')||'None';
-  const wings =  Object.values(GS.countries||{}).filter(c=>c.owner===GS.myIndex&&c.airwings>0).map(c=>`${c.name}(${c.airwings}✈)`).join(', ')||'None';
-  const btns = [
-    ['DEPLOY',   '⚓ Deploy Fleet (100 MIL)',      'Click YOUR territory'],
-    ['BLOCKADE', '🚫 Blockade Enemy (1 fleet)',     'Click ENEMY territory'],
-    ['BOMBING',  '✈ Strategic Bombing (1 wing)',    'Click ENEMY territory'],
-    ['DEVELOP',  '🏗 Develop Infrastructure',       'Click YOUR territory'],
+  _sfxClick();
+  if (GS.turn !== GS.myIndex) {
+    openDrawer('naval', '⚓ NAVAL & AIR OPS', `<div style="color:#f55;text-align:center;padding:20px;">Naval ops only available on YOUR TURN.</div>`);
+    return;
+  }
+  const myCountries = Object.values(GS.countries||{}).filter(c=>c.owner===GS.myIndex);
+  const totalFleets = myCountries.reduce((s,c)=>s+(c.ships||0),0);
+  const totalWings = myCountries.reduce((s,c)=>s+(c.airwings||0),0);
+  const budget = GS.players[GS.myIndex].budget;
+  const stealth = hasTech('STEALTH_BOMBERS');
+  const carrier = hasTech('CARRIER_STRIKE');
+
+  const ops = [
+    {
+      id:'DEPLOY', icon:'⚓', label:'Deploy Naval Fleet',
+      cost:'100 MIL', desc:'Build a fleet in one of your coastal territories. Fleets enable blockades and naval attacks.',
+      hint:'Click YOUR territory', canUse: budget >= 100
+    },
+    {
+      id:'BLOCKADE', icon:'🚫', label:'Blockade Enemy Port',
+      cost:`1 Fleet (have: ${totalFleets})`, desc:'Cut off enemy income from a coastal territory. Reduces their budget by 20% for 3 turns.',
+      hint:'Click ENEMY territory', canUse: totalFleets > 0
+    },
+    {
+      id:'BOMBING', icon:'✈', label:'Strategic Air Strike',
+      cost:`1 Air Wing (have: ${totalWings})${stealth?' · STEALTH':''}`, desc:`Destroy enemy territory output. ${stealth?'Stealth tech bypasses air defense.':'Opposed by enemy air defense.'}`,
+      hint:'Click ENEMY territory', canUse: totalWings > 0
+    },
+    {
+      id:'AIRWING', icon:'🛩', label:'Build Air Wing',
+      cost:'80 MIL', desc:'Add an air wing to one of your territories to enable air strikes and air defense.',
+      hint:'Click YOUR territory', canUse: budget >= 80
+    },
+    {
+      id:'DEVELOP', icon:'🏗', label:'Develop Infrastructure',
+      cost:'50–250 MIL', desc:'Upgrade territory infrastructure (max level 5). Each level increases income output.',
+      hint:'Click YOUR territory', canUse: budget >= 50
+    },
   ];
-  const body = btns.map(([action, label, hint]) => `
-    <button class="strat-drawer-btn" onclick="
-      window._pendingNaval='${action}';
-      closeAllModals();
-      setLog('${hint} after selecting ${label}');
-    ">${label}<span style="float:right;opacity:0.5;font-size:9px;">${hint}</span></button>
-  `).join('');
+  if (carrier) ops.push({
+    id:'CARRIER_ATK', icon:'🛳', label:'Carrier Strike Group',
+    cost:`2 Fleets (have: ${totalFleets})`, desc:'CARRIER STRIKE: Naval attack on any coastal territory, bypassing land borders.',
+    hint:'Click ANY coastal territory', canUse: totalFleets >= 2
+  });
+
+  const body = ops.map(op => `
+    <div class="strat-item" style="${!op.canUse?'opacity:0.5':''}">
+      <div class="strat-item-title">${op.icon} ${op.label}</div>
+      <div class="strat-item-desc">${op.desc}</div>
+      <div class="strat-item-cost">${op.cost}</div>
+      <button class="strat-drawer-btn" style="margin-top:5px;" ${!op.canUse?'disabled':''}
+        onclick="window._pendingNaval='${op.id}'; window.closeAllModals(); setLog('${op.hint} to: ${op.label}');">
+        SELECT → CLICK GLOBE
+      </button>
+    </div>`).join('');
+
   openDrawer('naval', '⚓ NAVAL & AIR OPS', `
-    ${body}
-    <div style="margin-top:10px;font-size:9px;opacity:0.55;line-height:1.6;">
-      Fleets: ${fleets}<br>Air Wings: ${wings}
+    <div style="display:flex;gap:15px;margin-bottom:10px;font-size:10px;">
+      <span>⚓ Fleets: <b style="color:#0af">${totalFleets}</b></span>
+      <span>✈ Air Wings: <b style="color:#0af">${totalWings}</b></span>
+      <span>💰 Budget: <b style="color:#0f8">${budget} MIL</b></span>
     </div>
+    ${body}
   `);
 }
 
+// =====================================================================
+// WEATHER
+// =====================================================================
 function showWeatherInfo() {
-  SFX.playClick();
+  _sfxClick();
   const s = GS.weather || { season:'SPRING', turnCount:0 };
   const next = 4 - (s.turnCount % 4);
-  openDrawer('weather', '🌍 WEATHER / SEASON', `
-    <div style="margin-bottom:8px;">Season: <b style="color:#0f8;">${s.season}</b>
-    &nbsp;·&nbsp;Next in <b>${next}</b> turn(s)</div>
+  const seasonColor = { SPRING:'#0f8', SUMMER:'#fa0', AUTUMN:'#f80', WINTER:'#0af' }[s.season] || '#9cf';
+  const icons = { SPRING:'🌸', SUMMER:'☀', AUTUMN:'🍂', WINTER:'❄' };
+  const myTerr = Object.entries(GS.countries||{}).filter(([iso,c])=>c.owner===GS.myIndex);
+  const affectedWinter = myTerr.filter(([iso])=>WEATHER_ZONES.WINTER_BELT.isoPatterns.includes(iso)).length;
+  const affectedMonsoon = myTerr.filter(([iso])=>WEATHER_ZONES.MONSOON_BELT.isoPatterns.includes(iso)).length;
+
+  openDrawer('weather', '🌍 WEATHER & SEASONS', `
+    <div style="text-align:center;padding:12px;margin-bottom:12px;background:rgba(0,170,255,0.05);border:1px solid rgba(0,170,255,0.15);border-radius:6px;">
+      <div style="font-size:28px;">${icons[s.season]||'🌍'}</div>
+      <div style="color:${seasonColor};font-size:14px;letter-spacing:3px;font-weight:bold;">${s.season}</div>
+      <div style="opacity:0.6;font-size:9px;margin-top:4px;">Next season in ${next} turn(s)</div>
+    </div>
+    <div style="font-size:10px;margin-bottom:8px;opacity:0.7;">Your territories affected:</div>
     <div class="strat-item">
-      <div class="strat-item-title">❄ Winter (Russia, Scandinavia, Canada)</div>
-      <div class="strat-item-desc">Ground attack −25% · Defense +10%</div>
+      <div class="strat-item-title">❄ Winter Belt — ${affectedWinter} territories</div>
+      <div class="strat-item-desc">Russia, Scandinavia, Canada, Baltics</div>
+      <div class="strat-item-cost">${s.season==='WINTER'?'<span style="color:#f55">ACTIVE: Attack −25% · Defense +10%</span>':'Inactive this season'}</div>
     </div>
     <div class="strat-item">
-      <div class="strat-item-title">🌧 Monsoon (South & East Asia)</div>
-      <div class="strat-item-desc">Ground attack −15% · Defense +5%</div>
+      <div class="strat-item-title">🌧 Monsoon Belt — ${affectedMonsoon} territories</div>
+      <div class="strat-item-desc">India, Southeast Asia, Indonesia, Philippines</div>
+      <div class="strat-item-cost">${s.season==='MONSOON'||s.season==='SUMMER'?'<span style="color:#f55">ACTIVE: Attack −15% · Defense +5%</span>':'Inactive this season'}</div>
+    </div>
+    <div style="margin-top:10px;font-size:9px;opacity:0.55;padding:6px;border:1px solid rgba(255,255,255,0.05);border-radius:4px;">
+      💡 Weather modifiers are automatically applied during attack resolution.
     </div>
   `);
 }
 
-// Hook globe clicks for pending spy/naval actions
+// =====================================================================
+// GLOBE CLICK INTERCEPT — pending spy / naval actions
+// =====================================================================
 const _origHandleGlobeClick = window.handleGlobeClick;
 window.handleGlobeClick = function(iso) {
   if (window._pendingSpyAction && iso) {
-    executeSpyAction(window._pendingSpyAction, iso);
+    const action = window._pendingSpyAction;
     window._pendingSpyAction = null;
+    executeSpyAction(action, iso);
     return;
   }
   if (window._pendingNaval && iso) {
     const action = window._pendingNaval;
     window._pendingNaval = null;
-    if (action === 'DEPLOY') deployNavalFleet(iso);
-    else if (action === 'BLOCKADE') navalBlockade(iso);
-    else if (action === 'BOMBING') strategicBombing(iso);
-    else if (action === 'DEVELOP') developTerritory(iso);
+    if      (action === 'DEPLOY')      deployNavalFleet(iso);
+    else if (action === 'AIRWING')     deployAirWing(iso);
+    else if (action === 'BLOCKADE')    navalBlockade(iso);
+    else if (action === 'BOMBING')     strategicBombing(iso);
+    else if (action === 'DEVELOP')     developTerritory(iso);
+    else if (action === 'CARRIER_ATK') carrierStrike(iso);
     return;
   }
   if (typeof _origHandleGlobeClick === 'function') _origHandleGlobeClick(iso);
 };
 
+// Deploy Air Wing
+function deployAirWing(iso) {
+  if (GS.turn !== GS.myIndex) return;
+  const c = GS.countries[iso];
+  if (!c || c.owner !== GS.myIndex) { setLog('✈ Select YOUR territory to build an air wing.'); return; }
+  const cost = 80;
+  if (GS.players[GS.myIndex].budget < cost) { setLog(`✈ Need ${cost} MIL to build air wing.`); return; }
+  GS.players[GS.myIndex].budget -= cost;
+  c.airwings = (c.airwings||0) + 1;
+  setLog(`✈ Air wing deployed in ${c.name}.`);
+  triggerNewsEvent(`${c.name.toUpperCase()} AIR BASE DECLARED OPERATIONAL`);
+  if (GS.isOnline) syncState();
+}
+
+// Carrier Strike (requires CARRIER_STRIKE tech)
+function carrierStrike(iso) {
+  if (GS.turn !== GS.myIndex) return;
+  const myFleets = Object.entries(GS.countries).filter(([,c])=>c.owner===GS.myIndex&&c.ships>=1);
+  if (myFleets.length < 2) { setLog('🛳 Carrier strike requires 2 fleets.'); return; }
+  const tgt = GS.countries[iso];
+  if (!tgt || tgt.owner === GS.myIndex) { setLog('🛳 Select an ENEMY territory.'); return; }
+  // Consume 2 fleet movements
+  let consumed = 0;
+  for (const [fiso, fc] of myFleets) {
+    if (consumed >= 2) break;
+    fc.ships--; consumed++;
+  }
+  const dmg = Math.ceil(tgt.troops * 0.4);
+  tgt.troops = Math.max(0, tgt.troops - dmg);
+  if (tgt.troops === 0) { tgt.owner = GS.myIndex; tgt.troops = 1; refreshBorder(iso); updateTroopSprite(iso); }
+  setLog(`🛳 CARRIER STRIKE on ${tgt.name}: −${dmg} troops destroyed!`);
+  triggerNewsEvent(`CARRIER STRIKE GROUP HITS ${tgt.name.toUpperCase()} — HEAVY CASUALTIES`);
+  if (GS.isOnline) syncState();
+}
+
 // Initialize doomsday clock after game starts
 const _origInitGame = window.initGame;
 window.initGame = function(names, idx) {
   if (typeof _origInitGame === 'function') _origInitGame(names, idx);
-  setTimeout(() => {
-    renderDoomsdayClock();
-  }, 1000);
+  setTimeout(() => { renderDoomsdayClock(); }, 1000);
 };
+
+
 
 </script>
 </body>
