@@ -73,6 +73,7 @@ const wss = new WebSocket.Server({ server });
 let globalGameState = null;
 const connectedClients = new Set();
 let playerCounter = 0;
+const chatHistory = [];
 
 // Database initialization and state parsing logic moved to startServer() at the bottom
 
@@ -104,7 +105,8 @@ wss.on('connection', ws => {
   ws.send(JSON.stringify({ 
     type: 'saved_state', 
     gameState: globalGameState,
-    isHost: client.isHost
+    isHost: client.isHost,
+    chatHistory: chatHistory
   }));
   
   // Notify others
@@ -144,6 +146,15 @@ wss.on('connection', ws => {
         }, ws);
         break;
       }
+      
+      case 'ai_log': {
+        // Relay Raincloud reasoning to all clients
+        broadcast({
+          type: 'ai_log',
+          msg: msg.msg
+        }, ws);
+        break;
+      }
 
       case 'get_saved_state': {
         // Redundant, but just in case they ask again
@@ -152,10 +163,14 @@ wss.on('connection', ws => {
       }
 
       case 'chat': {
+        const chatObj = { name: client.name, text: msg.text };
+        chatHistory.push(chatObj);
+        if (chatHistory.length > 50) chatHistory.shift();
+        
         broadcastAll({
           type: 'chat',
-          name: client.name,
-          text: msg.text
+          name: chatObj.name,
+          text: chatObj.text
         });
         break;
       }
