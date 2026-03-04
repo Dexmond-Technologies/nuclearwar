@@ -143,7 +143,7 @@ function initWebSockets() {
     totalPlayers: connectedClients.size
   }, ws);
 
-  ws.on('message', raw => {
+  ws.on('message', async raw => {
     let msg;
     try { msg = JSON.parse(raw); } catch { return; }
 
@@ -213,6 +213,52 @@ function initWebSockets() {
         }));
         break;
       }
+
+      case 'get_commander_stats': {
+        const callsign = msg.callsign;
+        if (!pgPool || !callsign) return;
+        try {
+          // Upsert commander record
+          let res = await pgPool.query(`
+            INSERT INTO commanders (callsign, last_seen) 
+            VALUES ($1, NOW()) 
+            ON CONFLICT (callsign) DO UPDATE SET last_seen = NOW() 
+            RETURNING attacks, damage
+          `, [callsign]);
+          
+          ws.send(JSON.stringify({
+            type: 'commander_stats',
+            stats: { attacks: res.rows[0].attacks, damage: parseInt(res.rows[0].damage) }
+          }));
+        } catch (err) {
+          console.error('DB Error on get_commander_stats:', err.message);
+        }
+        break;
+      }
+
+      case 'record_attack': {
+        const callsign = msg.callsign;
+        const damage = msg.damage || 0;
+        if (!pgPool || !callsign) return;
+        try {
+          let res = await pgPool.query(`
+            UPDATE commanders 
+            SET attacks = attacks + 1, damage = damage + $2, last_seen = NOW()
+            WHERE callsign = $1
+            RETURNING attacks, damage
+          `, [callsign, damage]);
+          
+          if (res.rowCount > 0) {
+            ws.send(JSON.stringify({
+              type: 'commander_stats',
+              stats: { attacks: res.rows[0].attacks, damage: parseInt(res.rows[0].damage) }
+            }));
+          }
+        } catch (err) {
+          console.error('DB Error on record_attack:', err.message);
+        }
+        break;
+      }
     }
   });
 
@@ -248,7 +294,18 @@ async function startServer() {
           updated_at TIMESTAMPTZ DEFAULT NOW()
         )
       `);
-      console.log('☢ PostgreSQL connected — game_state table ready');
+      
+      await pgPool.query(`
+        CREATE TABLE IF NOT EXISTS commanders (
+          callsign VARCHAR(64) PRIMARY KEY,
+          attacks INTEGER DEFAULT 0,
+          damage BIGINT DEFAULT 0,
+          created_at TIMESTAMPTZ DEFAULT NOW(),
+          last_seen TIMESTAMPTZ DEFAULT NOW()
+        )
+      `);
+      
+      console.log('☢ PostgreSQL connected — game_state and commanders tables ready');
       const state = await loadGameState();
       if (state) globalGameState = state;
     } catch (err) {

@@ -1707,13 +1707,8 @@ function updateDashboard() {
     }
   });
 
-  // Global UI Update for User Stats Box
-  if (GS.globalMetrics) {
-    const atkEl = document.getElementById('us-attacks');
-    const dmgEl = document.getElementById('us-damage');
-    if (atkEl) atkEl.textContent = (GS.globalMetrics.userAttacks || 0).toLocaleString();
-    if (dmgEl) dmgEl.textContent = formatTroops(GS.globalMetrics.userDamage || 0) + ' MILS';
-  }
+  // Local UI Update for User Stats Box - handled by WebSocket response now.
+  // The US UI is updated directly via 'commander_stats' WSS event.
 }
 
 // =====================================================================
@@ -2564,10 +2559,13 @@ function executeAttackPreset(type) {
     let al=0,dl=0;
     for(let i=0;i<Math.min(aR.length,dR.length);i++){if(aR[i]>dR[i])dl++;else al++;}
     
-    // User Stats Tracker
-    if (GS.globalMetrics) {
-      GS.globalMetrics.userAttacks = (GS.globalMetrics.userAttacks || 0) + 1;
-      GS.globalMetrics.userDamage = (GS.globalMetrics.userDamage || 0) + dl;
+    // Sync damage to Player Profile DB
+    if (ws && ws.readyState === 1 && dl > 0) {
+       ws.send(JSON.stringify({
+         type: 'record_attack',
+         callsign: document.getElementById('player-name').value || 'Commander',
+         damage: dl
+       }));
     }
     
     op.fromC.troops-=al; op.toC.troops-=dl;
@@ -3200,6 +3198,13 @@ function initWS() {
         }
         break;
       }
+      case 'commander_stats': {
+        const atkEl = document.getElementById('us-attacks');
+        const dmgEl = document.getElementById('us-damage');
+        if (atkEl && msg.stats) atkEl.textContent = (msg.stats.attacks || 0).toLocaleString();
+        if (dmgEl && msg.stats) dmgEl.textContent = formatTroops(msg.stats.damage || 0) + ' MILS';
+        break;
+      }
       case 'error':
         document.getElementById('lobby-msg').textContent=msg.msg; break;
     }
@@ -3302,7 +3307,10 @@ function joinGlobalWar() {
   
   // Give the ws a second to open and rename
   setTimeout(() => {
-    if(ws && ws.readyState === 1) ws.send(JSON.stringify({type:'rename', name:nm}));
+    if(ws && ws.readyState === 1) {
+      ws.send(JSON.stringify({type:'rename', name:nm}));
+      ws.send(JSON.stringify({type:'get_commander_stats', callsign:nm}));
+    }
   }, 500);
 }
 
