@@ -35,13 +35,18 @@ async function loadGameState() {
   return null;
 }
 
+// Path for fallback json persistence. 
+// Can be set to a mapped persistent disk on Render via DATA_DIR environment variable
+const dataDir = process.env.DATA_DIR || __dirname;
+const jsonFallbackPath = path.join(dataDir, 'game_state.json');
+
 async function saveGameState(gs) {
   // Always update global cache and local file fallback
   globalGameState = gs;
   try {
-    fs.writeFileSync(path.join(__dirname, 'game_state.json'), JSON.stringify(gs));
+    fs.writeFileSync(jsonFallbackPath, JSON.stringify(gs));
   } catch (e) {
-    console.error('⚠ Failed to save to game_state.json:', e.message);
+    console.error(`⚠ Failed to save to ${jsonFallbackPath}:`, e.message);
   }
 
   if (!pgPool) return;
@@ -58,10 +63,9 @@ async function saveGameState(gs) {
 
 async function loadGameStateFallback() {
   try {
-    const p = path.join(__dirname, 'game_state.json');
-    if (fs.existsSync(p)) {
-      const data = fs.readFileSync(p, 'utf8');
-      console.log('✓ Loaded persisted game state from local JSON fallback');
+    if (fs.existsSync(jsonFallbackPath)) {
+      const data = fs.readFileSync(jsonFallbackPath, 'utf8');
+      console.log(`✓ Loaded persisted game state from ${jsonFallbackPath}`);
       return JSON.parse(data);
     }
   } catch (e) {
