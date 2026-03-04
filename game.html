@@ -1206,8 +1206,39 @@ async function loadCountries(retries = 3) {
 
     if (!geos.length) return;
 
-    const lat = sumLat/cnt, lon = sumLon/cnt;
-    countryData[iso] = { name: p.name||iso, lat, lon, polys };
+    // Calculate bounding box for the country to sample random points
+    let minLat = 90, maxLat = -90, minLon = 180, maxLon = -180;
+    polys.forEach(poly => {
+      poly.forEach(pt => {
+        if(pt.lat < minLat) minLat = pt.lat;
+        if(pt.lat > maxLat) maxLat = pt.lat;
+        if(pt.lon < minLon) minLon = pt.lon;
+        if(pt.lon > maxLon) maxLon = pt.lon;
+      });
+    });
+
+    let bestLat = sumLat/cnt;
+    let bestLon = sumLon/cnt;
+
+    // 85% chance to force the point onto explicit dry land (inside the polygon)
+    // 15% chance to let it naturally fall near the coast/water as per user request
+    if (Math.random() < 0.85) {
+      for(let iter = 0; iter < 100; iter++) {
+        const testLat = minLat + Math.random() * (maxLat - minLat);
+        const testLon = minLon + Math.random() * (maxLon - minLon);
+        let inside = false;
+        for (const poly of polys) {
+          if (pointInPoly(testLat, testLon, poly)) { inside = true; break; }
+        }
+        if (inside) {
+          bestLat = testLat;
+          bestLon = testLon;
+          break;
+        }
+      }
+    }
+
+    countryData[iso] = { name: p.name||iso, lat: bestLat, lon: bestLon, polys };
 
     // Draw border lines
     // Build border lines geometry but do not render them on the globe
