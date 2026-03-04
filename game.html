@@ -204,6 +204,20 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   100% { box-shadow:0 0 10px rgba(255,50,50,0.2); }
 }
 
+/* User Stats Box */
+#user-stats-box {
+  position:absolute; right: calc(20px + 25vw + 15px); bottom:45px; width:220px;
+  background:rgba(0,10,20,.85); border:1px solid #0af; border-radius:4px;
+  padding:10px 15px; display:flex; flex-direction:column; gap:6px;
+  box-shadow:0 0 15px rgba(0,170,255,0.15); backdrop-filter:blur(4px);
+  pointer-events:none; z-index:90; display:none;
+}
+#user-stats-box.visible { display:flex; }
+.us-title { font-size:12px; font-weight:bold; color:#0af; text-transform:uppercase; letter-spacing:2px; margin-bottom:2px; border-bottom:1px solid rgba(0,170,255,0.3); padding-bottom:4px;}
+.us-row { display:flex; justify-content:space-between; align-items:center; font-size:10px; color:#fff; }
+.us-label { opacity:0.7; letter-spacing:1px; text-transform:uppercase; }
+.us-val { font-weight:bold; color:#0f8; }
+
 .dash-header{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
 .dash-dot{width:12px;height:12px;border-radius:50%;}
 .dash-pname{font-size:15px;letter-spacing:2px;font-weight:bold;text-transform:uppercase;}
@@ -435,10 +449,16 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       <div style="opacity:0.5">> AWAITING COMBAT DATA...</div>
     </div>
   </div>
-  
   <a href="https://worldmonitor-qt6l.onrender.com/" target="_blank" class="war-room-btn" id="btn-war-room">
     ► VISIT WAR-ROOM LIVE 🎥
   </a>
+
+  <!-- USER STATS BOX -->
+  <div id="user-stats-box">
+    <div class="us-title" id="us-name">COMMANDER</div>
+    <div class="us-row"><span class="us-label">Total Attacks:</span><span class="us-val" id="us-attacks">0</span></div>
+    <div class="us-row"><span class="us-label">Total Damage:</span><span class="us-val" id="us-damage">0 MILS</span></div>
+  </div>
 
 </div>
 
@@ -1189,8 +1209,20 @@ function updateDashboard() {
     if(pi===0){
       const pEl=document.getElementById('d0-players');
       if(pEl) pEl.textContent=`⚡ ${GS.players[0].name.toUpperCase()} IN COMMAND`;
+      
+      // Update User Stats box name
+      const usName = document.getElementById('us-name');
+      if(usName) usName.textContent = GS.players[0].name;
     }
   });
+
+  // Global UI Update for User Stats Box
+  if (GS.globalMetrics) {
+    const atkEl = document.getElementById('us-attacks');
+    const dmgEl = document.getElementById('us-damage');
+    if (atkEl) atkEl.textContent = (GS.globalMetrics.userAttacks || 0).toLocaleString();
+    if (dmgEl) dmgEl.textContent = formatTroops(GS.globalMetrics.userDamage || 0) + ' MILS';
+  }
 }
 
 // =====================================================================
@@ -1722,6 +1754,12 @@ function tryAttack(targetIso) {
       def.troops -= defLoss;
       updateTroopSprite(attackingFrom);
 
+      // User Stats Tracker
+      if (GS.globalMetrics) {
+        GS.globalMetrics.userAttacks = (GS.globalMetrics.userAttacks || 0) + 1;
+        GS.globalMetrics.userDamage = (GS.globalMetrics.userDamage || 0) + defLoss;
+      }
+
       if (def.troops <= 0) {
         // Conquer!
         const moveTroops = Math.min(atk.troops-1, atkDice);
@@ -1936,6 +1974,12 @@ function executeAttackPreset(type) {
     const dR=Array.from({length:defD},()=>1+Math.floor(Math.random()*6)).sort((a,b)=>b-a);
     let al=0,dl=0;
     for(let i=0;i<Math.min(aR.length,dR.length);i++){if(aR[i]>dR[i])dl++;else al++;}
+    
+    // User Stats Tracker
+    if (GS.globalMetrics) {
+      GS.globalMetrics.userAttacks = (GS.globalMetrics.userAttacks || 0) + 1;
+      GS.globalMetrics.userDamage = (GS.globalMetrics.userDamage || 0) + dl;
+    }
     
     op.fromC.troops-=al; op.toC.troops-=dl;
     
@@ -2538,7 +2582,11 @@ function applyState(s) {
   GS.isOnline=true; GS.myIndex=0; 
   
   if(s.AI_STATE) GS.AI_STATE = s.AI_STATE;
-  if(s.globalMetrics) GS.globalMetrics = s.globalMetrics;
+  if(s.globalMetrics) {
+    GS.globalMetrics = s.globalMetrics;
+    if(GS.globalMetrics.userAttacks === undefined) GS.globalMetrics.userAttacks = 0;
+    if(GS.globalMetrics.userDamage === undefined) GS.globalMetrics.userDamage = 0;
+  }
   
   // Restore GS.players properly
   if (GS.players.length === 0) {
@@ -2557,6 +2605,7 @@ function applyState(s) {
   document.getElementById('hud').style.display='block';
   document.getElementById('dash-0').classList.add('visible');
   document.getElementById('dash-1').classList.add('visible');
+  document.getElementById('user-stats-box').classList.add('visible');
   
   refreshAllBorders(); buildTroopSprites(); updatePhaseUI();
   updateDashboard();
