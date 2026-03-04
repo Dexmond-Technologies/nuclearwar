@@ -607,6 +607,111 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 
 </div>
 
+<!-- =====================================================================
+     OPS SIDEBAR — fixed vertical pill bar, RIGHT edge of left dashboard
+     Lives OUTSIDE #hud so pointer-events work perfectly
+     ===================================================================== -->
+<style>
+#ops-sidebar {
+  position: fixed;
+  top: 80px;
+  left: calc(20px + 25vw + 10px);
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(0, 8, 22, 0.88);
+  border: 1px solid rgba(0, 180, 255, 0.35);
+  border-radius: 28px;
+  padding: 10px 7px;
+  z-index: 500;
+  pointer-events: auto;
+  box-shadow: 0 0 20px rgba(0, 170, 255, 0.12), 0 4px 30px rgba(0,0,0,0.5);
+  backdrop-filter: blur(8px);
+}
+#ops-sidebar.visible { display: flex; }
+
+.ops-btn {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  min-height: 42px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 170, 255, 0.35);
+  background: rgba(0, 170, 255, 0.08);
+  color: #0af;
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: auto;
+  position: relative;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+  flex-shrink: 0;
+}
+.ops-btn:hover, .ops-btn.active {
+  background: rgba(0, 170, 255, 0.28);
+  border-color: #0af;
+  box-shadow: 0 0 14px rgba(0, 180, 255, 0.5);
+}
+.ops-btn[data-vol] {
+  border-color: rgba(255, 200, 0, 0.35);
+  color: #fa0;
+}
+.ops-btn[data-vol]:hover {
+  background: rgba(255, 180, 0, 0.18);
+  border-color: #fa0;
+  box-shadow: 0 0 14px rgba(255, 180, 0, 0.4);
+}
+.ops-tip {
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 8, 20, 0.95);
+  border: 1px solid rgba(0, 180, 255, 0.35);
+  border-radius: 5px;
+  padding: 4px 10px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  font-family: 'Courier New', monospace;
+  color: #9cf;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+.ops-btn:hover .ops-tip { opacity: 1; }
+</style>
+
+<div id="ops-sidebar">
+  <button class="ops-btn" onclick="showDiplomacyModal()" id="ops-btn-diplomacy">
+    <i class="fa-solid fa-handshake"></i>
+    <span class="ops-tip">DIPLOMACY</span>
+  </button>
+  <button class="ops-btn" onclick="showSpyModal()" id="ops-btn-espionage">
+    <i class="fa-solid fa-user-secret"></i>
+    <span class="ops-tip">ESPIONAGE</span>
+  </button>
+  <button class="ops-btn" onclick="showTechModal()" id="ops-btn-tech">
+    <i class="fa-solid fa-microscope"></i>
+    <span class="ops-tip">TECH TREE</span>
+  </button>
+  <button class="ops-btn" onclick="showNavalModal()" id="ops-btn-naval">
+    <i class="fa-solid fa-anchor"></i>
+    <span class="ops-tip">NAVAL / AIR</span>
+  </button>
+  <button class="ops-btn" onclick="showWeatherInfo()" id="ops-btn-weather">
+    <i class="fa-solid fa-cloud-sun"></i>
+    <span class="ops-tip">WEATHER</span>
+  </button>
+  <button class="ops-btn" data-vol="1" onclick="SFX.toggleMute(); this.innerHTML = SFX.muted ? '<i class=\'fa-solid fa-volume-xmark\'></i><span class=\'ops-tip\'>VOLUME</span>' : '<i class=\'fa-solid fa-volume-high\'></i><span class=\'ops-tip\'>VOLUME</span>'">
+    <i class="fa-solid fa-volume-high"></i>
+    <span class="ops-tip">VOLUME</span>
+  </button>
+</div>
+
 <!-- Chat -->
 <button id="chat-toggle" style="display:none">💬</button>
 <div id="chat-box">
@@ -3306,6 +3411,7 @@ function applyState(s) {
   document.getElementById('dash-0').classList.add('visible');
   document.getElementById('dash-1').classList.add('visible');
   document.getElementById('user-stats-box').classList.add('visible');
+  document.getElementById('ops-sidebar').classList.add('visible');
   
   refreshAllBorders(); buildTroopSprites(); updatePhaseUI();
   updateDashboard();
