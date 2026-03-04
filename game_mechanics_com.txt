@@ -1,0 +1,75 @@
+# NUCLEAR WAR - Game Mechanics & Commands Overview
+
+## Core Gameplay
+Nuclear War is a turn-based global domination strategy game played on a 3D spherical rendering of Earth. The framework is heavily inspired by the classic board game "Risk", but expanded with modern warfare tactics, asynchronous multiplayer capabilities, dynamic AI, and an economic system. Players ("COMMANDERS") fight against a sophisticated AI opponent known as "RAINCLOUD" (or against each other).
+
+## Factions
+1. **Humanity / Commander (Player 0):** Represents human coalition forces. Relies on economy, strategic perks, and troop management.
+2. **RAINCLOUD (Player 1):** The AI adversary. An evolving neural network faction that scales in threat, manages energy, and uses weighted tactical scoring to launch devastating attacks and cyber-warfare operations.
+
+---
+
+## Turn Phases
+Each player's turn consists of three distinct phases:
+
+### 1. REINFORCE Phase
+- **Mechanic:** At the start of the turn, players receive reinforcements based on the number of territories they own (minimum of 3).
+- **Auto-deploy:** For human players, 60% of the reinforcements are automatically distributed across owned territories to speed up gameplay.
+- **Action:** The player selects one of their territories and deploys the remaining available troops to bolster defenses or prepare for an offensive.
+
+### 2. ATTACK Phase
+- **Mechanic:** Players can launch attacks from their territories into adjacent enemy-controlled territories.
+- **Combat:** Requires at least 2 troops in the attacking territory. The game uses a classic dice-rolling mechanic:
+  - Attacker rolls up to 3 dice.
+  - Defender rolls up to 2 dice.
+  - Highest dice are compared; lowest roll loses a troop. In a tie, the defender wins.
+- **Conquest:** If all defending troops are eliminated, the territory is conquered, and attacking troops move in to occupy it.
+- **Action:** Click an owned territory (Attacker), then click an adjacent enemy territory (Defender).
+
+### 3. FORTIFY Phase
+- **Mechanic:** At the end of the turn, players can permanently relocate troops from one owned territory to another owned territory to reinforce vulnerable borders.
+- **Action:** Select an origin territory, select a destination territory, and choose how many troops to move.
+
+---
+
+## Advanced Systems & Mechanics
+
+### Economic Budgeting
+- **Income:** Human players generate income ("DEFENSE BUDGET") every turn.
+- **Expenditure:** Budget is primarily used to activate "Strategic Command Perks" (special user actions).
+- **Catastrophic Events:** Every 7-14 turns, random global crises occur (e.g., "PANDEMIC EMERGENCY", "POWER GRID FAILURE", "CYBERSECURITY BREACH"). These forcibly drain massive portions of the player's defense budget, requiring careful financial management.
+
+### Nuclear Warfare
+- **Warheads:** Factions begin with a limited arsenal of nuclear warheads.
+- **Action (NUKE STRIKE):** Instead of a conventional attack, players can launch an ICBM at any enemy country.
+- **Effect:** Immediately wipes out 6-10 enemy troops in the targeted region. If it brings troops to 0, the territory is automatically conquered.
+- **Fallout:** The targeted territory suffers "Nuclear Fallout" for 3 turns, visually indicating radiation.
+
+### RAINCLOUD AI Evolution
+The AI doesn't just play Risk—it actively evolves throughout the game:
+- **Adaptability & Intelligence:** Increases over time, allowing the AI to prioritize higher-value targets.
+- **Aggression Level:** Scales up if the AI is losing territory.
+- **Operations:** The AI uses a weighted scoring model to decide which countries to attack. It has an "Energy" system that dictates how many major operations it can perform, including Cyberattacks (e.g., grounding human air traffic, destroying human communications).
+
+---
+
+## Strategic Command Perks (User Actions)
+During a turn, human players can spend their Defense Budget ($B) to execute devastating tactical operations via the "COMMAND UPLINK" (Attack Modal).
+
+### Global Operations (Immediate Effect)
+These operations sabotage the AI functionally:
+- **False Flag ($200B):** Confuses AI logic gates, reducing RAINCLOUD's Threat Tier and Aggression.
+- **Cyberattack Infra ($350B):** Executes a zero-day exploit, draining RAINCLOUD's Energy to 0 to prevent it from launching cyber operations on its next turn.
+- **Communication Jam ($150B):** Shatters enemy coordination. Halves the maximum number of attacks RAINCLOUD can perform next turn.
+- **Satellite Hack ($120B):** Blinds orbital reconnaissance, permanently reducing RAINCLOUD's intelligence level.
+
+### Targeted Operations (Requires Territory Selection)
+These operations directly impact the game board:
+- **Orbital Strike ($100B):** Calls down a kinetic bombardment from space onto an enemy territory, immediately eliminating up to 5 enemy troops.
+- **Special Forces / Devgru ($150B):** Deploys elite commandos to assassinate enemy leaders in a territory, draining troops and placing the country under siege for 2 turns (causes continuous troop drain).
+- **Airborne Assault ($200B):** Drops paratroopers behind enemy lines. Acts as a sudden attack that can immediately conquer a territory if it kills all defenders, bypassing normal adjacency rules.
+- **Shock & Awe ($250B):** A massive conventional bombardment that heavily damages troops and applies a "Shocked" status, reducing the defender's combat effectiveness (rolls only 1 die instead of 2).
+- **PSYOP Rebellion ($300B):** Incites a rebellion in an enemy territory. The territory instantly flips to Neutral ownership, collapsing the enemy's hold on it.
+- **Close Air Support ($150B):** Locks air support onto an enemy territory. Any conventional attacks against this territory for the rest of the turn gain +1 attack die.
+- **Drone Strike ($50B):** A cheap, precision strike that picks off a single enemy troop unit. Cannot be used to conquer a territory.
+- **EMP Blast ($250B):** Wipes out electronic infrastructure. Eliminates up to 3 troops and applies "Fallout/Shock" effects without using a nuclear warhead.

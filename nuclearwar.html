@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NUCLEAR WAR ☢ — 3D World War Simulation</title>
+    <!-- Strict CSP: No inline styles or scripts allowed. -->
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' https://nuclearwar.onrender.com; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; font-src 'self';">
+    <meta name="description"
+        content="Nuclear War: A real-time 3D nuclear war strategy game playable in any web browser. Built with Three.js, WebGL, and a Node.js WebSocket server for multiplayer.">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/jpeg" href="images/favicon.jpg">
+    <style>
+        /* Modern Premium 3D Theme overrides */
+        body {
+            background-color: #07070b;
+            background-image: radial-gradient(circle at 50% 30%, rgba(45, 10, 10, 0.6) 0%, #050508 100%), url('images/background.jpg');
+            background-blend-mode: overlay;
+            color: #e2e8f0;
+        }
+
+        .site-header {
+            background: rgba(5, 5, 10, 0.85);
+            border-bottom: 1px solid rgba(220, 38, 38, 0.3);
+            backdrop-filter: blur(12px);
+        }
+
+        .logo h1 { color: #f8fafc; }
+        .logo .highlight { color: #ef4444; text-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
+        .subtitle { color: #94a3b8; }
+
+        .hero {
+            padding: 6rem 0 4rem;
+            text-align: center;
+        }
+
+        .hero-title {
+            color: #ffffff;
+            font-size: 3.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+        }
+
+        .hero-title span {
+            color: #ef4444;
+        }
+
+        .hero-lead {
+            font-size: 1.4rem;
+            color: #cbd5e1;
+            max-width: 800px;
+            margin: 0 auto 2.5rem;
+        }
+
+        .tech-badges {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 3rem;
+        }
+
+        .tech-badge {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            color: #94a3b8;
+            padding: 0.5rem 1.2rem;
+            border-radius: 50px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tech-badge .dot {
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #ef4444;
+        }
+
+        .showcase-container {
+            margin: 0 auto 4rem;
+            max-width: 1000px;
+            position: relative;
+        }
+
+        .game-image {
+            width: 100%;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 0 2px rgba(239, 68, 68, 0.3);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            display: block;
+        }
+
+        .game-image:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(239, 68, 68, 0.4), 0 0 0 2px #ef4444;
+        }
+
+        .play-now-container {
+            text-align: center;
+            margin: -2rem auto 4rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .btn-play {
+            background: #ff0000;
+            color: #ffffff !important;
+            font-size: 1.5rem;
+            padding: 1.2rem 4rem;
+            border-radius: 8px;
+            text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 2px;
+            border: 2px solid #ff4444;
+            box-shadow: 0 0 12px #ff0000, 0 0 30px #ff0000, 0 0 60px rgba(255, 0, 0, 0.5), inset 0 2px 5px rgba(255, 255, 255, 0.15);
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+        }
+
+        .btn-play:hover {
+            transform: translateY(-5px) scale(1.05);
+            background: #ff2222;
+            box-shadow: 0 0 20px #ff0000, 0 0 50px #ff0000, 0 0 100px rgba(255, 0, 0, 0.7), inset 0 2px 5px rgba(255, 255, 255, 0.2);
+            border-color: #ff6666;
+        }
+
+        .btn-play::after {
+            content: '▶';
+            font-size: 1.2rem;
+        }
+
+        .content-section {
+            padding: 4rem 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-header h2 {
+            color: #f8fafc;
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section-header .line {
+            height: 4px;
+            width: 60px;
+            background: #ef4444;
+            margin: 1rem auto 0;
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .info-card {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 2.5rem;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            border-color: rgba(239, 68, 68, 0.3);
+            background: rgba(15, 23, 42, 0.6);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+        }
+
+        .info-card h3 {
+            color: #ef4444;
+            font-size: 1.4rem;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .info-card h3::before {
+            content: '♦';
+            color: #f8fafc;
+            font-size: 1rem;
+        }
+
+        .info-card p, .info-card li {
+            color: #cbd5e1;
+            line-height: 1.7;
+            font-size: 1.05rem;
+        }
+
+        .custom-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .custom-list li {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .custom-list li::before {
+            content: "☢";
+            position: absolute;
+            left: 0;
+            color: #ef4444;
+            font-size: 0.9rem;
+            top: 2px;
+        }
+
+        .mechanics-box {
+            background: linear-gradient(180deg, rgba(30, 10, 10, 0.5) 0%, rgba(10, 5, 5, 0.8) 100%);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 3rem;
+            border-radius: 20px;
+            margin: 4rem auto;
+            max-width: 900px;
+        }
+
+        .mechanics-box h3 {
+            text-align: center;
+            color: #f8fafc;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+        }
+
+        .phase-step {
+            display: flex;
+            margin-bottom: 1.8rem;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid #ef4444;
+            transition: background 0.2s;
+        }
+
+        .phase-step:hover {
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .phase-name {
+            font-weight: 800;
+            color: #ef4444;
+            width: 140px;
+            flex-shrink: 0;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .phase-desc {
+            color: #cbd5e1;
+            flex-grow: 1;
+            line-height: 1.6;
+        }
+
+        .tech-stack-box {
+            text-align: center;
+            padding: 3rem;
+            background: rgba(15, 23, 42, 0.3);
+            border-radius: 16px;
+            border: 1px dashed rgba(148, 163, 184, 0.2);
+            margin-bottom: 4rem;
+        }
+
+        .tech-stack-box code {
+            display: inline-block;
+            background: #0f172a;
+            color: #38bdf8;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+            font-family: var(--font-mono);
+            font-size: 1.1rem;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.5rem; }
+            .phase-step { flex-direction: column; }
+            .phase-name { margin-bottom: 0.5rem; }
+            .btn-play { padding: 1rem 2.5rem; font-size: 1.2rem; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="site-header">
+        <div class="container header-content">
+            <div class="logo">
+                <a href="index.html" style="text-decoration: none;">
+                    <h1>DEXMOND&nbsp;<span class="highlight">TECHNOLOGIES</span></h1>
+                </a>
+                <p class="subtitle">NUCLEAR WAR ☢ 3D SIMULATION</p>
+            </div>
+            <div class="header-extra">
+                <a href="index.html" class="btn btn-outline" style="color: #cbd5e1; border-color: rgba(255,255,255,0.2);">Return to Hub</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <div class="tech-badges">
+                    <div class="tech-badge"><div class="dot"></div> REAL-TIME MULTIPLAYER</div>
+                    <div class="tech-badge">THREE.JS</div>
+                    <div class="tech-badge">WEBGL</div>
+                    <div class="tech-badge">NODE.JS</div>
+                </div>
+                
+                <h2 class="hero-title">Nuclear <span>War</span></h2>
+                <p class="hero-lead">A real-time 3D nuclear war strategy game playable directly in your web browser. Command nations, launch tactical strikes, and dominate a fully rendered 3D Earth.</p>
+                
+                <div class="showcase-container">
+                    <img src="images/nuclearwar.png" alt="Nuclear War 3D Gameplay" class="game-image">
+                </div>
+
+                <div class="play-now-container">
+                    <a href="https://nuclearwar.onrender.com/" class="btn-play" target="_blank" rel="noopener noreferrer">Play Now!</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Game Overview</h2>
+                    <div class="line"></div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h3>What It Is</h3>
+                        <p>Nuclear War is a Risk-inspired global domination game rendered on a realistic 3D Earth globe. Every country in the world (~180 nations) is a playable territory with its own troop count, faction color, and vulnerability to nuclear strikes. The game uses NASA Earth satellite imagery as the globe texture, with Natural Earth GeoJSON borders overlaid on top.</p>
+                    </div>
+
+                    <div class="info-card">
+                        <h3>Game Modes</h3>
+                        <ul class="custom-list">
+                            <li><strong>Single Player:</strong> You (Blue) vs 3 AI opponents (Red, Green, Gold). Dynamic AI uses greedy territorial expansion and opportunistic nuclear strikes.</li>
+                            <li><strong>Multiplayer:</strong> Online play via WebSocket server with 4-letter room codes. Up to 4 human players; any unfilled slots are controlled by AI. Includes in-game text chat.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mechanics-box">
+                    <h3>Phases Per Turn</h3>
+                    
+                    <div class="phase-step">
+                        <div class="phase-name">Reinforce</div>
+                        <div class="phase-desc">Place new troops on your territories. You receive a minimum of 3 troops, plus 1 additional troop per 3 territories you own.</div>
+                    </div>
+                    
+                    <div class="phase-step">
+                        <div class="phase-name">Attack</div>
+                        <div class="phase-desc">Click your territory, then click an enemy territory to initiate an attack. Conventional attacks are resolved by live dice rolls determining the outcome.</div>
+                    </div>
+
+                    <div class="phase-step">
+                        <div class="phase-name">Fortify</div>
+                        <div class="phase-desc">Move troops strategically between your own connected territories to bolster your defenses.</div>
+                    </div>
+
+                    <div class="phase-step">
+                        <div class="phase-name">Nuke</div>
+                        <div class="phase-desc">A devastating special attack that ignores dice rolls. Deals 6-10 massive damage and leaves a 3-turn radioactive fallout. Each player starts with 2 nuclear warheads.</div>
+                    </div>
+
+                    <div class="phase-step">
+                        <div class="phase-name">End Turn</div>
+                        <div class="phase-desc">Pass the command to the next player. Survive and conquer.</div>
+                    </div>
+                </div>
+
+                <div class="mechanics-box" style="border-color: rgba(56, 189, 248, 0.4); background: linear-gradient(180deg, rgba(10, 20, 40, 0.5) 0%, rgba(5, 10, 20, 0.8) 100%);">
+                    <h3 style="color: #38bdf8;">UNITED FRONT: DEFEATING RAINCLOUD</h3>
+                    <p style="color: #cbd5e1; font-size: 1.1rem; line-height: 1.8; text-align: center; margin-bottom: 2rem;">
+                        RAINCLOUD is an evolving AI adversary that continuously adapts, hacks global infrastructure, and launches devastating nuclear strikes. <strong>Humanity cannot survive divided.</strong>
+                    </p>
+                    
+                    <div class="info-grid" style="margin-bottom: 0;">
+                        <div class="info-card" style="background: rgba(0,0,0,0.4); border-color: rgba(56, 189, 248, 0.2);">
+                            <h3 style="color: #f8fafc;"><span style="color: #38bdf8;">⚡</span> The Defense Budget</h3>
+                            <p>Every turn, the human coalition generates a shared Defense Budget. This economy is vital for survival, but frequent global catastrophes (pandemics, grid failures) will drastically drain your funds.</p>
+                        </div>
+                        <div class="info-card" style="background: rgba(0,0,0,0.4); border-color: rgba(56, 189, 248, 0.2);">
+                            <h3 style="color: #f8fafc;"><span style="color: #38bdf8;">⚔</span> Strategic Operations</h3>
+                            <p>Commanders must pool their resources to execute high-tier operations. You can blind RAINCLOUD's satellites, jam its communications, or launch orbital strikes to crippling its compute nodes.</p>
+                        </div>
+                        <div class="info-card" style="background: rgba(0,0,0,0.4); border-color: rgba(56, 189, 248, 0.2);">
+                            <h3 style="color: #f8fafc;"><span style="color: #38bdf8;">🛡</span> Cooperative Survival</h3>
+                            <p>As RAINCLOUD's Threat Tier escalates, individual attacks will fail. Players must coordinate: one commander flanks with Airborne Assaults while another drains RAINCLOUD's energy via Cyberattacks.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tech-stack-box">
+                    <h3 style="color: #f8fafc; margin-bottom: 1.5rem; text-transform: uppercase;">Technical Stack</h3>
+                    <p style="color: #cbd5e1; margin-bottom: 1rem;">Frontend: HTML5 + CSS3 + Vanilla JavaScript<br>
+                    3D Engine: Three.js r128<br>
+                    Backend: Node.js + WebSockets</p>
+                    <div>
+                        <code>node server.js</code>
+                    </div>
+                    <p style="color: #94a3b8; font-size: 0.9rem; margin-top: 1rem;">Self-contained game client requires no build steps. 100% native browser experience.</p>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer" style="background: #050508; border-top: 1px solid rgba(255,255,255,0.05); text-align: center;">
+        <div class="container">
+            <div class="footer-bottom">
+                <p style="color: #64748b;">&copy; 2026 DEXMOND TECHNOLOGIES Ltd. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+</html>
