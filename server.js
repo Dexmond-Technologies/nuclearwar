@@ -11,7 +11,7 @@ const WebSocket = require('ws');
 const { OAuth2Client } = require('google-auth-library');
 
 // REPLACE THIS WITH YOUR ACTUAL GOOGLE CLIENT ID
-const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID_HERE';
+const GOOGLE_CLIENT_ID = '787878787390-tn6tlui3t6np301p671uqcvoapdpsn73.apps.googleusercontent.com';
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 // ── PostgreSQL persistence (optional — only active if DATABASE_URL is set) ──
