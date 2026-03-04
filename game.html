@@ -611,7 +611,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     
     <div id="lobby-auth-status" style="color:#0f8; font-family:'Courier New', monospace; font-size:12px; margin-bottom:15px; min-height:15px;"></div>
 
-    <button id="btn-join-war" class="sp-btn" style="width:80%;max-width:300px;font-size:16px;padding:15px;background:rgba(0,170,255,0.2);color:#0af;border:1px solid #0af; display:none;" onclick="joinGlobalWar()">JOIN GLOBAL WAR</button>
+
   </div>
 </div>
 
@@ -3421,9 +3421,9 @@ let pendingGoogleToken = null;
 // Google Identity Callback
 function handleGoogleCredentialResponse(response) {
   pendingGoogleToken = response.credential;
-  document.getElementById('lobby-auth-status').innerHTML = "✓ UPLINK AUTHENTICATED. READY FOR DEPLOYMENT.";
+  document.getElementById('lobby-auth-status').innerHTML = "✓ UPLINK AUTHENTICATED. INITIATING DEPLOYMENT...";
   document.querySelector('.g_id_signin').style.display = 'none'; // hide the google button
-  document.getElementById('btn-join-war').style.display = 'inline-block'; // show the enter button
+  joinGlobalWar(); // auto-join immediately
 }
 
 function initWS() {
