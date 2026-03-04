@@ -433,6 +433,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     </div>
   </div>
   <div id="side-panel">
+    <button id="sp-close" onclick="document.getElementById('side-panel').classList.remove('show');window._selIso=null;renderGlobe();" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#f55;font-size:16px;cursor:pointer;line-height:1;padding:4px;" title="Close Panel">✕</button>
     <div id="sp-cname">—</div>
     <div id="sp-info"></div>
     <div id="sp-actions">
