@@ -254,9 +254,18 @@ async function startServer() {
     }
   }
   
-  // 2. Fallback to Local JSON if still empty
+  // 2. Fallback to Local JSON if state is empty (whether we have PG or not)
   if (!globalGameState) {
-    globalGameState = await loadGameStateFallback();
+    console.log('ℹ No PostgreSQL state found. Attempting to load from JSON config...');
+    const localState = await loadGameStateFallback();
+    if (localState) {
+      globalGameState = localState;
+      // If we loaded from local but have PG connection, save it to PG immediately to migrate data
+      if (pgPool) {
+        console.log('➡ Migrating local game state to PostgreSQL...');
+        saveGameState(globalGameState);
+      }
+    }
   }
 
   if (globalGameState) {
