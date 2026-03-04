@@ -3922,176 +3922,244 @@ window.endTurn = function() {
 // =====================================================================
 function injectStrategyPanel() {
   if (document.getElementById('strategy-panel')) return;
-  const panel = document.createElement('div');
-  panel.id = 'strategy-panel';
-  panel.style.cssText = `
-    position:absolute; bottom:100px; left:20px; width:200px;
-    background:rgba(0,5,15,0.92); border:1px solid rgba(0,180,255,0.3);
-    border-radius:6px; padding:10px; z-index:20; pointer-events:auto;
-    font-family:'Courier New',monospace; font-size:10px; color:#0af;
-  `;
-  panel.innerHTML = `
-    <div style="font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:2px;margin-bottom:8px;opacity:0.7;">⚙ STRATEGY OPS</div>
-    <button class="strat-btn" onclick="showDiplomacyModal()" title="Propose Treaty">🤝 DIPLOMACY</button>
-    <button class="strat-btn" onclick="showSpyModal()"  title="Espionage Actions">🔎 ESPIONAGE</button>
-    <button class="strat-btn" onclick="showTechModal()" title="Research Technology">🔬 TECH TREE</button>
-    <button class="strat-btn" onclick="showNavalModal()" title="Naval Operations">⚓ NAVAL OPS</button>
-    <button class="strat-btn" onclick="showWeatherInfo()" title="Current weather conditions">🌍 WEATHER</button>
-    <div id="strat-info" style="margin-top:6px;font-size:9px;opacity:0.7;min-height:20px;line-height:1.4;"></div>
-  `;
-  document.getElementById('hud').appendChild(panel);
 
-  // CSS for buttons
+  // Inject CSS for the whole system
   const style = document.createElement('style');
+  style.id = 'strategy-styles';
   style.textContent = `
-    .strat-btn {
-      display:block; width:100%; margin-bottom:4px; padding:5px 8px;
-      background:rgba(0,170,255,0.07); border:1px solid rgba(0,170,255,0.25);
-      color:#0af; cursor:pointer; font-family:'Courier New',monospace;
-      font-size:9px; letter-spacing:1px; text-align:left; border-radius:3px;
-      transition:background 0.15s, border-color 0.15s;
+    /* ── STRATEGY TOOLBAR: persistent icon bar, centered bottom ── */
+    #strategy-panel {
+      position:absolute; bottom:8px; left:50%; transform:translateX(-50%);
+      display:flex; gap:6px; align-items:center;
+      background:rgba(0,5,15,0.88); border:1px solid rgba(0,180,255,0.25);
+      border-radius:40px; padding:6px 14px; z-index:25; pointer-events:auto;
     }
-    .strat-btn:hover { background:rgba(0,170,255,0.18); border-color:#0af; }
-    .modal-overlay {
-      position:absolute; inset:0; background:rgba(0,5,15,0.92); z-index:200;
-      display:flex; align-items:center; justify-content:center;
-      backdrop-filter:blur(6px);
+    .strat-icon-btn {
+      background:rgba(0,170,255,0.08); border:1px solid rgba(0,170,255,0.2);
+      color:#0af; cursor:pointer; border-radius:50%; width:34px; height:34px;
+      font-size:14px; display:flex; align-items:center; justify-content:center;
+      transition:background 0.15s, border-color 0.15s, box-shadow 0.15s;
+      position:relative;
     }
-    .modal-card {
-      background:rgba(0,8,22,0.97); border:1px solid #0af; border-radius:10px;
-      padding:25px 30px; max-width:480px; width:90vw; max-height:80vh;
-      overflow-y:auto; color:#9cf; font-family:'Courier New',monospace; font-size:11px;
+    .strat-icon-btn:hover, .strat-icon-btn.active {
+      background:rgba(0,170,255,0.22); border-color:#0af;
+      box-shadow:0 0 10px rgba(0,180,255,0.4);
     }
-    .modal-title { font-family:'Orbitron',sans-serif; color:#0af; font-size:14px;
-      letter-spacing:3px; margin-bottom:14px; }
-    .modal-btn { padding:7px 14px; margin:4px; background:rgba(0,170,255,0.1);
+    .strat-icon-btn .strat-tooltip {
+      position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%);
+      background:rgba(0,8,20,0.95); border:1px solid rgba(0,180,255,0.3);
+      border-radius:4px; padding:3px 8px; font-size:9px; letter-spacing:1px;
+      white-space:nowrap; opacity:0; pointer-events:none;
+      font-family:'Courier New',monospace; color:#9cf;
+      transition:opacity 0.15s;
+    }
+    .strat-icon-btn:hover .strat-tooltip { opacity:1; }
+
+    /* ── STRATEGY DRAWER: slides up from bottom-center ── */
+    .strat-drawer {
+      position:absolute; bottom:62px; left:50%; transform:translateX(-50%);
+      background:rgba(0,6,18,0.97); border:1px solid rgba(0,180,255,0.35);
+      border-radius:10px; padding:16px 20px; z-index:24; pointer-events:auto;
+      width:340px; max-height:60vh; overflow-y:auto;
+      font-family:'Courier New',monospace; font-size:11px; color:#9cf;
+      box-shadow:0 -4px 30px rgba(0,180,255,0.1);
+      animation:drawerSlideUp 0.2s ease-out;
+    }
+    @keyframes drawerSlideUp {
+      from { opacity:0; transform:translateX(-50%) translateY(12px); }
+      to   { opacity:1; transform:translateX(-50%) translateY(0); }
+    }
+    .strat-drawer-title {
+      font-family:'Orbitron',sans-serif; color:#0af; font-size:12px;
+      letter-spacing:3px; margin-bottom:12px; display:flex;
+      align-items:center; justify-content:space-between;
+    }
+    .strat-drawer-close {
+      background:none; border:none; color:#f55; cursor:pointer; font-size:14px;
+      padding:0; line-height:1;
+    }
+    .strat-drawer-btn {
+      display:block; width:100%; margin-bottom:5px; padding:7px 10px;
+      background:rgba(0,170,255,0.07); border:1px solid rgba(0,170,255,0.2);
+      color:#0af; cursor:pointer; border-radius:4px; text-align:left;
+      font-family:'Courier New',monospace; font-size:10px; letter-spacing:0.5px;
+      transition:background 0.12s;
+    }
+    .strat-drawer-btn:hover { background:rgba(0,170,255,0.18); border-color:#0af; }
+    .strat-drawer-btn:disabled { opacity:0.4; cursor:not-allowed; }
+    .strat-item {
+      margin-bottom:10px; padding:10px; border:1px solid rgba(0,170,255,0.15);
+      border-radius:6px; background:rgba(0,170,255,0.03);
+    }
+    .strat-item-title { color:#0f8; font-weight:bold; margin-bottom:3px; }
+    .strat-item-desc { opacity:0.65; font-size:10px; margin-bottom:5px; line-height:1.4; }
+    .strat-item-cost { color:#fa0; font-size:10px; }
+    .strat-active-badge { color:#0f8; font-size:10px; margin-left:6px; }
+    .modal-btn { padding:5px 12px; margin:3px 0; background:rgba(0,170,255,0.1);
       border:1px solid #0af; color:#0af; cursor:pointer; border-radius:3px;
-      font-family:'Courier New',monospace; font-size:10px; letter-spacing:1px; }
+      font-family:'Courier New',monospace; font-size:10px; }
     .modal-btn:hover { background:rgba(0,170,255,0.25); }
-    .modal-close { float:right; background:none; border:none; color:#f55; cursor:pointer; font-size:16px; }
   `;
   document.head.appendChild(style);
+
+  // Build the toolbar
+  const panel = document.createElement('div');
+  panel.id = 'strategy-panel';
+  const buttons = [
+    { id:'btn-diplomacy', icon:'🤝', tip:'DIPLOMACY',  fn:'showDiplomacyModal()' },
+    { id:'btn-espionage', icon:'🔎', tip:'ESPIONAGE',   fn:'showSpyModal()' },
+    { id:'btn-tech',      icon:'🔬', tip:'TECH TREE',   fn:'showTechModal()' },
+    { id:'btn-naval',     icon:'⚓', tip:'NAVAL / AIR', fn:'showNavalModal()' },
+    { id:'btn-weather',   icon:'🌍', tip:'WEATHER',     fn:'showWeatherInfo()' },
+  ];
+  panel.innerHTML = buttons.map(b => `
+    <button id="${b.id}" class="strat-icon-btn" onclick="${b.fn}">
+      ${b.icon}
+      <span class="strat-tooltip">${b.tip}</span>
+    </button>
+  `).join('');
+  document.getElementById('hud').appendChild(panel);
 }
 
+// Shared drawer open/close
+let _openDrawerId = null;
 function closeAllModals() {
-  document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+  document.querySelectorAll('.strat-drawer').forEach(d => d.remove());
+  document.querySelectorAll('.strat-icon-btn').forEach(b => b.classList.remove('active'));
+  _openDrawerId = null;
+}
+
+function openDrawer(id, titleHtml, bodyHtml) {
+  // Toggle: if same drawer already open, close it
+  if (_openDrawerId === id) { closeAllModals(); return; }
+  closeAllModals();
+  _openDrawerId = id;
+
+  const hud = document.getElementById('hud');
+  const drawer = document.createElement('div');
+  drawer.className = 'strat-drawer';
+  drawer.id = 'drawer-' + id;
+  drawer.innerHTML = `
+    <div class="strat-drawer-title">
+      ${titleHtml}
+      <button class="strat-drawer-close" onclick="closeAllModals()">✕</button>
+    </div>
+    ${bodyHtml}
+  `;
+  hud.appendChild(drawer);
+  const btn = document.getElementById('btn-' + id);
+  if (btn) btn.classList.add('active');
 }
 
 function showDiplomacyModal() {
-  SFX.playClick(); closeAllModals();
-  const m = document.createElement('div'); m.className = 'modal-overlay';
-  m.innerHTML = `<div class="modal-card">
-    <button class="modal-close" onclick="closeAllModals()">✕</button>
-    <div class="modal-title">🤝 DIPLOMACY</div>
-    <p style="margin-bottom:12px;opacity:0.7;">Offer terms to RAINCLOUD. Acceptance depends on the balance of power.</p>
-    ${Object.entries(TREATY_TYPES).map(([key,t])=>`
-      <div style="margin-bottom:12px;padding:10px;border:1px solid rgba(0,170,255,0.2);border-radius:4px;">
-        <b style="color:#0f8;">${t.name}</b><br>
-        <span style="opacity:0.7;">${t.desc}</span><br>
-        <span style="color:#fa0;">Cost: ${t.cost || 0} MIL | Duration: ${t.duration} turns</span><br>
-        <button class="modal-btn" onclick="proposeTreaty('${key}');closeAllModals()">PROPOSE</button>
-        ${hasTreaty(key) ? '<span style="color:#0f8;"> ✓ ACTIVE</span>' : ''}
-      </div>`).join('')}
-  </div>`;
-  document.getElementById('hud').appendChild(m);
+  SFX.playClick();
+  const body = Object.entries(TREATY_TYPES).map(([key,t]) => `
+    <div class="strat-item">
+      <div class="strat-item-title">${t.name}${hasTreaty(key)?'<span class="strat-active-badge">✓ ACTIVE</span>':''}</div>
+      <div class="strat-item-desc">${t.desc}</div>
+      <div class="strat-item-cost">Cost: ${t.cost||0} MIL · ${t.duration} turns</div>
+      <button class="strat-drawer-btn" onclick="proposeTreaty('${key}');closeAllModals();" ${hasTreaty(key)?'disabled':''}>
+        PROPOSE →
+      </button>
+    </div>`).join('');
+  openDrawer('diplomacy', '🤝 DIPLOMACY', `
+    <p style="font-size:10px;opacity:0.6;margin-bottom:10px;">Offer terms to RAINCLOUD. AI acceptance depends on balance of power.</p>
+    ${body}
+  `);
 }
 
 function showSpyModal() {
-  SFX.playClick(); closeAllModals();
-  const m = document.createElement('div'); m.className = 'modal-overlay';
-  m.innerHTML = `<div class="modal-card">
-    <button class="modal-close" onclick="closeAllModals()">✕</button>
-    <div class="modal-title">🔎 ESPIONAGE</div>
-    <p style="margin-bottom:12px;opacity:0.7;">Select an action, then click a target territory on the globe.</p>
-    ${SPY_ACTIONS.map(a=> `
-      <div style="margin-bottom:10px;padding:10px;border:1px solid rgba(0,170,255,0.2);border-radius:4px;">
-        <b style="color:#0f8;">${a.name}</b>
-        <span style="float:right;color:#fa0;">${a.cost} MIL | ${Math.round(a.successBase*100)}% success</span><br>
-        <span style="opacity:0.7;">${a.desc}</span><br>
-        <button class="modal-btn" onclick="
-          window._pendingSpyAction='${a.id}';
-          closeAllModals();
-          setLog('🔎 Click enemy territory to execute ${a.name}');
-        ">SELECT</button>
-      </div>`).join('')}
-  </div>`;
-  document.getElementById('hud').appendChild(m);
+  SFX.playClick();
+  const body = SPY_ACTIONS.map(a => `
+    <div class="strat-item">
+      <div class="strat-item-title">${a.name}</div>
+      <div class="strat-item-desc">${a.desc}</div>
+      <div class="strat-item-cost">${a.cost} MIL · ${Math.round(a.successBase*100)}% success</div>
+      <button class="strat-drawer-btn" onclick="
+        window._pendingSpyAction='${a.id}';
+        closeAllModals();
+        setLog('🔎 Click an ENEMY territory to run: ${a.name}');
+      ">SELECT → CLICK GLOBE</button>
+    </div>`).join('');
+  openDrawer('espionage', '🔎 ESPIONAGE', `
+    <p style="font-size:10px;opacity:0.6;margin-bottom:10px;">Select action, then click a target on the globe.</p>
+    ${body}
+  `);
 }
 
 function showTechModal() {
-  SFX.playClick(); closeAllModals();
+  SFX.playClick();
   const pts = GS.tech ? (GS.tech.points || 0) : 0;
-  const m = document.createElement('div'); m.className = 'modal-overlay';
-  m.innerHTML = `<div class="modal-card">
-    <button class="modal-close" onclick="closeAllModals()">✕</button>
-    <div class="modal-title">🔬 TECHNOLOGY TREE</div>
-    <p style="margin-bottom:12px;">Research Points: <b style="color:#0f8;">${pts}</b> &nbsp;(Earn ${Math.max(1,Math.floor(Object.values(GS.countries||{}).filter(c=>c.owner===GS.myIndex).length/20))} per turn)</p>
-    ${['MILITARY','CYBER','ECONOMIC','NUCLEAR','AIR','NAVAL'].map(cat => {
-      const nodes = TECH_NODES.filter(n => n.cat === cat);
-      if (!nodes.length) return '';
-      return `<div style="margin-bottom:10px;"><div style="color:#fa0;margin-bottom:4px;letter-spacing:2px;font-size:9px;">${cat}</div>
-      ${nodes.map(n=>{
+  const perTurn = Math.max(1, Math.floor(Object.values(GS.countries||{}).filter(c=>c.owner===GS.myIndex).length/20));
+  const categories = ['MILITARY','CYBER','ECONOMIC','NUCLEAR','AIR','NAVAL'];
+  const body = categories.map(cat => {
+    const nodes = TECH_NODES.filter(n => n.cat === cat);
+    if (!nodes.length) return '';
+    return `<div style="margin-bottom:8px;">
+      <div style="color:#fa0;font-size:9px;letter-spacing:2px;margin-bottom:4px;">${cat}</div>
+      ${nodes.map(n => {
         const u = hasTech(n.id);
-        const prereqMet = n.requires.every(r=>hasTech(r));
-        return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;padding:6px;
-          border:1px solid ${u?'#0f8':prereqMet?'rgba(0,170,255,0.25)':'rgba(100,100,100,0.2)'};border-radius:3px;">
-          <span style="flex:1;opacity:${prereqMet||u?1:0.4};">${n.name} — <span style="opacity:0.7;">${n.desc}</span></span>
-          ${u ? '<span style="color:#0f8;">✓ DONE</span>' :
-            prereqMet ? `<button class="modal-btn" style="padding:4px 10px;" onclick="unlockTech('${n.id}');showTechModal();">
-              ${n.cost} pts</button>` : '<span style="opacity:0.4;">🔒</span>'}
-        </div>`;}).join('')}
-      </div>`;}).join('')}
-  </div>`;
-  document.getElementById('hud').appendChild(m);
+        const prereqMet = n.requires.every(r => hasTech(r));
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;
+          border:1px solid ${u?'#0f8':prereqMet?'rgba(0,170,255,0.2)':'rgba(80,80,80,0.2)'};
+          border-radius:3px;margin-bottom:3px;opacity:${prereqMet||u?1:0.45};">
+          <span style="font-size:10px;">${n.name}<br><span style="opacity:0.6;font-size:9px;">${n.desc}</span></span>
+          ${u ? '<span style="color:#0f8;font-size:10px;">✓</span>' :
+            prereqMet ? `<button class="modal-btn" style="white-space:nowrap;" onclick="unlockTech('${n.id}');showTechModal();">${n.cost}pt</button>` :
+            '<span style="opacity:0.3;font-size:12px;">🔒</span>'}
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+  openDrawer('tech', '🔬 TECH TREE', `
+    <div style="margin-bottom:10px;padding:7px;background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.15);border-radius:4px;">
+      Research Points: <b style="color:#0f8;">${pts}</b> &nbsp;+${perTurn}/turn
+    </div>
+    ${body}
+  `);
 }
 
 function showNavalModal() {
-  SFX.playClick(); closeAllModals();
-  const m = document.createElement('div'); m.className = 'modal-overlay';
-  m.innerHTML = `<div class="modal-card">
-    <button class="modal-close" onclick="closeAllModals()">✕</button>
-    <div class="modal-title">⚓ NAVAL OPERATIONS</div>
-    <p style="margin-bottom:12px;opacity:0.7;">Control the seas to expand your reach and embargo enemies.</p>
-    <button class="modal-btn" onclick="
-      window._pendingNaval='DEPLOY'; closeAllModals();
-      setLog('⚓ Click YOUR territory to deploy a naval fleet (100 MIL).');
-    ">⚓ DEPLOY FLEET (100 MIL)</button>
-    <button class="modal-btn" onclick="
-      window._pendingNaval='BLOCKADE'; closeAllModals();
-      setLog('⚓ Click ENEMY territory to blockade (costs 1 fleet).');
-    ">🚫 BLOCKADE ENEMY (1 fleet)</button>
-    <button class="modal-btn" onclick="
-      window._pendingNaval='BOMBING'; closeAllModals();
-      setLog('✈ Click ENEMY territory to conduct strategic bombing (costs 1 air wing).');
-    ">✈ STRATEGIC BOMBING</button>
-    <button class="modal-btn" onclick="
-      window._pendingNaval='DEVELOP'; closeAllModals();
-      setLog('🏗 Click YOUR territory to develop infrastructure.');
-    ">🏗 DEVELOP INFRASTRUCTURE</button>
-    <div style="margin-top:12px;opacity:0.6;font-size:9px;">Your fleets: ${Object.values(GS.countries||{}).filter(c=>c.owner===GS.myIndex&&c.ships>0).map(c=>c.name+' ('+c.ships+' ships)').join(', ')||'None'}</div>
-    <div style="opacity:0.6;font-size:9px;">Your air wings: ${Object.values(GS.countries||{}).filter(c=>c.owner===GS.myIndex&&c.airwings>0).map(c=>c.name+' ('+c.airwings+' wings)').join(', ')||'None'}</div>
-  </div>`;
-  document.getElementById('hud').appendChild(m);
+  SFX.playClick();
+  const fleets = Object.values(GS.countries||{}).filter(c=>c.owner===GS.myIndex&&c.ships>0).map(c=>`${c.name}(${c.ships}⚓)`).join(', ')||'None';
+  const wings =  Object.values(GS.countries||{}).filter(c=>c.owner===GS.myIndex&&c.airwings>0).map(c=>`${c.name}(${c.airwings}✈)`).join(', ')||'None';
+  const btns = [
+    ['DEPLOY',   '⚓ Deploy Fleet (100 MIL)',      'Click YOUR territory'],
+    ['BLOCKADE', '🚫 Blockade Enemy (1 fleet)',     'Click ENEMY territory'],
+    ['BOMBING',  '✈ Strategic Bombing (1 wing)',    'Click ENEMY territory'],
+    ['DEVELOP',  '🏗 Develop Infrastructure',       'Click YOUR territory'],
+  ];
+  const body = btns.map(([action, label, hint]) => `
+    <button class="strat-drawer-btn" onclick="
+      window._pendingNaval='${action}';
+      closeAllModals();
+      setLog('${hint} after selecting ${label}');
+    ">${label}<span style="float:right;opacity:0.5;font-size:9px;">${hint}</span></button>
+  `).join('');
+  openDrawer('naval', '⚓ NAVAL & AIR OPS', `
+    ${body}
+    <div style="margin-top:10px;font-size:9px;opacity:0.55;line-height:1.6;">
+      Fleets: ${fleets}<br>Air Wings: ${wings}
+    </div>
+  `);
 }
 
 function showWeatherInfo() {
-  SFX.playClick(); closeAllModals();
-  const s = GS.weather || { season: 'SPRING', turnCount: 0 };
+  SFX.playClick();
+  const s = GS.weather || { season:'SPRING', turnCount:0 };
   const next = 4 - (s.turnCount % 4);
-  const m = document.createElement('div'); m.className = 'modal-overlay';
-  m.innerHTML = `<div class="modal-card">
-    <button class="modal-close" onclick="closeAllModals()">✕</button>
-    <div class="modal-title">🌍 WEATHER REPORT</div>
-    <p>Current Season: <b style="color:#0f8;">${s.season}</b></p>
-    <p style="opacity:0.7;">Next season change in: ${next} turn(s)</p>
-    <hr style="border-color:rgba(0,170,255,0.1);margin:12px 0;">
-    <p><b>❄ WINTER</b> (affects Russia, Scandinavia, Canada):<br>
-    <span style="opacity:0.7;">Ground attack −25%, defense +10%</span></p>
-    <p><b>🌧 MONSOON</b> (affects South/East Asia):<br>
-    <span style="opacity:0.7;">Ground attack −15%, defense +5%</span></p>
-    <button class="modal-btn" onclick="closeAllModals()">CLOSE</button>
-  </div>`;
-  document.getElementById('hud').appendChild(m);
+  openDrawer('weather', '🌍 WEATHER / SEASON', `
+    <div style="margin-bottom:8px;">Season: <b style="color:#0f8;">${s.season}</b>
+    &nbsp;·&nbsp;Next in <b>${next}</b> turn(s)</div>
+    <div class="strat-item">
+      <div class="strat-item-title">❄ Winter (Russia, Scandinavia, Canada)</div>
+      <div class="strat-item-desc">Ground attack −25% · Defense +10%</div>
+    </div>
+    <div class="strat-item">
+      <div class="strat-item-title">🌧 Monsoon (South & East Asia)</div>
+      <div class="strat-item-desc">Ground attack −15% · Defense +5%</div>
+    </div>
+  `);
 }
 
 // Hook globe clicks for pending spy/naval actions
