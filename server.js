@@ -116,7 +116,8 @@ function broadcastAll(msg) {
   broadcast(msg, null);
 }
 
-wss.on('connection', ws => {
+function initWebSockets() {
+  wss.on('connection', ws => {
   playerCounter++;
   const client = { ws, id: playerCounter, name: `Commander ${playerCounter}`, isHost: false };
   connectedClients.add(client);
@@ -233,6 +234,7 @@ wss.on('connection', ws => {
     }
   });
 });
+}
 
 // On Sever Startup, init DB and try to load state immediately before listening
 async function startServer() {
@@ -276,6 +278,9 @@ async function startServer() {
   
   server.listen(PORT, () => {
     console.log(`☢ NUCLEAR WAR Multi-Service running on port ${PORT}`);
+    
+    // Safety lock: Only accept WS connections after DB and HTTP are fully ready
+    initWebSockets();
   });
 }
 
