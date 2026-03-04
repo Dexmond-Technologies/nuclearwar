@@ -2520,6 +2520,10 @@ function initWS() {
             applyState(msg.gameState);
             setLog('✓ CONNECTED TO GLOBAL UPLINK');
             triggerNewsEvent('COMMAND UPLINK RESTORED — RESUMING OPERATION');
+            if (GS.turn === 1 && ws_isHost) {
+              setLog('⟳ RESUMING RAINCLOUD PROCESSING...');
+              setTimeout(aiTurn, 2000);
+            }
           } else {
             // No state exists on server, we must generate a fresh world and push it
             initGame(['COMMANDER', 'RAINCLOUD'], 0);
@@ -2535,15 +2539,25 @@ function initWS() {
         break;
       case 'game_start':
         hideLobby(); applyState(msg.gameState); break;
-      case 'state_update':
-        // If we want to allow all humans to play as Player 0 concurrently, we apply state.
-        // We might want to lock inputs if another human is taking action, but for now we trust them.
-        applyState(msg.gameState); break;
+      case 'state_update': {
+        const oldTurn = GS.turn;
+        applyState(msg.gameState);
+        if (oldTurn === 0 && GS.turn === 1) {
+          showTurnAnnounce(1, () => {
+            if (ws_isHost) setTimeout(aiTurn, 600);
+          });
+        }
+        break;
+      }
       case 'player_left':
         setLog(`⚠ ${msg.name} disconnected. ${msg.totalPlayers} remaining.`); break;
       case 'host_migrated':
         ws_isHost = true;
         setLog(`⚙ You are now the primary host for AI computation.`);
+        if (GS.turn === 1) {
+          setLog('⟳ RESUMING STALLED RAINCLOUD PROCESSING...');
+          setTimeout(aiTurn, 1000);
+        }
         break;
       case 'player_list':
         showRoomPlayers(msg.players);
