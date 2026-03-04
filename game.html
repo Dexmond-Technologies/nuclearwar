@@ -2467,19 +2467,18 @@ function initWS() {
     switch(msg.type){
       case 'saved_state': {
         ws_isHost = msg.isHost;
-        if (msg.gameState) {
-          applyState(msg.gameState);
-          hideLobby();
-          setLog('✓ CONNECTED TO GLOBAL UPLINK');
-          triggerNewsEvent('COMMAND UPLINK RESTORED — RESUMING OPERATION');
-        } else {
-          // No state exists on server, we must generate a fresh world and push it
-          hideLobby();
-          loadCountries().then(() => {
+        hideLobby();
+        loadCountries().then(() => {
+          if (msg.gameState) {
+            applyState(msg.gameState);
+            setLog('✓ CONNECTED TO GLOBAL UPLINK');
+            triggerNewsEvent('COMMAND UPLINK RESTORED — RESUMING OPERATION');
+          } else {
+            // No state exists on server, we must generate a fresh world and push it
             initGame(['COMMANDER', 'SKYNET'], 0);
             syncState(); // immediately populate the server
-          });
-        }
+          }
+        });
         break;
       }
       case 'player_joined':
