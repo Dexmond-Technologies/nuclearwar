@@ -1210,10 +1210,10 @@ function updateDashboard() {
     if(pi===0){
       const pEl=document.getElementById('d0-players');
       if(pEl) pEl.textContent=`⚡ ${GS.players[0].name.toUpperCase()} IN COMMAND`;
-      
       // Update User Stats box name
       const usName = document.getElementById('us-name');
-      if(usName) usName.textContent = GS.players[0].name;
+      const inputName = document.getElementById('player-name')?.value;
+      if(usName) usName.textContent = inputName ? inputName : GS.players[0].name;
     }
   });
 
