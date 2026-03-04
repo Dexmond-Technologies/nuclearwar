@@ -99,7 +99,7 @@ const wss = new WebSocket.Server({ server });
 let globalGameState = null;
 const connectedClients = new Set();
 let playerCounter = 0;
-const chatHistory = [];
+// ── Chat history is now part of globalGameState for persistence
 
 // Database initialization and state parsing logic moved to startServer() at the bottom
 
@@ -128,12 +128,15 @@ function initWebSockets() {
 
   console.log(`${client.name} joined. Total Commanders: ${connectedClients.size}`);
 
+  // Initialize chatHistory array if this is a fresh state or old state missed it
+  const currentChatHistory = globalGameState ? (globalGameState.chatHistory || []) : [];
+
   // Auto-send the current global state (or lack thereof) to the new player
   ws.send(JSON.stringify({ 
     type: 'saved_state', 
     gameState: globalGameState,
     isHost: client.isHost,
-    chatHistory: chatHistory
+    chatHistory: currentChatHistory
   }));
   
   // Notify others
@@ -195,8 +198,23 @@ function initWebSockets() {
 
       case 'chat': {
         const chatObj = { name: client.name, text: msg.text };
-        chatHistory.push(chatObj);
-        if (chatHistory.length > 50) chatHistory.shift();
+        
+        // Ensure globalGameState and chat array exist
+        if (!globalGameState) {
+          globalGameState = { players: [], countries: {}, activePlayerIndex: 0 };
+        }
+        if (!globalGameState.chatHistory) {
+          globalGameState.chatHistory = [];
+        }
+        
+        globalGameState.chatHistory.push(chatObj);
+        // Keep last 100 messages total
+        if (globalGameState.chatHistory.length > 100) {
+          globalGameState.chatHistory.shift();
+        }
+        
+        // Save state immediately to persist chat
+        saveGameState(globalGameState);
         
         broadcastAll({
           type: 'chat',
