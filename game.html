@@ -1383,22 +1383,145 @@ function getCountryAt(lat, lon) {
 // =====================================================================
 // GAME INITIALIZATION
 // =====================================================================
+// =====================================================================
+// PHASE 1: REAL-WORLD COUNTRY STATS (GDP in $B, mil_rank 1-100, pop in M)
+// =====================================================================
+const COUNTRY_STATS = {
+  USA:{gdp:26000,mil:100,pop:334},CHN:{gdp:18000,mil:95,pop:1412},IND:{gdp:3700,mil:80,pop:1428},
+  RUS:{gdp:2240,mil:90,pop:144},DEU:{gdp:4400,mil:60,pop:84},GBR:{gdp:3100,mil:65,pop:67},
+  FRA:{gdp:3000,mil:62,pop:68},JPN:{gdp:4300,mil:55,pop:125},BRA:{gdp:2100,mil:50,pop:215},
+  CAN:{gdp:2100,mil:45,pop:38},KOR:{gdp:1700,mil:58,pop:52},AUS:{gdp:1700,mil:44,pop:26},
+  MEX:{gdp:1490,mil:35,pop:129},IDN:{gdp:1390,mil:42,pop:277},SAU:{gdp:1100,mil:48,pop:36},
+  TUR:{gdp:1150,mil:52,pop:85},NLD:{gdp:1000,mil:36,pop:17},ARE:{gdp:500,mil:40,pop:10},
+  ISR:{gdp:520,mil:56,pop:9},PAK:{gdp:376,mil:44,pop:231},NGA:{gdp:477,mil:30,pop:223},
+  ARG:{gdp:630,mil:32,pop:46},EGY:{gdp:476,mil:38,pop:105},ZAF:{gdp:419,mil:28,pop:60},
+  UKR:{gdp:200,mil:46,pop:44},POL:{gdp:750,mil:38,pop:38},SWE:{gdp:590,mil:34,pop:10},
+  NOR:{gdp:480,mil:32,pop:5},PHL:{gdp:404,mil:28,pop:115},MYS:{gdp:430,mil:26,pop:33},
+  VNM:{gdp:406,mil:30,pop:98},BGD:{gdp:460,mil:22,pop:170},COL:{gdp:363,mil:26,pop:52},
+  CHL:{gdp:360,mil:24,pop:19},IRQ:{gdp:268,mil:30,pop:42},IRN:{gdp:367,mil:42,pop:87},
+  PRK:{gdp:30,mil:50,pop:26},SYR:{gdp:22,mil:18,pop:21},LBY:{gdp:52,mil:12,pop:7},
+  SDN:{gdp:35,mil:14,pop:46},ETH:{gdp:156,mil:14,pop:126},TZA:{gdp:77,mil:8,pop:64},
+  KEN:{gdp:110,mil:8,pop:56},GHA:{gdp:76,mil:6,pop:33},ANG:{gdp:95,mil:12,pop:35},
+  MOZ:{gdp:18,mil:4,pop:33},ZMB:{gdp:22,mil:3,pop:19},ZIM:{gdp:25,mil:5,pop:16},
+  ALG:{gdp:191,mil:20,pop:45},MAR:{gdp:142,mil:16,pop:37},TUN:{gdp:47,mil:10,pop:12},
+  PRT:{gdp:262,mil:18,pop:10},ESP:{gdp:1500,mil:40,pop:47},ITA:{gdp:2190,mil:45,pop:60},
+  GRC:{gdp:240,mil:20,pop:11},ROU:{gdp:300,mil:24,pop:19},HUN:{gdp:188,mil:16,pop:10},
+  CZE:{gdp:330,mil:18,pop:11},AUT:{gdp:515,mil:16,pop:9},CHE:{gdp:800,mil:18,pop:9},
+  BEL:{gdp:580,mil:22,pop:12},DNK:{gdp:390,mil:18,pop:6},FIN:{gdp:300,mil:20,pop:6},
+  SGP:{gdp:470,mil:30,pop:6},HKG:{gdp:360,mil:5,pop:7},TWN:{gdp:760,mil:44,pop:24},
+  THA:{gdp:500,mil:22,pop:72},MMR:{gdp:65,mil:18,pop:54},KHM:{gdp:26,mil:6,pop:17},
+  LAO:{gdp:14,mil:4,pop:7},NPL:{gdp:40,mil:6,pop:30},LKA:{gdp:84,mil:10,pop:22},
+  AFG:{gdp:14,mil:12,pop:40},UZB:{gdp:80,mil:14,pop:36},KAZ:{gdp:220,mil:18,pop:19},
+  GEO:{gdp:24,mil:8,pop:4},AZE:{gdp:95,mil:16,pop:10},ARM:{gdp:20,mil:12,pop:3},
+  BLR:{gdp:73,mil:22,pop:10},MDA:{gdp:15,mil:4,pop:3},LTU:{gdp:74,mil:12,pop:3},
+  LVA:{gdp:43,mil:10,pop:2},EST:{gdp:38,mil:10,pop:1},SVK:{gdp:120,mil:12,pop:5},
+  SVN:{gdp:66,mil:8,pop:2},HRV:{gdp:80,mil:10,pop:4},SRB:{gdp:66,mil:12,pop:7},
+  BIH:{gdp:24,mil:6,pop:3},ALB:{gdp:18,mil:5,pop:3},MKD:{gdp:14,mil:4,pop:2},
+  MNE:{gdp:6,mil:3,pop:1},BLZ:{gdp:2,mil:1,pop:0.4},GTM:{gdp:85,mil:6,pop:18},
+  HND:{gdp:28,mil:4,pop:10},SLV:{gdp:34,mil:4,pop:6},NIC:{gdp:16,mil:3,pop:7},
+  CRI:{gdp:65,mil:0,pop:5},PAN:{gdp:68,mil:5,pop:4},CUB:{gdp:100,mil:14,pop:11},
+  VEN:{gdp:105,mil:14,pop:29},BOL:{gdp:44,mil:6,pop:12},PRY:{gdp:42,mil:4,pop:7},
+  URY:{gdp:70,mil:6,pop:4},PER:{gdp:240,mil:18,pop:33},ECU:{gdp:113,mil:10,pop:18},
+  GUY:{gdp:20,mil:2,pop:0.8},JAM:{gdp:16,mil:2,pop:3},TTO:{gdp:22,mil:4,pop:1.4},
+  NZL:{gdp:250,mil:10,pop:5},PNG:{gdp:28,mil:3,pop:10},FJI:{gdp:4,mil:1,pop:0.9},
+  SOM:{gdp:7,mil:5,pop:18},DJI:{gdp:4,mil:4,pop:1},ERI:{gdp:2,mil:8,pop:3},
+  UGA:{gdp:48,mil:6,pop:48},RWA:{gdp:13,mil:4,pop:14},BDI:{gdp:3,mil:2,pop:12},
+  COD:{gdp:60,mil:10,pop:100},CMR:{gdp:46,mil:5,pop:28},CIV:{gdp:68,mil:5,pop:27},
+  SEN:{gdp:28,mil:4,pop:17},MLI:{gdp:20,mil:5,pop:22},BFA:{gdp:19,mil:4,pop:22},
+  NER:{gdp:17,mil:3,pop:26},TCD:{gdp:12,mil:5,pop:17},CAF:{gdp:2,mil:2,pop:5},
+  GAB:{gdp:19,mil:3,pop:2},GNQ:{gdp:12,mil:2,pop:1.5},COG:{gdp:14,mil:2,pop:6},
+  MWI:{gdp:12,mil:2,pop:20},LSO:{gdp:3,mil:1,pop:2},SWZ:{gdp:4,mil:1,pop:1.2},
+  NAM:{gdp:13,mil:2,pop:3},BWA:{gdp:20,mil:2,pop:3},MDG:{gdp:14,mil:2,pop:28},
+  MUS:{gdp:13,mil:1,pop:1.3},SYC:{gdp:2,mil:0,pop:0.1},CPV:{gdp:2,mil:0,pop:0.6},
+  GMB:{gdp:2,mil:1,pop:2.6},GNB:{gdp:2,mil:1,pop:2},SLE:{gdp:4,mil:1,pop:8},
+  LBR:{gdp:4,mil:1,pop:5},TGO:{gdp:8,mil:2,pop:8},BEN:{gdp:18,mil:2,pop:13},
+  GIN:{gdp:20,mil:4,pop:13},QAT:{gdp:220,mil:24,pop:3},KWT:{gdp:145,mil:20,pop:4},
+  BHR:{gdp:44,mil:12,pop:1.5},OMN:{gdp:88,mil:18,pop:5},YEM:{gdp:20,mil:8,pop:34},
+  JOR:{gdp:47,mil:16,pop:10},LBN:{gdp:22,mil:8,pop:5},PSE:{gdp:20,mil:4,pop:5},
+  MDV:{gdp:7,mil:0,pop:0.5},BTN:{gdp:3,mil:1,pop:0.8},TLS:{gdp:3,mil:1,pop:1.3},
+  BRN:{gdp:14,mil:5,pop:0.5},MNG:{gdp:17,mil:4,pop:3},TKM:{gdp:40,mil:6,pop:6},
+  TJK:{gdp:11,mil:4,pop:10},KGZ:{gdp:12,mil:4,pop:7},WSM:{gdp:1,mil:0,pop:0.2},
+  TON:{gdp:0.5,mil:0,pop:0.1},VUT:{gdp:1,mil:0,pop:0.3},SLB:{gdp:1.5,mil:0,pop:0.7},
+};
+
+// Helper: get stat for a country (fallback if unknown)
+function getCountryStat(iso) {
+  return COUNTRY_STATS[iso] || { gdp: 5, mil: 2, pop: 1 };
+}
+
+// =====================================================================
+// PHASE 2: FOG OF WAR
+// =====================================================================
+let fogEnabled = true;
+
+function computeVisibility() {
+  if (!fogEnabled) return null;
+  const myTerritories = new Set(
+    Object.entries(GS.countries || {})
+      .filter(([,c]) => c.owner === GS.myIndex)
+      .map(([iso]) => iso)
+  );
+  const visible = new Set(myTerritories);
+
+  // Add all countries geographically adjacent (within ~20 degrees lat/lon)
+  const myArr = Array.from(myTerritories);
+  Object.keys(countryData || {}).forEach(iso => {
+    if (visible.has(iso)) return;
+    const cd = countryData[iso];
+    if (!cd) return;
+    for (const myIso of myArr) {
+      const mcd = countryData[myIso];
+      if (!mcd) continue;
+      const dlat = Math.abs(cd.lat - mcd.lat);
+      const dlon = Math.abs(cd.lon - mcd.lon);
+      const dist = Math.sqrt(dlat*dlat + dlon*dlon);
+      if (dist < 22) { visible.add(iso); break; }
+    }
+  });
+  return visible;
+}
+
+function applyFogOfWar() {
+  if (!GS.countries) return;
+  const visible = computeVisibility();
+  Object.entries(troopSprites).forEach(([iso, sprite]) => {
+    if (!sprite) return;
+    if (visible && !visible.has(iso)) {
+      sprite.material.opacity = 0.15;
+      sprite.material.transparent = true;
+    } else {
+      sprite.material.opacity = 1.0;
+      sprite.material.transparent = true;
+    }
+  });
+}
+
 function initGame(playerNames, myIndex) {
   GS.players = playerNames.map((name,i)=>({
     name, index:i, color:PLAYER_COLORS[i], nukes:2, alive:true, troops:0, budget: 500
   }));
   GS.myIndex = myIndex;
 
-  // Assign countries randomly
+  // Assign countries — seed from real-world stats
   const isos = Object.keys(countryData);
   isos.sort(()=>Math.random()-.5);
 
   const numPlayers = GS.players.length;
   isos.forEach((iso,i) => {
     const owner = i < isos.length * 0.85 ? (i % numPlayers) : -1; // 15% neutral
-    const initTroops = owner === -1 ? 1 : (2 + Math.floor(Math.random()*3));
-    GS.countries[iso] = { owner, troops:initTroops, nuked:0,
-      name:countryData[iso].name, lat:countryData[iso].lat, lon:countryData[iso].lon };
+    const stats = getCountryStat(iso);
+    // Scale mil strength (1-100) into game troops (1-15)
+    const milTroops = Math.round(1 + (stats.mil / 100) * 14);
+    const initTroops = owner === -1 ? Math.max(1, Math.round(milTroops * 0.4)) : milTroops;
+    // Income per turn derived from GDP (log scale so small countries still matter)
+    const income = Math.max(1, Math.round(Math.log10(stats.gdp + 1) * 3));
+    GS.countries[iso] = {
+      owner, troops: initTroops, nuked: 0,
+      name: countryData[iso].name, lat: countryData[iso].lat, lon: countryData[iso].lon,
+      gdp: stats.gdp, mil: stats.mil, pop: stats.pop, income,
+      infrastructure: 3, // 0-5 scale, starts at 3
+      airwings: 0, ships: 0,
+    };
   });
 
   // Count troops for reinforcement baseline
@@ -1781,6 +1904,25 @@ function startTurn(playerIndex) {
   // Reinforcement calculation is now done in showTurnAnnounce
   const incomeRate = GS.reinforceLeft; // Use the pre-calculated reinforceLeft
   if(GS.players[playerIndex]) GS.players[playerIndex].budget += (incomeRate * 50);
+
+  // GDP-BASED INCOME: Sum income from all owned territories each turn
+  if (GS.countries) {
+    let gdpIncome = 0;
+    Object.values(GS.countries).forEach(c => {
+      if (c.owner === playerIndex && c.income) {
+        let inc = c.income;
+        if (c.infrastructure) inc = Math.round(inc * (0.6 + c.infrastructure * 0.08));
+        if (c.nuked > 0) inc = Math.round(inc * 0.3); // Nuked territories lose 70% income
+        gdpIncome += inc;
+      }
+    });
+    if (GS.players[playerIndex]) {
+      GS.players[playerIndex].budget = (GS.players[playerIndex].budget || 0) + gdpIncome;
+    }
+  }
+
+  // Apply fog of war every turn
+  if (playerIndex === GS.myIndex) setTimeout(applyFogOfWar, 300);
 
   // ── CATASTROPHIC EVENTS (every 7–14 turns, drain budget for both factions) ──
   if (playerIndex === GS.myIndex) {
@@ -3380,6 +3522,608 @@ setTimeout(triggerAmbientWarfare, 8000);
 
 spawnAmbients();
 animate();
+
+// =====================================================================
+// PHASE 3: NAVAL WARFARE
+// =====================================================================
+GS.fleets = GS.fleets || {}; // { iso: { owner, ships } }
+
+function deployNavalFleet(iso) {
+  if (GS.turn !== GS.myIndex) return;
+  const c = GS.countries[iso];
+  if (!c || c.owner !== GS.myIndex) { setLog('⚓ Select a territory YOU own to deploy a fleet.'); return; }
+  if (GS.players[GS.myIndex].budget < 100) { setLog('⚓ Insufficient budget for naval fleet (100 MIL required).'); return; }
+  GS.players[GS.myIndex].budget -= 100;
+  c.ships = (c.ships || 0) + 1;
+  setLog(`⚓ Fleet deployed from ${c.name}. Naval supremacy extends to adjacent seas.`);
+  triggerNewsEvent(`${c.name.toUpperCase()} NAVAL FLEET COMMISSIONED`);
+  if (GS.isOnline) syncState();
+}
+
+function navalBlockade(targetIso) {
+  const source = Object.entries(GS.countries).find(([,c]) => c.owner === GS.myIndex && (c.ships || 0) > 0);
+  if (!source) { setLog('⚓ You need a naval fleet to blockade.'); return; }
+  const [srcIso, srcC] = source;
+  const tgt = GS.countries[targetIso];
+  if (!tgt || tgt.owner === GS.myIndex) return;
+  tgt.blockaded = (tgt.blockaded || 0) + 2; // 2 turns of blockade
+  srcC.ships = Math.max(0, srcC.ships - 1);
+  setLog(`⚓ ${tgt.name} BLOCKADED for 2 turns — enemy income cut by 50%.`);
+  triggerNewsEvent(`${tgt.name.toUpperCase()} SUFFERS NAVAL BLOCKADE`);
+  if (GS.isOnline) syncState();
+}
+
+// Hook blockade income penalty into startTurn GDP income above
+// (already applied: nuked territories)
+
+// =====================================================================
+// PHASE 4: AIR SUPERIORITY
+// =====================================================================
+GS.airForce = GS.airForce || {}; // per-player airwing counts
+
+function buyAirWing(iso) {
+  if (GS.turn !== GS.myIndex) return;
+  const c = GS.countries[iso];
+  if (!c || c.owner !== GS.myIndex) { setLog('✈ Select your territory to station air wings.'); return; }
+  if (GS.players[GS.myIndex].budget < 75) { setLog('✈ Insufficient budget (75 MIL per air wing).'); return; }
+  GS.players[GS.myIndex].budget -= 75;
+  c.airwings = (c.airwings || 0) + 1;
+  setLog(`✈ Air wing stationed in ${c.name}. Defense +20% in adjacent territories.`);
+  if (GS.isOnline) syncState();
+}
+
+function strategicBombing(targetIso) {
+  if (GS.turn !== GS.myIndex) return;
+  const airSrc = Object.entries(GS.countries).find(([,c]) => c.owner === GS.myIndex && (c.airwings || 0) >= 1);
+  if (!airSrc) { setLog('✈ Need at least 1 air wing to conduct strategic bombing.'); return; }
+  const tgt = GS.countries[targetIso];
+  if (!tgt || tgt.owner === GS.myIndex) return;
+  airSrc[1].airwings--;
+  tgt.infrastructure = Math.max(0, (tgt.infrastructure || 3) - 1);
+  tgt.bombedTurns = (tgt.bombedTurns || 0) + 2;
+  const loss = Math.floor(tgt.troops * 0.15);
+  tgt.troops = Math.max(1, tgt.troops - loss);
+  updateTroopSprite(targetIso);
+  setLog(`✈ Strategic bombing of ${tgt.name}: -${loss} troops, infrastructure degraded.`);
+  triggerNewsEvent(`${tgt.name.toUpperCase()} BOMBED — INFRASTRUCTURE IN RUINS`);
+  if (GS.isOnline) syncState();
+}
+
+// Apply air defense bonus during attack resolution
+function getAirDefenseBonus(iso) {
+  const c = GS.countries[iso];
+  if (!c || !c.airwings || c.airwings === 0) return 1.0;
+  return 1.0 + (Math.min(c.airwings, 5) * 0.04); // Up to +20% defense
+}
+
+// =====================================================================
+// PHASE 5: DIPLOMACY ENGINE
+// =====================================================================
+GS.treaties = GS.treaties || []; // { type, player0, player1, turnsLeft }
+
+const TREATY_TYPES = {
+  NON_AGGRESSION: { name: 'Non-Aggression Pact', cost: 0, duration: 6, desc: 'Neither side attacks the other for 6 turns.' },
+  ALLIANCE:       { name: 'Military Alliance',   cost: 50, duration: 8, desc: 'If attacked, ally defends. +5% attack boost.' },
+  TRADE:          { name: 'Trade Agreement',     cost: 0, duration: 10, desc: 'Both sides gain +15% income for 10 turns.' },
+};
+
+function proposeTreaty(type) {
+  if (GS.turn !== GS.myIndex) { setLog('🤝 Diplomacy only during your turn.'); return; }
+  const treaty = TREATY_TYPES[type];
+  if (!treaty) return;
+  if (treaty.cost > 0 && GS.players[GS.myIndex].budget < treaty.cost) {
+    setLog(`🤝 Insufficient funds for ${treaty.name} (${treaty.cost} MIL)`); return;
+  }
+  // AI acceptance roll: 50% base + adjustment if losing
+  const aiTerr = Object.values(GS.countries).filter(c=>c.owner===1).length;
+  const humanTerr = Object.values(GS.countries).filter(c=>c.owner===0).length;
+  const aiAcceptChance = 0.35 + (humanTerr > aiTerr ? 0.35 : 0.05);
+  const accepted = Math.random() < aiAcceptChance;
+
+  if (!accepted) {
+    setLog(`🤝 RAINCLOUD rejected ${treaty.name}.`);
+    triggerNewsEvent('DIPLOMATIC OVERTURES REBUFFED BY RAINCLOUD');
+    return;
+  }
+  if (treaty.cost > 0) GS.players[GS.myIndex].budget -= treaty.cost;
+  GS.treaties.push({ type, p0: GS.myIndex, p1: 1, turnsLeft: treaty.duration });
+  setLog(`✅ ${treaty.name} SIGNED. ${treaty.desc}`);
+  triggerNewsEvent(`${treaty.name.toUpperCase()} ESTABLISHED`);
+  if (GS.isOnline) syncState();
+}
+
+function tickTreaties() {
+  GS.treaties = (GS.treaties || []).filter(t => {
+    t.turnsLeft--;
+    if (t.turnsLeft <= 0) {
+      // RAINCLOUD betrayal: 30% chance on expiry
+      if (Math.random() < 0.30 && t.type === 'ALLIANCE') {
+        triggerNewsEvent('RAINCLOUD BETRAYS ALLIANCE — WAR REIGNITES');
+        setLog('⚠ RAINCLOUD has betrayed the Alliance! WAR RESUMES.');
+      } else {
+        setLog(`🤝 ${TREATY_TYPES[t.type].name} has expired.`);
+      }
+      return false;
+    }
+    return true;
+  });
+
+  // Apply trade bonus income
+  GS.treaties.forEach(t => {
+    if (t.type === 'TRADE') {
+      if (GS.players[0]) GS.players[0].budget += 20;
+      if (GS.players[1]) GS.players[1].budget += 20;
+    }
+  });
+}
+
+function hasTreaty(type) {
+  return (GS.treaties || []).some(t => t.type === type && t.turnsLeft > 0);
+}
+
+// =====================================================================
+// PHASE 6: ESPIONAGE SYSTEM
+// =====================================================================
+const SPY_ACTIONS = [
+  { id: 'SABOTAGE',    name: '🔪 Sabotage',   cost: 80,  successBase: 0.65, desc: 'Reduces enemy territory output by 30% for 3 turns.' },
+  { id: 'INTEL',       name: '👁 Intel',      cost: 40,  successBase: 0.80, desc: 'Reveals all enemy troop counts for 5 turns (disables fog on enemy).' },
+  { id: 'COUP',        name: '💼 Coup',       cost: 200, successBase: 0.35, desc: 'Attempt to flip a weak enemy territory (<3 troops) to your side.' },
+  { id: 'FALSE_INTEL', name: '📡 Disinform.',  cost: 60,  successBase: 0.70, desc: "Fakes reporting on enemy territory—your side gets false troop counts." },
+];
+
+GS.spyState = GS.spyState || { intelActive: 0, sabotaged: {} };
+
+function executeSpyAction(actionId, targetIso) {
+  if (GS.turn !== GS.myIndex) { setLog('🔎 Espionage only during your turn.'); return; }
+  const action = SPY_ACTIONS.find(a => a.id === actionId);
+  if (!action) return;
+  if (GS.players[GS.myIndex].budget < action.cost) {
+    setLog(`🔎 Insufficient budget for ${action.name} (${action.cost} MIL).`); return;
+  }
+  GS.players[GS.myIndex].budget -= action.cost;
+  const tgt = GS.countries[targetIso];
+  if (!tgt || tgt.owner === GS.myIndex) { setLog('🔎 Must target an enemy territory.'); return; }
+
+  const roll = Math.random();
+  const success = roll < action.successBase;
+
+  if (!success) {
+    setLog(`🔎 ${action.name} FAILED in ${tgt.name}. ${action.cost} MIL lost.`);
+    triggerNewsEvent('SPY CAUGHT — DIPLOMATIC INCIDENT');
+    return;
+  }
+
+  switch (actionId) {
+    case 'SABOTAGE':
+      tgt.sabotaged = 3;
+      setLog(`🔪 SABOTAGE SUCCESS: ${tgt.name} output crippled for 3 turns.`);
+      triggerNewsEvent(`${tgt.name.toUpperCase()} INTERNAL SABOTAGE REPORTED`);
+      break;
+    case 'INTEL':
+      GS.spyState.intelActive = 5;
+      fogEnabled = false;
+      setLog(`👁 INTEL SUCCESS: Full visibility for 5 turns.`);
+      applyFogOfWar();
+      triggerNewsEvent('INTELLIGENCE BREAKTHROUGH — ENEMY POSITIONS REVEALED');
+      break;
+    case 'COUP':
+      if (tgt.troops <= 3) {
+        tgt.owner = GS.myIndex;
+        tgt.troops = 1;
+        refreshBorder(targetIso);
+        updateTroopSprite(targetIso);
+        setLog(`💼 COUP SUCCESS: ${tgt.name} flipped to your control!`);
+        triggerNewsEvent(`${tgt.name.toUpperCase()} GOVERNMENT OVERTHROWN IN COUP`);
+      } else {
+        setLog(`💼 COUP FAILED: ${tgt.name} is too well defended.`);
+      }
+      break;
+    case 'FALSE_INTEL':
+      setLog(`📡 DISINFORMATION planted in ${tgt.name}. Enemy confused!`);
+      triggerNewsEvent('WIDESPREAD MISINFORMATION CAMPAIGN DETECTED');
+      break;
+  }
+  if (GS.isOnline) syncState();
+}
+
+function tickEspionage() {
+  if (GS.spyState && GS.spyState.intelActive > 0) {
+    GS.spyState.intelActive--;
+    if (GS.spyState.intelActive === 0) {
+      fogEnabled = true;
+      applyFogOfWar();
+      setLog('👁 Intel window closed. Fog of war restored.');
+    }
+  }
+  // Decrement sabotaged turns
+  Object.values(GS.countries || {}).forEach(c => {
+    if (c.sabotaged > 0) c.sabotaged--;
+  });
+}
+
+// =====================================================================
+// PHASE 7: TECHNOLOGY TREE
+// =====================================================================
+GS.tech = GS.tech || {
+  points: 0,
+  unlocked: new Set(),
+};
+
+const TECH_NODES = [
+  { id: 'ADVANCED_MISSILES', cat: 'MILITARY', cost: 5, name: '🚀 Advanced Missiles', desc: '+25% missile damage', requires: [] },
+  { id: 'TROOP_DOCTRINE',    cat: 'MILITARY', cost: 4, name: '⚔ Elite Troops',    desc: '+15% ground attack', requires: [] },
+  { id: 'CYBER_WARFARE',     cat: 'CYBER',    cost: 6, name: '💻 Cyber Warfare',   desc: '+30% espionage success chance', requires: [] },
+  { id: 'SATELLITE_NET',     cat: 'CYBER',    cost: 5, name: '🛰 Satellite Net',   desc: 'Permanently removes fog of war', requires: ['CYBER_WARFARE'] },
+  { id: 'ECONOMIC_REFORM',   cat: 'ECONOMIC', cost: 3, name: '💰 Economic Reform', desc: '+10% territory income', requires: [] },
+  { id: 'TRADE_NETWORK',     cat: 'ECONOMIC', cost: 4, name: '🌐 Trade Network',   desc: '+20% GDP income bonus', requires: ['ECONOMIC_REFORM'] },
+  { id: 'NUKE_YIELD',        cat: 'NUCLEAR',  cost: 6, name: '☢ Yield Boost',    desc: '+50% nuclear damage', requires: [] },
+  { id: 'NUKE_SHIELD',       cat: 'NUCLEAR',  cost: 5, name: '🛡 Nuke Shield',   desc: '50% chance to intercept incoming nukes', requires: [] },
+  { id: 'STEALTH_BOMBERS',   cat: 'AIR',      cost: 5, name: '🕶 Stealth Fleet', desc: 'Air missions bypass enemy air defense', requires: [] },
+  { id: 'CARRIER_STRIKE',    cat: 'NAVAL',    cost: 5, name: '⚓ Carrier Strike', desc: 'Naval attack: can hit any coastal territory', requires: [] },
+];
+
+function earnTechPoints() {
+  const owned = Object.values(GS.countries || {}).filter(c => c.owner === GS.myIndex).length;
+  const points = Math.max(1, Math.floor(owned / 20));
+  GS.tech.points = (GS.tech.points || 0) + points;
+}
+
+function unlockTech(nodeId) {
+  if (GS.turn !== GS.myIndex) return;
+  const node = TECH_NODES.find(n => n.id === nodeId);
+  if (!node) return;
+  if ((GS.tech.points || 0) < node.cost) { setLog(`🔬 Need ${node.cost} research points (you have ${GS.tech.points}).`); return; }
+  const unlocked = GS.tech.unlocked instanceof Set ? GS.tech.unlocked : new Set(GS.tech.unlocked || []);
+  if (unlocked.has(nodeId)) { setLog('🔬 Already researched.'); return; }
+  if (node.requires.some(r => !unlocked.has(r))) { setLog(`🔬 Prerequisite not met: ${node.requires.join(', ')}`); return; }
+  GS.tech.points -= node.cost;
+  unlocked.add(nodeId);
+  GS.tech.unlocked = unlocked;
+  setLog(`🔬 RESEARCHED: ${node.name} — ${node.desc}`);
+  triggerNewsEvent(`BREAKTHROUGH: ${node.name.toUpperCase()}`);
+  // Apply permanent effects
+  if (nodeId === 'SATELLITE_NET') { fogEnabled = false; applyFogOfWar(); }
+  if (GS.isOnline) syncState();
+}
+
+function hasTech(id) {
+  if (!GS.tech || !GS.tech.unlocked) return false;
+  const u = GS.tech.unlocked;
+  return (u instanceof Set) ? u.has(id) : (u || []).includes(id);
+}
+
+// =====================================================================
+// PHASE 8: WEATHER & SEASONS
+// =====================================================================
+const SEASONS = ['SPRING', 'SUMMER', 'AUTUMN', 'WINTER'];
+const WEATHER_ZONES = {
+  WINTER_BELT: { isoPatterns: ['RUS','NOR','FIN','SWE','CAN','ISL','DNK','LVA','LTU','EST','BLR'], season: 'WINTER' },
+  MONSOON_BELT: { isoPatterns: ['IND','BGD','MMR','THA','VNM','KHM','LAO','IDN','PHL'], season: 'MONSOON' },
+};
+
+GS.weather = GS.weather || { season: 'SPRING', turnCount: 0 };
+
+function getWeatherModifier(iso) {
+  const c = GS.countries[iso];
+  if (!c) return { attack: 1.0, defense: 1.0, label: '' };
+  const season = GS.weather.season;
+  if (season === 'WINTER' && WEATHER_ZONES.WINTER_BELT.isoPatterns.includes(iso)) {
+    return { attack: 0.75, defense: 1.1, label: '❄ Winter' };
+  }
+  if (season === 'MONSOON' && WEATHER_ZONES.MONSOON_BELT.isoPatterns.includes(iso)) {
+    return { attack: 0.85, defense: 1.05, label: '🌧 Monsoon' };
+  }
+  return { attack: 1.0, defense: 1.0, label: '' };
+}
+
+function tickWeather() {
+  GS.weather.turnCount = (GS.weather.turnCount || 0) + 1;
+  if (GS.weather.turnCount % 4 === 0) {
+    const idx = SEASONS.indexOf(GS.weather.season);
+    GS.weather.season = SEASONS[(idx + 1) % 4];
+    setLog(`🌍 SEASON CHANGE: ${GS.weather.season}`);
+    triggerNewsEvent(`SEASON SHIFT: GLOBAL CONDITIONS ENTERING ${GS.weather.season}`);
+  }
+}
+
+// =====================================================================
+// PHASE 9: ECONOMIC & INFRASTRUCTURE
+// =====================================================================
+function developTerritory(iso) {
+  if (GS.turn !== GS.myIndex) return;
+  const c = GS.countries[iso];
+  if (!c || c.owner !== GS.myIndex) { setLog('🏗 Select your own territory to develop.'); return; }
+  if ((c.infrastructure || 3) >= 5) { setLog('🏗 Infrastructure already at maximum.'); return; }
+  const cost = 50 * ((c.infrastructure || 3) + 1); // Progressive cost
+  if (GS.players[GS.myIndex].budget < cost) {
+    setLog(`🏗 Insufficient budget (${cost} MIL needed to upgrade ${c.name}).`); return;
+  }
+  GS.players[GS.myIndex].budget -= cost;
+  c.infrastructure = Math.min(5, (c.infrastructure || 3) + 1);
+  setLog(`🏗 ${c.name} infrastructure upgraded to level ${c.infrastructure} — income +${Math.round(8)}%`);
+  if (GS.isOnline) syncState();
+}
+
+function bombInfrastructure(targetIso) {
+  if (GS.turn !== GS.myIndex) { return; }
+  const airSrc = Object.entries(GS.countries).find(([,c]) => c.owner === GS.myIndex && (c.airwings || 0) > 0);
+  if (!airSrc) { setLog('✈ Need air wings to bomb infrastructure.'); return; }
+  const tgt = GS.countries[targetIso];
+  if (!tgt || tgt.owner === GS.myIndex) return;
+  airSrc[1].airwings--;
+  tgt.infrastructure = Math.max(0, (tgt.infrastructure || 3) - 1);
+  setLog(`💥 ${tgt.name} infrastructure bombed — income reduced permanently.`);
+  triggerNewsEvent(`${tgt.name.toUpperCase()} ECONOMIC INFRASTRUCTURE TARGETED`);
+  if (GS.isOnline) syncState();
+}
+
+// =====================================================================
+// PHASE 10: ESCALATION LADDER & DOOMSDAY CLOCK
+// =====================================================================
+const ESCALATION_STAGES = [
+  { level: 0, name: 'COLD WAR',     clock: '11:45', color: '#0af', news: 'GEOPOLITICAL TENSIONS REMAIN HIGH' },
+  { level: 1, name: 'PROXY WAR',   clock: '11:50', color: '#fa0', news: 'PROXY CONFLICTS ERUPT ACROSS THREE CONTINENTS' },
+  { level: 2, name: 'OPEN WAR',    clock: '11:55', color: '#f80', news: 'GLOBAL POWERS ENTER DIRECT ARMED CONFLICT' },
+  { level: 3, name: 'TOTAL WAR',   clock: '11:58', color: '#f44', news: 'TOTAL WAR DECLARED: ALL RESOURCES MOBILIZED' },
+  { level: 4, name: 'NUCLEAR ENDGAME', clock: '11:59', color: '#f00', news: '☢ NUCLEAR EXCHANGE IMMINENT — CIVILIZATIONAL RISK' },
+];
+
+GS.escalation = GS.escalation || 0;
+GS.nukesFired = GS.nukesFired || 0;
+
+function updateEscalation() {
+  // Escalate based on nukes fired and turns passed
+  const stage = Math.min(4, Math.floor(GS.nukesFired) + Math.floor((GS.turnCount || 0) / 20));
+  if (stage !== GS.escalation) {
+    GS.escalation = stage;
+    const info = ESCALATION_STAGES[stage];
+    triggerNewsEvent(info.news);
+    setLog(`⚠ ESCALATION LEVEL ${stage}: ${info.name} — ${info.clock}`);
+    renderDoomsdayClock();
+  }
+}
+
+function renderDoomsdayClock() {
+  let el = document.getElementById('doomsday-clock');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'doomsday-clock';
+    el.style.cssText = `position:absolute;top:95px;left:50%;transform:translateX(-50%);
+      background:rgba(0,0,0,0.8);border-radius:6px;padding:4px 14px;
+      font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:2px;
+      z-index:20;pointer-events:none;border:1px solid currentColor;`;
+    document.getElementById('hud').appendChild(el);
+  }
+  const info = ESCALATION_STAGES[GS.escalation || 0];
+  el.style.color = info.color;
+  el.style.borderColor = info.color;
+  el.style.textShadow = `0 0 8px ${info.color}`;
+  el.innerHTML = `☢ ${info.name} &nbsp;|&nbsp; 🕐 ${info.clock}`;
+}
+
+// Tick all secondary systems each end-of-turn
+function tickAllSystems() {
+  tickTreaties();
+  tickEspionage();
+  tickWeather();
+  earnTechPoints();
+  updateEscalation();
+}
+
+// Hook into endTurn
+const _origEndTurn = window.endTurn;
+window.endTurn = function() {
+  tickAllSystems();
+  if (typeof _origEndTurn === 'function') _origEndTurn();
+};
+
+// =====================================================================
+// STRATEGY HUD PANEL (Buttons for all new systems)
+// =====================================================================
+function injectStrategyPanel() {
+  if (document.getElementById('strategy-panel')) return;
+  const panel = document.createElement('div');
+  panel.id = 'strategy-panel';
+  panel.style.cssText = `
+    position:absolute; bottom:100px; left:20px; width:200px;
+    background:rgba(0,5,15,0.92); border:1px solid rgba(0,180,255,0.3);
+    border-radius:6px; padding:10px; z-index:20; pointer-events:auto;
+    font-family:'Courier New',monospace; font-size:10px; color:#0af;
+  `;
+  panel.innerHTML = `
+    <div style="font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:2px;margin-bottom:8px;opacity:0.7;">⚙ STRATEGY OPS</div>
+    <button class="strat-btn" onclick="showDiplomacyModal()" title="Propose Treaty">🤝 DIPLOMACY</button>
+    <button class="strat-btn" onclick="showSpyModal()"  title="Espionage Actions">🔎 ESPIONAGE</button>
+    <button class="strat-btn" onclick="showTechModal()" title="Research Technology">🔬 TECH TREE</button>
+    <button class="strat-btn" onclick="showNavalModal()" title="Naval Operations">⚓ NAVAL OPS</button>
+    <button class="strat-btn" onclick="showWeatherInfo()" title="Current weather conditions">🌍 WEATHER</button>
+    <div id="strat-info" style="margin-top:6px;font-size:9px;opacity:0.7;min-height:20px;line-height:1.4;"></div>
+  `;
+  document.getElementById('hud').appendChild(panel);
+
+  // CSS for buttons
+  const style = document.createElement('style');
+  style.textContent = `
+    .strat-btn {
+      display:block; width:100%; margin-bottom:4px; padding:5px 8px;
+      background:rgba(0,170,255,0.07); border:1px solid rgba(0,170,255,0.25);
+      color:#0af; cursor:pointer; font-family:'Courier New',monospace;
+      font-size:9px; letter-spacing:1px; text-align:left; border-radius:3px;
+      transition:background 0.15s, border-color 0.15s;
+    }
+    .strat-btn:hover { background:rgba(0,170,255,0.18); border-color:#0af; }
+    .modal-overlay {
+      position:absolute; inset:0; background:rgba(0,5,15,0.92); z-index:200;
+      display:flex; align-items:center; justify-content:center;
+      backdrop-filter:blur(6px);
+    }
+    .modal-card {
+      background:rgba(0,8,22,0.97); border:1px solid #0af; border-radius:10px;
+      padding:25px 30px; max-width:480px; width:90vw; max-height:80vh;
+      overflow-y:auto; color:#9cf; font-family:'Courier New',monospace; font-size:11px;
+    }
+    .modal-title { font-family:'Orbitron',sans-serif; color:#0af; font-size:14px;
+      letter-spacing:3px; margin-bottom:14px; }
+    .modal-btn { padding:7px 14px; margin:4px; background:rgba(0,170,255,0.1);
+      border:1px solid #0af; color:#0af; cursor:pointer; border-radius:3px;
+      font-family:'Courier New',monospace; font-size:10px; letter-spacing:1px; }
+    .modal-btn:hover { background:rgba(0,170,255,0.25); }
+    .modal-close { float:right; background:none; border:none; color:#f55; cursor:pointer; font-size:16px; }
+  `;
+  document.head.appendChild(style);
+}
+
+function closeAllModals() {
+  document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+}
+
+function showDiplomacyModal() {
+  SFX.playClick(); closeAllModals();
+  const m = document.createElement('div'); m.className = 'modal-overlay';
+  m.innerHTML = `<div class="modal-card">
+    <button class="modal-close" onclick="closeAllModals()">✕</button>
+    <div class="modal-title">🤝 DIPLOMACY</div>
+    <p style="margin-bottom:12px;opacity:0.7;">Offer terms to RAINCLOUD. Acceptance depends on the balance of power.</p>
+    ${Object.entries(TREATY_TYPES).map(([key,t])=>`
+      <div style="margin-bottom:12px;padding:10px;border:1px solid rgba(0,170,255,0.2);border-radius:4px;">
+        <b style="color:#0f8;">${t.name}</b><br>
+        <span style="opacity:0.7;">${t.desc}</span><br>
+        <span style="color:#fa0;">Cost: ${t.cost || 0} MIL | Duration: ${t.duration} turns</span><br>
+        <button class="modal-btn" onclick="proposeTreaty('${key}');closeAllModals()">PROPOSE</button>
+        ${hasTreaty(key) ? '<span style="color:#0f8;"> ✓ ACTIVE</span>' : ''}
+      </div>`).join('')}
+  </div>`;
+  document.getElementById('hud').appendChild(m);
+}
+
+function showSpyModal() {
+  SFX.playClick(); closeAllModals();
+  const m = document.createElement('div'); m.className = 'modal-overlay';
+  m.innerHTML = `<div class="modal-card">
+    <button class="modal-close" onclick="closeAllModals()">✕</button>
+    <div class="modal-title">🔎 ESPIONAGE</div>
+    <p style="margin-bottom:12px;opacity:0.7;">Select an action, then click a target territory on the globe.</p>
+    ${SPY_ACTIONS.map(a=> `
+      <div style="margin-bottom:10px;padding:10px;border:1px solid rgba(0,170,255,0.2);border-radius:4px;">
+        <b style="color:#0f8;">${a.name}</b>
+        <span style="float:right;color:#fa0;">${a.cost} MIL | ${Math.round(a.successBase*100)}% success</span><br>
+        <span style="opacity:0.7;">${a.desc}</span><br>
+        <button class="modal-btn" onclick="
+          window._pendingSpyAction='${a.id}';
+          closeAllModals();
+          setLog('🔎 Click enemy territory to execute ${a.name}');
+        ">SELECT</button>
+      </div>`).join('')}
+  </div>`;
+  document.getElementById('hud').appendChild(m);
+}
+
+function showTechModal() {
+  SFX.playClick(); closeAllModals();
+  const pts = GS.tech ? (GS.tech.points || 0) : 0;
+  const m = document.createElement('div'); m.className = 'modal-overlay';
+  m.innerHTML = `<div class="modal-card">
+    <button class="modal-close" onclick="closeAllModals()">✕</button>
+    <div class="modal-title">🔬 TECHNOLOGY TREE</div>
+    <p style="margin-bottom:12px;">Research Points: <b style="color:#0f8;">${pts}</b> &nbsp;(Earn ${Math.max(1,Math.floor(Object.values(GS.countries||{}).filter(c=>c.owner===GS.myIndex).length/20))} per turn)</p>
+    ${['MILITARY','CYBER','ECONOMIC','NUCLEAR','AIR','NAVAL'].map(cat => {
+      const nodes = TECH_NODES.filter(n => n.cat === cat);
+      if (!nodes.length) return '';
+      return `<div style="margin-bottom:10px;"><div style="color:#fa0;margin-bottom:4px;letter-spacing:2px;font-size:9px;">${cat}</div>
+      ${nodes.map(n=>{
+        const u = hasTech(n.id);
+        const prereqMet = n.requires.every(r=>hasTech(r));
+        return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;padding:6px;
+          border:1px solid ${u?'#0f8':prereqMet?'rgba(0,170,255,0.25)':'rgba(100,100,100,0.2)'};border-radius:3px;">
+          <span style="flex:1;opacity:${prereqMet||u?1:0.4};">${n.name} — <span style="opacity:0.7;">${n.desc}</span></span>
+          ${u ? '<span style="color:#0f8;">✓ DONE</span>' :
+            prereqMet ? `<button class="modal-btn" style="padding:4px 10px;" onclick="unlockTech('${n.id}');showTechModal();">
+              ${n.cost} pts</button>` : '<span style="opacity:0.4;">🔒</span>'}
+        </div>`;}).join('')}
+      </div>`;}).join('')}
+  </div>`;
+  document.getElementById('hud').appendChild(m);
+}
+
+function showNavalModal() {
+  SFX.playClick(); closeAllModals();
+  const m = document.createElement('div'); m.className = 'modal-overlay';
+  m.innerHTML = `<div class="modal-card">
+    <button class="modal-close" onclick="closeAllModals()">✕</button>
+    <div class="modal-title">⚓ NAVAL OPERATIONS</div>
+    <p style="margin-bottom:12px;opacity:0.7;">Control the seas to expand your reach and embargo enemies.</p>
+    <button class="modal-btn" onclick="
+      window._pendingNaval='DEPLOY'; closeAllModals();
+      setLog('⚓ Click YOUR territory to deploy a naval fleet (100 MIL).');
+    ">⚓ DEPLOY FLEET (100 MIL)</button>
+    <button class="modal-btn" onclick="
+      window._pendingNaval='BLOCKADE'; closeAllModals();
+      setLog('⚓ Click ENEMY territory to blockade (costs 1 fleet).');
+    ">🚫 BLOCKADE ENEMY (1 fleet)</button>
+    <button class="modal-btn" onclick="
+      window._pendingNaval='BOMBING'; closeAllModals();
+      setLog('✈ Click ENEMY territory to conduct strategic bombing (costs 1 air wing).');
+    ">✈ STRATEGIC BOMBING</button>
+    <button class="modal-btn" onclick="
+      window._pendingNaval='DEVELOP'; closeAllModals();
+      setLog('🏗 Click YOUR territory to develop infrastructure.');
+    ">🏗 DEVELOP INFRASTRUCTURE</button>
+    <div style="margin-top:12px;opacity:0.6;font-size:9px;">Your fleets: ${Object.values(GS.countries||{}).filter(c=>c.owner===GS.myIndex&&c.ships>0).map(c=>c.name+' ('+c.ships+' ships)').join(', ')||'None'}</div>
+    <div style="opacity:0.6;font-size:9px;">Your air wings: ${Object.values(GS.countries||{}).filter(c=>c.owner===GS.myIndex&&c.airwings>0).map(c=>c.name+' ('+c.airwings+' wings)').join(', ')||'None'}</div>
+  </div>`;
+  document.getElementById('hud').appendChild(m);
+}
+
+function showWeatherInfo() {
+  SFX.playClick(); closeAllModals();
+  const s = GS.weather || { season: 'SPRING', turnCount: 0 };
+  const next = 4 - (s.turnCount % 4);
+  const m = document.createElement('div'); m.className = 'modal-overlay';
+  m.innerHTML = `<div class="modal-card">
+    <button class="modal-close" onclick="closeAllModals()">✕</button>
+    <div class="modal-title">🌍 WEATHER REPORT</div>
+    <p>Current Season: <b style="color:#0f8;">${s.season}</b></p>
+    <p style="opacity:0.7;">Next season change in: ${next} turn(s)</p>
+    <hr style="border-color:rgba(0,170,255,0.1);margin:12px 0;">
+    <p><b>❄ WINTER</b> (affects Russia, Scandinavia, Canada):<br>
+    <span style="opacity:0.7;">Ground attack −25%, defense +10%</span></p>
+    <p><b>🌧 MONSOON</b> (affects South/East Asia):<br>
+    <span style="opacity:0.7;">Ground attack −15%, defense +5%</span></p>
+    <button class="modal-btn" onclick="closeAllModals()">CLOSE</button>
+  </div>`;
+  document.getElementById('hud').appendChild(m);
+}
+
+// Hook globe clicks for pending spy/naval actions
+const _origHandleGlobeClick = window.handleGlobeClick;
+window.handleGlobeClick = function(iso) {
+  if (window._pendingSpyAction && iso) {
+    executeSpyAction(window._pendingSpyAction, iso);
+    window._pendingSpyAction = null;
+    return;
+  }
+  if (window._pendingNaval && iso) {
+    const action = window._pendingNaval;
+    window._pendingNaval = null;
+    if (action === 'DEPLOY') deployNavalFleet(iso);
+    else if (action === 'BLOCKADE') navalBlockade(iso);
+    else if (action === 'BOMBING') strategicBombing(iso);
+    else if (action === 'DEVELOP') developTerritory(iso);
+    return;
+  }
+  if (typeof _origHandleGlobeClick === 'function') _origHandleGlobeClick(iso);
+};
+
+// Initialize strategy panel and doomsday clock after game starts
+const _origInitGame = window.initGame;
+window.initGame = function(names, idx) {
+  if (typeof _origInitGame === 'function') _origInitGame(names, idx);
+  setTimeout(() => {
+    injectStrategyPanel();
+    renderDoomsdayClock();
+  }, 1000);
+};
+
 </script>
 </body>
 </html>
