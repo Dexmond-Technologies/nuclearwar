@@ -1163,6 +1163,36 @@ function triggerNewsEvent(forcedText = null) {
 }
 
 // =====================================================================
+// LIVE NEWS INTEGRATION (NewsAPI.world)
+// =====================================================================
+let nextLiveNewsTurn = 5 + Math.floor(Math.random() * 4); // First live news between turn 5-8
+
+async function fetchLiveNews() {
+  try {
+    const res = await fetch('https://newsapi.world/api/v1/latest?apikey=pk_live_78882096965298deb4dd2132b01132b0387198dbdc1bff877bff5717d81d687d');
+    if (!res.ok) return;
+    const data = await res.json();
+    
+    // Attempt to extract a headline
+    if (data && data.results && data.results.length > 0) {
+      const article = data.results[Math.floor(Math.random() * data.results.length)];
+      if (article && article.title) {
+        let title = article.title.toUpperCase();
+        // Append source if available
+        if (article.source_id) title = `[${article.source_id.toUpperCase()}] ` + title;
+        triggerNewsEvent(title);
+        return;
+      }
+    }
+  } catch (err) {
+    console.error("Live news fetch failed:", err);
+  }
+  
+  // Fallback to fake news if fetch failed
+  triggerNewsEvent();
+}
+
+// =====================================================================
 // CONSTANTS & PLAYER SETUP
 // =====================================================================
 // =====================================================================
@@ -2059,8 +2089,13 @@ function startTurn(playerIndex) {
 
   // Show big turn announcement
   showTurnAnnounce(playerIndex, () => {
+    
     // Random chance to trigger a news event after the announcement fades
-    if (Math.random() < 0.2) {
+    // If it is time for a LIVE news event from the API, we use that.
+    if (GS.turnCount >= nextLiveNewsTurn) {
+      setTimeout(() => fetchLiveNews(), 1000);
+      nextLiveNewsTurn = GS.turnCount + 5 + Math.floor(Math.random() * 4); // Next live news in 5-8 turns
+    } else if (Math.random() < 0.2) {
       setTimeout(() => triggerNewsEvent(), 1000);
     }
     
