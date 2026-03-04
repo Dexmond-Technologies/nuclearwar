@@ -1210,10 +1210,12 @@ async function loadCountries(retries = 3) {
     countryData[iso] = { name: p.name||iso, lat, lon, polys };
 
     // Draw border lines
+    // Build border lines geometry but do not render them on the globe
     const mat = new THREE.LineBasicMaterial({color:NEUTRAL.int, transparent:true, opacity:.6});
     const group = new THREE.Group();
     geos.forEach(geo => group.add(new THREE.Line(geo, mat.clone())));
     group.userData = { iso, mat };
+    group.visible = false; // Hide borders per user request
     countryBorders[iso] = group;
     scene.add(group);
   });
