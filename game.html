@@ -2537,8 +2537,30 @@ function applyState(s) {
   
   if(s.AI_STATE) GS.AI_STATE = s.AI_STATE;
   if(s.globalMetrics) GS.globalMetrics = s.globalMetrics;
-  s.players.forEach((p,i)=>{if(GS.players[i])Object.assign(GS.players[i],p);});
+  
+  // Restore GS.players properly
+  if (GS.players.length === 0) {
+    GS.players = s.players.map((p, i) => ({ ...p, color: PLAYER_COLORS[i] }));
+  } else {
+    s.players.forEach((p,i)=>{if(GS.players[i])Object.assign(GS.players[i],p);});
+  }
+
+  // Restore UI visibility if we are joining late
+  const badges = document.getElementById('player-badges');
+  badges.innerHTML = GS.players.map((p,i)=>`
+    <div class="pb" id="badge-${i}"
+      style="border-color:${p.color.hex};color:${p.color.hex}">
+      ${p.color.name}: ${p.name}
+    </div>`).join('');
+  document.getElementById('hud').style.display='block';
+  document.getElementById('dash-0').classList.add('visible');
+  document.getElementById('dash-1').classList.add('visible');
+  
   refreshAllBorders(); buildTroopSprites(); updatePhaseUI();
+  updateDashboard();
+  
+  if(window._dashInterval) clearInterval(window._dashInterval);
+  window._dashInterval = setInterval(updateDashboard, 1000);
   
   if(GS.turn===0) setLog(`▶ HUMAN FRONT — ${GS.phase}`);
   else setLog(`⟳ SKYNET PROCESSING...`);
