@@ -17,17 +17,6 @@ if (process.env.DATABASE_URL) {
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false }
   });
-  pgPool.query(`
-    CREATE TABLE IF NOT EXISTS game_state (
-      id INTEGER PRIMARY KEY DEFAULT 1,
-      state JSONB NOT NULL,
-      updated_at TIMESTAMPTZ DEFAULT NOW()
-    )
-  `).then(() => {
-    console.log('☢ PostgreSQL connected — game_state table ready');
-  }).catch(err => {
-    console.error('⚠ PostgreSQL table creation failed:', err.message);
-  });
 } else {
   console.log('ℹ No DATABASE_URL — running without persistence (state resets on restart)');
 }
@@ -85,10 +74,7 @@ let globalGameState = null;
 const connectedClients = new Set();
 let playerCounter = 0;
 
-// On Sever Startup, try load state from DB immediately
-loadGameState().then(state => {
-  if (state) globalGameState = state;
-});
+// Database initialization and state parsing logic moved to startServer() at the bottom
 
 function broadcast(msg, excludeWs = null) {
   const data = JSON.stringify(msg);
@@ -203,6 +189,28 @@ wss.on('connection', ws => {
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`☢ NUCLEAR WAR Multi-Service running on port ${PORT}`);
-});
+// On Sever Startup, init DB and try to load state immediately before listening
+async function startServer() {
+  if (pgPool) {
+    try {
+      await pgPool.query(`
+        CREATE TABLE IF NOT EXISTS game_state (
+          id INTEGER PRIMARY KEY DEFAULT 1,
+          state JSONB NOT NULL,
+          updated_at TIMESTAMPTZ DEFAULT NOW()
+        )
+      `);
+      console.log('☢ PostgreSQL connected — game_state table ready');
+    } catch (err) {
+      console.error('⚠ PostgreSQL table creation failed:', err.message);
+    }
+    const state = await loadGameState();
+    if (state) globalGameState = state;
+  }
+  
+  server.listen(PORT, () => {
+    console.log(`☢ NUCLEAR WAR Multi-Service running on port ${PORT}`);
+  });
+}
+
+startServer();
