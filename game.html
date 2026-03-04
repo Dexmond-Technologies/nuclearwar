@@ -95,15 +95,41 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 .die.def{background:#001a30;border:2px solid #0af;color:#0af;}
 
 /* Chat */
-#chat-box{position:absolute;bottom:60px;left:16px;width:260px;background:rgba(0,5,15,.85);
-  border:1px solid rgba(0,180,255,.15);border-radius:4px;display:none;pointer-events:auto;}
+#chat-box{position:absolute;bottom:120px;left:calc(20px + 25vw + 15px);width:260px;background:rgba(0,5,15,.95);
+  border:1px solid #0af;border-radius:8px;display:none;pointer-events:auto;z-index:200;
+  box-shadow:0 0 15px rgba(0,170,255,0.4);}
 #chat-box.open{display:flex;flex-direction:column;}
 #chat-msgs{flex:1;overflow-y:auto;max-height:160px;padding:8px;font-size:10px;line-height:1.7;}
 #chat-input-row{display:flex;border-top:1px solid rgba(0,180,255,.1);}
 #chat-inp{flex:1;padding:6px 8px;background:transparent;border:none;color:#fff;
   font:10px 'Courier New',monospace;outline:none;}
 #chat-send{padding:6px 10px;background:#0af2;border:none;color:#0af;cursor:pointer;font-size:11px;}
-#chat-toggle{position:absolute;bottom:60px;left:16px;pointer-events:auto;z-index:15;display:none;}
+#btn-chat-toggle {
+  position: absolute;
+  left: calc(20px + 25vw + 15px);
+  bottom: 60px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(0, 170, 255, 0.15);
+  border: 1px solid #0af;
+  color: #0af;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+  pointer-events: auto;
+  box-shadow: 0 0 15px rgba(0, 170, 255, 0.4);
+  transition: all 0.2s;
+  display: none;
+}
+#btn-chat-toggle:hover {
+  background: rgba(0, 170, 255, 0.3);
+  box-shadow: 0 0 25px rgba(0, 170, 255, 0.8);
+  transform: scale(1.1);
+}
 
 /* Tooltip */
 #tip{position:absolute;pointer-events:none;background:rgba(0,8,20,.95);border:1px solid rgba(0,180,255,.3);
@@ -338,6 +364,20 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   .dash-tag { display: none !important; }
   .dash-val { min-width: 20px !important; }
   
+  #btn-chat-toggle {
+    left: 50vw !important;
+    transform: translateX(-50%) !important;
+    bottom: 140px !important;
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 18px !important;
+  }
+  #chat-box {
+    left: 50vw !important;
+    transform: translateX(-50%) !important;
+    bottom: 190px !important;
+  }
+  
   #phase-btns { gap: 4px !important; }
   .phase-btn { padding: 6px 0 !important; font-size: 8px !important; }
 
@@ -509,14 +549,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       <div id="phase-label">—</div>
     </div>
     <div style="display:flex;gap:15px;pointer-events:auto;align-items:center;">
-      <!-- USER STATS BOX -->
-      <div id="user-stats-box">
-        <div class="us-title" id="us-name">COMMANDER</div>
-        <div class="us-row"><span class="us-label">Total Attacks:</span><span class="us-val" id="us-attacks">0</span></div>
-        <div class="us-row"><span class="us-label">Total Damage:</span><span class="us-val" id="us-damage">0 MILS</span></div>
-      </div>
       <div style="display:flex;gap:8px;">
-        <button class="phase-btn" id="btn-chat-toggle" style="display:none;padding:10px 15px;">💬 CHAT</button>
         <button class="phase-btn" id="btn-end-turn" style="padding:10px 15px;">END TURN ▶</button>
       </div>
     </div>
@@ -615,7 +648,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 #ops-sidebar {
   position: fixed;
   top: 80px;
-  left: calc(20px + 25vw + 10px);
+  right: calc(20px + 25vw + 10px);
   display: none;
   flex-direction: column;
   gap: 8px;
@@ -666,7 +699,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 }
 .ops-tip {
   position: absolute;
-  left: calc(100% + 10px);
+  right: calc(100% + 10px);
   top: 50%;
   transform: translateY(-50%);
   background: rgba(0, 8, 20, 0.95);
@@ -713,7 +746,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 </div>
 
 <!-- Chat -->
-<button id="chat-toggle" style="display:none">💬</button>
+<button id="btn-chat-toggle" style="display:none">💬</button>
 <div id="chat-box">
   <div id="chat-msgs"></div>
   <div class="chat-input-row" style="display:flex;border-top:1px solid rgba(0,180,255,.1)">
@@ -1053,7 +1086,8 @@ const SFX = {
   toggleMute() {
     this.muted = !this.muted;
     if (!this.muted) this.playClick();
-    document.getElementById('btn-vol').innerText = this.muted ? '🔈' : '🔊';
+    const btnVol = document.getElementById('btn-vol');
+    if (btnVol) btnVol.innerText = this.muted ? '🔈' : '🔊';
     if (this.ctx) {
       if (this.muted) this.ctx.suspend();
       else this.ctx.resume();
@@ -1279,7 +1313,7 @@ function triggerNewsEvent(forcedText = null) {
 // =====================================================================
 // LIVE NEWS INTEGRATION (NewsAPI.world)
 // =====================================================================
-let nextLiveNewsTurn = 5 + Math.floor(Math.random() * 4); // First live news between turn 5-8
+let nextLiveNewsTurn = 1 + Math.floor(Math.random() * 2); // First live news very soon
 
 async function fetchLiveNews() {
   try {
@@ -1772,6 +1806,9 @@ function initGame(playerNames, myIndex) {
   // Show dashboards and start live update — only 2 panels in 2-faction mode
   document.getElementById('dash-0').classList.add('visible');
   document.getElementById('dash-1').classList.add('visible');
+  document.getElementById('user-stats-box').classList.add('visible');
+  document.getElementById('ops-sidebar').classList.add('visible');
+  document.getElementById('btn-chat-toggle').style.display = 'block';
   updateDashboard();
   if(window._dashInterval) clearInterval(window._dashInterval);
   window._dashInterval = setInterval(updateDashboard, 1000);
@@ -2208,7 +2245,7 @@ function startTurn(playerIndex) {
     // If it is time for a LIVE news event from the API, we use that.
     if (GS.turnCount >= nextLiveNewsTurn) {
       setTimeout(() => fetchLiveNews(), 1000);
-      nextLiveNewsTurn = GS.turnCount + 5 + Math.floor(Math.random() * 4); // Next live news in 5-8 turns
+      nextLiveNewsTurn = GS.turnCount + 1 + Math.floor(Math.random() * 2); // Next live news in 1-2 turns
     } else if (Math.random() < 0.2) {
       setTimeout(() => triggerNewsEvent(), 1000);
     }
@@ -3412,6 +3449,9 @@ function applyState(s) {
   document.getElementById('dash-1').classList.add('visible');
   document.getElementById('user-stats-box').classList.add('visible');
   document.getElementById('ops-sidebar').classList.add('visible');
+  document.getElementById('btn-chat-toggle').style.display = 'block';
+  document.getElementById('user-stats-box').classList.add('visible');
+  document.getElementById('ops-sidebar').classList.add('visible');
   
   refreshAllBorders(); buildTroopSprites(); updatePhaseUI();
   updateDashboard();
@@ -4159,7 +4199,7 @@ window.endTurn = function() {
 let _openDrawerId = null;
 function closeAllModals() {
   document.querySelectorAll('.strat-drawer').forEach(d => d.remove());
-  document.querySelectorAll('.strat-icon-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.ops-btn, .strat-icon-btn').forEach(b => b.classList.remove('active'));
   _openDrawerId = null;
 }
 
@@ -4181,7 +4221,7 @@ function openDrawer(id, titleHtml, bodyHtml) {
     ${bodyHtml}
   `;
   document.body.appendChild(drawer);
-  const btn = document.getElementById('btn-' + id);
+  const btn = document.getElementById('ops-btn-' + id) || document.getElementById('btn-' + id);
   if (btn) btn.classList.add('active');
 }
 
