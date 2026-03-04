@@ -3903,21 +3903,9 @@ function updateEscalation() {
 }
 
 function renderDoomsdayClock() {
-  let el = document.getElementById('doomsday-clock');
-  if (!el) {
-    el = document.createElement('div');
-    el.id = 'doomsday-clock';
-    el.style.cssText = `position:absolute;top:95px;left:50%;transform:translateX(-50%);
-      background:rgba(0,0,0,0.8);border-radius:6px;padding:4px 14px;
-      font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:2px;
-      z-index:20;pointer-events:none;border:1px solid currentColor;`;
-    document.getElementById('hud').appendChild(el);
-  }
-  const info = ESCALATION_STAGES[GS.escalation || 0];
-  el.style.color = info.color;
-  el.style.borderColor = info.color;
-  el.style.textShadow = `0 0 8px ${info.color}`;
-  el.innerHTML = `☢ ${info.name} &nbsp;|&nbsp; 🕐 ${info.clock}`;
+  // UI rendering removed as per user request
+  const el = document.getElementById('doomsday-clock');
+  if (el) el.remove();
 }
 
 // Tick all secondary systems each end-of-turn
