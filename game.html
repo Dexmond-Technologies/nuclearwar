@@ -1033,7 +1033,8 @@ const texLoader = new THREE.TextureLoader();
 const earthTex  = texLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/land_ocean_ice_cloud_2048.jpg');
 const globeMat  = new THREE.MeshPhongMaterial({map:earthTex,specular:new THREE.Color(0x003355),shininess:15});
 const globeMesh = new THREE.Mesh(globeGeo, globeMat);
-globeMesh.rotation.y = -Math.PI / 2; // Align texture with GeoJSON borders
+window.globeMesh = globeMesh;
+// globeMesh.rotation.y = 0; // Default alignment is correct for this texture
 scene.add(globeMesh);
 
 // Atmosphere
@@ -1171,11 +1172,27 @@ async function loadCountries(retries = 3) {
     let sumLat=0, sumLon=0, cnt=0;
     const polys = [];
 
+    // Helper to apply -30 degree prime meridian offset and wrap dateline
+    const oLon = (lon) => {
+      let l = lon - 30;
+      if (l < -180) l += 360;
+      if (l > 180) l -= 360;
+      return l;
+    };
+
     const extractRing = ring => {
-      const pts = ring.map(([lon,lat]) => ll2v(lat,lon,GLOBE_R+.003));
-      polys.push(ring.map(([lon,lat])=>({lat,lon})));
-      sumLon += ring.reduce((a,[lo])=>a+lo,0)/ring.length;
-      sumLat += ring.reduce((a,[lo,la])=>a+la,0)/ring.length;
+      const pts = ring.map(([lon,lat]) => ll2v(lat,oLon(lon),GLOBE_R+.003));
+      polys.push(ring.map(([lon,lat])=>({lat,lon:oLon(lon)})));
+      
+      // Calculate ring centroid using offset longitude, handling dateline wrap naively as before
+      let tLon = 0, tLat = 0;
+      ring.forEach(([lo, la]) => {
+        tLon += oLon(lo);
+        tLat += la;
+      });
+      sumLon += tLon / ring.length;
+      sumLat += tLat / ring.length;
+      
       cnt++;
       return new THREE.BufferGeometry().setFromPoints(pts);
     };
