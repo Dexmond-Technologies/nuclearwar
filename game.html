@@ -1997,6 +1997,10 @@ function startTurn(playerIndex) {
 }
 
 function nextTurn() {
+  if (window._turnTimer) {
+    clearInterval(window._turnTimer);
+    window._turnTimer = null;
+  }
   if (GS.turn === 1) GS.turnCount++; // Increment overall turn when Raincloud finishes
   do {
     GS.turn = (GS.turn + 1) % GS.players.length;
@@ -2024,34 +2028,40 @@ function updatePhaseUI() {
   document.getElementById('btn-end-turn').disabled = !myTurn;
   
   // 30-Second Turn Timer Logic
-  if (window._turnTimer) clearInterval(window._turnTimer);
-  const timerBadge = document.getElementById('d0-players'); // Temporary visual placement for the timer, could also be a new element
+  const timerBadge = document.getElementById('d0-players'); // Temporary visual placement for the timer
   if (myTurn) {
-    let timeLeft = 30;
-    // Store original text to restore when turn ends
     if (!window._origPlayersText) window._origPlayersText = timerBadge.innerHTML;
     
-    window._turnTimer = setInterval(() => {
-      timeLeft--;
-      if (timeLeft <= 10) {
-          timerBadge.innerHTML = `<span style="color:#f24">⚠ TIMEOUT IN ${timeLeft}s</span>`;
-      } else {
-          timerBadge.innerHTML = `⏳ TURN TIME: ${timeLeft}s`;
-      }
-      
-      if (timeLeft <= 0) {
-        clearInterval(window._turnTimer);
-        setLog('⏳ TURN TIME EXPIRED. AUTO-YIELDING CONSOLE.');
-        if (!document.getElementById('attack-modal').classList.contains('show')) {
-            nextTurn(); // Automatically end turn
+    // ONLY start the timer if it isn't already running for this turn
+    if (!window._turnTimer) {
+      let timeLeft = 30;
+      window._turnTimer = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 10) {
+            timerBadge.innerHTML = `<span style="color:#f24">⚠ TIMEOUT IN ${timeLeft}s</span>`;
         } else {
-            document.getElementById('attack-modal').classList.remove('show');
-            nextTurn();
+            timerBadge.innerHTML = `⏳ TURN TIME: ${timeLeft}s`;
         }
-      }
-    }, 1000);
+        
+        if (timeLeft <= 0) {
+          clearInterval(window._turnTimer);
+          window._turnTimer = null;
+          setLog('⏳ TURN TIME EXPIRED. AUTO-YIELDING CONSOLE.');
+          if (!document.getElementById('attack-modal').classList.contains('show')) {
+              nextTurn(); // Automatically end turn
+          } else {
+              document.getElementById('attack-modal').classList.remove('show');
+              nextTurn();
+          }
+        }
+      }, 1000);
+    }
   } else {
-    // Restore original text when not our turn
+    // End our timer and restore text when not our turn
+    if (window._turnTimer) {
+      clearInterval(window._turnTimer);
+      window._turnTimer = null;
+    }
     if (window._origPlayersText) timerBadge.innerHTML = window._origPlayersText;
   }
 }
