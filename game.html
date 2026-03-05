@@ -4800,15 +4800,26 @@ function initIntelMap() {
   if (intelMap) return;
   const container = document.getElementById('deckgl-container');
   const layers = {};
-  for(const k of Object.keys(INTEL_LAYERS)) layers[k] = false;
+  for(const k of Object.keys(INTEL_LAYERS)) layers[k] = true;
   
-  intelMap = new window.DeckGLMap(container, {
-    zoom: 2.5,
-    pan: {x:0, y:0},
-    view: 'global',
-    timeRange: '24h',
-    layers: layers
-  });
+  try {
+    intelMap = new window.DeckGLMap(container, {
+      zoom: 2.5,
+      pan: {x:0, y:0},
+      view: 'global',
+      timeRange: '24h',
+      layers: layers
+    });
+  } catch (e) {
+    const loadingDiv = document.getElementById('intel-map-loading');
+    if (loadingDiv) {
+      loadingDiv.innerHTML = `<div style="color:red; font-size:12px; text-align:left; padding:20px;"><b>CRITICAL MAP ERROR:</b><br>${e.message}<br><br><pre style="white-space:pre-wrap;">${e.stack}</pre></div>`;
+      loadingDiv.style.display = 'flex';
+      loadingDiv.style.alignItems = 'flex-start';
+    }
+    console.error("Error initializing DeckGLMap:", e);
+    setLog("⚠ Error loading Intel Map. Check console for details.");
+  }
 }
 
 function showIntelMapDrawer() {

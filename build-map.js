@@ -40,10 +40,15 @@ esbuild.build({
   entryPoints: ['src/map-entry.ts'],
   bundle: true,
   outfile: 'public/dist/improve_earth.js',
-  format: 'iife',
   sourcemap: true,
   minify: true,
   tsconfig: 'tsconfig.json',
+  banner: {
+    js: 'window.import_meta = { glob: () => ({}), env: { VITE_MAP_INTERACTION_MODE: "flat" } };'
+  },
+  define: {
+    'import.meta': 'window.import_meta',
+  },
   plugins: [stubPlugin]
 }).then(() => {
   console.log('Map bundle built successfully!');
