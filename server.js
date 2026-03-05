@@ -234,7 +234,7 @@ const server = http.createServer((req, res) => {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*'
     });
-    fetch('https://api.windy.com/webcams/api/v3/webcams?limit=50&include=location,player&modifiers=live', {
+    fetch('https://api.windy.com/webcams/api/v3/webcams?limit=250&include=location,player&modifiers=live', {
       method: 'GET',
       headers: { 'x-windy-api-key': 'vEqfjmfqyPguO0tTOX5gKMTXH6sz5dZR' }
     })

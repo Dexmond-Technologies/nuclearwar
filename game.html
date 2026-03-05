@@ -747,6 +747,9 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   </div>
   <div id="side-panel">
     <button id="sp-close" onclick="document.getElementById('side-panel').classList.remove('show');GS.selected=null;" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#f55;font-size:16px;cursor:pointer;line-height:1;padding:4px;" title="Close Panel">✕</button>
+    <button class="sp-btn" id="btn-toggle-skin" style="position:absolute; right:15px; width:100px; text-align:center; bottom:204px; background:#02050a; color:#0af; border:1px solid #0af; z-index:99999; padding:4px 8px; font-size:10px; cursor:pointer;" title="Toggle live webcams map skin">
+  🌍 LIVE SKIN
+</button>
     <div id="sp-cname">—</div>
     <div id="sp-info"></div>
     <div id="sp-actions">
@@ -919,7 +922,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 #btn-toggle-radio-lock {
   position: absolute;
   bottom: 8px;
-  left: calc(20px + 25vw - 68px);
+  left: calc(20px + 25vw - 78px);
   padding: 4px 8px;
   border: 1px solid rgba(255,170,0,0.5);
   background: rgba(255,170,0,0.1);
@@ -2039,6 +2042,26 @@ const COUNTRY_STATS = {
   TON:{gdp:0.5,mil:0,pop:0.1},VUT:{gdp:1,mil:0,pop:0.3},SLB:{gdp:1.5,mil:0,pop:0.7},
 };
 
+const COUNTRY_POP_PCT = {
+  IND: 8.1, CHN: 25.3, USA: 6.2, IDN: 1.5, PAK: 0.9, NGA: 0.6, BRA: 0.2, BGD: 1.3, RUS: 2.6, ETH: 0.6,
+  MEX: 0.6, JPN: 0.8, EGY: 0.3, PHL: 0.3, COD: 1.1, VNM: 0.7, IRN: 1.5, TUR: 1.6, DEU: 1.5, THA: 1.3,
+  GBR: 1.2, FRA: 1.2, ITA: 1.1, ZAF: 1.1, TZA: 1.2, MMR: 1.0, KEN: 1.0, KOR: 0.9, COL: 0.9, ESP: 0.9,
+  UGA: 0.9, ARG: 0.8, ALG: 0.8, SDN: 0.9, UKR: 0.7, IRQ: 0.8, AFG: 0.7, POL: 0.7, CAN: 0.7, MAR: 0.7,
+  SAU: 0.7, UZB: 0.6, PER: 0.6, MYS: 0.6, ANG: 0.7, MOZ: 0.6, GHA: 0.6, YEM: 0.6, NPL: 0.5, VEN: 0.5,
+  MDG: 0.5, CMR: 0.5, CIV: 0.5, PRK: 0.5, AUS: 0.5, NER: 0.5, LKA: 0.4, BFA: 0.4, MLI: 0.4, ROU: 0.3,
+  MWI: 0.4, CHL: 0.3, KAZ: 0.4, ZMB: 0.4, GTM: 0.3, ECU: 0.3, NLD: 0.3, SYR: 0.4, SEN: 0.3, KHM: 0.3,
+  TCD: 0.3, SOM: 0.3, ZIM: 0.3, GIN: 0.3, RWA: 0.2, BEN: 0.2, BDI: 0.2, TUN: 0.2, BOL: 0.2, BEL: 0.2,
+  HTI: 0.2, JOR: 0.2, DOM: 0.2, CUB: 0.2, SSD: 0.2, SWE: 0.2, HND: 0.2, CZE: 0.2, AZE: 0.2, GRC: 0.2,
+  PRT: 0.2, HUN: 0.2, TJK: 0.2, BLR: 0.2, AUT: 0.2, PNG: 0.2, SRB: 0.1, ISR: 0.9, CHE: 0.2, TGO: 0.2,
+  SLE: 0.2, LAO: 0.1, HKG: 0.1, PRY: 0.1, LBY: 0.1, BGR: 0.1, LBN: 0.1, NIC: 0.1, KGZ: 0.1, SLV: 0.1,
+  TKM: 0.1, SGP: 0.1, DNK: 0.1, FIN: 0.1, NOR: 0.1, SVK: 0.1, CAF: 0.1, CRI: 0.1, IRL: 0.1, OMN: 0.1,
+  LBR: 0.1, NZL: 0.1, MRT: 0.1, PAN: 0.1, KWT: 0.1, HRV: 0.1, MDA: 0.1, GEO: 0.1, ERI: 0.1, URY: 0.1,
+  BIH: 0.1, MNG: 0.1, ARM: 0.0, LTU: 0.0, QAT: 0.1, JAM: 0.0, ALB: 0.0, NAM: 0.0, GMB: 0.0, BWA: 0.0,
+  LSO: 0.0, MKD: 0.0, SVN: 0.0, LVA: 0.0, KOS: 0.0, GNB: 0.0, GNQ: 0.0, TTO: 0.0, EST: 0.0, TLS: 0.0,
+  MUS: 0.0, CYP: 0.0, SWZ: 0.0, DJI: 0.0, FJI: 0.0, COM: 0.0, GUY: 0.0, SLB: 0.0, BTN: 0.0, LUX: 0.0,
+  MNE: 0.0, SUR: 0.0, MLT: 0.0, MDV: 0.0, BRN: 0.0, BLZ: 0.0, BHS: 0.0, ISL: 0.0, BRB: 0.0, VUT: 0.0,
+  WSM: 0.0, LCA: 0.0, KIR: 0.0, GRD: 0.0, TON: 0.0, SYC: 0.0, ATG: 0.0, AND: 0.0, DMA: 0.0, KNA: 0.0
+};
 // Helper: get stat for a country (fallback if unknown)
 function getCountryStat(iso) {
   return COUNTRY_STATS[iso] || { gdp: 5, mil: 2, pop: 1 };
@@ -2099,17 +2122,35 @@ function initGame(playerNames, myIndex) {
 
   // Assign countries — seed from real-world stats
   const isos = Object.keys(countryData);
-  isos.sort(()=>Math.random()-.5);
 
-  const numPlayers = GS.players.length;
-  isos.forEach((iso,i) => {
-    const owner = i < isos.length * 0.85 ? (i % numPlayers) : -1; // 15% neutral
+  // REALISTIC GEOPOLITICS
+  const HUMAN_BLOC = ['USA', 'GBR', 'FRA', 'DEU', 'JPN', 'KOR', 'AUS', 'CAN', 'POL', 'ITA', 'ESP', 'UKR', 'ISR', 'TWN', 'NLD', 'BEL', 'SWE', 'NOR', 'FIN', 'DNK', 'GRC', 'PRT', 'CZE', 'ROU', 'CHE', 'AUT', 'NZL', 'PHL', 'CHL', 'ARG', 'COL'];
+  const RAINCLOUD_BLOC = ['RUS', 'CHN', 'IRN', 'PRK', 'SYR', 'BLR', 'VEN', 'CUB', 'MMR', 'NIC', 'ERI', 'MLI', 'BFA', 'NER', 'CAF', 'ZIM', 'SDN'];
+
+  const GLOBAL_TROOP_POOL = 1000; // Base units (multiplied by 10k in UI to represent 10,000,000 global starting troops roughly)
+
+  isos.forEach((iso) => {
+    let owner = -1; // Default to neutral (Non-aligned / Global South)
+    
+    // Assign 80% chance of sticking to real blocs, 20% friction/rebellions for gameplay variety, unless it's a superpower
+    const isSuperpower = ['USA', 'RUS', 'CHN', 'UKR', 'IRN', 'GBR', 'FRA'].includes(iso);
+    if (HUMAN_BLOC.includes(iso) && (isSuperpower || Math.random() < 0.8)) owner = 0;
+    else if (RAINCLOUD_BLOC.includes(iso) && (isSuperpower || Math.random() < 0.8)) owner = 1;
+    
+    // If neutral, randomly assign to a player 15% of the time to create proxy war sparks
+    if (owner === -1 && Math.random() < 0.15) {
+      owner = Math.random() > 0.5 ? 0 : 1;
+    }
+
     const stats = getCountryStat(iso);
-    // Scale mil strength (1-100) into game troops (1-15)
-    const milTroops = Math.round(1 + (stats.mil / 100) * 14);
-    const initTroops = owner === -1 ? Math.max(1, Math.round(milTroops * 0.4)) : milTroops;
+    const popPct = COUNTRY_POP_PCT[iso] || 0.1; // Default to 0.1% if missing
+    
+    // Mathematical Troop Distribution based on real population density (minimum 1 to ensure a garrison)
+    const initTroops = Math.max(1, Math.round((popPct / 100) * GLOBAL_TROOP_POOL));
+
     // Income per turn derived from GDP (log scale so small countries still matter)
     const income = Math.max(1, Math.round(Math.log10(stats.gdp + 1) * 3));
+    
     GS.countries[iso] = {
       owner, troops: initTroops, nuked: 0,
       name: countryData[iso].name, lat: countryData[iso].lat, lon: countryData[iso].lon,
@@ -2169,7 +2210,8 @@ async function initWebcams() {
     const tex = new THREE.CanvasTexture(c);
 
     data.result.webcams.forEach(cam => {
-      if (!cam.location || cam.location.latitude === undefined) return;
+      // Must have location and must have a TRUE live stream player
+      if (!cam.location || cam.location.latitude === undefined || !cam.player || !cam.player.live) return;
       const mat = new THREE.SpriteMaterial({ map: tex, color: 0xffffff, transparent: true, depthTest: false });
       const sprite = new THREE.Sprite(mat);
       sprite.scale.set(0.05, 0.05, 1); // Moderate yellow dot
@@ -2199,7 +2241,8 @@ function playWebcamFeed(embedUrl, title) {
   
   const iframe = document.createElement('iframe');
   const separator = embedUrl.includes('?') ? '&' : '?';
-  iframe.src = embedUrl + separator + 'autoplay=1'; 
+  // Enforce autoplay using both play=1 and autoplay=1 params
+  iframe.src = embedUrl + separator + 'autoplay=1&play=1'; 
   iframe.style.width='100%'; iframe.style.height='calc(100% - 40px)'; iframe.style.border='none';
   iframe.setAttribute('allow', 'autoplay; fullscreen');
   
@@ -2769,7 +2812,8 @@ function handleGlobeClick(e) {
             const webcamObj = data.result;
             if (webcamObj && webcamObj.player) {
               const p = webcamObj.player;
-              const freshUrl = p?.live || p?.lifetime || p?.day;
+              // STRICTLY USE ONLY LIVE (p.live). Never fallback to timelapse (p.day).
+              const freshUrl = p?.live;
               if (freshUrl) playWebcamFeed(freshUrl, camData.title);
             }
           })
@@ -5366,9 +5410,9 @@ function fetchAndRenderBoats() {
   fetch('/api/boats').then(r => r.json()).then(data => {
       clearBoatMarkers();
       
-      const R = 50.5; // Earth radius in THREE.js scene, slightly above 50 to clear the red shader mesh
+      const R = typeof GLOBE_R !== 'undefined' ? GLOBE_R + 0.025 : 1.025; // Earth radius in THREE.js scene, slightly above surface
       // Basic boat geometry
-      const boatGeo = new THREE.ConeGeometry(0.3, 0.8, 4);
+      const boatGeo = new THREE.ConeGeometry(0.006, 0.018, 4);
       boatGeo.rotateX(Math.PI / 2); // Point it flat along surface
       const boatMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, depthTest: false, renderOrder: 10 });
 
@@ -5381,19 +5425,15 @@ function fetchAndRenderBoats() {
               { lat: 25.0330, lon: 121.5654, cog: 45, name: "TW ESCORT" },   // Taiwan Strait
               { lat: 0, lon: 0, cog: 0, name: "EQUATOR GHOST" }              // Center of map
           ];
+      } else {
+          // Downsample massive datasets to prevent WebGL lag (render 1 in 50 boats)
+          data = data.filter((_, idx) => idx % 50 === 0);
       }
 
       data.forEach(boat => {
-          // Convert lat/lon to 3D point
-          const phi = (90 - boat.lat) * (Math.PI / 180);
-          const theta = (boat.lon + 180) * (Math.PI / 180);
-          
-          const x = -(R * Math.sin(phi) * Math.cos(theta));
-          const z = (R * Math.sin(phi) * Math.sin(theta));
-          const y = (R * Math.cos(phi));
-          
           const mesh = new THREE.Mesh(boatGeo, boatMat);
-          mesh.position.set(x, y, z);
+          const pos = ll2v(boat.lat, boat.lon, R);
+          mesh.position.copy(pos);
           
           // Align to surface
           mesh.lookAt(new THREE.Vector3(0,0,0));
