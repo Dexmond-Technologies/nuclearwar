@@ -5053,16 +5053,18 @@ function initIntelMap() {
 function showIntelMapDrawer() {
   _sfxClick();
   const body = Object.entries(INTEL_LAYERS).map(([key, label]) => {
-    return `<div class="strat-item" style="display:flex; justify-content:space-between; align-items:center;">
-      <span class="strat-item-title" style="margin:0">${label}</span>
-      <input type="checkbox" id="toggle-${key}" onchange="toggleIntelLayer('${key}', this.checked)" style="width:16px;height:16px;cursor:pointer;">
+    return `<div class="strat-item" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0;">
+      <span class="strat-item-title" style="margin:0; font-size:10px;">${label}</span>
+      <input type="checkbox" id="toggle-${key}" onchange="toggleIntelLayer('${key}', this.checked)" style="width:14px;height:14px;cursor:pointer;">
     </div>`;
   }).join('');
   
   openDrawer('intel-layers', '👁 GLOBAL INTEL FEED', `
     <div style="font-size:10px;opacity:0.6;margin-bottom:10px;">Enable live data layers parsed from local and remote API feeds.</div>
-    ${body}
-  `);
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+      ${body}
+    </div>
+  `, 400);
 
   // Sync checkboxes with current map state
   if (intelMap) {
