@@ -40,7 +40,7 @@ esbuild.build({
   entryPoints: ['src/map-entry.ts'],
   bundle: true,
   outfile: 'public/dist/improve_earth.js',
-  format: 'esm',
+  format: 'iife',
   sourcemap: true,
   minify: true,
   tsconfig: 'tsconfig.json',
