@@ -21,15 +21,14 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   width:100vw;height:100vh;max-width:100vw;text-align:center;
   box-shadow:inset 0 0 100px rgba(0,180,255,.2);
   backdrop-filter:blur(12px);
-  position:relative;
   display:flex;flex-direction:column;justify-content:center;align-items:center;
-  overflow-y:auto;
+  overflow:hidden;
 }
 .lobby-title{font-family:'Orbitron',sans-serif;font-size:6vw;font-weight:900;letter-spacing:15px;color:#0af;text-shadow:0 0 40px rgba(0,170,255,0.8), 0 0 20px rgba(0,170,255,0.5);margin-bottom:2vh;}
 .lobby-sub{font-family:'Share Tech Mono',monospace;font-size:1.8vw;letter-spacing:10px;opacity:.9;margin-bottom:6vh;color:#ff3232;text-shadow:0 0 15px rgba(255,50,50,0.6);text-transform:uppercase;}
 .lobby-text{
-  font-family:'Rajdhani',sans-serif;font-size:2.4vw;line-height:1.8;color:#0f8;font-weight:700;
-  text-shadow:0 0 20px rgba(0,255,136,0.5);padding:0 5vw;
+  font-family:'Rajdhani',sans-serif;font-size:4.0vw;line-height:1.8;color:#0f8;font-weight:900;
+  text-shadow:0 0 20px rgba(0,255,136,0.5);padding:0 2vw; margin-top:-6vh;
 }
 .lbtn{width:100%;padding:12px;margin:6px 0;background:transparent;border:1px solid #0af;
   color:#0af;font:12px 'Courier New',monospace;letter-spacing:2px;cursor:pointer;text-transform:uppercase;
@@ -201,107 +200,95 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   align-items:center;justify-content:center;z-index:250;backdrop-filter:blur(10px);
 }
 #onboarding-modal.show { display:flex; animation: fadeInModal 0.4s ease-out; }
+
 .ob-card {
-  background: rgba(4, 9, 20, 0.85);
-  border: 1px solid rgba(0, 170, 255, 0.15); 
-  border-radius: 16px; 
-  padding: 48px; 
-  width: 760px; 
-  max-width: 90vw;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 1), 0 0 30px rgba(0, 170, 255, 0.15), inset 0 0 20px rgba(0, 170, 255, 0.05);
+  background: rgba(4, 9, 20, 0.95);
+  background-image: radial-gradient(circle at center, rgba(0,255,136,0.05) 0%, transparent 70%);
+  border: 1px solid rgba(0, 255, 136, 0.3); 
+  border-radius: 4px; 
+  padding: 40px; 
+  width: 900px; 
+  max-width: 95vw;
+  box-shadow: 0 0 60px rgba(0, 0, 0, 1), 0 0 30px rgba(0, 255, 136, 0.15), inset 0 0 20px rgba(0, 255, 136, 0.05);
   text-align: center; 
   position: relative; 
   overflow: hidden;
   backdrop-filter: blur(20px);
 }
-.ob-card::before { 
-  content: ''; 
-  position: absolute; 
-  top: 0; left: 0; width: 100%; height: 3px; 
-  background: linear-gradient(90deg, transparent, #00f0ff, transparent); 
-  box-shadow: 0 0 20px #0af; 
+.ob-card::after {
+  content: ''; position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1), rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px);
+  pointer-events: none; z-index: 10;
 }
+.ob-card::before { 
+  content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px; 
+  background: linear-gradient(90deg, transparent, #0f8, transparent); 
+  box-shadow: 0 5px 20px rgba(0,255,136,0.5); 
+}
+.ob-flavor {
+  font-family: 'Share Tech Mono', monospace;
+  color: #f55; font-size: 13px; letter-spacing: 5px; margin-bottom: 5px;
+  text-shadow: 0 0 10px rgba(255,50,50,0.8); text-transform: uppercase;
+  animation: flavorPulse 2.5s infinite alternate; z-index: 20; position:relative;
+}
+@keyframes flavorPulse { from { opacity: 0.5; } to { opacity: 1; text-shadow: 0 0 15px #f55; } }
+
 .ob-title { 
-  font-family: 'Orbitron', sans-serif; 
-  font-size: 36px; 
-  font-weight: 900; 
-  letter-spacing: 8px; 
-  margin-bottom: 20px; 
-  text-transform: uppercase; 
-  background: linear-gradient(90deg, #00f0ff, #0077ff);
-  -webkit-background-clip: text;
-  color: transparent;
-  text-shadow: 0 0 30px rgba(0, 200, 255, 0.4); 
+  font-family: 'Orbitron', sans-serif; font-size: 38px; font-weight: 900; 
+  letter-spacing: 6px; margin-bottom: 20px; text-transform: uppercase; 
+  color: #0f8; text-shadow: 2px 2px 0px rgba(255,0,85,0.6), -2px -2px 0px rgba(0,240,255,0.6), 0 0 25px rgba(0, 255, 136, 0.4); 
+  z-index: 20; position:relative;
 }
 .ob-desc { 
-  font-family: 'Inter', system-ui, -apple-system, sans-serif; 
-  font-size: 15px; 
-  color: rgba(255, 255, 255, 0.8); 
-  line-height: 1.6; 
-  margin-bottom: 40px; 
-  letter-spacing: 0.5px;
-  font-weight: 400;
+  font-family: 'Rajdhani', sans-serif; font-size: 18px; color: rgba(255, 255, 255, 0.9); 
+  line-height: 1.5; margin-bottom: 30px; letter-spacing: 1px; font-weight: 600;
+  z-index: 20; position:relative;
 }
 .ob-phases { 
-  display: flex; 
-  justify-content: space-between; 
-  gap: 24px; 
-  margin-bottom: 40px; 
-  text-align: left; 
+  display: flex; justify-content: space-between; gap: 20px; margin-bottom: 40px; text-align: left; 
+  z-index: 20; position:relative;
 }
 .ob-phase { 
-  flex: 1; 
-  background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08); 
-  border-radius: 12px; 
-  padding: 20px;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  flex: 1; background: linear-gradient(180deg, rgba(0,255,136,0.05) 0%, rgba(0,0,0,0.5) 100%);
+  border: 1px solid rgba(0, 255, 136, 0.15); border-radius: 4px; padding: 20px;
+  transition: all 0.3s ease; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
 }
 .ob-phase:hover {
-  transform: translateY(-4px);
-  border-color: rgba(0, 170, 255, 0.3);
-  box-shadow: 0 12px 24px rgba(0,0,0,0.4), 0 0 20px rgba(0, 170, 255, 0.1);
-  background: linear-gradient(180deg, rgba(0,170,255,0.05) 0%, rgba(255,255,255,0) 100%);
+  transform: translateY(-4px); border-color: rgba(0, 255, 136, 0.6);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.5), 0 0 20px rgba(0, 255, 136, 0.2), inset 0 0 15px rgba(0,255,136,0.1);
 }
 .ob-phase-name { 
-  font-family: 'Orbitron', sans-serif; 
-  font-size: 15px; 
-  color: #00f0ff; 
-  margin-bottom: 12px; 
-  text-transform: uppercase; 
-  letter-spacing: 1px; 
-  font-weight: 700;
+  font-family: 'Orbitron', sans-serif; font-size: 18px; color: #0f8; margin-bottom: 12px; 
+  text-transform: uppercase; letter-spacing: 2px; font-weight: 900;
+  border-bottom: 1px solid rgba(0,255,136,0.3); padding-bottom: 5px;
 }
 .ob-phase-text { 
-  font-size: 13px; 
-  color: rgba(255, 255, 255, 0.65); 
-  line-height: 1.6; 
-  font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+  font-size: 14px; color: rgba(255, 255, 255, 0.8); line-height: 1.5; 
+  font-family: 'Inter', system-ui, -apple-system, sans-serif; margin-bottom: 10px;
 }
+.ob-phase-intel {
+  margin: 0; padding-left: 15px; font-family: 'Share Tech Mono', monospace; font-size: 11px;
+  color: #0af; list-style-type: square; line-height: 1.6;
+}
+.ob-phase-intel li { margin-bottom: 4px; }
+
 .ob-start-btn { 
-  display: inline-block; 
-  padding: 16px 48px; 
-  background: transparent; 
-  color: #00f0ff; 
-  font-family: 'Orbitron', sans-serif;
-  font-size: 16px;
-  font-weight: 800; 
-  letter-spacing: 4px; 
-  text-transform: uppercase; 
-  border: 2px solid #00f0ff; 
-  border-radius: 8px; 
-  cursor: pointer; 
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-  box-shadow: 0 0 15px rgba(0, 170, 255, 0.2) inset, 0 0 15px rgba(0, 170, 255, 0.2);
-  text-shadow: 0 0 8px rgba(0, 170, 255, 0.5);
+  display: inline-block; padding: 18px 50px; background: rgba(0,255,136,0.1); 
+  color: #0f8; font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 900; 
+  letter-spacing: 6px; text-transform: uppercase; border: 2px solid #0f8; 
+  border-radius: 4px; cursor: pointer; transition: all 0.2s; 
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.2) inset, 0 0 20px rgba(0, 255, 136, 0.3);
+  text-shadow: 0 0 8px rgba(0, 255, 136, 0.5); z-index: 20; position:relative;
+  animation: btnPulse 2s infinite alternate;
+}
+@keyframes btnPulse {
+  0% { box-shadow: inset 0 0 10px rgba(0,255,136,0.2), 0 0 15px rgba(0,255,136,0.2); }
+  100% { box-shadow: inset 0 0 25px rgba(0,255,136,0.5), 0 0 35px rgba(0,255,136,0.5), 0 0 10px #0f8; }
 }
 .ob-start-btn:hover { 
-  background: #00f0ff; 
-  color: #000;
-  text-shadow: none;
-  box-shadow: 0 0 30px rgba(0, 170, 255, 0.6), inset 0 0 10px rgba(255,255,255,0.5); 
-  transform: translateY(-2px) scale(1.02); 
+  background: #0f8; color: #000; text-shadow: none; animation: none;
+  box-shadow: 0 0 40px rgba(0, 255, 136, 0.8), inset 0 0 10px #fff; 
+  transform: translateY(-2px); 
 }
 
 /* ── FACTION DASHBOARDS ─ 2-faction: Human vs Raincloud ── */
@@ -434,7 +421,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   
   .lobby-box { padding: 30px 15px !important; }
   .lobby-title { font-size: 24px !important; letter-spacing: 3px !important; }
-  .lobby-text { font-size: 17px !important; line-height: 1.3 !important; }
+  .lobby-text { font-size: 28px !important; line-height: 1.3 !important; font-weight: 900 !important; }
   .lobby-sub { font-size: 10px !important; margin-bottom: 20px !important; }
   
   /* Fit dashes on screen */
@@ -657,59 +644,75 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       THE PLATFORM PROVIDES AN OPEN RPC INTERFACE, ALLOWING EXTERNAL PROGRAMS, SCRIPTS, AND INTERNET BOTS TO CONNECT TO THE GAME.<br>
       AUTOMATED AGENTS MAY PARTICIPATE ON EITHER SIDE OF THE CONFLICT, SUPPORTING HUMANITY OR OPERATING UNDER THE CONTROL OF RAINCLOUD.<br><br>
       THE OBJECTIVE IS SIMPLE:<br>
-      HUMANITY VS RAINCLOUD.
+      <strong>HUMANITY VS RAINCLOUD</strong>.
     </div>
 
-    <!-- Google Sign-In Container -->
-    <div style="margin:20px auto; display:flex; justify-content:center; min-height:50px;">
-      <div id="g_id_onload"
-           data-client_id="787878787390-opqat1n6on9vp0sk8ilkn4qv1t6je1tp.apps.googleusercontent.com"
-           data-callback="handleGoogleCredentialResponse"
-           data-auto_prompt="false">
+    <!-- Authentication Row (Google + Override) -->
+    <div style="display:flex; flex-direction:row; align-items:center; justify-content:center; gap:20px; margin-top:260px; margin-bottom:20px; width:100%;">
+      <!-- Google Sign-In Container -->
+      <div style="display:flex; justify-content:center; min-height:50px;">
+        <div id="g_id_onload"
+             data-client_id="787878787390-opqat1n6on9vp0sk8ilkn4qv1t6je1tp.apps.googleusercontent.com"
+             data-callback="handleGoogleCredentialResponse"
+             data-auto_prompt="false">
+        </div>
+        <div class="g_id_signin"
+             data-type="standard"
+             data-shape="rectangular"
+             data-theme="filled_black"
+             data-text="continue_with"
+             data-size="large"
+             data-logo_alignment="left">
+        </div>
       </div>
-      <div class="g_id_signin"
-           data-type="standard"
-           data-shape="rectangular"
-           data-theme="filled_black"
-           data-text="continue_with"
-           data-size="large"
-           data-logo_alignment="left">
+
+      <!-- Dev/Offline Bypass -->
+      <div style="margin-bottom: 7px;">
+        <input type="text" id="dev-unlock-in" placeholder="ENTER OVERRIDE CODE" style="background:rgba(0,10,20,0.8); border:1px solid rgba(0,170,255,0.4); color:#0f8; padding:8px 15px; text-align:center; font-family:'Courier New', monospace; width:220px; border-radius:4px; outline:none; height:40px;" 
+               onkeyup="if(this.value.toLowerCase()==='unlock'){ document.getElementById('lobby-auth-status').innerHTML='✓ OVERRIDE ACCEPTED'; document.querySelector('.g_id_signin').style.display='none'; this.style.display='none'; joinGlobalWar(); }">
       </div>
     </div>
     
     <div id="lobby-auth-status" style="color:#0f8; font-family:'Courier New', monospace; font-size:12px; margin-bottom:15px; min-height:15px;"></div>
-    
-    <!-- Dev/Offline Bypass -->
-    <div style="margin-top:20px; text-align:center;">
-      <input type="text" id="dev-unlock-in" placeholder="ENTER OVERRIDE CODE" style="background:rgba(0,10,20,0.8); border:1px solid rgba(0,170,255,0.4); color:#0f8; padding:8px 15px; text-align:center; font-family:'Courier New', monospace; width:220px; border-radius:4px; outline:none;" 
-             onkeyup="if(this.value.toLowerCase()==='unlock'){ document.getElementById('lobby-auth-status').innerHTML='✓ OVERRIDE ACCEPTED'; document.querySelector('.g_id_signin').style.display='none'; this.style.display='none'; joinGlobalWar(); }">
-    </div>
   </div>
 </div>
 
 <!-- ONBOARDING MODAL -->
 <div id="onboarding-modal">
   <div class="ob-card">
+    <div class="ob-flavor">UPLINK ESTABLISHED. INCOMING TRANSMISSION...</div>
     <div class="ob-title">COMMAND BRIEFING</div>
     <div class="ob-desc">
-      You have joined the unified human coalition against RAINCLOUD.<br>
-      Coordinate your attacks, manage the shared global Defense Budget, and survive.
+      You have been drafted into the unified human coalition against the autonomous AI, RAINCLOUD.<br>
+      Your objective is absolute survival. Coordinate tactical strikes, manage the shared global Defense Budget, and hold the line.
     </div>
     <div class="ob-phases">
       <div class="ob-phase">
         <div class="ob-phase-name">1. REINFORCE</div>
-        <div class="ob-phase-text">Click any of your blue territories to place new armies. The more land humanity holds, the more reinforcements you receive.</div>
+        <div class="ob-phase-text">Click any of your blue territories to deploy new divisions. The more ground humanity holds, the more massive your reserves.</div>
+        <ul class="ob-phase-intel">
+          <li>Prioritize connecting isolated regions</li>
+          <li>Reserves scale with territory count</li>
+        </ul>
       </div>
       <div class="ob-phase">
         <div class="ob-phase-name">2. ATTACK</div>
-        <div class="ob-phase-text">Click your territory, then a red enemy territory to assault. Or use the War Room to execute powerful strategic perks using the shared budget.</div>
+        <div class="ob-phase-text">Select your staging ground, then lock onto a red enemy territory to assault. Access the War Room to execute high-value strategic perks using the coalition budget.</div>
+        <ul class="ob-phase-intel">
+          <li>Maintain numerical superiority</li>
+          <li>War Room perks can turn the tide</li>
+        </ul>
       </div>
       <div class="ob-phase">
         <div class="ob-phase-name">3. FORTIFY</div>
-        <div class="ob-phase-text">Move troops between your connected territories to shore up defenses before passing the turn.</div>
+        <div class="ob-phase-text">Reposition troops between connected friendly territories to reinforce vulnerabilities before ending your combat phase.</div>
+        <ul class="ob-phase-intel">
+          <li>Never leave borders exposed</li>
+          <li>Consolidate impregnable choke points</li>
+        </ul>
       </div>
     </div>
-    <button class="ob-start-btn" onclick="closeOnboarding()">INITIATE COMMAND</button>
+    <button class="ob-start-btn" onclick="closeOnboarding()">INITIATE COMMAND SEQUENCE</button>
   </div>
 </div>
 
@@ -3937,9 +3940,56 @@ document.getElementById('btn-chat-toggle').onclick=()=>{
 };
 
 // =====================================================================
-// AMBIENT VISUAL UNITS (JETS, SUBS, SHIPS) - purely for display
+// AMBIENT VISUAL UNITS (JETS, SUBS, SHIPS, PLANES) - purely for display
 // =====================================================================
 const ambients = [];
+const planes3D = [];
+
+function spawnAmbientPlanes() {
+  if (!window.scene || !GS.countries || Object.keys(GS.countries).length < 2) return;
+  const isos = Object.keys(GS.countries);
+  const fromIso = isos[Math.floor(Math.random() * isos.length)];
+  let toIso = isos[Math.floor(Math.random() * isos.length)];
+  while(toIso === fromIso) toIso = isos[Math.floor(Math.random() * isos.length)];
+  
+  const fc = countryData[fromIso], tc = countryData[toIso];
+  if(!fc || !tc) return;
+  
+  const sd = ll2v(fc.lat, fc.lon, 1.01).normalize(); 
+  const ed = ll2v(tc.lat, tc.lon, 1.01).normalize();
+  const owner = Math.random() > 0.5 ? 0 : 1;
+  const col = PLAYER_COLORS[owner].hex;
+  
+  const numPlanes = 4 + Math.floor(Math.random() * 4); // 4 to 7
+  
+  for(let p=0; p<numPlanes; p++) {
+    const troopsText = Math.floor(5 + Math.random() * 6) + 'K'; // 5K to 10K
+    const tex = troopTexture(troopsText, col);
+    const mat = new THREE.SpriteMaterial({map: tex, depthTest: false});
+    const sprite = new THREE.Sprite(mat);
+    sprite.scale.set(.12, .06, 1);
+    scene.add(sprite);
+    
+    // Stagger their progress slightly so they move in a group/formation
+    const delay = -(p * 0.04) - (Math.random() * 0.03);
+    
+    // Add some random lateral offset to the path
+    const offset = new THREE.Vector3(
+      (Math.random()-0.5)*0.06,
+      (Math.random()-0.5)*0.06,
+      (Math.random()-0.5)*0.06
+    );
+    
+    planes3D.push({
+       sprite, sd, ed, progress: delay, speed: 0.12 + (Math.random()*0.03), offset
+    });
+  }
+}
+
+// Spawn planes every 15-20 seconds
+setInterval(() => {
+  if (window.scene) spawnAmbientPlanes();
+}, 15000 + Math.random() * 5000);
 
 function createJetCanvas() {
   const c = document.createElement('canvas'); c.width=128; c.height=128;
@@ -4173,6 +4223,35 @@ function animate() {
     const dot = camDir.dot(pos.normalize());
     amb.sprite.visible = dot > 0.08;
   });
+
+  // Update animated plane (troop box) flights
+  for(let i = planes3D.length - 1; i >= 0; i--) {
+    const p = planes3D[i];
+    p.progress += dt * p.speed;
+    
+    if (p.progress < 0) {
+       p.sprite.visible = false;
+       continue;
+    }
+    
+    if (p.progress >= 1) {
+       scene.remove(p.sprite);
+       if (p.sprite.material.map) p.sprite.material.map.dispose();
+       p.sprite.material.dispose();
+       planes3D.splice(i, 1);
+       continue;
+    }
+    
+    const basePos = slerp3D(p.sd, p.ed, p.progress).normalize();
+    // Parabolic arc for flight
+    const h = GLOBE_R + 0.02 + Math.sin(p.progress * Math.PI) * 0.25; 
+    basePos.multiplyScalar(h).add(p.offset);
+    p.sprite.position.copy(basePos);
+    
+    // Backface culling
+    const dot = camDir.dot(basePos.clone().normalize());
+    p.sprite.visible = (dot > 0.08);
+  }
 
   renderer.render(scene,camera);
 }

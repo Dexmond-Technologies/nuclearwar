@@ -1555,10 +1555,16 @@ export class DeckGLMap {
   }
 
   private createCivilianFlightsLayer(): ScatterplotLayer {
+    // OpenSky array format: [icao24, callsign, origin_country, time_position, last_contact, longitude, latitude, ...]
+    // Sometimes longitude (d[5]) or latitude (d[6]) are null, crashing DeckGL's buffer.
+    const validFlights = this.civilianFlights.filter(d => 
+      Array.isArray(d) && d.length >= 7 && typeof d[5] === 'number' && typeof d[6] === 'number'
+    );
+    
     return new ScatterplotLayer({
       id: 'civilian-flights-layer',
-      data: this.civilianFlights,
-      getPosition: (d: any) => [d[5], d[6]], // longitude, latitude from OpenSky state array
+      data: validFlights,
+      getPosition: (d: any) => [d[5], d[6]], // longitude, latitude
       getRadius: 6000,
       getFillColor: [255, 255, 220, 230], // Off-white/yellowish to stand out from military red
       radiusMinPixels: 2,
