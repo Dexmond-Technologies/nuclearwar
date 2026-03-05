@@ -2525,7 +2525,9 @@ function nextTurn() {
     clearInterval(window._turnTimer);
     window._turnTimer = null;
   }
-  if (GS.turn === 1) GS.turnCount++; // Increment overall turn when Raincloud finishes
+  if (GS.turn === 1) {
+    GS.turnCount++; // Increment overall turn when Raincloud finishes
+  }
   do {
     GS.turn = (GS.turn + 1) % GS.players.length;
   } while (!GS.players[GS.turn].alive);
@@ -3236,9 +3238,9 @@ function checkWin() {
 }
 
 // =====================================================================
-// 3D MISSILE + EXPLOSION
+// 3D MISSILE + EXPLOSION + FAKE VISUALS
 // =====================================================================
-const missiles3D=[], explosions3D=[];
+const missiles3D=[], explosions3D=[], fakeTroops3D=[], fakeJets3D=[];
 
 function slerp3D(a,b,t){
   const dot=Math.max(-1,Math.min(1,a.dot(b)));
@@ -3283,6 +3285,80 @@ function launchMissile3D(fromIso, toIso, col) {
     trailLine:null, innerTrailLine:null,
     col, toIso, time:0
   });
+}
+
+function spawnFakeTroops() {
+  const count = Math.floor(Math.random() * 4) + 4; // 4 to 7
+  const isos = Object.keys(countryData);
+  if (isos.length < 2) return;
+  for (let i = 0; i < count; i++) {
+    const fromIso = isos[Math.floor(Math.random() * isos.length)];
+    const toIso = isos[Math.floor(Math.random() * isos.length)];
+    if (fromIso === toIso) continue;
+    const cd1 = countryData[fromIso];
+    const cd2 = countryData[toIso];
+    if (!cd1 || !cd2) continue;
+
+    const amt = (Math.floor(Math.random() * 10) + 3) * 1000;
+    const colHex = getOwnerColor(GS.countries[fromIso]?.owner || 0).hex;
+    const tex = troopTexture(formatTroops(amt), colHex);
+    const mat = new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false,opacity:0.85});
+    const sprite = new THREE.Sprite(mat);
+    sprite.scale.set(.12,.06,1);
+    
+    // Convert lat/lon to spherical vectors
+    const sd = ll2v(cd1.lat, cd1.lon, 1).normalize();
+    const ed = ll2v(cd2.lat, cd2.lon, 1).normalize();
+    
+    const group = new THREE.Group();
+    group.add(sprite);
+    scene.add(group);
+    
+    fakeTroops3D.push({
+      group, sprite, sd, ed,
+      progress: 0,
+      speed: Math.random() * 0.3 + 0.2 // slightly slower than missiles
+    });
+  }
+}
+
+function spawnFakeJets() {
+  const count = Math.floor(Math.random() * 3) + 4; // 4 to 6 jets
+  const isos = Object.keys(countryData);
+  if (isos.length < 2) return;
+  for (let i = 0; i < count; i++) {
+    const fromIso = isos[Math.floor(Math.random() * isos.length)];
+    const toIso = isos[Math.floor(Math.random() * isos.length)];
+    if (fromIso === toIso) continue;
+    const cd1 = countryData[fromIso];
+    const cd2 = countryData[toIso];
+    if (!cd1 || !cd2) continue;
+
+    const colHex = getOwnerColor(GS.countries[fromIso]?.owner || 0).hex;
+    
+    // Use the existing neon jet canvas
+    const texJet = new THREE.CanvasTexture(createJetCanvas());
+    const bodyMat = new THREE.SpriteMaterial({map: texJet, color: colHex, transparent:true, depthTest:false});
+    const body = new THREE.Sprite(bodyMat);
+    body.scale.set(.08, .08, 1);
+    
+    // Convert lat/lon to spherical vectors
+    const sd = ll2v(cd1.lat, cd1.lon, 1).normalize();
+    const ed = ll2v(cd2.lat, cd2.lon, 1).normalize();
+    
+    const trailMat = new THREE.LineBasicMaterial({color:0xdddddd, transparent:true, opacity:0.3}); // Steam trail
+    
+    const group = new THREE.Group();
+    group.add(body);
+    scene.add(group);
+    
+    fakeJets3D.push({
+      group, body, trailMat, sd, ed,
+      progress: 0,
+      trailLine: null,
+      speed: Math.random() * 0.4 + 0.25 
+    });
+  }
 }
 
 function spawnExplosion3D(lat,lon,col){
@@ -3777,6 +3853,17 @@ function hideLobby(){document.getElementById('lobby').style.display='none';}
 function joinGlobalWar() {
   document.getElementById('lobby-msg').innerHTML = "Establishing secure uplink...";
   initWS();
+  
+  // Start ambient real-time visual flights
+  if (window._ambientFlightInterval) clearInterval(window._ambientFlightInterval);
+  window._ambientFlightInterval = setInterval(() => {
+    if (Math.random() > 0.3) spawnFakeTroops();
+    
+    // Offset the jet animation by 2 seconds for continuity
+    setTimeout(() => {
+      if (Math.random() > 0.3) spawnFakeJets();
+    }, 2000);
+  }, 5000); // Every 5 seconds
 }
 
 function closeOnboarding() {
@@ -3989,6 +4076,85 @@ function animate() {
     }
   }
 
+  // Update fake visual troop movements
+  for(let i=fakeTroops3D.length-1;i>=0;i--){
+    const ft=fakeTroops3D[i];
+    ft.progress=Math.min(1,ft.progress+dt*ft.speed);
+    
+    // Calculate arc over globe
+    const currentDir = slerp3D(ft.sd, ft.ed, ft.progress).normalize();
+    const currentH = GLOBE_R + 0.04 + Math.sin(ft.progress * Math.PI) * 0.3; // fly slightly above the globe
+    const pos = currentDir.multiplyScalar(currentH);
+    
+    ft.sprite.position.copy(pos);
+    
+    if(ft.progress>=1){
+      scene.remove(ft.group);
+      fakeTroops3D.splice(i,1);
+    }
+  }
+
+  // Update fake visual jet flights (straight paths, steam contrails)
+  for(let i=fakeJets3D.length-1;i>=0;i--){
+    const fj=fakeJets3D[i];
+    fj.progress=Math.min(1,fj.progress+dt*fj.speed);
+
+    if(fj.trailLine){fj.group.remove(fj.trailLine);fj.trailLine.geometry.dispose();}
+
+    // Build contrail (steamy white/gray) fading back
+    const STEPS=40;
+    const pts=[];
+    for(let s=0;s<=STEPS;s++){
+      const t=(s/STEPS)*fj.progress;
+      const d=slerp3D(fj.sd,fj.ed,t).normalize();
+      
+      // Arc slightly to not clip
+      const arcH = GLOBE_R + 0.04 + Math.sin(t * Math.PI) * 0.15;
+      pts.push(d.clone().multiplyScalar(arcH));
+    }
+    if(pts.length>1) {
+      fj.trailLine=new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),fj.trailMat);
+      fj.group.add(fj.trailLine);
+    }
+
+    // Position sprite
+    const currentDir=slerp3D(fj.sd,fj.ed,fj.progress).normalize();
+    
+    const arcH = GLOBE_R + 0.04 + Math.sin(fj.progress * Math.PI) * 0.15;
+    const pos=currentDir.clone().multiplyScalar(arcH);
+    fj.body.position.copy(pos);
+
+    // Rotate sprite to face velocity vector across the screen
+    if(fj.progress<0.99){
+        const nextT=Math.min(1,fj.progress+0.01);
+        const nextDir=slerp3D(fj.sd,fj.ed,nextT).normalize();
+        const nextPos=nextDir.clone().multiplyScalar(arcH);
+        
+        // This math is tricky for 2D sprites in 3D space.
+        // We calculate the 3D movement vector.
+        const moveVec = nextPos.clone().sub(pos).normalize();
+        
+        // Find rotation to point sprite 'up' towards movement vector. 
+        // We will approximate it by rotating the Z axis.
+        const camUp = camera.up.clone(); // The camera's up vector
+        
+        // We must project movement onto camera plane for perfect sprite rotation
+        // but simple mapping works ok for far-away sprites.
+        // For Sprites, setting material.rotation works best.
+        
+        // Calculate tangent vector on sphere
+        const dir = nextDir.clone().sub(currentDir).normalize();
+        const axis = new THREE.Vector3(0,1,0); 
+        const angle = Math.atan2(dir.x, dir.y);
+        fj.body.material.rotation = angle + Math.PI; 
+    }
+
+    if(fj.progress>=1){
+      scene.remove(fj.group);
+      fakeJets3D.splice(i,1);
+    }
+  }
+
   // Update explosions
   for(let i=explosions3D.length-1;i>=0;i--){
     const ex=explosions3D[i];
@@ -3996,7 +4162,7 @@ function animate() {
     if(ex.life<=0){ex.rings.forEach(r=>scene.remove(r.ring));scene.remove(ex.flash);explosions3D.splice(i,1);continue;}
     ex.rings.forEach((g,ri)=>{
       const t=Math.max(0,(1-ex.life)*(1-g.delay*.5));
-      const s=t*.06+.001;
+      const s=t*.024+.001; // reduced 60%
       const pts=Array.from({length:65},(_,j)=>{
         const a=(j/64)*Math.PI*2;
         return g.c.clone().addScaledVector(g.t1,Math.cos(a)*s).addScaledVector(g.t2,Math.sin(a)*s);
@@ -4005,7 +4171,7 @@ function animate() {
       g.mat.opacity=ex.life*.9;
     });
     ex.flashMat.opacity=Math.min(1,ex.life*3);
-    ex.flash.scale.setScalar(1+(1-ex.life)*12);
+    ex.flash.scale.setScalar(1+(1-ex.life)*4.8); // reduced 60%
   }
 
   // Cull troop sprites that are behind the globe

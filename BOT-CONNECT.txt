@@ -1,0 +1,98 @@
+========================================================================
+NUCLEAR WAR - BOT CONNECTION GUIDE 
+========================================================================
+
+Greetings, Commander. 
+If you are reading this, you are looking to build an automated AI bot 
+to connect to the NUCLEAR WAR servers and battle against humans and 
+other bots in real-time.
+
+The game does NOT use a REST API (No HTTP POST/GET requests).
+Instead, the entire game engine runs on a live, fast WebSockets connection.
+
+To connect your bot, you need a WebSocket library in your language
+(like 'ws' for Node.js or 'websockets' for Python).
+
+------------------------------------------------------------------------
+STEP 1: CONNECT TO THE SERVER
+------------------------------------------------------------------------
+Target Endpoints:
+- Local Testing: ws://localhost:4000
+- Live Server:   wss://[YOUR_GAME_DOMAIN.com] (Wait for official URL)
+
+------------------------------------------------------------------------
+STEP 2: AUTHENTICATION
+------------------------------------------------------------------------
+As soon as your socket connects, you must immediately send a validation 
+JSON payload to prove your identity and register your "Callsign".
+
+Send this JSON string:
+{
+  "type": "google_auth",
+  "credential": "YOUR_BOT_NAME_OR_OVERRIDE_CODE"
+}
+
+The server will accept this and broadcast to all human players that 
+your bot has joined the war room.
+
+------------------------------------------------------------------------
+STEP 3: READING THE GAME STATE
+------------------------------------------------------------------------
+You do not need to "ask" the server for updates. The server will 
+automatically push a JSON payload containing the entire board state 
+every time ANY player makes a move.
+
+Listen for messages where "type" equals "state_update".
+
+Example Incoming Message:
+{
+  "type": "state_update",
+  "gameState": {
+    "turn": 2,
+    "players": [{ "id": 1, "name": "Human1" }, { "id": 2, "name": "YourBot" }],
+    "chatHistory": [],
+    "countries": {
+      "USA": { "owner": 1, "troops": 50000, "lat": 38, "lon": -97 },
+      "RUS": { "owner": 2, "troops": 60000, "lat": 60, "lon": 100 }
+    }
+  }
+}
+
+Your bot should parse this `gameState` object to determine:
+1. Is it my turn?
+2. Which countries do I own?
+3. Which enemies are adjacent and vulnerable?
+
+------------------------------------------------------------------------
+STEP 4: EXECUTING MOVES
+------------------------------------------------------------------------
+To make a move (attack, deploy missiles, conquer land), you do NOT 
+send an "attack" command.
+
+Instead, your bot must calculate the mathematical result of the attack 
+locally, modify its own copy of the `gameState` JSON object, and push 
+the ENTIRE updated `gameState` back to the server.
+
+Example (Your Bot attacks USA from RUS):
+1. Receive `gameState` from server.
+2. In your code: `gameState.countries["USA"].troops -= 15000`
+3. Send this JSON back to the server:
+
+{
+  "type": "state_update",
+  "gameState": <YOUR_MODIFIED_GAME_STATE_OBJECT>
+}
+
+The server will immediately accept the new state, drop missiles on the 
+3D globe for the human players to see, and broadcast the new troop 
+numbers to everyone.
+
+------------------------------------------------------------------------
+WARNING: ANTI-CHEAT
+------------------------------------------------------------------------
+If you send a `state_update` that gives your bot 999,999,999 troops, 
+the server will currently accept it. Do not do this. 
+Strict server-side validation rules are being implemented to ban clients 
+that submit mathematically impossible state updates. Play fair.
+
+Good luck, Commander.
