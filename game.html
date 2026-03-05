@@ -709,7 +709,10 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 <!-- HUD -->
 <div id="hud">
   <div id="topbar">
-    <div class="player-badges" id="player-badges"></div>
+    <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-start;">
+      <div style="font-family:'Orbitron', sans-serif; font-size:12px; font-weight:900; letter-spacing:4px; color:#0af; text-transform:uppercase; text-shadow:0 0 10px rgba(0,170,255,0.8), 0 0 20px rgba(0,170,255,0.4);">DEXMOND TECHNOLOGIES Ltd</div>
+      <div class="player-badges" id="player-badges"></div>
+    </div>
     <div style="text-align:center; position:absolute; left:50%; transform:translateX(-50%);">
       <div id="game-title">☢ NUCLEAR WAR</div>
       <div id="phase-label">—</div>
