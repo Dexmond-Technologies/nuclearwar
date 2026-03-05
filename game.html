@@ -203,13 +203,13 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 
 .ob-card {
   background: rgba(4, 9, 20, 0.95);
-  background-image: radial-gradient(circle at center, rgba(0,255,136,0.05) 0%, transparent 70%);
-  border: 1px solid rgba(0, 255, 136, 0.3); 
+  background-image: radial-gradient(circle at center, rgba(0,170,255,0.05) 0%, transparent 70%);
+  border: 1px solid rgba(0, 170, 255, 0.3); 
   border-radius: 4px; 
   padding: 40px; 
   width: 900px; 
   max-width: 95vw;
-  box-shadow: 0 0 60px rgba(0, 0, 0, 1), 0 0 30px rgba(0, 255, 136, 0.15), inset 0 0 20px rgba(0, 255, 136, 0.05);
+  box-shadow: 0 0 60px rgba(0, 0, 0, 1), 0 0 30px rgba(0, 170, 255, 0.15), inset 0 0 20px rgba(0, 170, 255, 0.05);
   text-align: center; 
   position: relative; 
   overflow: hidden;
@@ -222,8 +222,8 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 }
 .ob-card::before { 
   content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px; 
-  background: linear-gradient(90deg, transparent, #0f8, transparent); 
-  box-shadow: 0 5px 20px rgba(0,255,136,0.5); 
+  background: linear-gradient(90deg, transparent, #0af, transparent); 
+  box-shadow: 0 5px 20px rgba(0,170,255,0.5); 
 }
 .ob-flavor {
   font-family: 'Share Tech Mono', monospace;
@@ -236,7 +236,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 .ob-title { 
   font-family: 'Orbitron', sans-serif; font-size: 38px; font-weight: 900; 
   letter-spacing: 6px; margin-bottom: 20px; text-transform: uppercase; 
-  color: #0f8; text-shadow: 2px 2px 0px rgba(255,0,85,0.6), -2px -2px 0px rgba(0,240,255,0.6), 0 0 25px rgba(0, 255, 136, 0.4); 
+  color: #0af; text-shadow: 2px 2px 0px rgba(255,0,85,0.6), -2px -2px 0px rgba(0,240,255,0.6), 0 0 25px rgba(0, 170, 255, 0.4); 
   z-index: 20; position:relative;
 }
 .ob-desc { 
@@ -249,18 +249,18 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   z-index: 20; position:relative;
 }
 .ob-phase { 
-  flex: 1; background: linear-gradient(180deg, rgba(0,255,136,0.05) 0%, rgba(0,0,0,0.5) 100%);
-  border: 1px solid rgba(0, 255, 136, 0.15); border-radius: 4px; padding: 20px;
+  flex: 1; background: linear-gradient(180deg, rgba(0,170,255,0.05) 0%, rgba(0,0,0,0.5) 100%);
+  border: 1px solid rgba(0, 170, 255, 0.15); border-radius: 4px; padding: 20px;
   transition: all 0.3s ease; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
 }
 .ob-phase:hover {
-  transform: translateY(-4px); border-color: rgba(0, 255, 136, 0.6);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.5), 0 0 20px rgba(0, 255, 136, 0.2), inset 0 0 15px rgba(0,255,136,0.1);
+  transform: translateY(-4px); border-color: rgba(0, 170, 255, 0.6);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.5), 0 0 20px rgba(0, 170, 255, 0.2), inset 0 0 15px rgba(0,170,255,0.1);
 }
 .ob-phase-name { 
-  font-family: 'Orbitron', sans-serif; font-size: 18px; color: #0f8; margin-bottom: 12px; 
+  font-family: 'Orbitron', sans-serif; font-size: 18px; color: #0af; margin-bottom: 12px; 
   text-transform: uppercase; letter-spacing: 2px; font-weight: 900;
-  border-bottom: 1px solid rgba(0,255,136,0.3); padding-bottom: 5px;
+  border-bottom: 1px solid rgba(0,170,255,0.3); padding-bottom: 5px;
 }
 .ob-phase-text { 
   font-size: 14px; color: rgba(255, 255, 255, 0.8); line-height: 1.5; 
@@ -273,21 +273,21 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 .ob-phase-intel li { margin-bottom: 4px; }
 
 .ob-start-btn { 
-  display: inline-block; padding: 18px 50px; background: rgba(0,255,136,0.1); 
-  color: #0f8; font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 900; 
-  letter-spacing: 6px; text-transform: uppercase; border: 2px solid #0f8; 
+  display: inline-block; padding: 18px 50px; background: rgba(0,170,255,0.1); 
+  color: #0af; font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 900; 
+  letter-spacing: 6px; text-transform: uppercase; border: 2px solid #0af; 
   border-radius: 4px; cursor: pointer; transition: all 0.2s; 
-  box-shadow: 0 0 15px rgba(0, 255, 136, 0.2) inset, 0 0 20px rgba(0, 255, 136, 0.3);
-  text-shadow: 0 0 8px rgba(0, 255, 136, 0.5); z-index: 20; position:relative;
+  box-shadow: 0 0 15px rgba(0, 170, 255, 0.2) inset, 0 0 20px rgba(0, 170, 255, 0.3);
+  text-shadow: 0 0 8px rgba(0, 170, 255, 0.5); z-index: 20; position:relative;
   animation: btnPulse 2s infinite alternate;
 }
 @keyframes btnPulse {
-  0% { box-shadow: inset 0 0 10px rgba(0,255,136,0.2), 0 0 15px rgba(0,255,136,0.2); }
-  100% { box-shadow: inset 0 0 25px rgba(0,255,136,0.5), 0 0 35px rgba(0,255,136,0.5), 0 0 10px #0f8; }
+  0% { box-shadow: inset 0 0 10px rgba(0,170,255,0.2), 0 0 15px rgba(0,170,255,0.2); }
+  100% { box-shadow: inset 0 0 25px rgba(0,170,255,0.5), 0 0 35px rgba(0,170,255,0.5), 0 0 10px #0af; }
 }
 .ob-start-btn:hover { 
-  background: #0f8; color: #000; text-shadow: none; animation: none;
-  box-shadow: 0 0 40px rgba(0, 255, 136, 0.8), inset 0 0 10px #fff; 
+  background: #0af; color: #000; text-shadow: none; animation: none;
+  box-shadow: 0 0 40px rgba(0, 170, 255, 0.8), inset 0 0 10px #fff; 
   transform: translateY(-2px); 
 }
 
@@ -1256,6 +1256,15 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   </div>
 </div>
 
+<!-- Webcam Display Modal -->
+<div id="webcam-modal" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:600px; height:450px; background:rgba(10,5,5,0.95); border:1px solid #f24; z-index:9000; box-shadow:0 0 20px rgba(255,30,30,0.5); flex-direction:column;">
+  <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 15px; background:rgba(255,10,10,0.1); border-bottom:1px solid #f24;">
+    <div id="webcam-title" style="color:#f24; font:14px 'Courier New', monospace; font-weight:bold; letter-spacing:2px;">UPLINK ESTABLISHED</div>
+    <button onclick="closeWebcamModal()" style="background:transparent; border:none; color:#f24; font:16px 'Courier New', monospace; cursor:pointer;" title="Close Connection">✕</button>
+  </div>
+  <div id="webcam-iframe-container" style="flex:1; width:100%; height:100%; background:#000;"></div>
+</div>
+
 <!-- Troop Input -->
 <div id="troop-inp">
   <div style="font-size:12px;letter-spacing:2px;color:#0af" id="troop-label">TROOPS TO MOVE</div>
@@ -1300,11 +1309,83 @@ const AVIATIONSTACK_API_KEY = 'bbf22d54152c8666dd5a9fbe5a1344cb'; // Flight trac
 const SFX = {
   ctx: null,
   muted: false,
+  _bgOsc: null,
+  _bgGain: null,
   init() {
     if (!this.ctx) {
       window.AudioContext = window.AudioContext || window.webkitAudioContext;
       this.ctx = new AudioContext();
+      // Ensure the context is resumed if created inside a click handler
+      if (this.ctx.state === 'suspended') {
+        this.ctx.resume();
+      }
     }
+  },
+  startAmbientRadio() {
+    if(!this.ctx || this._bgOsc) return;
+    const t = this.ctx.currentTime;
+    
+    // Low, ominous pulsing drone for "World Radio" ambient feel
+    this._bgOsc = this.ctx.createOscillator();
+    this._bgGain = this.ctx.createGain();
+    
+    // Mix two oscillators for a thicker drone (one sub, one audible mid drone)
+    this._bgOsc.type = 'sawtooth';
+    this._bgOsc.frequency.setValueAtTime(110, t); // Audible drone
+    
+    // Create slow LFO for pulsing volume
+    const lfo = this.ctx.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.setValueAtTime(0.15, t); // roughly 6 second cycle
+    
+    const lfoGain = this.ctx.createGain();
+    lfoGain.gain.setValueAtTime(0.04, t); // pulse depth
+    
+    // Base volume
+    this._bgGain.gain.setValueAtTime(0.02, t); 
+    
+    // Lowpass filter to muffle the sawtooth into an eerie hum
+    const lpf = this.ctx.createBiquadFilter();
+    lpf.type = 'lowpass';
+    lpf.frequency.setValueAtTime(400, t);
+    
+    // Connect LFO to filter frequency for a sweeping effect
+    const filterLfo = this.ctx.createOscillator();
+    filterLfo.type = 'sine';
+    filterLfo.frequency.setValueAtTime(0.05, t);
+    const filterLfoGain = this.ctx.createGain();
+    filterLfoGain.gain.setValueAtTime(200, t); // sweeps from 200 to 600Hz
+    filterLfo.connect(filterLfoGain);
+    filterLfoGain.connect(lpf.frequency);
+    
+    lfo.connect(lfoGain);
+    lfoGain.connect(this._bgGain.gain);
+    
+    this._bgOsc.connect(lpf);
+    lpf.connect(this._bgGain);
+    this._bgGain.connect(this.ctx.destination);
+    
+    // Add white noise for radio static
+    const noiseBuffer = this._createNoiseBuffer(2.0);
+    if (noiseBuffer) {
+       const noiseSrc = this.ctx.createBufferSource();
+       noiseSrc.buffer = noiseBuffer;
+       noiseSrc.loop = true;
+       const noiseFilter = this.ctx.createBiquadFilter();
+       noiseFilter.type = 'bandpass';
+       noiseFilter.frequency.setValueAtTime(1000, t);
+       const noiseGain = this.ctx.createGain();
+       noiseGain.gain.setValueAtTime(0.005, t);
+       noiseSrc.connect(noiseFilter);
+       noiseFilter.connect(noiseGain);
+       noiseGain.connect(this.ctx.destination);
+       noiseSrc.start(t);
+       this._noiseSrc = noiseSrc; // save ref to stop later if needed
+    }
+    
+    this._bgOsc.start(t);
+    lfo.start(t);
+    filterLfo.start(t);
   },
   toggleMute() {
     this.muted = !this.muted;
@@ -1312,8 +1393,12 @@ const SFX = {
     const btnVol = document.getElementById('btn-vol');
     if (btnVol) btnVol.innerText = this.muted ? '🔈' : '🔊';
     if (this.ctx) {
-      if (this.muted) this.ctx.suspend();
-      else this.ctx.resume();
+      if (this.muted) {
+        this.ctx.suspend();
+      } else {
+        this.ctx.resume();
+        if(!this._bgOsc) this.startAmbientRadio();
+      }
     }
   },
   _createNoiseBuffer(len) {
@@ -1652,6 +1737,9 @@ window.toggleGlobeSkin = function() {
     btn.style.color = '#fff';
     sun.color.setHex(0xff8888);
     fill.color.setHex(0x551111);
+    
+    // Enable Webcams layer on Hostile Skin
+    if (intelGroups.webcams) intelGroups.webcams.visible = true;
   } else {
     // Revert to default
     globeMat.color.setHex(0xffffff);
@@ -1662,6 +1750,9 @@ window.toggleGlobeSkin = function() {
     btn.style.color = '#f24';
     sun.color.setHex(0xffeedd);
     fill.color.setHex(0x223366);
+    
+    // Disable Webcams layer on Normal Skin
+    if (intelGroups.webcams) intelGroups.webcams.visible = false;
   }
 };
 document.getElementById('btn-skin-toggle').addEventListener('click', () => {
@@ -1682,13 +1773,16 @@ const intelGroups = {
   bases: new THREE.Group(),
   nuclear: new THREE.Group(),
   conflicts: new THREE.Group(),
-  liveFlights: new THREE.Group()
+  liveFlights: new THREE.Group(),
+  webcams: new THREE.Group()
 };
 
 intelGroups.bases.visible = false;
 intelGroups.nuclear.visible = false;
 intelGroups.conflicts.visible = false;
 intelGroups.liveFlights.visible = false;
+intelGroups.webcams.visible = false; // Only visible on Hostile Skin
+window.webcamsData = []; // Array to map raycaster hits to webcam player data
 
 Object.values(intelGroups).forEach(g => scene.add(g));
 
@@ -1778,6 +1872,95 @@ function createGlowTexture(colorHex) {
   const tex = new THREE.CanvasTexture(c);
   return tex;
 }
+
+// --- 4. Webcams (Fetched from Proxy) ---
+async function initWebcamsLayer() {
+  try {
+    let webcamList = [];
+    try {
+      const res = await fetch("/api/webcams");
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.webcams) webcamList = data.webcams;
+      }
+    } catch (e) {
+      console.warn("Webcams proxy unreachable:", e);
+    }
+    
+    // Fallback: If Windy API fails (403 Forbidden, rate limit, etc), generate 50 simulated surveillance nodes
+    if (webcamList.length === 0) {
+      console.log("Webcams API unavailable or empty. Spawning 50 simulated uplinks.");
+      const isos = Object.keys(countryData);
+      for(let i=0; i<50; i++) {
+        const iso = isos[Math.floor(Math.random() * isos.length)];
+        const c = countryData[iso];
+        if(!c) continue;
+        // Un-offset the longitude for dummy generators since c.lon is already offset, 
+        // to ensure it processes consistently through the loop below.
+        let rawLon = c.lon + 90;
+        if (rawLon > 180) rawLon -= 360;
+        
+        webcamList.push({
+          title: 'Simulated Surveillance Node ' + iso + '-' + i,
+          location: { 
+            latitude: c.lat + (Math.random()-0.5)*5, 
+            longitude: rawLon + (Math.random()-0.5)*5,
+            city: 'Sector ' + i
+          },
+          player: { day: 'https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&mute=1' }
+        });
+      }
+    }
+
+    // Fix: make the points MUCH larger so they are visible, and turn off depthTest so they overlay the red globe
+    const webcamMat = new THREE.PointsMaterial({
+      color: 0xffff00, size: 0.12, transparent: true, opacity: 1.0,
+      map: createGlowTexture(0xffff00), blending: THREE.AdditiveBlending, depthTest: false, depthWrite: false
+    });
+    
+    const pts = [];
+    window.webcamsData = []; // ensure it's clean
+    
+    webcamList.forEach((cam) => {
+      // Validate lat/lon
+      if (!cam.location || cam.location.latitude === undefined || cam.location.longitude === undefined) return;
+      if (!cam.player || (!cam.player.day && !cam.player.lifetime)) return; // needs a player
+      
+      // The underlying globe texture is shifted -90deg longitude, so we must offset raw coordinates
+      let offsetLon = cam.location.longitude - 90;
+      if (offsetLon < -180) offsetLon += 360;
+      if (offsetLon > 180) offsetLon -= 360;
+
+      // Fix: Raise the radius slightly more to ensure they float above the sphere geometry
+      const v = ll2v(cam.location.latitude, offsetLon, GLOBE_R + 0.05);
+      pts.push(v.x, v.y, v.z);
+      
+      let embedUrl = cam.player.day || cam.player.lifetime;
+      // If it's a real Windy API URL, it needs ?play=1 to autoplay the feed
+      if (embedUrl && embedUrl.includes('windy.com') && !embedUrl.includes('play=1')) {
+          embedUrl += '?play=1';
+      }
+      
+      window.webcamsData.push({
+        title: cam.title,
+        city: cam.location.city || 'Unknown',
+        playerEmbed: embedUrl
+      });
+    });
+    
+    const camGeo = new THREE.BufferGeometry();
+    camGeo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+    const camPoints = new THREE.Points(camGeo, webcamMat);
+    // Add explicitly to scene as well inside the group to ensure it renders over the globe
+    camPoints.renderOrder = 999; 
+    intelGroups.webcams.add(camPoints);
+    
+    console.log(`Loaded ${window.webcamsData.length} webcams onto the Hostile Skin layer.`);
+  } catch (err) {
+    console.error("Failed to load Webcams:", err);
+  }
+}
+initWebcamsLayer();
 
 // =====================================================================
 // ORBIT CONTROLS
@@ -2393,6 +2576,129 @@ function updateTroopSprite(iso) {
 }
 
 // =====================================================================
+// TROOP FLIGHT ANIMATIONS (Ambient)
+// =====================================================================
+const activeFlights = [];
+const MAX_FLIGHTS = 7;
+
+function spawnTroopFlight() {
+  if (!GS || !GS.countries || Object.keys(GS.countries).length < 2) return;
+  
+  // Pick random start and end countries
+  const isos = Object.keys(GS.countries);
+  const startIso = isos[Math.floor(Math.random() * isos.length)];
+  let endIso = isos[Math.floor(Math.random() * isos.length)];
+  while (endIso === startIso) endIso = isos[Math.floor(Math.random() * isos.length)];
+  
+  const startData = countryData[startIso];
+  const endData = countryData[endIso];
+  if (!startData || !endData) return;
+  
+  const owner = GS.countries[startIso].owner;
+  const colHex = getOwnerColor(owner).hex;
+  
+  // Random amount (5, 7, 9, 12)
+  const amounts = [5, 7, 9, 12];
+  const amount = amounts[Math.floor(Math.random() * amounts.length)] + 'K';
+  
+  const startPos = ll2v(startData.lat, startData.lon, GLOBE_R + 0.05);
+  const endPos = ll2v(endData.lat, endData.lon, GLOBE_R + 0.05);
+  
+  // Create sprite
+  const tex = troopTexture(amount, colHex);
+  const mat = new THREE.SpriteMaterial({map: tex, transparent: true, depthTest: false});
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(0.08, 0.04, 1);
+  sprite.position.copy(startPos);
+  
+  // Create Trail
+  const trailMat = new THREE.LineBasicMaterial({
+    color: getOwnerColor(owner).int, 
+    transparent: true, 
+    opacity: 0.5,
+    depthWrite: false
+  });
+  const trailGeo = new THREE.BufferGeometry();
+  // Pre-allocate array for up to 50 trail points
+  const maxPoints = 50;
+  const positions = new Float32Array(maxPoints * 3);
+  trailGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  trailGeo.setDrawRange(0, 0);
+  const trail = new THREE.Line(trailGeo, trailMat);
+  
+  scene.add(sprite);
+  scene.add(trail);
+  
+  activeFlights.push({
+    sprite,
+    trail,
+    startPos,
+    endPos,
+    startTime: Date.now(),
+    duration: 15000 + Math.random() * 10000, // 15s to 25s
+    trailPoints: [],
+    maxTrailLen: maxPoints
+  });
+}
+
+function updateFlights() {
+  const now = Date.now();
+  for (let i = activeFlights.length - 1; i >= 0; i--) {
+    const f = activeFlights[i];
+    const t = (now - f.startTime) / f.duration;
+    
+    if (t >= 1.0) {
+      // Flight finished
+      scene.remove(f.sprite);
+      scene.remove(f.trail);
+      f.sprite.material.map.dispose();
+      f.sprite.material.dispose();
+      f.trail.geometry.dispose();
+      f.trail.material.dispose();
+      activeFlights.splice(i, 1);
+      continue;
+    }
+    
+    // SLERP interpolation for spherical arc
+    const startQ = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(1,0,0), f.startPos.clone().normalize());
+    const endQ = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(1,0,0), f.endPos.clone().normalize());
+    const currentQ = new THREE.Quaternion().slerpQuaternions(startQ, endQ, t);
+    
+    // Base position
+    const baseVec = new THREE.Vector3(1,0,0).applyQuaternion(currentQ);
+    
+    // Add arc height (peaks at mid-flight t=0.5)
+    // Parabolic arc: 4 * t * (1-t) peaks at 1.0 when t=0.5
+    const heightFactor = Math.sin(t * Math.PI) * 0.15; // Max arc height 0.15
+    const currentPos = baseVec.clone().multiplyScalar(GLOBE_R + 0.05 + heightFactor);
+    
+    f.sprite.position.copy(currentPos);
+    
+    // Update trail
+    f.trailPoints.push(currentPos.clone());
+    if (f.trailPoints.length > f.maxTrailLen) {
+      f.trailPoints.shift();
+    }
+    
+    const positions = f.trail.geometry.attributes.position.array;
+    for (let j = 0; j < f.trailPoints.length; j++) {
+      positions[j * 3] = f.trailPoints[j].x;
+      positions[j * 3 + 1] = f.trailPoints[j].y;
+      positions[j * 3 + 2] = f.trailPoints[j].z;
+    }
+    f.trail.geometry.setDrawRange(0, f.trailPoints.length);
+    f.trail.geometry.attributes.position.needsUpdate = true;
+  }
+  
+  // Spawn new flights if needed
+  if (GS && GS.countries && Object.keys(GS.countries).length > 0 && activeFlights.length < MAX_FLIGHTS) {
+    if (Math.random() < 0.05) { // Throttle spawns slightly so they don't all appear at once
+      spawnTroopFlight();
+    }
+  }
+}
+
+// =====================================================================
 // TURN MANAGEMENT
 // =====================================================================
 function showTurnAnnounce(playerIndex, cb) {
@@ -2739,6 +3045,22 @@ function handleGlobeClick(e) {
   mouse.y = -(e.clientY/innerHeight)*2+1;
   ray.setFromCamera(mouse, camera);
 
+  // 1. Check if the Hostile Skin is active and if we clicked a Webcam
+  if (isHostileSkin && intelGroups.webcams && intelGroups.webcams.visible) {
+    // Determine intersect with the points cloud
+    const webcamHits = ray.intersectObject(intelGroups.webcams.children[0] || intelGroups.webcams, false);
+    if (webcamHits.length > 0) {
+      // Points geometry intersections return an index
+      const ptIndex = webcamHits[0].index;
+      if (ptIndex !== undefined && window.webcamsData[ptIndex]) {
+        const cam = window.webcamsData[ptIndex];
+        openWebcamModal(cam);
+        return; // Stop further click execution
+      }
+    }
+  }
+
+  // 2. Normal globe intersection
   const hits = ray.intersectObject(globeMesh, false);
   if (!hits.length) return;
   const pt = hits[0].point.normalize();
@@ -2792,8 +3114,25 @@ canvas.addEventListener('mousemove', e => {
   mouse.x=(e.clientX/innerWidth)*2-1;
   mouse.y=-(e.clientY/innerHeight)*2+1;
   ray.setFromCamera(mouse,camera);
-  const hits = ray.intersectObjects(Object.values(troopSprites),false);
+  
   const tip = document.getElementById('tip');
+  
+  // Check Webcam Hover first (only if Hostile Skin is active)
+  if (isHostileSkin && intelGroups.webcams && intelGroups.webcams.visible) {
+    const webcamPtsHit = ray.intersectObject(intelGroups.webcams.children[0] || intelGroups.webcams, false);
+    if (webcamPtsHit.length > 0) {
+      const ptIndex = webcamPtsHit[0].index;
+      if (ptIndex !== undefined && window.webcamsData[ptIndex]) {
+        const cam = window.webcamsData[ptIndex];
+        tip.classList.add('show');
+        tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY-10)+'px';
+        tip.innerHTML=`<b>[ LIVE FEED ]</b><br>${cam.title}<br><span style="color:#ff0">Click to connect</span>`;
+        return; // Stop further hover processing
+      }
+    }
+  }
+
+  const hits = ray.intersectObjects(Object.values(troopSprites),false);
   if(hits.length) {
     const iso = hits[0].object.userData.iso;
     const c = GS.countries[iso]; const cd=countryData[iso];
@@ -2805,6 +3144,23 @@ canvas.addEventListener('mousemove', e => {
     }
   } else tip.classList.remove('show');
 });
+
+// Webcam Modal API
+function openWebcamModal(camData) {
+  const modal = document.getElementById('webcam-modal');
+  const title = document.getElementById('webcam-title');
+  const iframeContainer = document.getElementById('webcam-iframe-container');
+  
+  title.innerText = `UPLINK ESTABLISHED: ${camData.title}`;
+  iframeContainer.innerHTML = `<iframe src="${camData.playerEmbed}" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>`;
+  
+  modal.style.display = 'flex';
+}
+
+function closeWebcamModal() {
+  document.getElementById('webcam-modal').style.display = 'none';
+  document.getElementById('webcam-iframe-container').innerHTML = ''; // Clear iframe to stop playback
+}
 
 function selectCountry(iso) {
   const prev = GS.selected;
@@ -4107,6 +4463,8 @@ function animate() {
   requestAnimationFrame(animate);
   const dt=Math.min(clock3.getDelta(),.05);
   time3+=dt;
+  
+  if (typeof updateFlights === 'function') updateFlights();
 
   // Auto-rotate when idle (even during missile flight)
   if(!drag) {
@@ -5282,87 +5640,34 @@ if (dash0 && opsSidebar) {
 // ============================================================================
 // WORLD RADIO INTEGRATION
 // ============================================================================
+// ============================================================================
+// WORLD RADIO INTEGRATION (Synthetic Ambient Noise)
+// ============================================================================
 let radioActive = false;
-let radioUrl = '';
-let radioName = '';
-const audioElement = document.getElementById('world-radio');
 const radioBtn = document.getElementById('btn-radio-toggle');
 const radioDisplay = document.getElementById('radio-display');
-
-async function fetchNextRadioStation() {
-  try {
-    const radioApiUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-        ? `http://${window.location.hostname}:4000/api/radio/random` 
-        : `/api/radio/random`;
-    const res = await fetch(radioApiUrl);
-    if (!res.ok) throw new Error('Failed to fetch radio');
-    const data = await res.json();
-    if (data && data.length > 0) {
-      // API returns an array of random stations. Pick the first one.
-      const station = data[0];
-      radioName = station.name || 'Unknown Station';
-      let bestStream = '';
-      if (station.streams && station.streams.length > 0) {
-        const httpsStream = station.streams.find(s => s.isHttps);
-        bestStream = httpsStream ? httpsStream.url : station.streams[0].url;
-      }
-      radioUrl = bestStream;
-      
-      radioDisplay.innerText = `♫ ${radioName}`;
-      radioDisplay.title = radioName;
-
-      audioElement.src = radioUrl;
-      if (radioActive) {
-        audioElement.play().catch(e => {
-          console.warn("Autoplay blocked:", e);
-          radioActive = false;
-          radioBtn.innerText = '🔇';
-          radioDisplay.innerText = 'World Radio: MUTED';
-        });
-      }
-    } else {
-      console.warn("No radio stations returned from API");
-    }
-  } catch (err) {
-    console.error("Radio API error:", err);
-  }
-}
 
 // Toggle radio state
 radioBtn.addEventListener('click', () => {
   radioActive = !radioActive;
   if (radioActive) {
     radioBtn.innerText = '🔊';
-    if (!audioElement.src || audioElement.src === window.location.href) {
-      radioDisplay.innerText = 'World Radio: CONNECTING...';
-      fetchNextRadioStation();
+    radioDisplay.innerText = 'World Radio: ON';
+    // Initialize procedural ambient background music
+    SFX.init();
+    if (SFX._bgOsc && SFX.ctx.state === 'suspended') {
+      SFX.ctx.resume();
     } else {
-      audioElement.play().catch(e => {
-        console.warn("Play error:", e);
-        radioActive = false;
-        radioBtn.innerText = '🔇';
-        radioDisplay.innerText = 'World Radio: MUTED';
-      });
-      if (radioActive) {
-        radioDisplay.innerText = `♫ ${radioName || 'Connected'}`;
-      }
+      SFX.startAmbientRadio();
     }
   } else {
     radioBtn.innerText = '🔇';
-    audioElement.pause();
     radioDisplay.innerText = 'World Radio: OFF';
+    if (SFX._bgOsc && SFX.ctx) {
+      SFX.ctx.suspend(); // Pause the ambient track entirely
+    }
   }
 });
-
-// Rotate station every 60 seconds
-setInterval(() => {
-  if (radioActive) {
-    fetchNextRadioStation();
-  }
-}, 60000);
-
-// Initialize volume to a reasonable level so it doesn't overpower sfx
-audioElement.volume = 0.4;
 
 
 

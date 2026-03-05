@@ -155,6 +155,23 @@ const server = http.createServer((req, res) => {
       console.error('Radio API error:', err);
       res.end(JSON.stringify({ error: 'Failed to fetch radio stations' }));
     });
+  } else if (req.url === '/api/webcams') {
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    });
+    fetch('https://api.windy.com/webcams/api/v3/webcams?limit=200&include=location,player', {
+      method: 'GET',
+      headers: {
+        'x-windy-api-key': 'vEqfjmfqyPguO0tTOX5gKMTXH6sz5dZR'
+      }
+    })
+    .then(r => r.text())
+    .then(data => res.end(data))
+    .catch(err => {
+      console.error('Webcam API error:', err);
+      res.end(JSON.stringify({ error: 'Failed to fetch webcams' }));
+    });
   } else {
     res.writeHead(404);
     res.end('Not found');
