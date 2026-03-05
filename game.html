@@ -415,13 +415,13 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 #ta-nukes{font-size:12px;letter-spacing:2px;margin-top:14px;opacity:.7;}
 /* Cinematic News Alert */
 #news-alert{position:absolute;top:15%;left:0;width:100%;background:rgba(200,0,0,0.85);color:#fff;
-  z-index:999;text-align:center;padding:17px 0;border-top:2px solid #f00;border-bottom:2px solid #f00;
+  z-index:999;text-align:center;padding:6px 0;border-top:2px solid #f00;border-bottom:2px solid #f00;
   display:none;align-items:center;justify-content:center;box-shadow:0 0 50px rgba(255,0,0,0.8);
   backdrop-filter:blur(10px);overflow:hidden;}
 #news-alert.show{display:flex;animation:slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, alertFlash 1s infinite alternate;}
 #news-alert.hide{animation:slideOut 0.4s ease-in forwards;}
-#na-label{position:absolute;top:3px;left:20px;font-size:8px;font-family:'Share Tech Mono',monospace;letter-spacing:4px;color:#ffb8b8;}
-#na-text{font-size:30px;font-family:'Orbitron',sans-serif;font-weight:900;letter-spacing:6px;text-transform:uppercase;text-shadow:0 0 20px #fff;}
+#na-label{position:absolute;top:2px;left:20px;font-size:6px;font-family:'Share Tech Mono',monospace;letter-spacing:4px;color:#ffb8b8;}
+#na-text{font-size:12px;font-family:'Orbitron',sans-serif;font-weight:900;letter-spacing:6px;text-transform:uppercase;text-shadow:0 0 20px #fff;}
 .na-stripe{position:absolute;width:100%;height:100%;background:repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(0,0,0,0.15) 20px, rgba(0,0,0,0.15) 40px);pointer-events:none;}
 @keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
 @keyframes slideOut{from{transform:translateX(0);opacity:1;}to{transform:translateX(-100%);opacity:0;}}
@@ -796,6 +796,9 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   </div>
   <div style="position:absolute; bottom:12px; left:20px; font-family:'Share Tech Mono', monospace; font-size:10px; font-weight:normal; letter-spacing:3px; color:#0af; text-transform:uppercase; z-index:15; pointer-events:none; text-shadow:0 0 5px rgba(0,170,255,0.8);">DEXMOND TECHNOLOGIES Ltd</div>
   <button id="btn-toggle-skin" onclick="toggleRedSkin()">🔴 RED SKIN</button>
+  <button id="btn-toggle-boats" onclick="toggleBoats()" style="display:none; position:absolute; bottom:143px; right:calc(25px + 25vw + 10px); left:auto; width:90px; text-align:center; padding:4px 8px; border:1px solid rgba(0,170,255,0.5); background:rgba(0,170,255,0.1); color:#0af; font-family:'Share Tech Mono', monospace; font-size:10px; border-radius:3px; cursor:pointer; z-index:20; pointer-events:auto; transition:0.2s; outline:none;">🚢 BOATS OFF</button>
+  <button id="btn-toggle-radio" onclick="toggleRadio()">📻 ON</button>
+  <button id="btn-toggle-radio-lock" onclick="toggleRadioLock()" style="display:none;">🔓 UNLOCK RADIO STATION</button>
 
   <div class="faction-dash" id="dash-1">
     <div class="dash-header">
@@ -850,8 +853,11 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 <style>
 #btn-toggle-skin {
   position: absolute;
-  bottom: 8px;
-  left: calc(20px + 25vw - 80px);
+  bottom: 114px;
+  right: calc(25px + 25vw + 10px);
+  left: auto;
+  width: 90px;
+  text-align: center;
   padding: 4px 8px;
   border: 1px solid rgba(255,50,50,0.5);
   background: rgba(255,50,50,0.1);
@@ -875,6 +881,68 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   color: #0af;
 }
 #btn-toggle-skin.active-normal:hover {
+  background: rgba(0,170,255,0.3);
+  border-color: #0af;
+}
+
+#btn-toggle-radio {
+  position: absolute;
+  bottom: 8px;
+  left: calc(20px + 25vw - 128px);
+  padding: 4px 8px;
+  border: 1px solid rgba(0,255,136,0.5);
+  background: rgba(0,255,136,0.1);
+  color: #0f8;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  z-index: 20;
+  pointer-events: auto;
+  transition: 0.2s;
+  outline: none;
+}
+#btn-toggle-radio:hover {
+  background: rgba(0,255,136,0.3);
+  border-color: #0f8;
+}
+#btn-toggle-radio.radio-off {
+  border: 1px solid rgba(255,50,50,0.5);
+  background: rgba(255,50,50,0.1);
+  color: #f55;
+}
+#btn-toggle-radio.radio-off:hover {
+  background: rgba(255,50,50,0.3);
+  border-color: #f55;
+}
+
+#btn-toggle-radio-lock {
+  position: absolute;
+  bottom: 8px;
+  left: calc(20px + 25vw - 68px);
+  padding: 4px 8px;
+  border: 1px solid rgba(255,170,0,0.5);
+  background: rgba(255,170,0,0.1);
+  color: #fa0;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  z-index: 20;
+  pointer-events: auto;
+  transition: 0.2s;
+  outline: none;
+}
+#btn-toggle-radio-lock:hover {
+  background: rgba(255,170,0,0.3);
+  border-color: #fa0;
+}
+#btn-toggle-radio-lock.radio-locked {
+  border: 1px solid rgba(0,170,255,0.5);
+  background: rgba(0,170,255,0.1);
+  color: #0af;
+}
+#btn-toggle-radio-lock.radio-locked:hover {
   background: rgba(0,170,255,0.3);
   border-color: #0af;
 }
@@ -1631,6 +1699,12 @@ renderer.setClearColor(0x02050a,1);
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 1000);
 
+// Red Skin Webcams
+let webcamGroup = new THREE.Group();
+webcamGroup.visible = false;
+let webcamSprites = [];
+scene.add(webcamGroup);
+
 // Stars
 const sg = new THREE.BufferGeometry();
 const sp = [];
@@ -2077,6 +2151,78 @@ function initGame(playerNames, myIndex) {
 
 // =====================================================================
 // LIVE FACTION DASHBOARD — 2 factions: Humanity (0) vs Raincloud (1)
+// =====================================================================
+// WEBCAM RENDERING (RED SKIN)
+// =====================================================================
+async function initWebcams() {
+  try {
+    const res = await fetch('/api/webcams');
+    const data = await res.json();
+    if (!data.result || !data.result.webcams) return;
+    
+    // Create a tiny yellow dot texture
+    const c = document.createElement('canvas'); c.width=64; c.height=64;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#ffff00'; // Yellow dot
+    ctx.beginPath(); ctx.arc(32,32,28,0,Math.PI*2); ctx.fill();
+    ctx.lineWidth = 4; ctx.strokeStyle = '#ffae00'; ctx.stroke();
+    const tex = new THREE.CanvasTexture(c);
+
+    data.result.webcams.forEach(cam => {
+      if (!cam.location || cam.location.latitude === undefined) return;
+      const mat = new THREE.SpriteMaterial({ map: tex, color: 0xffffff, transparent: true, depthTest: false });
+      const sprite = new THREE.Sprite(mat);
+      sprite.scale.set(0.05, 0.05, 1); // Moderate yellow dot
+      
+      const pos = ll2v(cam.location.latitude, cam.location.longitude, GLOBE_R + 0.05);
+      sprite.position.copy(pos);
+      
+      sprite.userData = { isWebcam: true, webcamId: cam.webcamId, title: cam.title || 'Live Feed' };
+      webcamGroup.add(sprite);
+      webcamSprites.push(sprite);
+    });
+    console.log("Loaded " + webcamSprites.length + " Red Skin webcams");
+  } catch(e) { console.error("Webcam load error", e); }
+}
+
+function playWebcamFeed(embedUrl, title) {
+  const modal = document.createElement('div');
+  modal.style.position = 'fixed'; modal.style.top='50%'; modal.style.left='50%'; 
+  modal.style.transform='translate(-50%,-50%)'; modal.style.width='640px'; modal.style.height='480px';
+  modal.style.backgroundColor='#000'; modal.style.border='2px solid #ff2222';
+  modal.style.boxShadow='0 0 40px rgba(255,0,0,0.5)'; modal.style.zIndex='99999';
+  
+  const header = document.createElement('div');
+  header.style.padding='10px'; header.style.color='#fff'; header.style.backgroundColor='#200';
+  header.style.fontFamily='monospace'; header.style.display='flex'; header.style.justifyContent='space-between';
+  header.innerHTML = `<span>🔴 LIVE FEED: ${title||'UNKNOWN LOCATION'}</span><span style="cursor:pointer;color:#f24;" onclick="this.parentElement.parentElement.remove(); if(typeof _sfxClick !== 'undefined') _sfxClick();">[CLOSE]</span>`;
+  
+  const iframe = document.createElement('iframe');
+  const separator = embedUrl.includes('?') ? '&' : '?';
+  iframe.src = embedUrl + separator + 'autoplay=1'; 
+  iframe.style.width='100%'; iframe.style.height='calc(100% - 40px)'; iframe.style.border='none';
+  iframe.setAttribute('allow', 'autoplay; fullscreen');
+  
+  // Overlay to hide Windy.com logo and replace with Dexmond Tech
+  const overlay = document.createElement('div');
+  overlay.style.position='absolute'; overlay.style.top='48px'; overlay.style.left='8px';
+  overlay.style.width='280px'; overlay.style.height='65px';
+  overlay.style.backgroundColor='rgba(10, 10, 15, 0.95)';
+  overlay.style.border='1px solid #0f8'; overlay.style.color='#0f8';
+  overlay.style.zIndex='1000'; overlay.style.boxShadow='0 0 20px rgba(0,255,136,0.3)';
+  overlay.style.fontFamily="'Share Tech Mono', monospace"; overlay.style.fontSize='11px';
+  overlay.style.display='flex'; overlay.style.alignItems='center'; overlay.style.justifyContent='center';
+  overlay.style.textAlign='center'; overlay.style.pointerEvents='none';
+  overlay.innerHTML = '<span style="color:#0af;margin-right:8px;font-size:16px;">▶</span> <div style="line-height:1.4;"><b>DEXMOND TECHNOLOGIES Ltd</b><br><span style="color:#888;font-size:9px;">ENCRYPTED LIVE FEED</span></div>';
+  
+  modal.appendChild(header);
+  modal.appendChild(iframe);
+  modal.appendChild(overlay);
+  document.body.appendChild(modal);
+}
+
+initWebcams();
+
 // =====================================================================
 function updateDashboard() {
   if(!GS.players.length) return;
@@ -2604,6 +2750,35 @@ function handleGlobeClick(e) {
   if (document.getElementById('troop-inp').classList.contains('show')) return;
   if (document.getElementById('attack-modal').classList.contains('show')) return; // Block clicks if attack modal is open
   if (document.getElementById('onboarding-modal').style.display === 'flex') return;
+
+  // 1. Check Webcams first if Red Skin is active
+  if (window.isRedSkin && webcamSprites.length > 0) {
+    mouse.x = (e.clientX/innerWidth)*2-1;
+    mouse.y = -(e.clientY/innerHeight)*2+1;
+    ray.setFromCamera(mouse, camera);
+    const intersects = ray.intersectObjects(webcamSprites);
+    if(intersects.length > 0) {
+      const camData = intersects[0].object.userData;
+      if (camData.webcamId) {
+        if(typeof _sfxClick !== 'undefined') _sfxClick();
+        
+        // Fetch fresh API token so Windy stream doesn't expire
+        fetch(`/api/webcams/${camData.webcamId}`)
+          .then(r => r.json())
+          .then(data => {
+            const webcamObj = data.result;
+            if (webcamObj && webcamObj.player) {
+              const p = webcamObj.player;
+              const freshUrl = p?.live || p?.lifetime || p?.day;
+              if (freshUrl) playWebcamFeed(freshUrl, camData.title);
+            }
+          })
+          .catch(e => console.error("Failed fresh webcam fetch", e));
+          
+        return; // Consume click
+      }
+    }
+  }
 
   mouse.x = (e.clientX/innerWidth)*2-1;
   mouse.y = -(e.clientY/innerHeight)*2+1;
@@ -5149,6 +5324,91 @@ window.toggleIntelLayer = function(layerKey, isChecked) {
   }
 };
 
+let boatsActive = false;
+let boatInterval = null;
+let boatMarkers = []; // Store THREE.js meshes for the boats
+
+window.toggleBoats = function() {
+  if (typeof _sfxClick !== 'undefined') _sfxClick();
+  boatsActive = !boatsActive;
+  const btn = document.getElementById('btn-toggle-boats');
+  
+  if (boatsActive) {
+    btn.innerHTML = '🚢 BOATS ON';
+    btn.style.borderColor = '#0f8';
+    btn.style.color = '#0f8';
+    btn.style.background = 'rgba(0,255,136,0.1)';
+    fetchAndRenderBoats();
+    boatInterval = setInterval(fetchAndRenderBoats, 10000);
+  } else {
+    btn.innerHTML = '🚢 BOATS OFF';
+    btn.style.borderColor = 'rgba(0,170,255,0.5)';
+    btn.style.color = '#0af';
+    btn.style.background = 'rgba(0,170,255,0.1)';
+    clearInterval(boatInterval);
+    boatInterval = null;
+    clearBoatMarkers();
+  }
+};
+
+function clearBoatMarkers() {
+  if (typeof scene === 'undefined') return;
+  boatMarkers.forEach(b => {
+      if (b.material) b.material.dispose();
+      if (b.geometry) b.geometry.dispose();
+      scene.remove(b);
+  });
+  boatMarkers = [];
+}
+
+function fetchAndRenderBoats() {
+  if (typeof scene === 'undefined' || typeof THREE === 'undefined') return;
+  fetch('/api/boats').then(r => r.json()).then(data => {
+      clearBoatMarkers();
+      
+      const R = 50.5; // Earth radius in THREE.js scene, slightly above 50 to clear the red shader mesh
+      // Basic boat geometry
+      const boatGeo = new THREE.ConeGeometry(0.3, 0.8, 4);
+      boatGeo.rotateX(Math.PI / 2); // Point it flat along surface
+      const boatMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, depthTest: false, renderOrder: 10 });
+
+      if (data.length === 0) {
+          // Fallback mock boats if AIS stream is temporarily dead
+          data = [
+              { lat: 40.7128, lon: -74.0060, cog: 90, name: "US DEFENDER" }, // NY Coast
+              { lat: 35.6895, lon: 139.6917, cog: 180, name: "JP PATROL" },  // Tokyo Bay
+              { lat: 51.5074, lon: -0.1278, cog: 270, name: "UK FRIGATE" },  // London Coast
+              { lat: 25.0330, lon: 121.5654, cog: 45, name: "TW ESCORT" },   // Taiwan Strait
+              { lat: 0, lon: 0, cog: 0, name: "EQUATOR GHOST" }              // Center of map
+          ];
+      }
+
+      data.forEach(boat => {
+          // Convert lat/lon to 3D point
+          const phi = (90 - boat.lat) * (Math.PI / 180);
+          const theta = (boat.lon + 180) * (Math.PI / 180);
+          
+          const x = -(R * Math.sin(phi) * Math.cos(theta));
+          const z = (R * Math.sin(phi) * Math.sin(theta));
+          const y = (R * Math.cos(phi));
+          
+          const mesh = new THREE.Mesh(boatGeo, boatMat);
+          mesh.position.set(x, y, z);
+          
+          // Align to surface
+          mesh.lookAt(new THREE.Vector3(0,0,0));
+          
+          // Rotate to face COG (Course Over Ground)
+          if (boat.cog) {
+              mesh.rotateZ(-boat.cog * (Math.PI / 180));
+          }
+          
+          scene.add(mesh);
+          boatMarkers.push(mesh);
+      });
+  }).catch(e => console.error("Error fetching boats:", e));
+}
+
 document.getElementById('btn-toggle-intel').addEventListener('click', () => {
   SFX.playClick();
   intelMapActive = !intelMapActive;
@@ -5184,16 +5444,176 @@ window.toggleRedSkin = function() {
   if(typeof _sfxClick !== 'undefined') _sfxClick();
   window.isRedSkin = !window.isRedSkin;
   const btn = document.getElementById('btn-toggle-skin');
+  const boatBtn = document.getElementById('btn-toggle-boats');
+  
+  // Toggle webcam visibility
+  if (typeof webcamGroup !== 'undefined') webcamGroup.visible = window.isRedSkin;
+
   if(window.isRedSkin) {
     if(typeof globeMat !== 'undefined') globeMat.color.setHex(0xff2222);
-    btn.innerHTML = '🌍 NORMAL SKIN';
+    btn.innerHTML = '🌍 LIVE SKIN';
     btn.classList.add('active-normal');
+    boatBtn.style.display = 'block'; // Show boats toggle on red skin
   } else {
     if(typeof globeMat !== 'undefined') globeMat.color.setHex(0xffffff);
     btn.innerHTML = '🔴 RED SKIN';
     btn.classList.remove('active-normal');
+    boatBtn.style.display = 'none'; // Hide on normal skin
+    
+    // Auto turn off boats if returning to normal skin
+    if (boatsActive) toggleBoats();
   }
 };
+
+function playWebcamFeed(embedUrl, title) {
+  const modal = document.createElement('div');
+  modal.style.position = 'fixed'; modal.style.top='50%'; modal.style.left='50%'; 
+  modal.style.transform='translate(-50%,-50%)'; modal.style.width='640px'; modal.style.height='480px';
+  modal.style.backgroundColor='#000'; modal.style.border='2px solid #ff2222';
+  modal.style.boxShadow='0 0 40px rgba(255,0,0,0.5)'; modal.style.zIndex='99999';
+  
+  const header = document.createElement('div');
+  header.style.padding='10px'; header.style.color='#fff'; header.style.backgroundColor='#200';
+  header.style.fontFamily='monospace'; header.style.display='flex'; header.style.justifyContent='space-between';
+  header.innerHTML = `<span>🔴 LIVE FEED: ${title||'UNKNOWN LOCATION'}</span><span style="cursor:pointer;color:#f24;" onclick="this.parentElement.parentElement.remove(); if(typeof _sfxClick !== 'undefined') _sfxClick();">[CLOSE]</span>`;
+  
+  const iframe = document.createElement('iframe');
+  iframe.src = embedUrl; iframe.style.width='100%'; iframe.style.height='calc(100% - 40px)'; iframe.style.border='none';
+  
+  modal.appendChild(header);
+  modal.appendChild(iframe);
+  document.body.appendChild(modal);
+}
+
+// ================= AMBIENT RADIO FEED =================
+let radioAudio = new Audio();
+let radioStations = [];
+let currentRadioIndex = 0;
+let radioRotationTimer = null;
+let radioStarted = false; // Prevents browser autoplay block
+window.isRadioOn = true;
+window.isRadioLocked = false;
+
+function fetchRadios() {
+  fetch('/api/radio/random')
+    .then(r => r.json())
+    .then(data => {
+      if (data && data.length > 0) {
+        radioStations = data;
+        currentRadioIndex = 0;
+        if (window.isRadioOn) playNextRadio();
+      }
+    })
+    .catch(e => console.error("Radio fetch error", e));
+}
+
+function playNextRadio() {
+  if (!window.isRadioOn) return;
+  if (radioStations.length === 0 || currentRadioIndex >= radioStations.length) {
+    return fetchRadios(); // Fetch a fresh batch
+  }
+  
+  const station = radioStations[currentRadioIndex];
+  currentRadioIndex++;
+  
+  // Try playing resolved URL or direct URL
+  const streamUrl = station.urlResolved || station.url;
+  console.log(`📻 [AMBIENT RADIO] Tuning to: ${station.name || 'Unknown'} (${station.countryCode || '??'})`);
+  
+  // Visually notify the user in the game log
+  // if (typeof setLog === 'function') {
+  //   setLog(`📻 INTERCEPT: [${station.countryCode || '??'}] ${station.name || 'ENCRYPTED SIGNAL'}`);
+  // }
+
+  radioAudio.crossOrigin = "anonymous";
+  radioAudio.src = streamUrl;
+  radioAudio.volume = 0.40; // Increased volume by 15% (0.25 -> 0.40)
+  
+  radioAudio.play().catch(e => {
+    console.warn("Radio autoplay blocked or stream dead, skipping...", e);
+    // If stream is dead, try next in 3 seconds
+    if (radioRotationTimer) clearTimeout(radioRotationTimer);
+    if (window.isRadioOn && !window.isRadioLocked) radioRotationTimer = setTimeout(playNextRadio, 3000);
+  });
+  
+  // Rotate to a new random station every 60 seconds
+  if (radioRotationTimer) clearTimeout(radioRotationTimer);
+  if (window.isRadioOn && !window.isRadioLocked) radioRotationTimer = setTimeout(playNextRadio, 60000);
+}
+
+// Browsers block autoplay until user interacts, so we wait for the first click anywhere.
+document.addEventListener('click', () => {
+    if (!radioStarted && window.isRadioOn) {
+        radioStarted = true;
+        fetchRadios();
+        document.getElementById('btn-toggle-radio-lock').style.display = 'block';
+    }
+}, {once: true});
+
+window.toggleRadio = function() {
+  if (typeof _sfxClick !== 'undefined') _sfxClick();
+  const btn = document.getElementById('btn-toggle-radio');
+  const lockBtn = document.getElementById('btn-toggle-radio-lock');
+  window.isRadioOn = !window.isRadioOn;
+  
+  if (!window.isRadioOn) {
+    radioAudio.pause();
+    if (radioRotationTimer) clearTimeout(radioRotationTimer);
+    btn.innerHTML = '🔇 OFF';
+    btn.classList.add('radio-off');
+    lockBtn.style.display = 'none';
+  } else {
+    btn.innerHTML = '📻 ON';
+    btn.classList.remove('radio-off');
+    lockBtn.style.display = 'block';
+    if (!radioStarted) {
+      radioStarted = true;
+      fetchRadios();
+    } else {
+      // Set the src and play the current station that was paused
+      if (radioAudio.src) {
+        radioAudio.play().catch(e => {
+            console.warn("Radio playback failed on resume, skipping to next...", e);
+            playNextRadio();
+        });
+        if (!window.isRadioLocked) {
+            if (radioRotationTimer) clearTimeout(radioRotationTimer);
+            radioRotationTimer = setTimeout(playNextRadio, 60000);
+        }
+      } else {
+          playNextRadio();
+      }
+    }
+  }
+};
+
+window.toggleRadioLock = function() {
+  if (typeof _sfxClick !== 'undefined') _sfxClick();
+  const btn = document.getElementById('btn-toggle-radio-lock');
+  window.isRadioLocked = !window.isRadioLocked;
+  
+  if (window.isRadioLocked) {
+    btn.innerHTML = '🔒 LOCK RADIO STATION';
+    btn.classList.add('radio-locked');
+    if (radioRotationTimer) {
+      clearTimeout(radioRotationTimer);
+      radioRotationTimer = null;
+    }
+    // Visually notify
+    // if (typeof setLog === 'function') setLog('📻 Station LOCKED. Auto-rotation disabled.');
+  } else {
+    btn.innerHTML = '🔓 UNLOCK RADIO STATION';
+    btn.classList.remove('radio-locked');
+    // Start the timer again
+    if (window.isRadioOn) {
+      if (radioRotationTimer) clearTimeout(radioRotationTimer);
+      radioRotationTimer = setTimeout(playNextRadio, 60000);
+    }
+    // Visually notify
+    // if (typeof setLog === 'function') setLog('📻 Station UNLOCKED. Auto-rotation enabled.');
+  }
+};
+// ========================================================
 
 // Add hover listeners for ops-sidebar
 const dash0 = document.getElementById('dash-0');

@@ -8,7 +8,9 @@
   },
   "dependencies": {
     "google-auth-library": "^10.6.1",
+    "node-fetch": "^2.7.0",
     "pg": "^8.11.0",
+    "radio-browser-api": "^6.0.3",
     "ws": "^8.0.0"
   },
   "devDependencies": {

@@ -8,7 +8,69 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const WebSocket = require('ws');
+// node-fetch is built-in in Node 18+, but we use it gracefully.
+const { RadioBrowserApi } = require('radio-browser-api');
+const radioApi = new RadioBrowserApi('NuclearWarGame-DexmondTech');
 const { OAuth2Client } = require('google-auth-library');
+
+// Start AISStream Client
+const AIS_KEY = 'da80da037d260301abf6f89de4df9c3ba3395b24';
+const aisSocket = new WebSocket('wss://stream.aisstream.io/v0/stream');
+
+let activeBoats = {};
+
+aisSocket.onopen = () => {
+  console.log('🚢 Connected to AIS Stream');
+  const subscriptionMessage = {
+      Apikey: AIS_KEY,
+      BoundingBoxes: [[[-90, -180], [90, 180]]], // Global
+      FiltersShipMMSI: [], 
+      FilterMessageTypes: ["PositionReport"]
+  };
+  aisSocket.send(JSON.stringify(subscriptionMessage));
+  
+  // Re-subscribe every 5 minutes to keep alive, as aisstream can drop idle connections
+  setInterval(() => {
+     if (aisSocket.readyState === WebSocket.OPEN) {
+         aisSocket.send(JSON.stringify(subscriptionMessage));
+     }
+  }, 5 * 60 * 1000);
+};
+
+aisSocket.onmessage = (event) => {
+  try {
+      const msg = JSON.parse(event.data);
+      console.log('AIS RAW:', msg.MessageType, msg.MetaData?.ShipName);
+      if (msg.MessageType === "PositionReport") {
+          const report = msg.Message.PositionReport;
+          const mmsi = msg.MetaData.MMSI;
+          
+          activeBoats[mmsi] = {
+              mmsi: mmsi,
+              name: msg.MetaData.ShipName ? msg.MetaData.ShipName.trim() : 'UNKNOWN VESSEL',
+              lat: report.Latitude,
+              lon: report.Longitude,
+              cog: report.Cog,      // Course over ground
+              sog: report.Sog,      // Speed over ground
+              timestamp: Date.now()
+          };
+      }
+  } catch (err) {}
+};
+
+aisSocket.onerror = (error) => console.log('AIS WebSocket Error:', error);
+aisSocket.onclose = () => console.log('AIS WebSocket Closed');
+
+// Clean up old boats every minute to prevent memory leak
+setInterval(() => {
+    const now = Date.now();
+    for (const mmsi in activeBoats) {
+        if (now - activeBoats[mmsi].timestamp > 600000) { // 10 minutes
+            delete activeBoats[mmsi];
+        }
+    }
+}, 60000);
+
 
 // REPLACE THIS WITH YOUR ACTUAL GOOGLE CLIENT ID
 const GOOGLE_CLIENT_ID = '787878787390-opqat1n6on9vp0sk8ilkn4qv1t6je1tp.apps.googleusercontent.com';
@@ -136,21 +198,33 @@ const server = http.createServer((req, res) => {
       'Access-Control-Allow-Origin': '*'
     });
     res.end(cachedFlights);
+  } else if (req.url === '/api/boats') {
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    });
+    res.end(JSON.stringify(Object.values(activeBoats)));
   } else if (req.url === '/api/radio/random') {
     res.writeHead(200, {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*'
     });
-    // Proxy request to RapidAPI to avoid exposing key in frontend
-    fetch('https://50k-radio-stations.p.rapidapi.com/radios/random?limit=10', {
-      method: 'GET',
-      headers: {
-        'x-rapidapi-host': '50k-radio-stations.p.rapidapi.com',
-        'x-rapidapi-key': 'adb6ff2de6mshb66e6898d93f081p11917djsne4ac6df3ad45'
-      }
+    // Fetch unlimited free stations using the radio-browser-api!
+    // We pick a random country to ensure global diversity, instead of getting stuck on top Spanish ones
+    const countries = ['US', 'GB', 'FR', 'DE', 'IT', 'JP', 'BR', 'RU', 'IN', 'ZA', 'AU', 'CA', 'KR', 'MX', 'EG', 'NL', 'SE', 'NO', 'FI', 'TR', 'GR'];
+    const randomCountry = countries[Math.floor(Math.random() * countries.length)];
+    radioApi.searchStations({
+      limit: 100,
+      hideBroken: true,
+      hasGeoInfo: true,
+      countryCode: randomCountry
     })
-    .then(r => r.text())
-    .then(data => res.end(data))
+    .then(stations => {
+      // Shuffle and slice randomly
+      const shuffled = stations.sort(() => 0.5 - Math.random());
+      const selected = shuffled.slice(0, 10);
+      res.end(JSON.stringify(selected));
+    })
     .catch(err => {
       console.error('Radio API error:', err);
       res.end(JSON.stringify({ error: 'Failed to fetch radio stations' }));
@@ -160,17 +234,31 @@ const server = http.createServer((req, res) => {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*'
     });
-    fetch('https://api.windy.com/webcams/api/v3/webcams?limit=200&include=location,player', {
+    fetch('https://api.windy.com/webcams/api/v3/webcams?limit=50&include=location,player&modifiers=live', {
       method: 'GET',
-      headers: {
-        'x-windy-api-key': 'vEqfjmfqyPguO0tTOX5gKMTXH6sz5dZR'
-      }
+      headers: { 'x-windy-api-key': 'vEqfjmfqyPguO0tTOX5gKMTXH6sz5dZR' }
     })
-    .then(r => r.text())
-    .then(data => res.end(data))
+    .then(r => r.json())
+    .then(data => res.end(JSON.stringify({ result: data })))
     .catch(err => {
       console.error('Webcam API error:', err);
       res.end(JSON.stringify({ error: 'Failed to fetch webcams' }));
+    });
+  } else if (req.url.startsWith('/api/webcams/')) {
+    const webcamId = req.url.split('/')[3];
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    });
+    fetch(`https://api.windy.com/webcams/api/v3/webcams/${webcamId}?include=player`, {
+      method: 'GET',
+      headers: { 'x-windy-api-key': 'vEqfjmfqyPguO0tTOX5gKMTXH6sz5dZR' }
+    })
+    .then(r => r.json())
+    .then(data => res.end(JSON.stringify({ result: data })))
+    .catch(err => {
+      console.error('Single Webcam API error:', err);
+      res.end(JSON.stringify({ error: 'Failed to fetch webcam' }));
     });
   } else {
     res.writeHead(404);
