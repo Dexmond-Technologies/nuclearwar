@@ -108,7 +108,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 #btn-chat-toggle {
   position: absolute;
   left: calc(20px + 25vw + 16px);
-  bottom: 45px;
+  bottom: 51px;
   width: 50px;
   height: 50px;
   border-radius: 50%;
@@ -347,7 +347,8 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   background:rgba(0,10,20,.85); border:1px solid #0af; border-radius:4px;
   padding:4px 10px; flex-direction:column; gap:1px;
   box-shadow:0 0 15px rgba(0,170,255,0.15); backdrop-filter:blur(4px);
-  pointer-events:none; min-width:160px;
+  pointer-events:none; width:110px; min-width:80px;
+  position:absolute; bottom:45px; right:calc(25px + 25vw); z-index:50;
 }
 #user-stats-box.visible { display:flex !important; }
 .us-title { font-size:10px; font-weight:bold; color:#0af; text-transform:uppercase; letter-spacing:1px; margin-bottom:1px; border-bottom:1px solid rgba(0,170,255,0.3); padding-bottom:1px;}
@@ -596,6 +597,21 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   from { opacity:0; transform:translateY(12px); }
   to   { opacity:1; transform:translateY(0); }
 }
+.strat-drawer.intel-mode {
+  top:50%;
+  left:50%;
+  bottom:auto;
+  transform:translate(-50%, -50%);
+  width:600px;
+  max-width:90vw;
+  max-height:none;
+  overflow:visible;
+  animation:drawerFadeInCenter 0.2s ease-out;
+}
+@keyframes drawerFadeInCenter {
+  from { opacity:0; transform:translate(-50%, -45%); }
+  to   { opacity:1; transform:translate(-50%, -50%); }
+}
 .strat-drawer-title {
   font-family:'Orbitron',sans-serif; color:#0af; font-size:12px;
   letter-spacing:3px; margin-bottom:12px; display:flex;
@@ -724,13 +740,6 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       <div id="phase-label">—</div>
     </div>
     <div style="display:flex;gap:15px;pointer-events:auto;align-items:center;">
-      <div id="user-stats-box" style="text-align:left;">
-        <div class="us-title" id="us-name">COM-—</div>
-        <div class="us-row"><span class="us-label">Terr</span> <span class="us-val" id="us-terr">0</span></div>
-        <div class="us-row"><span class="us-label">Trp</span> <span class="us-val" id="us-trp">0</span></div>
-        <div class="us-row"><span class="us-label">Atk</span> <span class="us-val" id="us-attacks" style="color:#f55">0</span></div>
-        <div class="us-row"><span class="us-label">Dmg</span> <span class="us-val" id="us-damage" style="color:#fa0">0</span></div>
-      </div>
       <div style="display:flex;gap:8px;">
         <button class="phase-btn" id="btn-end-turn" style="padding:10px 15px;">END TURN ▶</button>
       </div>
@@ -786,6 +795,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     </div>
   </div>
   <div style="position:absolute; bottom:12px; left:20px; font-family:'Share Tech Mono', monospace; font-size:10px; font-weight:normal; letter-spacing:3px; color:#0af; text-transform:uppercase; z-index:15; pointer-events:none; text-shadow:0 0 5px rgba(0,170,255,0.8);">DEXMOND TECHNOLOGIES Ltd</div>
+  <button id="btn-toggle-skin" onclick="toggleRedSkin()">🔴 RED SKIN</button>
 
   <div class="faction-dash" id="dash-1">
     <div class="dash-header">
@@ -815,12 +825,20 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       <div style="opacity:0.5">> AWAITING COMBAT DATA...</div>
     </div>
   </div>
-  <button class="war-room-btn" id="btn-toggle-intel" style="bottom: 74px; width:auto; right:20px; padding:6px 12px; font-size:9px; animation: none;">
+  <button class="war-room-btn" id="btn-toggle-intel" style="bottom: 79px; width:25vw; right:20px; padding:6px 12px; font-size:9px; animation: none;">
     👁 HOSTILE INTEL
   </button>
   <a href="https://dexmond.com/worldmonitor.html" target="_blank" class="war-room-btn" id="btn-war-room">
     ► VISIT WAR-ROOM LIVE 🎥
   </a>
+
+  <div id="user-stats-box" style="text-align:left;">
+    <div class="us-title" id="us-name">COM-—</div>
+    <div class="us-row"><span class="us-label">Terr</span> <span class="us-val" id="us-terr">0</span></div>
+    <div class="us-row"><span class="us-label">Trp</span> <span class="us-val" id="us-trp">0</span></div>
+    <div class="us-row"><span class="us-label">Atk</span> <span class="us-val" id="us-attacks" style="color:#f55">0</span></div>
+    <div class="us-row"><span class="us-label">Dmg</span> <span class="us-val" id="us-damage" style="color:#fa0">0</span></div>
+  </div>
 
 
 </div>
@@ -830,6 +848,37 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
      Lives OUTSIDE #hud so pointer-events work perfectly
      ===================================================================== -->
 <style>
+#btn-toggle-skin {
+  position: absolute;
+  bottom: 8px;
+  left: calc(20px + 25vw - 80px);
+  padding: 4px 8px;
+  border: 1px solid rgba(255,50,50,0.5);
+  background: rgba(255,50,50,0.1);
+  color: #f55;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  z-index: 20;
+  pointer-events: auto;
+  transition: 0.2s;
+  outline: none;
+}
+#btn-toggle-skin:hover {
+  background: rgba(255,50,50,0.3);
+  border-color: #f55;
+}
+#btn-toggle-skin.active-normal {
+  border: 1px solid rgba(0,170,255,0.5);
+  background: rgba(0,170,255,0.1);
+  color: #0af;
+}
+#btn-toggle-skin.active-normal:hover {
+  background: rgba(0,170,255,0.3);
+  border-color: #0af;
+}
+
 #ops-sidebar {
   position: fixed;
   top: 72px;
@@ -4444,7 +4493,7 @@ function openDrawer(id, titleHtml, bodyHtml) {
   closeAllModals();
   _openDrawerId = id;
   const drawer = document.createElement('div');
-  drawer.className = 'strat-drawer';
+  drawer.className = id === 'intel-layers' ? 'strat-drawer intel-mode' : 'strat-drawer';
   drawer.id = 'drawer-' + id;
   drawer.innerHTML = `
     <div class="strat-drawer-title">
@@ -4909,8 +4958,10 @@ function showIntelMapDrawer() {
   }).join('');
   
   openDrawer('intel-layers', '👁 GLOBAL INTEL FEED', `
-    <div style="font-size:10px;opacity:0.6;margin-bottom:10px;">Enable live data layers parsed from local and remote API feeds.</div>
-    ${body}
+    <div style="font-size:10px;opacity:0.6;margin-bottom:15px; text-align:center;">Enable live data layers parsed from local and remote API feeds.</div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+      ${body}
+    </div>
   `);
 
   // Sync checkboxes with current map state
@@ -4961,6 +5012,22 @@ document.getElementById('btn-toggle-intel').addEventListener('click', () => {
     closeAllModals();
   }
 });
+
+window.isRedSkin = false;
+window.toggleRedSkin = function() {
+  if(typeof _sfxClick !== 'undefined') _sfxClick();
+  window.isRedSkin = !window.isRedSkin;
+  const btn = document.getElementById('btn-toggle-skin');
+  if(window.isRedSkin) {
+    if(typeof globeMat !== 'undefined') globeMat.color.setHex(0xff2222);
+    btn.innerHTML = '🌍 NORMAL SKIN';
+    btn.classList.add('active-normal');
+  } else {
+    if(typeof globeMat !== 'undefined') globeMat.color.setHex(0xffffff);
+    btn.innerHTML = '🔴 RED SKIN';
+    btn.classList.remove('active-normal');
+  }
+};
 
 // Add hover listeners for ops-sidebar
 const dash0 = document.getElementById('dash-0');
