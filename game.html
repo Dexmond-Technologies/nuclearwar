@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://accounts.google.com/gsi/client"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:hidden;}
@@ -17,16 +17,58 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 #lobby{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(2,13,26,0.9) 0%,rgba(0,0,0,1) 100%);
   display:flex;align-items:center;justify-content:center;z-index:200;flex-direction:column;gap:16px;}
 .lobby-box{
-  background:rgba(0,20,40,.85);border:2px solid rgba(0,200,255,0.4);border-radius:0;padding:40px;
-  width:100vw;height:100vh;max-width:100vw;text-align:center;
-  box-shadow:inset 0 0 100px rgba(0,180,255,.2);
-  backdrop-filter:blur(12px);
-  position:relative;
-  display:flex;flex-direction:column;justify-content:center;align-items:center;
-  overflow-y:auto;
+  background: linear-gradient(135deg, rgba(0, 15, 30, 0.6) 0%, rgba(0, 5, 12, 0.8) 100%);
+  border: none;
+  border-radius: 0;
+  padding: 50px 60px;
+  width: 100vw; height: 100vh;
+  max-width: 100vw; text-align: center;
+  position: relative;
+  overflow: hidden;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  backdrop-filter: blur(25px) saturate(150%);
+  -webkit-backdrop-filter: blur(25px) saturate(150%);
+  box-shadow: inset 0 0 200px rgba(0, 212, 255, 0.05);
 }
-.lobby-title{font-family:'Orbitron',sans-serif;font-size:6vw;font-weight:900;letter-spacing:15px;color:#0af;text-shadow:0 0 40px rgba(0,170,255,0.8), 0 0 20px rgba(0,170,255,0.5);margin-bottom:2vh;}
-.lobby-sub{font-family:'Share Tech Mono',monospace;font-size:1.8vw;letter-spacing:10px;opacity:.9;margin-bottom:6vh;color:#ff3232;text-shadow:0 0 15px rgba(255,50,50,0.6);text-transform:uppercase;}
+/* Caustic internal reflection */
+.lobby-box::before {
+  content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle, rgba(0, 240, 255, 0.04) 0%, transparent 50%);
+  transform: rotate(30deg);
+  pointer-events: none;
+  z-index: 0;
+}
+/* Sharp facet highlight */
+.lobby-box::after {
+  content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 15%, transparent 100%);
+  pointer-events: none;
+  border-radius: 12px;
+}
+.lobby-title{
+  font-family: 'Orbitron', sans-serif;
+  font-size: 64px;
+  font-weight: 800;
+  letter-spacing: 12px;
+  color: #00f0ff;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  text-shadow: 0 0 15px rgba(0, 240, 255, 0.8), 0 0 30px rgba(0, 240, 255, 0.4);
+  position: relative;
+  z-index: 1;
+}
+.lobby-sub{
+  font-family: 'Orbitron', sans-serif;
+  font-size: 20px;
+  letter-spacing: 8px;
+  opacity: 0.9;
+  margin-bottom: 40px;
+  color: #ff3232;
+  text-shadow: 0 0 15px rgba(255, 50, 50, 0.8);
+  text-transform: uppercase;
+  position: relative;
+  z-index: 1;
+}
 .lobby-text{
   font-family:'Rajdhani',sans-serif;font-size:2vw;line-height:1.8;color:#0f8;font-weight:700;
   text-shadow:0 0 20px rgba(0,255,136,0.5);padding:0 5vw;
@@ -195,113 +237,169 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 .rep-item.won{color:#0f8;}
 .rep-item.lost{color:#f55;}
 
-/* Onboarding Modal */
+/* ── ONBOARDING / BRIEFING (CYBER-CRYSTAL PREMIUM FINISH) ── */
 #onboarding-modal {
-  position:absolute;inset:0;background:rgba(0,5,15,.95);display:none;
-  align-items:center;justify-content:center;z-index:250;backdrop-filter:blur(10px);
+  display: none; position: fixed; inset: 0; background: rgba(0, 4, 12, 0.75);
+  z-index: 100000; justify-content: center; align-items: center;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
-#onboarding-modal.show { display:flex; animation: fadeInModal 0.4s ease-out; }
+#onboarding-modal.show { display: flex; animation: fadeInModal 0.4s cubic-bezier(0.1, 0.9, 0.2, 1); }
+
+@keyframes fadeInModal {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
 .ob-card {
-  background: rgba(4, 9, 20, 0.85);
-  border: 1px solid rgba(0, 170, 255, 0.15); 
-  border-radius: 16px; 
-  padding: 48px; 
-  width: 760px; 
-  max-width: 90vw;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 1), 0 0 30px rgba(0, 170, 255, 0.15), inset 0 0 20px rgba(0, 170, 255, 0.05);
-  text-align: center; 
-  position: relative; 
+  background: linear-gradient(135deg, rgba(0, 15, 30, 0.6) 0%, rgba(0, 5, 12, 0.8) 100%);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-top: 1px solid rgba(0, 240, 255, 0.6);
+  border-bottom: 1px solid rgba(0, 150, 255, 0.1);
+  border-radius: 12px;
+  padding: 40px 45px;
+  width: 680px;
+  max-width: 90%;
+  color: #fff;
+  font-family: 'Share Tech Mono', monospace;
+  text-align: center;
+  position: relative;
   overflow: hidden;
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(25px) saturate(150%);
+  -webkit-backdrop-filter: blur(25px) saturate(150%);
+  /* Floating crystal depth & volumetric glow */
+  box-shadow: 
+    inset 0 0 60px rgba(0, 212, 255, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 30px 60px rgba(0, 5, 10, 0.9),
+    0 0 40px rgba(0, 212, 255, 0.15);
 }
-.ob-card::before { 
-  content: ''; 
-  position: absolute; 
-  top: 0; left: 0; width: 100%; height: 3px; 
-  background: linear-gradient(90deg, transparent, #00f0ff, transparent); 
-  box-shadow: 0 0 20px #0af; 
+/* Caustic internal reflection */
+.ob-card::before {
+  content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle, rgba(0, 240, 255, 0.04) 0%, transparent 50%);
+  transform: rotate(30deg);
+  pointer-events: none;
+  z-index: 0;
 }
-.ob-title { 
-  font-family: 'Orbitron', sans-serif; 
-  font-size: 36px; 
-  font-weight: 900; 
-  letter-spacing: 8px; 
-  margin-bottom: 20px; 
-  text-transform: uppercase; 
-  background: linear-gradient(90deg, #00f0ff, #0077ff);
-  -webkit-background-clip: text;
-  color: transparent;
-  text-shadow: 0 0 30px rgba(0, 200, 255, 0.4); 
+/* Sharp facet highlight */
+.ob-card::after {
+  content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 15%, transparent 100%);
+  pointer-events: none;
+  border-radius: 12px;
 }
-.ob-desc { 
-  font-family: 'Inter', system-ui, -apple-system, sans-serif; 
-  font-size: 15px; 
-  color: rgba(255, 255, 255, 0.8); 
-  line-height: 1.6; 
-  margin-bottom: 40px; 
-  letter-spacing: 0.5px;
-  font-weight: 400;
+
+.ob-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: 6px;
+  color: #00f0ff;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  text-shadow: 0 0 15px rgba(0, 240, 255, 0.8), 0 0 30px rgba(0, 240, 255, 0.4);
+  position: relative;
+  z-index: 1;
 }
-.ob-phases { 
-  display: flex; 
-  justify-content: space-between; 
-  gap: 24px; 
-  margin-bottom: 40px; 
-  text-align: left; 
+
+.ob-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #aaddff;
+  opacity: 0.9;
+  margin-bottom: 35px;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
 }
-.ob-phase { 
-  flex: 1; 
-  background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08); 
-  border-radius: 12px; 
-  padding: 20px;
+
+.ob-phases {
+  display: flex; gap: 15px; margin-bottom: 40px;
+  position: relative; z-index: 1;
+  text-align: left;
+}
+
+.ob-phase {
+  flex: 1;
+  background: rgba(0, 20, 40, 0.3);
+  border: 1px solid rgba(0, 212, 255, 0.15);
+  border-top: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: 6px;
+  padding: 20px 15px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  box-shadow: 
+    inset 0 10px 20px rgba(0,0,0,0.2),
+    0 4px 15px rgba(0,0,0,0.4);
 }
 .ob-phase:hover {
-  transform: translateY(-4px);
-  border-color: rgba(0, 170, 255, 0.3);
-  box-shadow: 0 12px 24px rgba(0,0,0,0.4), 0 0 20px rgba(0, 170, 255, 0.1);
-  background: linear-gradient(180deg, rgba(0,170,255,0.05) 0%, rgba(255,255,255,0) 100%);
+  border-color: rgba(0, 240, 255, 0.5);
+  background: rgba(0, 30, 60, 0.4);
+  box-shadow: 
+    inset 0 0 15px rgba(0, 240, 255, 0.1),
+    0 0 20px rgba(0, 240, 255, 0.2);
+  transform: translateY(-2px);
 }
-.ob-phase-name { 
-  font-family: 'Orbitron', sans-serif; 
-  font-size: 15px; 
-  color: #00f0ff; 
-  margin-bottom: 12px; 
-  text-transform: uppercase; 
-  letter-spacing: 1px; 
-  font-weight: 700;
+
+.ob-phase-name {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: bold;
+  color: #00f0ff;
+  font-size: 14px;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px rgba(0, 212, 255, 0.6);
 }
-.ob-phase-text { 
-  font-size: 13px; 
-  color: rgba(255, 255, 255, 0.65); 
-  line-height: 1.6; 
-  font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+
+.ob-phase-text {
+  font-size: 11px;
+  color: #88ccff;
+  line-height: 1.5;
 }
-.ob-start-btn { 
-  display: inline-block; 
-  padding: 16px 48px; 
-  background: transparent; 
-  color: #00f0ff; 
+
+.ob-btn {
+  background: linear-gradient(180deg, rgba(0, 30, 50, 0.8) 0%, rgba(0, 10, 20, 0.9) 100%);
+  border: 1px solid #00f0ff;
+  color: #00f0ff;
+  padding: 16px 45px;
   font-family: 'Orbitron', sans-serif;
   font-size: 16px;
-  font-weight: 800; 
-  letter-spacing: 4px; 
-  text-transform: uppercase; 
-  border: 2px solid #00f0ff; 
-  border-radius: 8px; 
-  cursor: pointer; 
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-  box-shadow: 0 0 15px rgba(0, 170, 255, 0.2) inset, 0 0 15px rgba(0, 170, 255, 0.2);
-  text-shadow: 0 0 8px rgba(0, 170, 255, 0.5);
+  font-weight: bold;
+  letter-spacing: 3px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  position: relative;
+  display: inline-block;
+  z-index: 1;
+  overflow: hidden;
+  box-shadow: 
+    inset 0 0 15px rgba(0, 240, 255, 0.2),
+    0 0 25px rgba(0, 240, 255, 0.3);
 }
-.ob-start-btn:hover { 
-  background: #00f0ff; 
-  color: #000;
-  text-shadow: none;
-  box-shadow: 0 0 30px rgba(0, 170, 255, 0.6), inset 0 0 10px rgba(255,255,255,0.5); 
-  transform: translateY(-2px) scale(1.02); 
+/* Inset backlit core effect */
+.ob-btn::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: rgba(255, 255, 255, 0.5);
+}
+.ob-btn::after {
+  content: ''; position: absolute; bottom: -50%; left: -50%; width: 200%; height: 100%;
+  background: radial-gradient(circle, rgba(0, 240, 255, 0.15) 0%, transparent 60%);
+  pointer-events: none;
+}
+.ob-btn:hover {
+  background: linear-gradient(180deg, rgba(0, 50, 80, 0.9) 0%, rgba(0, 20, 40, 0.9) 100%);
+  box-shadow: 
+    inset 0 0 25px rgba(0, 240, 255, 0.4),
+    0 0 40px rgba(0, 240, 255, 0.6);
+  text-shadow: 0 0 10px #00f0ff;
+  transform: scale(1.02);
+}
+.ob-btn:active {
+  transform: scale(0.98);
+  box-shadow: inset 0 0 30px rgba(0, 240, 255, 0.6);
 }
 
 /* ── FACTION DASHBOARDS ─ 2-faction: Human vs Raincloud ── */
@@ -645,6 +743,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 </style>
 </head>
 <body>
+
 <!-- maplibre css -->
 <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
 
@@ -663,7 +762,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   <div class="lobby-box">
     <div class="lobby-title">☢ NUCLEAR WAR</div>
     <div class="lobby-sub">PERSISTENT GLOBAL WAR SIMULATION</div>
-    <div class="lobby-text" id="lobby-msg" style="margin-bottom:20px; color:#f24; text-transform:uppercase; font-size:10px; line-height: 1.8;">
+    <div class="lobby-text" id="lobby-msg" style="margin-bottom:80px; color:#f24; text-transform:uppercase; font-size:13px; line-height: 1.8; transform: scaleX(1.3); transform-origin: center;">
       WELCOME TO NUCLEAR WAR.<br><br>
       ALL HUMAN PLAYERS FIGHT TOGETHER AS A SINGLE COALITION.<br>
       YOUR ADVERSARY IS RAINCLOUD, AN AUTONOMOUS AI SYSTEM.<br><br>
@@ -675,32 +774,50 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       HUMANITY VS RAINCLOUD.
     </div>
 
-    <!-- Authentication Section (Side-by-Side) -->
-    <div id="auth-container-flex" style="display:flex; justify-content:center; align-items:center; gap:20px; margin:20px auto; min-height:50px;">
+    <!-- Authentication Section: Google | Wallet | Override Code -->
+    <div id="auth-container-flex" style="display:flex; flex-direction:column; justify-content:center; align-items:center; gap:16px; margin:240px auto 0; min-height:50px; position:relative; z-index:1;">
       
-      <!-- Google Sign-In -->
-      <div id="g_id_onload"
-           data-client_id="787878787390-opqat1n6on9vp0sk8ilkn4qv1t6je1tp.apps.googleusercontent.com"
-           data-callback="handleGoogleCredentialResponse"
-           data-auto_prompt="false">
+      <!-- Row 1: Google | Override Code -->
+      <div style="display:flex; justify-content:center; align-items:center; gap:40px;">
+        <!-- Google Sign-In -->
+        <div style="margin-top: 15px;">
+          <div id="g_id_onload"
+               data-client_id="787878787390-opqat1n6on9vp0sk8ilkn4qv1t6je1tp.apps.googleusercontent.com"
+               data-callback="handleGoogleCredentialResponse"
+               data-auto_prompt="false">
+          </div>
+          <div class="g_id_signin"
+               data-type="standard"
+               data-shape="rectangular"
+               data-theme="filled_black"
+               data-text="continue_with"
+               data-size="large"
+               data-logo_alignment="left">
+          </div>
+        </div>
+
+        <!-- Connect Wallet (CENTER) -->
+        <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+          <div style="font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:2px; color:rgba(0,212,255,0.5); text-transform:uppercase;">Solana Wallet</div>
+          <div style="position:relative; min-width:190px; height:40px; display:flex; align-items:center; justify-content:center; background:rgba(0,10,20,0.8); border:1px solid rgba(0,170,255,0.4); border-radius:4px; overflow:hidden; cursor:pointer; color:#0f8; font-family:'Courier New', monospace; font-size:13px; font-weight:bold; letter-spacing:1px; transition:all 0.2s; box-shadow:0 0 10px rgba(0,255,136,0.1);"
+               onmouseover="this.style.background='rgba(0,20,40,0.9)'; this.style.borderColor='#00f0ff'; this.style.boxShadow='0 0 15px rgba(0,240,255,0.5)';"
+               onmouseout="this.style.background='rgba(0,10,20,0.8)'; this.style.borderColor='rgba(0,170,255,0.4)'; this.style.boxShadow='0 0 10px rgba(0,255,136,0.1)';"
+               onclick="if(window.solanaModal) { window.solanaModal.open(); } else { alert('Wallet connecting... Please wait for modules to load.'); }">
+            CONNECT WALLET
+          </div>
+        </div>
+
+        <!-- Dev/Offline Bypass -->
+        <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+          <div style="font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:2px; color:rgba(0,212,255,0.5); text-transform:uppercase;">Override Code</div>
+          <input type="text" id="dev-unlock-in" placeholder="ENTER OVERRIDE CODE" style="background:rgba(0,10,20,0.8); border:1px solid rgba(0,170,255,0.4); color:#0f8; padding:8px 15px; text-align:center; font-family:'Courier New', monospace; width:220px; height: 40px; border-radius:4px; outline:none;"
+                 onkeyup="if(this.value.toLowerCase()==='unlock'){ document.getElementById('lobby-auth-status').innerHTML='✓ OVERRIDE ACCEPTED'; document.querySelector('.g_id_signin').style.display='none'; this.style.display='none'; document.getElementById('auth-container-flex').style.display='none'; joinGlobalWar(); }">
+        </div>
       </div>
-      <div class="g_id_signin"
-           data-type="standard"
-           data-shape="rectangular"
-           data-theme="filled_black"
-           data-text="continue_with"
-           data-size="large"
-           data-logo_alignment="left">
-      </div>
-      
-      <!-- Dev/Offline Bypass -->
-      <div>
-        <input type="text" id="dev-unlock-in" placeholder="ENTER OVERRIDE CODE" style="background:rgba(0,10,20,0.8); border:1px solid rgba(0,170,255,0.4); color:#0f8; padding:8px 15px; text-align:center; font-family:'Courier New', monospace; width:220px; height: 40px; border-radius:4px; outline:none;" 
-               onkeyup="if(this.value.toLowerCase()==='unlock'){ document.getElementById('lobby-auth-status').innerHTML='✓ OVERRIDE ACCEPTED'; document.querySelector('.g_id_signin').style.display='none'; this.style.display='none'; document.getElementById('auth-container-flex').style.display='none'; joinGlobalWar(); }">
-      </div>
+
     </div>
     
-    <div id="lobby-auth-status" style="color:#0f8; font-family:'Courier New', monospace; font-size:12px; margin-bottom:15px; min-height:15px;"></div>
+    <div id="lobby-auth-status" style="color:#0f8; font-family:'Courier New', monospace; font-size:12px; margin-top:16px; min-height:15px; position:relative; z-index:1;"></div>
 
   </div>
 </div>
@@ -727,7 +844,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
         <div class="ob-phase-text">Move troops between your connected territories to shore up defenses before passing the turn.</div>
       </div>
     </div>
-    <button class="ob-start-btn" onclick="closeOnboarding()">INITIATE COMMAND</button>
+    <button class="ob-btn" onclick="closeOnboarding()">INITIATE COMMAND</button>
   </div>
 </div>
 
@@ -1752,8 +1869,14 @@ const fill=new THREE.DirectionalLight(0x223366,.4); fill.position.set(-4,-1,-3);
 
 // Helpers
 function ll2v(lat,lon,r){
-  const la=lat*RAD,lo=lon*RAD;
-  return new THREE.Vector3(r*Math.cos(la)*Math.cos(lo),r*Math.sin(la),r*Math.cos(la)*Math.sin(lo));
+  const phi = (90 - lat) * (Math.PI / 180);
+  const theta = (lon + 180) * (Math.PI / 180);
+
+  return new THREE.Vector3(
+      -(r * Math.sin(phi) * Math.cos(theta)),
+      r * Math.cos(phi),
+      r * Math.sin(phi) * Math.sin(theta)
+  );
 }
 
 // =====================================================================
@@ -2210,16 +2333,23 @@ async function initWebcams() {
     const tex = new THREE.CanvasTexture(c);
 
     data.result.webcams.forEach(cam => {
-      // Must have location and must have a TRUE live stream player
-      if (!cam.location || cam.location.latitude === undefined || !cam.player || !cam.player.live) return;
+      // Must have location and stream URL from OpenWebcamDB
+      if (cam.lat === undefined || cam.lon === undefined) return;
+      if (!cam.stream_url) return;
       const mat = new THREE.SpriteMaterial({ map: tex, color: 0xffffff, transparent: true, depthTest: false });
       const sprite = new THREE.Sprite(mat);
       sprite.scale.set(0.05, 0.05, 1); // Moderate yellow dot
       
-      const pos = ll2v(cam.location.latitude, cam.location.longitude, GLOBE_R + 0.05);
+      const pos = ll2v(cam.lat, cam.lon, GLOBE_R + 0.05);
       sprite.position.copy(pos);
       
-      sprite.userData = { isWebcam: true, webcamId: cam.webcamId, title: cam.title || 'Live Feed' };
+      sprite.userData = { 
+        isWebcam: true, 
+        webcamId: cam.id, 
+        title: cam.name || 'Live Feed',
+        streamUrl: cam.stream_url,
+        streamType: cam.stream_type
+      };
       webcamGroup.add(sprite);
       webcamSprites.push(sprite);
     });
@@ -2227,40 +2357,46 @@ async function initWebcams() {
   } catch(e) { console.error("Webcam load error", e); }
 }
 
-function playWebcamFeed(embedUrl, title) {
+function playWebcamFeed(streamUrl, title, streamType) {
   const modal = document.createElement('div');
   modal.style.position = 'fixed'; modal.style.top='50%'; modal.style.left='50%'; 
   modal.style.transform='translate(-50%,-50%)'; modal.style.width='640px'; modal.style.height='480px';
   modal.style.backgroundColor='#000'; modal.style.border='2px solid #ff2222';
   modal.style.boxShadow='0 0 40px rgba(255,0,0,0.5)'; modal.style.zIndex='99999';
+  modal.style.display='flex'; modal.style.flexDirection='column';
   
   const header = document.createElement('div');
   header.style.padding='10px'; header.style.color='#fff'; header.style.backgroundColor='#200';
   header.style.fontFamily='monospace'; header.style.display='flex'; header.style.justifyContent='space-between';
-  header.innerHTML = `<span>🔴 LIVE FEED: ${title||'UNKNOWN LOCATION'}</span><span style="cursor:pointer;color:#f24;" onclick="this.parentElement.parentElement.remove(); if(typeof _sfxClick !== 'undefined') _sfxClick();">[CLOSE]</span>`;
+  header.innerHTML = `<span>🔴 LIVE STREAM: ${title||'UNKNOWN LOCATION'}</span><span style="cursor:pointer;color:#f24;" onclick="this.parentElement.parentElement.remove(); if(typeof _sfxClick !== 'undefined') _sfxClick();">[CLOSE]</span>`;
   
-  const iframe = document.createElement('iframe');
-  const separator = embedUrl.includes('?') ? '&' : '?';
-  // Enforce autoplay using both play=1 and autoplay=1 params
-  iframe.src = embedUrl + separator + 'autoplay=1&play=1'; 
-  iframe.style.width='100%'; iframe.style.height='calc(100% - 40px)'; iframe.style.border='none';
-  iframe.setAttribute('allow', 'autoplay; fullscreen');
+  const contentBox = document.createElement('div');
+  contentBox.style.flex='1'; contentBox.style.padding='20px'; contentBox.style.color='#0f8';
+  contentBox.style.fontFamily="'Share Tech Mono', monospace";
+  contentBox.style.fontSize='14px'; contentBox.style.wordBreak='break-all';
+  contentBox.style.display='flex'; contentBox.style.flexDirection='column'; contentBox.style.justifyContent='center'; contentBox.style.alignItems='center'; contentBox.style.textAlign='center';
   
-  // Overlay to hide Windy.com logo and replace with Dexmond Tech
-  const overlay = document.createElement('div');
-  overlay.style.position='absolute'; overlay.style.top='48px'; overlay.style.left='8px';
-  overlay.style.width='280px'; overlay.style.height='65px';
-  overlay.style.backgroundColor='rgba(10, 10, 15, 0.95)';
-  overlay.style.border='1px solid #0f8'; overlay.style.color='#0f8';
-  overlay.style.zIndex='1000'; overlay.style.boxShadow='0 0 20px rgba(0,255,136,0.3)';
-  overlay.style.fontFamily="'Share Tech Mono', monospace"; overlay.style.fontSize='11px';
-  overlay.style.display='flex'; overlay.style.alignItems='center'; overlay.style.justifyContent='center';
-  overlay.style.textAlign='center'; overlay.style.pointerEvents='none';
-  overlay.innerHTML = '<span style="color:#0af;margin-right:8px;font-size:16px;">▶</span> <div style="line-height:1.4;"><b>DEXMOND TECHNOLOGIES Ltd</b><br><span style="color:#888;font-size:9px;">ENCRYPTED LIVE FEED</span></div>';
+  const isRTSP = (streamType === 'rtsp' || streamUrl.startsWith('rtsp://'));
+  
+  if (isRTSP) {
+    contentBox.innerHTML = `
+      <div style="color:#0af; font-size:48px; margin-bottom:15px;">▶</div>
+      <div style="margin-bottom:20px;">RAW INGEST STREAM DETECTED</div>
+      <div style="background:rgba(0,30,50,0.5); border:1px solid #0af; padding:15px; border-radius:4px; max-width:80%;">
+        <div style="color:#fff; margin-bottom:10px;">URL:</div>
+        <a href="${streamUrl}" style="color:#f24; text-decoration:none;">${streamUrl}</a>
+      </div>
+      <div style="margin-top:20px; font-size:11px; color:#888;">USE OBS STUDIO, FFMPEG, OR VLC TO INGEST THIS PROPRIETARY STREAM</div>
+    `;
+  } else {
+    // Attempt standard embed or HTML5 video
+    contentBox.innerHTML = `
+      <video src="${streamUrl}" controls autoplay style="width:100%; height:100%; background:#000; border:none;"></video>
+    `;
+  }
   
   modal.appendChild(header);
-  modal.appendChild(iframe);
-  modal.appendChild(overlay);
+  modal.appendChild(contentBox);
   document.body.appendChild(modal);
 }
 
@@ -2802,23 +2938,9 @@ function handleGlobeClick(e) {
     const intersects = ray.intersectObjects(webcamSprites);
     if(intersects.length > 0) {
       const camData = intersects[0].object.userData;
-      if (camData.webcamId) {
+      if (camData.streamUrl) {
         if(typeof _sfxClick !== 'undefined') _sfxClick();
-        
-        // Fetch fresh API token so Windy stream doesn't expire
-        fetch(`/api/webcams/${camData.webcamId}`)
-          .then(r => r.json())
-          .then(data => {
-            const webcamObj = data.result;
-            if (webcamObj && webcamObj.player) {
-              const p = webcamObj.player;
-              // STRICTLY USE ONLY LIVE (p.live). Never fallback to timelapse (p.day).
-              const freshUrl = p?.live;
-              if (freshUrl) playWebcamFeed(freshUrl, camData.title);
-            }
-          })
-          .catch(e => console.error("Failed fresh webcam fetch", e));
-          
+        playWebcamFeed(camData.streamUrl, camData.title, camData.streamType);
         return; // Consume click
       }
     }
@@ -3855,7 +3977,10 @@ async function aiTurn() {
 // MULTIPLAYER (WebSocket & Google Auth)
 // =====================================================================
 let ws_isHost = false;
+
+// Global Auth State
 let pendingGoogleToken = null;
+let pendingSolanaAddress = null; // Stored when Web3Modal connects
 
 // Google Identity Callback
 function handleGoogleCredentialResponse(response) {
@@ -3879,9 +4004,12 @@ function initWS() {
         ws_isHost = msg.isHost;
         hideLobby();
 
-        // Immediately attempt Google Auth passing the JWT to the backend
+        // Immediately attempt Auth passing the JWT or Wallet to the backend
         if (pendingGoogleToken) {
           ws.send(JSON.stringify({ type: 'google_auth', credential: pendingGoogleToken }));
+        } else if (window.pendingSolanaAddress || pendingSolanaAddress) {
+          const addr = window.pendingSolanaAddress || pendingSolanaAddress;
+          ws.send(JSON.stringify({ type: 'solana_auth', address: addr }));
         }
 
         // Show onboarding when joining from lobby
@@ -4090,6 +4218,13 @@ function closeOnboarding() {
   SFX.init();
   document.getElementById('onboarding-modal').style.display = 'none';
   document.getElementById('ops-sidebar').classList.add('visible');
+  
+  // Start ambient world radio when the globe actually reveals
+  if (!radioStarted && window.isRadioOn) {
+      radioStarted = true;
+      fetchRadios();
+      document.getElementById('btn-toggle-radio-lock').style.display = 'block';
+  }
 }
 
 // Ensure the AI turn only triggers if the socket determines we are the "Host"
@@ -5567,7 +5702,7 @@ function playNextRadio() {
 
   radioAudio.crossOrigin = "anonymous";
   radioAudio.src = streamUrl;
-  radioAudio.volume = 0.40; // Increased volume by 15% (0.25 -> 0.40)
+  radioAudio.volume = 0.30; // Decreased per user request (was 0.40)
   
   radioAudio.play().catch(e => {
     console.warn("Radio autoplay blocked or stream dead, skipping...", e);
@@ -5581,14 +5716,7 @@ function playNextRadio() {
   if (window.isRadioOn && !window.isRadioLocked) radioRotationTimer = setTimeout(playNextRadio, 60000);
 }
 
-// Browsers block autoplay until user interacts, so we wait for the first click anywhere.
-document.addEventListener('click', () => {
-    if (!radioStarted && window.isRadioOn) {
-        radioStarted = true;
-        fetchRadios();
-        document.getElementById('btn-toggle-radio-lock').style.display = 'block';
-    }
-}, {once: true});
+// Global click listener removed; radio now starts explicitly inside closeOnboarding()
 
 window.toggleRadio = function() {
   if (typeof _sfxClick !== 'undefined') _sfxClick();
@@ -5670,6 +5798,49 @@ if (dash0 && opsSidebar) {
 
 </script>
 <script src="/dist/improve_earth.js"></script>
+<script src="https://unpkg.com/deck.gl@8.9.0/dist.min.js"></script>
+
+<!-- Reown AppKit / Solana CDN Scripts -->
+<script type="module">
+  import { createAppKit } from 'https://cdn.jsdelivr.net/npm/@reown/appkit@1.6.8/+esm';
+  import { solana, solanaTestnet, solanaDevnet } from 'https://cdn.jsdelivr.net/npm/@reown/appkit@1.6.8/networks/+esm';
+  import { SolanaAdapter } from 'https://cdn.jsdelivr.net/npm/@reown/appkit-adapter-solana@1.6.8/+esm';
+  import { PhantomWalletAdapter, SolflareWalletAdapter } from 'https://cdn.jsdelivr.net/npm/@solana/wallet-adapter-wallets@0.19.32/+esm';
+
+  const solanaWeb3JsAdapter = new SolanaAdapter({
+    wallets: [new PhantomWalletAdapter(), new SolflareWalletAdapter()]
+  });
+
+  const projectId = 'ba89a31db545167b667a42168923a1a3';
+  const metadata = {
+    name: 'Nuclear War',
+    description: 'Persistent Global Security Simulation',
+    url: window.location.origin,
+    icons: ['https://cdn-icons-png.flaticon.com/512/1126/1126462.png']
+  };
+
+  const modal = createAppKit({
+    adapters: [solanaWeb3JsAdapter],
+    networks: [solana, solanaTestnet, solanaDevnet],
+    metadata: metadata,
+    projectId,
+    themeMode: 'dark',
+    features: { analytics: true, email: false, socials: false }
+  });
+
+  modal.subscribeAccount((state) => {
+    if (state.isConnected && state.address) {
+      document.getElementById('lobby-auth-status').innerHTML='✓ WALLET CONNECTED: ' + state.address.substring(0,4) + '...' + state.address.substring(state.address.length-4);
+      document.getElementById('auth-container-flex').style.display='none';
+      window.pendingSolanaAddress = state.address;
+      if(typeof joinGlobalWar === 'function') {
+        joinGlobalWar();
+      }
+    }
+  });
+
+  window.solanaModal = modal;
+</script>
+
 </body>
 </html>
-
