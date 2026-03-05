@@ -274,7 +274,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 .war-room-btn {
   position:absolute; right:20px; bottom:45px; width:25vw;
   background:linear-gradient(135deg, rgba(200,0,0,0.8), rgba(100,0,0,0.9));
-  border:1px solid #f24; color:#fff; padding:10px; text-align:center;
+  border:1px solid #f24; color:#fff; padding:6px; text-align:center;
   font:12px 'Courier New', monospace; font-weight:bold; letter-spacing:2px;
   text-decoration:none; text-transform:uppercase; border-radius:4px;
   pointer-events:auto; z-index:100; box-shadow:0 0 15px rgba(255, 50, 50, 0.4);
@@ -747,7 +747,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       <div style="opacity:0.5">> AWAITING COMBAT DATA...</div>
     </div>
   </div>
-  <button class="war-room-btn" id="btn-toggle-intel" style="bottom: 90px; background:linear-gradient(135deg, #0af, #05f); border-color:#0af; animation:none;">
+  <button class="war-room-btn" id="btn-toggle-intel" style="bottom: 80px; animation: none;">
     👁 OPEN INTEL MAP
   </button>
   <a href="https://dexmond.com/worldmonitor.html" target="_blank" class="war-room-btn" id="btn-war-room">
@@ -4852,8 +4852,8 @@ document.getElementById('btn-toggle-intel').addEventListener('click', () => {
     canvas.style.display = 'block';
     container.style.display = 'none';
     btn.innerHTML = '👁 OPEN INTEL MAP';
-    btn.style.background = 'linear-gradient(135deg, #0af, #05f)';
-    btn.style.borderColor = '#0af';
+    btn.style.background = '';
+    btn.style.borderColor = '';
     closeAllModals();
   }
 });
