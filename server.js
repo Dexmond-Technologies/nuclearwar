@@ -136,6 +136,25 @@ const server = http.createServer((req, res) => {
       'Access-Control-Allow-Origin': '*'
     });
     res.end(cachedFlights);
+  } else if (req.url === '/api/radio/random') {
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    });
+    // Proxy request to RapidAPI to avoid exposing key in frontend
+    fetch('https://50k-radio-stations.p.rapidapi.com/radios/random?limit=10', {
+      method: 'GET',
+      headers: {
+        'x-rapidapi-host': '50k-radio-stations.p.rapidapi.com',
+        'x-rapidapi-key': 'adb6ff2de6mshb66e6898d93f081p11917djsne4ac6df3ad45'
+      }
+    })
+    .then(r => r.text())
+    .then(data => res.end(data))
+    .catch(err => {
+      console.error('Radio API error:', err);
+      res.end(JSON.stringify({ error: 'Failed to fetch radio stations' }));
+    });
   } else {
     res.writeHead(404);
     res.end('Not found');
