@@ -81,6 +81,34 @@ async function loadGameStateFallback() {
 
 const PORT = process.env.PORT || 8080;
 
+// --- OpenSky API Caching Proxy ---
+let cachedFlights = '{"time":0,"states":[]}';
+let lastFlightFetch = 0;
+const FLIGHT_CACHE_TTL = 30000; // 30 seconds
+
+async function fetchOpenSky() {
+  if (Date.now() - lastFlightFetch < FLIGHT_CACHE_TTL) return;
+  lastFlightFetch = Date.now();
+  try {
+    // We fetch a global or large bounding box. For stability without auth, we limit to a smaller global box or just all.
+    // The public API /api/states/all can be heavy, but we'll try it and cache heavily.
+    const res = await fetch('https://opensky-network.org/api/states/all');
+    if (res.ok) {
+      const data = await res.text();
+      cachedFlights = data;
+      console.log('✈ Successfully refreshed global flight data from OpenSky.');
+    } else {
+      console.warn('⚠ OpenSky API rate limited or unavailable:', res.status);
+    }
+  } catch (err) {
+    console.error('⚠ OpenSky Fetch Error:', err.message);
+  }
+}
+// Start initial fetch
+fetchOpenSky();
+setInterval(fetchOpenSky, FLIGHT_CACHE_TTL);
+
+
 // Create HTTP server to serve the static frontend
 const server = http.createServer((req, res) => {
   if (req.url === '/' || req.url === '/index.html' || req.url === '/game.html') {
@@ -101,6 +129,13 @@ const server = http.createServer((req, res) => {
       res.writeHead(200, { 'Content-Type': 'application/javascript' });
       res.end(data);
     });
+  } else if (req.url === '/api/flights') {
+    // Serve the cached OpenSky JSON
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    });
+    res.end(cachedFlights);
   } else {
     res.writeHead(404);
     res.end('Not found');

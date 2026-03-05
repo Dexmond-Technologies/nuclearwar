@@ -282,6 +282,7 @@ export class DeckGLMap {
   private firmsFireData: Array<{ lat: number; lon: number; brightness: number; frp: number; confidence: number; region: string; acq_date: string; daynight: string }> = [];
   private techEvents: TechEventMarker[] = [];
   private flightDelays: AirportDelayAlert[] = [];
+  private civilianFlights: any[] = [];
   private news: NewsItem[] = [];
   private newsLocations: Array<{ lat: number; lon: number; title: string; threatLevel: string; timestamp?: Date }> = [];
   private newsLocationFirstSeen = new Map<string, number>();
@@ -1123,6 +1124,11 @@ export class DeckGLMap {
       layers.push(this.createFlightDelaysLayer(filteredFlightDelays));
     }
 
+    // Live global civilian flights layer
+    if (mapLayers.liveFlights && this.civilianFlights.length > 0) {
+      layers.push(this.createCivilianFlightsLayer());
+    }
+
     // Protests layer (Supercluster-based deck.gl layers)
     if (mapLayers.protests && this.protests.length > 0) {
       layers.push(...this.createProtestClusterLayers());
@@ -1544,6 +1550,19 @@ export class DeckGLMap {
       },
       radiusMinPixels: 4,
       radiusMaxPixels: 15,
+      pickable: true,
+    });
+  }
+
+  private createCivilianFlightsLayer(): ScatterplotLayer {
+    return new ScatterplotLayer({
+      id: 'civilian-flights-layer',
+      data: this.civilianFlights,
+      getPosition: (d: any) => [d[5], d[6]], // longitude, latitude from OpenSky state array
+      getRadius: 6000,
+      getFillColor: [255, 255, 220, 230], // Off-white/yellowish to stand out from military red
+      radiusMinPixels: 2,
+      radiusMaxPixels: 8,
       pickable: true,
     });
   }
@@ -2671,6 +2690,8 @@ export class DeckGLMap {
         return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)}</strong><br/>${text(obj.operatorCountry)}</div>` };
       case 'military-flights-layer':
         return { html: `<div class="deckgl-tooltip"><strong>${text(obj.callsign || obj.registration || t('components.deckgl.tooltip.militaryAircraft'))}</strong><br/>${text(obj.type)}</div>` };
+      case 'civilian-flights-layer':
+        return { html: `<div class="deckgl-tooltip"><strong>${text(obj[1] || 'Unknown')}</strong><br/>${text(obj[2] || 'Global')} | ${Math.round(obj[7] * 3.28084 || 0)} ft | ${Math.round(obj[9] * 1.94384 || 0)} kts</div>` };
       case 'military-vessel-clusters-layer':
         return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name || t('components.deckgl.tooltip.vesselCluster'))}</strong><br/>${obj.vesselCount || 0} ${t('components.deckgl.tooltip.vessels')}<br/>${text(obj.activityType)}</div>` };
       case 'military-flight-clusters-layer':
@@ -2986,6 +3007,7 @@ export class DeckGLMap {
       'spaceports-layer': 'spaceport',
       'ports-layer': 'port',
       'flight-delays-layer': 'flight',
+      'civilian-flights-layer': 'flight',
       'startup-hubs-layer': 'startupHub',
       'tech-hqs-layer': 'techHQ',
       'accelerators-layer': 'accelerator',
@@ -3844,6 +3866,11 @@ export class DeckGLMap {
   public setMilitaryFlights(flights: MilitaryFlight[], clusters: MilitaryFlightCluster[] = []): void {
     this.militaryFlights = flights;
     this.militaryFlightClusters = clusters;
+    this.render();
+  }
+
+  public setCivilianFlights(states: any[]): void {
+    this.civilianFlights = states;
     this.render();
   }
 
