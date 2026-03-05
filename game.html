@@ -28,7 +28,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 .lobby-title{font-family:'Orbitron',sans-serif;font-size:6vw;font-weight:900;letter-spacing:15px;color:#0af;text-shadow:0 0 40px rgba(0,170,255,0.8), 0 0 20px rgba(0,170,255,0.5);margin-bottom:2vh;}
 .lobby-sub{font-family:'Share Tech Mono',monospace;font-size:1.8vw;letter-spacing:10px;opacity:.9;margin-bottom:6vh;color:#ff3232;text-shadow:0 0 15px rgba(255,50,50,0.6);text-transform:uppercase;}
 .lobby-text{
-  font-family:'Rajdhani',sans-serif;font-size:2vw;line-height:1.8;color:#0f8;font-weight:700;
+  font-family:'Rajdhani',sans-serif;font-size:2.4vw;line-height:1.8;color:#0f8;font-weight:700;
   text-shadow:0 0 20px rgba(0,255,136,0.5);padding:0 5vw;
 }
 .lbtn{width:100%;padding:12px;margin:6px 0;background:transparent;border:1px solid #0af;
@@ -348,7 +348,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   background:rgba(0,10,20,.85); border:1px solid #0af; border-radius:4px;
   padding:8px 12px; flex-direction:column; gap:4px;
   box-shadow:0 0 15px rgba(0,170,255,0.15); backdrop-filter:blur(4px);
-  pointer-events:none; min-width:180px; z-index:100;
+  pointer-events:none; width:90px; z-index:100;
 }
 #user-stats-box.visible { display:flex !important; }
 .us-title { font-size:10px; font-weight:bold; color:#0af; text-transform:uppercase; letter-spacing:1px; margin-bottom:1px; border-bottom:1px solid rgba(0,170,255,0.3); padding-bottom:1px;}
@@ -434,7 +434,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   
   .lobby-box { padding: 30px 15px !important; }
   .lobby-title { font-size: 24px !important; letter-spacing: 3px !important; }
-  .lobby-text { font-size: 14px !important; line-height: 1.3 !important; }
+  .lobby-text { font-size: 17px !important; line-height: 1.3 !important; }
   .lobby-sub { font-size: 10px !important; margin-bottom: 20px !important; }
   
   /* Fit dashes on screen */
@@ -651,7 +651,13 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     <div class="lobby-text" id="lobby-msg" style="margin-bottom:20px;">
       WELCOME TO NUCLEAR WAR.<br><br>
       ALL HUMAN PLAYERS FIGHT TOGETHER AS A SINGLE COALITION.<br>
-      YOUR ADVERSARY IS RAINCLOUD, AN AUTONOMOUS AI SYSTEM.
+      YOUR ADVERSARY IS RAINCLOUD, AN AUTONOMOUS AI SYSTEM.<br><br>
+      EVERY CONNECTED USER AUTOMATICALLY JOINS THE HUMAN FACTION.<br>
+      THERE ARE NO INDIVIDUAL HUMAN TEAMS — HUMANITY OPERATES AS ONE SIDE.<br><br>
+      THE PLATFORM PROVIDES AN OPEN RPC INTERFACE, ALLOWING EXTERNAL PROGRAMS, SCRIPTS, AND INTERNET BOTS TO CONNECT TO THE GAME.<br>
+      AUTOMATED AGENTS MAY PARTICIPATE ON EITHER SIDE OF THE CONFLICT, SUPPORTING HUMANITY OR OPERATING UNDER THE CONTROL OF RAINCLOUD.<br><br>
+      THE OBJECTIVE IS SIMPLE:<br>
+      HUMANITY VS RAINCLOUD.
     </div>
 
     <!-- Google Sign-In Container -->
@@ -1561,11 +1567,11 @@ async function fetchLiveNews() {
 const GLOBE_R = 1.0, RAD = Math.PI/180;
 
 // Dynamic WebSocket URL to support both local and production environments
-let WS_URL = 'ws://localhost:8080';
+let WS_URL = 'ws://localhost:4000';
 if (window.location.protocol !== 'file:') {
   const WS_PROTOCOL = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
   WS_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-    ? `ws://${window.location.host}` 
+    ? `ws://${window.location.hostname}:4000` 
     : `${WS_PROTOCOL}//${window.location.host}`;
 }
 
@@ -1945,6 +1951,28 @@ async function loadCountries(retries = 3) {
 
     countryData[iso] = { name: p.name||iso, lat: bestLat, lon: bestLon, polys };
 
+    // --- INJECT CUSTOM VIRTUAL NODES FOR NORTH AMERICA & CENTRAL ASIA ---
+    if (iso === 'USA') {
+      countryData['US_W'] = { name: 'US West', lat: 41.5, lon: -115.0, polys: [] };
+      countryData['US_E'] = { name: 'US East', lat: 38.5, lon: -78.0, polys: [] };
+      countryData['US_C'] = { name: 'US Central', lat: 40.0, lon: -95.0, polys: [] };
+      countryData['US_S'] = { name: 'US South', lat: 31.0, lon: -100.0, polys: [] };
+      countryData['US_NE'] = { name: 'US Northeast', lat: 43.0, lon: -73.0, polys: [] };
+    }
+    if (iso === 'CAN') {
+      countryData['CAN_W'] = { name: 'Canada West', lat: 55.0, lon: -120.0, polys: [] };
+      countryData['CAN_E'] = { name: 'Canada East', lat: 52.0, lon: -75.0, polys: [] };
+    }
+    if (iso === 'IRN') {
+      countryData['IRN_E'] = { name: 'Iran East', lat: 33.0, lon: 58.0, polys: [] };
+    }
+    if (iso === 'AFG') {
+      countryData['AFG_N'] = { name: 'Afghan North', lat: 36.0, lon: 67.0, polys: [] };
+    }
+    if (iso === 'KAZ') {
+      countryData['CASP'] = { name: 'Caspian Region', lat: 44.0, lon: 51.0, polys: [] };
+    }
+    // ----------------------------------------------------------------------
     // Draw border lines
     // Build border lines geometry but do not render them on the globe
     const mat = new THREE.LineBasicMaterial({color:NEUTRAL.int, transparent:true, opacity:.6});
@@ -2236,7 +2264,17 @@ function updateDashboard() {
       // Update User Stats box name
       const usName = document.getElementById('us-name');
       const inputName = document.getElementById('player-name')?.value;
-      if(usName) usName.textContent = inputName ? inputName : GS.players[0].name;
+      const displayName = window.myCallsign || inputName || GS.players[0].name;
+      if(usName) usName.textContent = 'COM-' + displayName.toUpperCase().substring(0, 15);
+      
+      // Update User Stats box dynamic stats
+      if (GS.countries) {
+        const myCountries = Object.values(GS.countries).filter(c => c.owner === GS.myIndex);
+        const terrEl = document.getElementById('us-terr');
+        const trpEl = document.getElementById('us-trp');
+        if (terrEl) terrEl.textContent = myCountries.length;
+        if (trpEl) trpEl.textContent = myCountries.reduce((sum, c) => sum + c.troops, 0);
+      }
     }
   });
 
@@ -3678,6 +3716,11 @@ function initWS() {
         // Immediately attempt Google Auth passing the JWT to the backend
         if (pendingGoogleToken) {
           ws.send(JSON.stringify({ type: 'google_auth', credential: pendingGoogleToken }));
+        } else {
+          if (window.myCallsign) {
+            ws.send(JSON.stringify({ type: 'rename', name: window.myCallsign }));
+          }
+          ws.send(JSON.stringify({ type: 'get_commander_stats', callsign: window.myCallsign || 'COMMANDER' }));
         }
 
         // Show onboarding when joining from lobby
@@ -3711,6 +3754,7 @@ function initWS() {
       }
       case 'google_auth_success':
         // The server verified the JWT. We are officially connected.
+        window.myCallsign = msg.name;
         document.getElementById('us-name').textContent = 'COM-' + msg.name.toUpperCase().substring(0, 15);
         document.getElementById('lobby-auth-status').innerHTML = "✓ UPLINK AUTHENTICATED. READY FOR DEPLOYMENT.";
         if (msg.stats) {
@@ -3866,6 +3910,10 @@ document.getElementById('chat-inp').addEventListener('keydown',e=>{if(e.key==='E
 function hideLobby(){document.getElementById('lobby').style.display='none';}
 
 function joinGlobalWar() {
+  const inp = document.getElementById('player-name')?.value;
+  if (inp) {
+    window.myCallsign = inp;
+  }
   document.getElementById('lobby-msg').innerHTML = "Establishing secure uplink...";
   initWS();
 }
@@ -5164,7 +5212,10 @@ const radioDisplay = document.getElementById('radio-display');
 
 async function fetchNextRadioStation() {
   try {
-    const res = await fetch('/api/radio/random');
+    const radioApiUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+        ? `http://${window.location.hostname}:4000/api/radio/random` 
+        : `/api/radio/random`;
+    const res = await fetch(radioApiUrl);
     if (!res.ok) throw new Error('Failed to fetch radio');
     const data = await res.json();
     if (data && data.length > 0) {

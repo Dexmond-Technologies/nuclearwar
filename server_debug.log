@@ -1,0 +1,13 @@
+nohup: ignoring input
+ℹ No DATABASE_URL — running without persistence (state resets on restart)
+ℹ No PostgreSQL state found. Attempting to load from JSON config...
+✓ Loaded persisted game state from /home/dexmond/Documents/Dexmond_Technologies/nuclearwar/game_state.json
+☢ Game state recovery complete. World is active.
+☢ NUCLEAR WAR Multi-Service running on port 4000
+⚠ OpenSky API rate limited or unavailable: 429
+⚠ OpenSky API rate limited or unavailable: 429
+⚠ OpenSky API rate limited or unavailable: 429
+⚠ OpenSky API rate limited or unavailable: 429
+⚠ OpenSky API rate limited or unavailable: 429
+⚠ OpenSky API rate limited or unavailable: 429
+⚠ OpenSky API rate limited or unavailable: 429

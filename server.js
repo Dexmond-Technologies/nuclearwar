@@ -79,7 +79,7 @@ async function loadGameStateFallback() {
   return null;
 }
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 4000;
 
 // --- OpenSky API Caching Proxy ---
 let cachedFlights = '{"time":0,"states":[]}';
