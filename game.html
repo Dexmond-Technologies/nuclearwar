@@ -783,9 +783,9 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     <button id="btn-skin-toggle" style="background:transparent;border:1px solid #f24;color:#f24;font:11px 'Courier New',monospace;padding:6px 12px;cursor:pointer;border-radius:3px;letter-spacing:1px;pointer-events:auto;transition:.2s;">⏏ HOSTILE SKIN</button>
     
     <!-- World Radio UI -->
-    <div id="radio-container" style="display:flex; align-items:center; background:rgba(0,10,20,0.8); border:1px solid #0af; border-radius:4px; padding:4px 8px; gap:8px;">
-      <button id="btn-radio-toggle" style="background:transparent; border:none; color:#0af; font-size:14px; cursor:pointer; padding:0; line-height:1;" title="Toggle Radio">🔊</button>
-      <div id="radio-display" style="font-family:'Courier New', monospace; font-size:10px; color:#0af; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:150px;">World Radio: OFF</div>
+    <div id="radio-container" style="display:flex; align-items:center; background:rgba(0,10,20,0.8); border:1px solid #0af; border-radius:4px; padding:4px 8px; gap:8px; cursor:pointer;" onclick="document.getElementById('btn-radio-toggle').click()">
+      <button id="btn-radio-toggle" style="background:transparent; border:none; color:#0af; font-size:14px; cursor:pointer; padding:0; line-height:1; pointer-events:none;" title="Toggle Radio">🔇</button>
+      <div id="radio-display" style="font-family:'Courier New', monospace; font-size:10px; color:#0af; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:150px; pointer-events:none;">World Radio: OFF</div>
     </div>
     <audio id="world-radio" autoplay preload="none" style="display:none;"></audio>
   </div>
@@ -5169,7 +5169,12 @@ async function fetchNextRadioStation() {
       // API returns an array of random stations. Pick the first one.
       const station = data[0];
       radioName = station.name || 'Unknown Station';
-      radioUrl = station.stream_url;
+      let bestStream = '';
+      if (station.streams && station.streams.length > 0) {
+        const httpsStream = station.streams.find(s => s.isHttps);
+        bestStream = httpsStream ? httpsStream.url : station.streams[0].url;
+      }
+      radioUrl = bestStream;
       
       radioDisplay.innerText = `♫ ${radioName}`;
       radioDisplay.title = radioName;
@@ -5197,10 +5202,18 @@ radioBtn.addEventListener('click', () => {
   if (radioActive) {
     radioBtn.innerText = '🔊';
     if (!audioElement.src || audioElement.src === window.location.href) {
+      radioDisplay.innerText = 'World Radio: CONNECTING...';
       fetchNextRadioStation();
     } else {
-      audioElement.play().catch(e => console.warn("Play error:", e));
-      radioDisplay.innerText = `♫ ${radioName || 'Loading...'}`;
+      audioElement.play().catch(e => {
+        console.warn("Play error:", e);
+        radioActive = false;
+        radioBtn.innerText = '🔇';
+        radioDisplay.innerText = 'World Radio: MUTED';
+      });
+      if (radioActive) {
+        radioDisplay.innerText = `♫ ${radioName || 'Connected'}`;
+      }
     }
   } else {
     radioBtn.innerText = '🔇';
