@@ -774,11 +774,19 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       <button class="phase-btn" id="pb-attack" style="flex:1;">ATTACK</button>
       <button class="phase-btn" id="pb-fortify" style="flex:1;">FORTIFY</button>
 
+  <div style="position:absolute; bottom:12px; left:20px; display:flex; align-items:center; z-index:15; pointer-events:auto;">
+    <div style="font-family:'Share Tech Mono', monospace; font-size:10px; font-weight:normal; letter-spacing:3px; color:#0af; text-transform:uppercase; text-shadow:0 0 5px rgba(0,170,255,0.8); pointer-events:none; margin-right: 25vw;">DEXMOND TECHNOLOGIES Ltd</div>
+    
+    <div style="display:flex; align-items:center; gap:15px; position:relative; top:-20px; left:-70px;">
+      <button id="btn-skin-toggle" style="background:transparent;border:1px solid #f24;color:#f24;font:11px 'Courier New',monospace;padding:6px 12px;cursor:pointer;border-radius:3px;letter-spacing:1px;pointer-events:auto;transition:.2s;">⏏ HOSTILE SKIN</button>
+      
+      <!-- World Radio UI -->
+      <div id="radio-container" style="display:flex; align-items:center; background:rgba(0,10,20,0.8); border:1px solid #0af; border-radius:4px; padding:4px 8px; gap:8px;">
+        <button id="btn-radio-toggle" style="background:transparent; border:none; color:#0af; font-size:14px; cursor:pointer; padding:0; line-height:1;" title="Toggle Radio">🔊</button>
+        <div id="radio-display" style="font-family:'Courier New', monospace; font-size:10px; color:#0af; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:150px;">World Radio: OFF</div>
+      </div>
     </div>
-  </div>
-  <div style="position:absolute; bottom:12px; left:20px; display:flex; align-items:center; gap:25vw; z-index:15; pointer-events:none;">
-    <div style="font-family:'Share Tech Mono', monospace; font-size:10px; font-weight:normal; letter-spacing:3px; color:#0af; text-transform:uppercase; text-shadow:0 0 5px rgba(0,170,255,0.8);">DEXMOND TECHNOLOGIES Ltd</div>
-    <button id="btn-skin-toggle" style="background:transparent;border:1px solid #f24;color:#f24;font:11px 'Courier New',monospace;padding:6px 12px;cursor:pointer;border-radius:3px;letter-spacing:1px;pointer-events:auto;transition:.2s;">⏏ HOSTILE SKIN</button>
+    <audio id="world-radio" autoplay preload="none" style="display:none;"></audio>
   </div>
 
   <div class="faction-dash" id="dash-1">
@@ -5140,6 +5148,76 @@ if (dash0 && opsSidebar) {
   opsSidebar.addEventListener('mouseenter', showOps);
   opsSidebar.addEventListener('mouseleave', hideOps);
 }
+
+// ============================================================================
+// WORLD RADIO INTEGRATION
+// ============================================================================
+let radioActive = false;
+let radioUrl = '';
+let radioName = '';
+const audioElement = document.getElementById('world-radio');
+const radioBtn = document.getElementById('btn-radio-toggle');
+const radioDisplay = document.getElementById('radio-display');
+
+async function fetchNextRadioStation() {
+  try {
+    const res = await fetch('/api/radio/random');
+    if (!res.ok) throw new Error('Failed to fetch radio');
+    const data = await res.json();
+    if (data && data.length > 0) {
+      // API returns an array of random stations. Pick the first one.
+      const station = data[0];
+      radioName = station.name || 'Unknown Station';
+      radioUrl = station.stream_url;
+      
+      radioDisplay.innerText = `♫ ${radioName}`;
+      radioDisplay.title = radioName;
+
+      audioElement.src = radioUrl;
+      if (radioActive) {
+        audioElement.play().catch(e => {
+          console.warn("Autoplay blocked:", e);
+          radioActive = false;
+          radioBtn.innerText = '🔇';
+          radioDisplay.innerText = 'World Radio: MUTED';
+        });
+      }
+    } else {
+      console.warn("No radio stations returned from API");
+    }
+  } catch (err) {
+    console.error("Radio API error:", err);
+  }
+}
+
+// Toggle radio state
+radioBtn.addEventListener('click', () => {
+  radioActive = !radioActive;
+  if (radioActive) {
+    radioBtn.innerText = '🔊';
+    if (!audioElement.src || audioElement.src === window.location.href) {
+      fetchNextRadioStation();
+    } else {
+      audioElement.play().catch(e => console.warn("Play error:", e));
+      radioDisplay.innerText = `♫ ${radioName || 'Loading...'}`;
+    }
+  } else {
+    radioBtn.innerText = '🔇';
+    audioElement.pause();
+    radioDisplay.innerText = 'World Radio: OFF';
+  }
+});
+
+// Rotate station every 60 seconds
+setInterval(() => {
+  if (radioActive) {
+    fetchNextRadioStation();
+  }
+}, 60000);
+
+// Initialize volume to a reasonable level so it doesn't overpower sfx
+audioElement.volume = 0.4;
+
 
 
 </script>
