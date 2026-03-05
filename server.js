@@ -92,6 +92,15 @@ const server = http.createServer((req, res) => {
       res.writeHead(200, { 'Content-Type': 'text/html' });
       res.end(data);
     });
+  } else if (req.url === '/dist/improve_earth.js') {
+    fs.readFile(path.join(__dirname, 'dist/improve_earth.js'), (err, data) => {
+      if (err) {
+        res.writeHead(404);
+        return res.end('Not found');
+      }
+      res.writeHead(200, { 'Content-Type': 'application/javascript' });
+      res.end(data);
+    });
   } else {
     res.writeHead(404);
     res.end('Not found');

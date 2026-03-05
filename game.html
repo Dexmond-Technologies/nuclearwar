@@ -574,12 +574,18 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 </style>
 </head>
 <body>
+<!-- maplibre css -->
+<link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+
 <div id="news-alert">
   <div class="na-stripe"></div>
   <div id="na-label">▶ INCOMING TRANSMISSION</div>
   <div id="na-text">EVENT TEXT</div>
 </div>
+<!-- Dual Map Containers -->
+<div id="deckgl-container" style="display:none; position:absolute; inset:0; z-index:5;"></div>
 <canvas id="c"></canvas>
+
 
 <!-- LOBBY -->
 <div id="lobby">
@@ -741,6 +747,9 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       <div style="opacity:0.5">> AWAITING COMBAT DATA...</div>
     </div>
   </div>
+  <button class="war-room-btn" id="btn-toggle-intel" style="bottom: 90px; background:linear-gradient(135deg, #0af, #05f); border-color:#0af; animation:none;">
+    👁 OPEN INTEL MAP
+  </button>
   <a href="https://dexmond.com/worldmonitor.html" target="_blank" class="war-room-btn" id="btn-war-room">
     ► VISIT WAR-ROOM LIVE 🎥
   </a>
@@ -4744,8 +4753,108 @@ window.initGame = function(names, idx) {
   setTimeout(() => { renderDoomsdayClock(); }, 1000);
 };
 
+// =====================================================================
+// INTEL MAP INTEGRATION
+// =====================================================================
+let intelMap = null;
+let intelMapActive = false;
+
+const INTEL_LAYERS = {
+  bases: '🏛 Military Bases',
+  nuclear: '☢ Nuclear Sites',
+  conflicts: '⚔ Conflict Zones',
+  datacenters: '🖥 AI Data Centers',
+  hotspots: '🎯 Intel Hotspots',
+  cables: '🔌 Undersea Cables',
+  protests: '📢 Protests & Unrest',
+  flightDelays: '✈ Flight Alerts',
+  weather: '⛈ Weather Alerts',
+  natural: '🌋 Natural Events',
+  cyberThreats: '🛡 Cyber Threats',
+  economic: '💰 Economic Hubs'
+};
+
+function initIntelMap() {
+  if (intelMap) return;
+  const container = document.getElementById('deckgl-container');
+  const layers = {};
+  for(const k of Object.keys(INTEL_LAYERS)) layers[k] = false;
+  
+  intelMap = new window.DeckGLMap(container, {
+    zoom: 2.5,
+    pan: {x:0, y:0},
+    view: 'global',
+    timeRange: '24h',
+    layers: layers
+  });
+}
+
+function showIntelMapDrawer() {
+  _sfxClick();
+  const body = Object.entries(INTEL_LAYERS).map(([key, label]) => {
+    return `<div class="strat-item" style="display:flex; justify-content:space-between; align-items:center;">
+      <span class="strat-item-title" style="margin:0">${label}</span>
+      <input type="checkbox" id="toggle-${key}" onchange="toggleIntelLayer('${key}', this.checked)" style="width:16px;height:16px;cursor:pointer;">
+    </div>`;
+  }).join('');
+  
+  openDrawer('intel-layers', '👁 GLOBAL INTEL FEED', `
+    <div style="font-size:10px;opacity:0.6;margin-bottom:10px;">Enable live data layers parsed from local and remote API feeds.</div>
+    ${body}
+  `);
+
+  // Sync checkboxes with current map state
+  if (intelMap) {
+    Object.keys(INTEL_LAYERS).forEach(key => {
+      const cb = document.getElementById(`toggle-${key}`);
+      if (cb) cb.checked = intelMap.state.layers[key] === true;
+    });
+  }
+}
+
+window.toggleIntelLayer = function(layerKey, isChecked) {
+  if (!intelMap) return;
+  if(intelMap.onLayerChange) {
+     intelMap.onLayerChange(layerKey, isChecked, 'user');
+  } else {
+     intelMap.state.layers[layerKey] = isChecked;
+     if(intelMap.debouncedRebuildLayers) intelMap.debouncedRebuildLayers();
+  }
+};
+
+document.getElementById('btn-toggle-intel').addEventListener('click', () => {
+  SFX.playClick();
+  intelMapActive = !intelMapActive;
+  const canvas = document.getElementById('c');
+  const container = document.getElementById('deckgl-container');
+  const btn = document.getElementById('btn-toggle-intel');
+  
+  if (intelMapActive) {
+    if(!window.DeckGLMap) {
+       console.error("DeckGLMap module not loaded yet.");
+       setLog("⚠ Intel Map module still loading...");
+       return;
+    }
+    initIntelMap();
+    canvas.style.display = 'none';
+    container.style.display = 'block';
+    btn.innerHTML = '🌍 RETURN TO WAR MAP';
+    btn.style.background = 'linear-gradient(135deg, #f24, #600)';
+    btn.style.borderColor = '#f24';
+    showIntelMapDrawer();
+  } else {
+    canvas.style.display = 'block';
+    container.style.display = 'none';
+    btn.innerHTML = '👁 OPEN INTEL MAP';
+    btn.style.background = 'linear-gradient(135deg, #0af, #05f)';
+    btn.style.borderColor = '#0af';
+    closeAllModals();
+  }
+});
 
 
 </script>
+<script type="module" src="/dist/improve_earth.js"></script>
 </body>
 </html>
+

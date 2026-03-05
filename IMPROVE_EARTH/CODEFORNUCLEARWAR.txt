@@ -1,0 +1,115 @@
+# Map Toggles Integration Guide (Nuclear War Project)
+
+I've copied all the required rendering tools, icons, map APIs, and backend data services for the `DeckGL` globe straight into `/home/dexmond/Documents/Dexmond_Technologies/World_Monitor/TOMOVE/`.
+
+To get this map system working in your other project and integrate it with your bottom user-toggles, follow these steps.
+
+---
+
+## 🏗️ 1. Project Setup
+To show these layers properly on your globe:
+
+### Install Map Packages
+```bash
+npm install deck.gl @deck.gl/core @deck.gl/layers @deck.gl/geo-layers @deck.gl/mapbox @deck.gl/aggregation-layers maplibre-gl supercluster
+```
+
+### Move the Copied Files
+Drag the entire `components/`, `config/`, `services/`, `types/`, and `utils/` folders from `TOMOVE/` into your project's `src` directory.
+
+---
+
+## 🗺️ 2. Integrate with User Toggles (UI)
+
+In  UI, yimplememnt all toggles at the bottom of the screen under the globe. You need to connect those switches directly to the `DeckGLMap` state so the layers appear when checked.
+
+### A. Initialize the Map with Toggles Connected
+When creating the main map on your page, you can define which layers are active right away:
+
+```typescript
+import { DeckGLMap } from './components/DeckGLMap';
+
+// 1. Grab your HTML container for the map
+const mapContainer = document.getElementById('map-container');
+
+// 2. Initialize the DeckGL map with initial toggle states (e.g. all off)
+const globeMap = new DeckGLMap(mapContainer, {
+  zoom: 3,                 // Global view zoom
+  view: 'global',
+  timeRange: '24h',        // Fetch data from the last 24h
+  layers: {
+    // These correspond to the data modules in TOMOVE/
+    hotspots: false,         // Intel Hotspots 🎯
+    conflicts: false,        // Conflict Zones ⚔
+    bases: false,            // Military Bases 🏛
+    nuclear: false,          // Nuclear Sites ☢
+    irradiators: false,      // Gamma Irradiators ⚠
+    spaceports: false,       // Spaceports 🚀
+    cables: false,           // Undersea Cables 🔌
+    pipelines: false,        // Pipelines 🛢
+    datacenters: false,      // AI Data Centers 🖥
+    militaryActivity: false, // Military Activity ✈
+    shipTraffic: false,      // Ship Traffic 🚢
+    tradeRoutes: false,      // Trade Routes ⚓
+    flightDelays: false,     // Flight Delays ✈
+    protests: false,         // Protests 📢
+    ucdp: false,             // UCDP Events ⚔
+    displacement: false,     // Displacement Flows 👥
+    climate: false,          // Climate Anomalies 🌫
+    weather: false,          // Weather Alerts ⛈
+    outages: false,          // Internet Outages 📡
+    cyberThreats: false,     // Cyber Threats 🛡
+    natural: false,          // Natural Events / Earthquakes 🌋
+    fires: false,            // Fires 🔥
+    waterways: false,        // Strategic Waterways ⚓
+    economic: false,         // Economic Centers & Critical Minerals 💰💎
+  }
+});
+```
+
+### B. Add Click Listeners to Your UI Toggles
+
+Let's assume your UI toggles at the bottom of the screen look like this:
+```html
+<div class="toggles-container">
+  <label><input type="checkbox" id="toggle-nuclear"> ☢ Nuclear Sites</label>
+  <label><input type="checkbox" id="toggle-bases"> 🏛 Military Bases</label>
+  <label><input type="checkbox" id="toggle-conflicts"> ⚔ Conflict Zones</label>
+</div>
+```
+
+You can hook them up directly using `globeMap.onLayerChange()`:
+
+```typescript
+// 1. Helper function to wire up any toggle
+function setupToggle(toggleId: string, layerKey: keyof typeof globeMap.state.layers) {
+  const toggle = document.getElementById(toggleId) as HTMLInputElement;
+  if (!toggle) return;
+
+  // Listen for the user clicking the switch
+  toggle.addEventListener('change', (e) => {
+    const isChecked = (e.target as HTMLInputElement).checked;
+
+    // This immediately redraws the DeckGL globe with the new layer state
+    globeMap.onLayerChange?.(layerKey, isChecked, 'user');
+  });
+}
+
+// 2. Connect your HTML switches to the mapping engine layers
+setupToggle('toggle-nuclear', 'nuclear');
+setupToggle('toggle-bases', 'bases');
+setupToggle('toggle-conflicts', 'conflicts');
+// ... bind the rest of your UI toggles
+```
+
+---
+
+## 🛠️ 3. How It Works Under the Hood
+If you look inside `TOMOVE/components/DeckGLMap.ts`, the `buildLayers()` function is automatically called every time `onLayerChange` updates the state. 
+
+It checks `this.state.layers.nuclear`, sees it's true, and automatically pushes an `IconLayer` utilizing `MARKER_ICONS.hexagon` to draw the markers.
+
+### Data Auto-Sync
+If you turn on a dynamic layer (like `cyberThreats` or `weather`), the corresponding service file in `TOMOVE/services/` will auto-fetch the JSON/XML data from those respective real-world APIs and immediately render the map.
+
+*Note: For dynamic data services, ensure your new server/project has proxy routes configured if necessary (like Render/Express), though `DeckGLMap.ts` handles the frontend rendering perfectly.*
