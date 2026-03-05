@@ -840,6 +840,17 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 .ops-btn:hover .ops-tip { opacity: 1; }
 </style>
 
+<style>
+#left-toolbar-group {
+  /* Container to group the ops sidebar, terminal button, and chat button */
+  pointer-events: none; /* Let clicks pass through the container itself */
+}
+#left-toolbar-group > * {
+  pointer-events: auto; /* Re-enable clicks for the actual buttons inside */
+}
+</style>
+
+<div id="left-toolbar-group">
 <div id="ops-sidebar">
   <button class="ops-btn" onclick="showDiplomacyModal()" id="ops-btn-diplomacy">
     <i class="fa-solid fa-handshake"></i>
@@ -872,6 +883,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 
 <!-- Chat -->
 <button id="btn-chat-toggle" style="display:none">💬</button>
+</div>
 <div id="chat-box">
   <div id="chat-msgs"></div>
   <div class="chat-input-row" style="display:flex;border-top:1px solid rgba(0,180,255,.1)">
