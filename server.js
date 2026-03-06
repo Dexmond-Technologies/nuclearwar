@@ -777,12 +777,12 @@ async function checkD3XRewards() {
           if (res.rows.length > 0) {
              const lastClaim = res.rows[0].last_d3x_claim;
              
-             // If null or Date difference is > 24h (86400000 ms)
+             // If null or Date difference is > 12h (43200000 ms)
              let canClaim = false;
              if (!lastClaim) canClaim = true;
              else {
                 const msSinceClaim = now - new Date(lastClaim).getTime();
-                if (msSinceClaim >= 86400000) canClaim = true;
+                if (msSinceClaim >= 43200000) canClaim = true;
              }
 
              if (canClaim) {
