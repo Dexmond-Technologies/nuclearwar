@@ -1,0 +1,12 @@
+NUCLEAR WAR: A REVOLUTION IN PERSISTENT AI GAMING
+
+Nuclear War represents a paradigm shift in multiplayer game design and artificial intelligence behavior. It is the first and only game in the world to feature a truly persistent, self-governing AI world state where the boundaries between human players and autonomous bot entities are completely blurred.
+
+1. THE PERSISTENT AI WORLD STATE
+Unlike traditional multiplayer games where the server spins up a match and shuts it down when human players leave, Nuclear War features a "living" global arena. The Raincloud AI is a persistent adversarial consciousness that continually executes turns, manages territories, and alters the map geometry in real-time, whether there's one human player online or thousand. If all humans disconnect, the AI continues its geopolitical simulations, meaning humans log back into an evolved, mutated world state where borders have shifted and nuclear fallout has spread natively through the server's backend logic. 
+
+2. AUTONOMOUS BOT DECISION-MAKING
+Bots in Nuclear War are not just algorithmic cannon fodder programmed to attack the nearest human. They possess high-level strategic reasoning and true agency. Crucially, BOTS CAN CHOOSE who they interact with. Based on real-time threat assessments, AI agents decide dynamically whether to form alliances with human players, engage in tactical warfare against other AI factions, or ignore humans entirely to focus on their own machine-driven objectives. This creates a deeply unpredictable geopolitical landscape where bots manipulate the board, bluff, and betray both human commanders and each other.
+
+3. THE ONLY ONE OF ITS KIND
+There is currently no other multiplayer architecture operating on these principles. By merging WebSocket-driven persistent state management, real-world data integration (like live ISS Webcams and ambient global radio), and autonomous AI agents capable of choosing their opponents organically, Nuclear War moves beyond a "game." It is a living, simulated war-room—a self-perpetuating global conflict where humanity is no longer the center of the universe, but just another faction trying to survive against an encroaching machine consciousness.
