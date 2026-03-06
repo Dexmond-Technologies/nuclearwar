@@ -196,7 +196,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 #go-title{font-size:44px;letter-spacing:6px;text-shadow:0 0 30px currentColor;margin-bottom:16px;}
 
 /* Attack Presets Modal */
-#attack-modal, #nuke-modal, #leaderboard-modal {
+#attack-modal, #nuke-modal, #leaderboard-modal, #naval-modal {
   position: absolute;
   top: 0; left: 0; width: 100vw; height: 100vh;
   background: rgba(0,0,0,0.4);
@@ -204,7 +204,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   z-index: 100;
   pointer-events: auto;
 }
-#attack-modal.show, #nuke-modal.show, #leaderboard-modal.show { 
+#attack-modal.show, #nuke-modal.show, #leaderboard-modal.show, #naval-modal.show { 
   display: flex !important; 
   animation: fadeInModal 0.3s ease-out;
 }
@@ -1007,7 +1007,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 <style>
 #btn-toggle-skin {
   position: absolute;
-  bottom: 125px;
+  bottom: 122px;
   right: calc(25px + 25vw + 10px);
   left: auto;
   width: 90px;
@@ -1572,6 +1572,38 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     <div id="leaderboard-content" style="max-height:60vh; overflow-y:auto; padding-right:5px; text-align:left;">
       <div style="opacity:0.6; text-align:center;">FETCHING DATABASE UPLINK...</div>
     </div>
+  </div>
+</div>
+
+<div id="naval-modal">
+  <div style="background:rgba(0,10,20,0.95); border:1px solid rgba(0,255,136,0.5); padding:25px; width:500px; max-width:90%; color:#0f8; font-family:'Share Tech Mono', monospace; box-shadow:0 0 30px rgba(0,255,136,0.15); position:relative;">
+    <button onclick="document.getElementById('naval-modal').classList.remove('show')" style="position:absolute; top:10px; right:12px; background:none; border:none; color:#f55; cursor:pointer; font-size:16px;">✕</button>
+    <div style="text-align:center; font-size:22px; font-weight:bold; letter-spacing:4px; margin-bottom:20px; border-bottom:1px solid rgba(0,255,136,0.3); padding-bottom:8px; text-shadow:0 0 10px #0f8;">
+      NAVAL ENGAGEMENT
+    </div>
+    
+    <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+      <div style="text-align:center; flex:1; border-right:1px solid rgba(0,255,136,0.2);">
+        <div style="font-size:10px; color:#0af; letter-spacing:2px; margin-bottom:5px;">HUMAN FLEET</div>
+        <div style="font-size:24px; font-weight:bold; color:#0af;" id="naval-hp-human">100</div>
+        <div style="width:80%; height:4px; background:rgba(0,170,255,0.2); margin:8px auto; border-radius:2px; overflow:hidden;">
+          <div id="naval-bar-human" style="height:100%; width:100%; background:#0af; transition:0.3s;"></div>
+        </div>
+      </div>
+      <div style="text-align:center; flex:1;">
+        <div style="font-size:10px; color:#f55; letter-spacing:2px; margin-bottom:5px;">RAINCLOUD AI</div>
+        <div style="font-size:24px; font-weight:bold; color:#f55;" id="naval-hp-ai">100</div>
+        <div style="width:80%; height:4px; background:rgba(255,85,85,0.2); margin:8px auto; border-radius:2px; overflow:hidden;">
+          <div id="naval-bar-ai" style="height:100%; width:100%; background:#f55; transition:0.3s;"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="naval-log" style="height:120px; overflow-y:auto; background:rgba(0,255,136,0.05); border:1px solid rgba(0,255,136,0.2); padding:10px; font-size:11px; margin-bottom:15px; display:flex; flex-direction:column; gap:4px;">
+      <div style="opacity:0.7;">Sonar contact acquired. Engaging enemy frigate.</div>
+    </div>
+    
+    <button id="btn-fire-torpedo" onclick="fireNavalTorpedo()" style="width:100%; padding:15px; background:linear-gradient(135deg,rgba(0,170,255,0.2),rgba(0,170,255,0.4)); border:1px solid #0af; color:#0af; font-family:'Share Tech Mono', monospace; font-size:16px; font-weight:bold; letter-spacing:3px; cursor:pointer; transition:0.2s;">FIRE TORPEDO</button>
   </div>
 </div>
 
@@ -3151,6 +3183,18 @@ function handleGlobeClick(e) {
       }
     }
   }
+  
+  // Intercept clicks on Boat Markers for Naval War Mini-Game
+  if (window.isRedSkin && boatsActive && boatMarkers && boatMarkers.length > 0) {
+    const boatHits = ray.intersectObjects(boatMarkers, false);
+    if (boatHits.length > 0) {
+      if (typeof window.openNavalWar === 'function') {
+        window.openNavalWar(boatHits[0].object);
+      }
+      return; // Intercept and stop further map propagation
+    }
+  }
+
   // Prioritize clicking exactly on a Troop Box
   let iso = null;
   const spriteHits = ray.intersectObjects(Object.values(troopSprites), false);
@@ -6437,22 +6481,7 @@ function initIntelMap() {
       loadingDiv.style.alignItems = 'flex-start';
     }
     console.error("Error initializing DeckGLMap:", e);
-    setLog("⚠ Error loading Intel Map. Check console for details.");
-  }
-
-  // --- Start polling proxy server for flights ---
-  function fetchLiveFlights() {
-    if (!intelMap || !intelMap.state.layers.liveFlights) return;
-    fetch('/api/flights').then(r => r.json()).then(data => {
-      if (data && data.states && intelMap.setCivilianFlights) {
-        intelMap.setCivilianFlights(data.states);
-      }
-    }).catch(e => console.error("Error fetching live flights:", e));
-  }
-  
-  // Fetch immediately and then loop
-  fetchLiveFlights();
-  setInterval(fetchLiveFlights, 30000);
+  // Flights API removed by request
 }
 
 function showIntelMapDrawer() {
@@ -6570,6 +6599,77 @@ function fetchAndRenderBoats() {
       });
   }).catch(e => console.error("Error fetching boats:", e));
 }
+
+// ================= NAVAL WAR MINI-GAME =================
+
+window.navalWarState = { active: false, humanHp: 100, aiHp: 100, boatMesh: null };
+
+window.openNavalWar = function(mesh) {
+  if (!window.isRedSkin || !boatsActive) return;
+  SFX.playClick();
+  window.navalWarState = { active: true, humanHp: 100, aiHp: 100, boatMesh: mesh };
+  
+  document.getElementById('naval-hp-human').textContent = '100';
+  document.getElementById('naval-bar-human').style.width = '100%';
+  document.getElementById('naval-hp-ai').textContent = '100';
+  document.getElementById('naval-bar-ai').style.width = '100%';
+  
+  const log = document.getElementById('naval-log');
+  log.innerHTML = '<div style="opacity:0.7;">Sonar contact acquired. Engaging enemy frigate.</div>';
+  
+  document.getElementById('btn-fire-torpedo').style.display = 'block';
+  document.getElementById('naval-modal').classList.add('show');
+};
+
+window.fireNavalTorpedo = function() {
+  if (!window.navalWarState.active) return;
+  SFX.playSiren(); // Torpedo launch sound
+  
+  // RNG Combat
+  const humanDmg = Math.floor(10 + Math.random() * 25);
+  const aiDmg = Math.floor(5 + Math.random() * 30);
+  
+  window.navalWarState.humanHp = Math.max(0, window.navalWarState.humanHp - aiDmg);
+  window.navalWarState.aiHp = Math.max(0, window.navalWarState.aiHp - humanDmg);
+  
+  // Update UI
+  document.getElementById('naval-hp-human').textContent = window.navalWarState.humanHp;
+  document.getElementById('naval-bar-human').style.width = window.navalWarState.humanHp + '%';
+  document.getElementById('naval-hp-ai').textContent = window.navalWarState.aiHp;
+  document.getElementById('naval-bar-ai').style.width = window.navalWarState.aiHp + '%';
+  
+  const log = document.getElementById('naval-log');
+  log.innerHTML += `<div><span style="color:#0af">HUMAN hits for ${humanDmg} DMG!</span> | <span style="color:#f55">RAINCLOUD hits for ${aiDmg} DMG!</span></div>`;
+  log.scrollTop = log.scrollHeight;
+  
+  // Check Win/Loss Condition
+  if (window.navalWarState.humanHp <= 0 || window.navalWarState.aiHp <= 0) {
+    window.navalWarState.active = false;
+    document.getElementById('btn-fire-torpedo').style.display = 'none';
+    
+    if (window.navalWarState.humanHp > window.navalWarState.aiHp) {
+      log.innerHTML += `<div style="color:#0f8; font-weight:bold; font-size:14px; margin-top:10px;">TACTICAL VICTORY! Raincloud frigate sunk. +50,000 Troops recovered!</div>`;
+      // Grant Reward
+      if (GS.players[GS.myIndex]) {
+        GS.reinforceLeft += 5; // 5 x 10k troops
+        updateDashboard();
+        setLog("🎁 Naval Victory! +50,000 reserve troops added.");
+      }
+      
+      // Remove boat from map
+      if (window.navalWarState.boatMesh) {
+         scene.remove(window.navalWarState.boatMesh);
+         boatMarkers = boatMarkers.filter(b => b !== window.navalWarState.boatMesh);
+      }
+    } else if (window.navalWarState.aiHp > window.navalWarState.humanHp) {
+      log.innerHTML += `<div style="color:#f55; font-weight:bold; font-size:14px; margin-top:10px;">DEFEAT! Human fleet destroyed.</div>`;
+      setLog("💥 Naval Defeat! Fleet lost to Raincloud.");
+    } else {
+      log.innerHTML += `<div style="color:#fa0; font-weight:bold; font-size:14px; margin-top:10px;">DRAW! Mutual destruction.</div>`;
+    }
+    log.scrollTop = log.scrollHeight;
+  }
+};
 
 document.getElementById('btn-toggle-intel').addEventListener('click', () => {
   SFX.playClick();

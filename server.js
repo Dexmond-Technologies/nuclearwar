@@ -214,13 +214,6 @@ const server = http.createServer((req, res) => {
       res.writeHead(200, { 'Content-Type': 'application/javascript' });
       res.end(data);
     });
-  } else if (req.url === '/api/flights') {
-    // Serve the cached OpenSky JSON
-    res.writeHead(200, {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
-    });
-    res.end(cachedFlights);
   } else if (req.url === '/api/boats') {
     res.writeHead(200, {
       'Content-Type': 'application/json',
