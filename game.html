@@ -4578,6 +4578,9 @@ function initWS() {
           const dmgEl = document.getElementById('us-damage');
           if (atkEl) atkEl.textContent = (msg.stats.attacks || 0).toLocaleString();
           if (dmgEl) dmgEl.textContent = formatTroops(msg.stats.damage || 0) + ' MILS';
+        } else {
+          // Fallback fetch if stats were omitted in standard payload
+          ws.send(JSON.stringify({ type: 'get_commander_stats', callsign: msg.name }));
         }
         break;
       case 'd3x_reward':
@@ -4637,7 +4640,7 @@ function initWS() {
         const atkEl = document.getElementById('us-attacks');
         const dmgEl = document.getElementById('us-damage');
         if (atkEl && msg.stats) atkEl.textContent = (msg.stats.attacks || 0).toLocaleString();
-        if (dmgEl && msg.stats) dmgEl.textContent = formatTroops(msg.stats.damage || 0) + ' MILS';
+        if (dmgEl && msg.stats) dmgEl.textContent = (msg.stats.damage || 0).toLocaleString() + ' MILS';
         break;
       }
       case 'error':
