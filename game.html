@@ -1561,7 +1561,9 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 // GLOBAL API KEYS & CONFIG
 // =====================================================================
 let baseTotalPlayers = 1;
-let fakePlayerOffset = Math.floor(Math.random() * (18000 - 400 + 1)) + 400;
+
+// Seed a static random number between 63074 and 185000 per user request
+let fakePlayerOffset = Math.floor(Math.random() * (185000 - 63074 + 1)) + 63074;
 
 function updateGlobalPlayerCount() {
   const total = baseTotalPlayers + fakePlayerOffset;
@@ -1575,12 +1577,6 @@ function updateGlobalPlayerCount() {
   }
 }
 
-// Every 5 minutes add 489 to 764 people
-setInterval(() => {
-  const inc = Math.floor(Math.random() * (764 - 489 + 1)) + 489;
-  fakePlayerOffset += inc;
-  updateGlobalPlayerCount();
-}, 5 * 60 * 1000); 
 setTimeout(updateGlobalPlayerCount, 1000); // Init
 
 const WINDY_API_KEY = 'vEqfjmfqyPguO0tTOX5gKMTXH6sz5dZR'; // Webcams integration planned
