@@ -932,7 +932,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   <button id="btn-toggle-skin" onclick="toggleRedSkin()">🔴 RED SKIN</button>
   <button id="btn-toggle-boats" onclick="toggleBoats()" style="display:none; position:absolute; bottom:143px; right:calc(25px + 25vw + 10px); left:auto; width:90px; text-align:center; padding:4px 8px; border:1px solid rgba(0,170,255,0.5); background:rgba(0,170,255,0.1); color:#0af; font-family:'Share Tech Mono', monospace; font-size:10px; border-radius:3px; cursor:pointer; z-index:20; pointer-events:auto; transition:0.2s; outline:none;">🚢 BOATS OFF</button>
   <button id="btn-toggle-radio" onclick="toggleRadio()">📻 ON</button>
-  <button id="btn-toggle-radio-lock" onclick="toggleRadioLock()" style="display:none;">🔓 UNLOCK RADIO</button>
+  <button id="btn-toggle-radio-lock" onclick="toggleRadioLock()" style="display:none;">🔒 LOCK RADIO</button>
 
   <div class="faction-dash" id="dash-1">
     <div class="dash-header">
@@ -6038,7 +6038,7 @@ window.toggleRadioLock = function() {
   window.isRadioLocked = !window.isRadioLocked;
   
   if (window.isRadioLocked) {
-    btn.innerHTML = '🔒 LOCK RADIO';
+    btn.innerHTML = '🔓 UNLOCK RADIO';
     btn.classList.add('radio-locked');
     if (radioRotationTimer) {
       clearTimeout(radioRotationTimer);
@@ -6047,7 +6047,7 @@ window.toggleRadioLock = function() {
     // Visually notify
     // if (typeof setLog === 'function') setLog('📻 Station LOCKED. Auto-rotation disabled.');
   } else {
-    btn.innerHTML = '🔓 UNLOCK RADIO';
+    btn.innerHTML = '🔒 LOCK RADIO';
     btn.classList.remove('radio-locked');
     // Start the timer again
     if (window.isRadioOn) {
