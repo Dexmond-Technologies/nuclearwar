@@ -1849,7 +1849,8 @@ if (window.location.protocol !== 'file:') {
 
 const PLAYER_COLORS = [
   { hex:'#00dcff', int:0x00dcff, name:'HUMANITY' },
-  { hex:'#ff3232', int:0xff3232, name:'RAINCLOUD AI' }
+  { hex:'#ff3232', int:0xff3232, name:'RAINCLOUD AI' },
+  { hex:'#39ff14', int:0x39ff14, name:'ILLUMINATI' }
 ];
 const NEUTRAL = { hex:'#445566', int:0x445566, name:'NEUTRAL' };
 
@@ -2338,6 +2339,17 @@ function initGame(playerNames, myIndex) {
     };
   });
 
+  // Pick exactly 15 neutral countries and make them Illuminati (owner = 2)
+  const neutralCountries = Object.keys(GS.countries).filter(iso => GS.countries[iso].owner === -1);
+  for (let i = neutralCountries.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [neutralCountries[i], neutralCountries[j]] = [neutralCountries[j], neutralCountries[i]];
+  }
+  const illuminatiCount = Math.min(15, neutralCountries.length);
+  for (let i = 0; i < illuminatiCount; i++) {
+    GS.countries[neutralCountries[i]].owner = 2;
+  }
+
   // Count troops for reinforcement baseline
   GS.players.forEach((_,pi) => {
     GS.players[pi].troops = Object.values(GS.countries).filter(c=>c.owner===pi).length;
@@ -2675,48 +2687,7 @@ function updateTroopSprite(iso) {
 
 const fakeStaticSprites = [];
 window.buildFakeStaticMarkers = function() {
-  if (fakeStaticSprites.length > 0) return; // Generate only once
-  for (let i = 0; i < 100; i++) {
-    // Generate random values roughly analogous to 20K, 50K
-    const val = Math.floor(Math.random() * 80 + 10);
-    const txt = val + 'K';
-    let colHex = Math.random() > 0.5 ? '#00ffff' : '#ff2222';
-    if (i < 5) colHex = '#39ff14'; // 5 exactly are NEON green
-    
-    const tex = troopTexture(txt, colHex);
-    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: true });
-    const sprite = new THREE.Sprite(mat);
-    
-    let lat, lon;
-    
-    if (i < 80) {
-      // 80% on land: pick a random country from countryData
-      const isos = Object.keys(countryData);
-      const randomIso = isos[Math.floor(Math.random() * isos.length)];
-      const cd = countryData[randomIso];
-      
-      // If country data exists, use its coordinates with a small random jitter (+/- 2 degrees)
-      if (cd && cd.lat !== undefined && cd.lon !== undefined) {
-        lat = cd.lat + (Math.random() * 4 - 2);
-        lon = cd.lon + (Math.random() * 4 - 2);
-      } else {
-        // Fallback to random if no data
-        lat = (Math.asin(Math.random() * 2 - 1) * 180 / Math.PI) * 0.85; 
-        lon = Math.random() * 360 - 180;
-      }
-    } else {
-      // 20% random across the entire globe surface
-      lat = (Math.asin(Math.random() * 2 - 1) * 180 / Math.PI) * 0.85; 
-      lon = Math.random() * 360 - 180;
-    }
-    
-    sprite.position.copy(ll2v(lat, lon, GLOBE_R + 0.04));
-    // Size it similarly to real markers
-    sprite.scale.set(0.12, 0.06, 1);
-    
-    scene.add(sprite);
-    fakeStaticSprites.push(sprite);
-  }
+  return; // DISABLED: We want boxes to strictly match actual faction ownership
 };
 
 // =====================================================================
@@ -3183,7 +3154,7 @@ canvas.addEventListener('mousemove', e => {
     const iso = hits[0].object.userData.iso;
     const c = GS.countries[iso]; const cd=countryData[iso];
     if(c && cd) {
-      const owner = c.owner===-1?'NEUTRAL':GS.players[c.owner]?.name||'?';
+      const owner = c.owner===-1?'NEUTRAL':PLAYER_COLORS[c.owner]?.name||'?';
       tip.classList.add('show');
       tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY-10)+'px';
       tip.innerHTML=`<b>${cd.name}</b><br>${owner} · ${(c.troops * 10000).toLocaleString()} troops${c.nuked?'<br>☢ FALLOUT':''}`
@@ -3209,7 +3180,7 @@ function selectCountry(iso) {
   const isEnemy = c.owner !== GS.myIndex && c.owner !== -1;
 
   document.getElementById('sp-info').innerHTML =
-    `Owner: ${c.owner===-1?'NEUTRAL':GS.players[c.owner]?.name}<br>Troops: ${(c.troops * 10000).toLocaleString()}${ c.nuked ? '<br><span style="color:#fa0">☢ FALLOUT '+c.nuked+' turns</span>':'' }`;
+    `Owner: ${c.owner===-1?'NEUTRAL':PLAYER_COLORS[c.owner]?.name}<br>Troops: ${(c.troops * 10000).toLocaleString()}${ c.nuked ? '<br><span style="color:#fa0">☢ FALLOUT '+c.nuked+' turns</span>':'' }`;
 
   // Enable/disable actions based on phase
   const phase = GS.phase;
@@ -3258,6 +3229,7 @@ function tryAttack(targetIso) {
   const def = GS.countries[targetIso];
   if (atk.owner !== GS.myIndex) { attackingFrom=null; return; }
   if (def.owner === GS.myIndex) { attackingFrom=null; return; }
+  if (def.owner === -1) { setLog('⚠ Cannot attack NEUTRAL regions'); attackingFrom=null; return; }
   if (atk.troops < 2) { setLog('⚠ Need at least 2 troops to attack!'); attackingFrom=null; return; }
 
   const atkDice = Math.min(3, atk.troops-1) + (def.cas ? 1 : 0);
