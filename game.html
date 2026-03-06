@@ -3095,13 +3095,21 @@ function handleGlobeClick(e) {
       }
     }
   }
+  // Prioritize clicking exactly on a Troop Box
+  let iso = null;
+  const spriteHits = ray.intersectObjects(Object.values(troopSprites), false);
+  if (spriteHits.length > 0) {
+    iso = spriteHits[0].object.userData.iso;
+  } else {
+    // Fallback to globe landmass raycast
+    const hits = ray.intersectObject(globeMesh, false);
+    if (!hits.length) return;
+    const pt = hits[0].point.normalize();
+    const lat = Math.asin(pt.y)/RAD; 
+    const lon = Math.atan2(pt.z,pt.x)/RAD; 
+    iso = getCountryAt(lat, lon);
+  }
 
-  const hits = ray.intersectObject(globeMesh, false);
-  if (!hits.length) return;
-  const pt = hits[0].point.normalize();
-  const lat = Math.asin(pt.y)/RAD; // Reverse 3D spherical translation mapping
-  const lon = Math.atan2(pt.z,pt.x)/RAD; // Fixed: removed negative sign
-  const iso = getCountryAt(lat, lon);
   if (!iso || !GS.countries[iso]) return;
 
   // If it's not our turn, we can still click to explore the globe and see territory stats, 
