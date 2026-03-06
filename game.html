@@ -2317,9 +2317,10 @@ function initGame(playerNames, myIndex) {
       owner = Math.random() > 0.5 ? 0 : 1;
     }
 
-    if (iso.startsWith('USA_V') || iso.startsWith('CHN_V')) {
-      const num = parseInt(iso.split('_V')[1]);
-      owner = num <= 5 ? 0 : 1;
+    if (iso.startsWith('USA_V')) {
+      owner = 0;
+    } else if (iso.startsWith('CHN_V')) {
+      owner = 1;
     }
     const stats = getCountryStat(iso);
     
