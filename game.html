@@ -196,7 +196,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 #go-title{font-size:44px;letter-spacing:6px;text-shadow:0 0 30px currentColor;margin-bottom:16px;}
 
 /* Attack Presets Modal */
-#attack-modal, #nuke-modal, #leaderboard-modal, #naval-modal {
+#attack-modal, #nuke-modal, #leaderboard-modal, #naval-modal, #shooter-modal {
   position: absolute;
   top: 0; left: 0; width: 100vw; height: 100vh;
   background: rgba(0,0,0,0.4);
@@ -204,7 +204,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   z-index: 100;
   pointer-events: auto;
 }
-#attack-modal.show, #nuke-modal.show, #leaderboard-modal.show, #naval-modal.show { 
+#attack-modal.show, #nuke-modal.show, #leaderboard-modal.show, #naval-modal.show, #shooter-modal.show { 
   display: flex !important; 
   animation: fadeInModal 0.3s ease-out;
 }
@@ -3190,6 +3190,17 @@ function handleGlobeClick(e) {
     if (boatHits.length > 0) {
       if (typeof window.openNavalWar === 'function') {
         window.openNavalWar(boatHits[0].object);
+      }
+      return; // Intercept and stop further map propagation
+    }
+  }
+  
+  // Intercept clicks on Airplane Markers for Shooter Mini-Game
+  if (window.isRedSkin && boatsActive && window.planeMarkers && window.planeMarkers.length > 0) {
+    const planeHits = ray.intersectObjects(window.planeMarkers, false);
+    if (planeHits.length > 0) {
+      if (typeof window.openShooterGame === 'function') {
+        window.openShooterGame(planeHits[0].object);
       }
       return; // Intercept and stop further map propagation
     }
@@ -6534,6 +6545,7 @@ window.toggleBoats = function() {
     btn.style.color = '#0f8';
     btn.style.background = 'rgba(0,255,136,0.1)';
     fetchAndRenderBoats();
+    if (typeof window.spawnRedPlanes === 'function') window.spawnRedPlanes();
     boatInterval = setInterval(fetchAndRenderBoats, 10000);
   } else {
     btn.innerHTML = '🚢 BOATS OFF';
@@ -6543,6 +6555,15 @@ window.toggleBoats = function() {
     clearInterval(boatInterval);
     boatInterval = null;
     clearBoatMarkers();
+    
+    // Clear planes
+    if (window.planeMarkers) {
+      window.planeMarkers.forEach(p => {
+        if (p.parent) p.parent.children.forEach(c => { if(c.material) c.material.dispose(); if(c.geometry) c.geometry.dispose(); });
+        if (p.parent) scene.remove(p.parent);
+      });
+      window.planeMarkers = [];
+    }
   }
 };
 
@@ -6668,6 +6689,142 @@ window.fireNavalTorpedo = function() {
       log.innerHTML += `<div style="color:#fa0; font-weight:bold; font-size:14px; margin-top:10px;">DRAW! Mutual destruction.</div>`;
     }
     log.scrollTop = log.scrollHeight;
+  }
+};
+
+// ================= AIRPLANE SHOOTER MINI-GAME =================
+
+window.planeMarkers = [];
+window.shooterState = { active: false, ammo: 3, aiHp: 100, planeMesh: null };
+
+window.spawnRedPlanes = function() {
+  if (typeof scene === 'undefined' || typeof THREE === 'undefined') return;
+  
+  // Clear old planes
+  window.planeMarkers.forEach(p => {
+      if (p.children) p.children.forEach(c => { if(c.material) c.material.dispose(); if(c.geometry) c.geometry.dispose(); });
+      scene.remove(p);
+  });
+  window.planeMarkers = [];
+  
+  if (!window.isRedSkin || !boatsActive) return;
+  
+  const R = typeof GLOBE_R !== 'undefined' ? GLOBE_R + 0.045 : 1.045; // Fly slightly higher than boats
+  const planeMat = new THREE.MeshBasicMaterial({ color: 0xffffff, depthTest: true });
+  
+  // Build a generic airplane group (half the size of the boat markers)
+  for (let i = 0; i < 30; i++) {
+    const planeGroup = new THREE.Group();
+    
+    // Fuselage
+    const bodyGeo = new THREE.CylinderGeometry(0.005, 0.005, 0.06, 8);
+    bodyGeo.rotateX(Math.PI / 2);
+    const body = new THREE.Mesh(bodyGeo, planeMat);
+    
+    // Wings
+    const wingGeo = new THREE.BoxGeometry(0.08, 0.002, 0.015);
+    const wings = new THREE.Mesh(wingGeo, planeMat);
+    wings.position.set(0, 0, 0.01);
+    
+    // Tail
+    const tailGeo = new THREE.BoxGeometry(0.025, 0.002, 0.01);
+    const tail = new THREE.Mesh(tailGeo, planeMat);
+    tail.position.set(0, 0, -0.025);
+    
+    planeGroup.add(body);
+    planeGroup.add(wings);
+    planeGroup.add(tail);
+    
+    // Random position
+    const lat = (Math.random() - 0.5) * 160;
+    const lon = (Math.random() - 0.5) * 360;
+    const pos = ll2v(lat, lon, R);
+    planeGroup.position.copy(pos);
+    planeGroup.lookAt(new THREE.Vector3(0,0,0));
+    
+    // Random heading
+    planeGroup.rotateZ(Math.random() * Math.PI * 2);
+    
+    // Set user data for raycaster
+    planeGroup.userData = { isPlane: true };
+    
+    // Fix raycast targeting on groups by adding invisible hit box
+    const hitBoxGeo = new THREE.BoxGeometry(0.1, 0.05, 0.1);
+    const hitBoxMat = new THREE.MeshBasicMaterial({visible: false});
+    const hitBox = new THREE.Mesh(hitBoxGeo, hitBoxMat);
+    planeGroup.add(hitBox);
+
+    scene.add(planeGroup);
+    window.planeMarkers.push(hitBox); // Raycast against the hitbox
+  }
+};
+
+window.openShooterGame = function(hitBoxMesh) {
+  if (!window.isRedSkin || !boatsActive) return;
+  SFX.playClick();
+  
+  const parentPlane = hitBoxMesh.parent;
+  window.shooterState = { active: true, ammo: 3, aiHp: 100, planeMesh: parentPlane };
+  
+  document.getElementById('shooter-ammo').textContent = '3';
+  document.getElementById('shooter-hp-ai').textContent = '100';
+  document.getElementById('shooter-bar-ai').style.width = '100%';
+  
+  const log = document.getElementById('shooter-log');
+  log.innerHTML = '<div style="opacity:0.7;">RPG-7 armed. Target aircraft locked.</div>';
+  
+  document.getElementById('btn-fire-rpg').style.display = 'block';
+  document.getElementById('shooter-modal').classList.add('show');
+};
+
+window.fireRPG = function() {
+  if (!window.shooterState.active || window.shooterState.ammo <= 0) return;
+  SFX.playClick(); // Standard click since we don't know if an explosion sound exists
+  
+  window.shooterState.ammo--;
+  
+  // RNG Combat
+  const hitChance = Math.random();
+  const dmg = (hitChance > 0.3) ? Math.floor(40 + Math.random() * 40) : 0; // 70% hit chance
+  
+  window.shooterState.aiHp = Math.max(0, window.shooterState.aiHp - dmg);
+  
+  // Update UI
+  document.getElementById('shooter-ammo').textContent = window.shooterState.ammo;
+  document.getElementById('shooter-hp-ai').textContent = window.shooterState.aiHp;
+  document.getElementById('shooter-bar-ai').style.width = window.shooterState.aiHp + '%';
+  
+  const log = document.getElementById('shooter-log');
+  if (dmg > 0) {
+    log.innerHTML += `<div><span style="color:#0af">DIRECT HIT! ${dmg} DMG!</span></div>`;
+  } else {
+    log.innerHTML += `<div><span style="color:#888">MISSED! Rocket flew past target.</span></div>`;
+  }
+  log.scrollTop = log.scrollHeight;
+  
+  // Check Win/Loss Condition
+  if (window.shooterState.aiHp <= 0) {
+    window.shooterState.active = false;
+    document.getElementById('btn-fire-rpg').style.display = 'none';
+    
+    log.innerHTML += `<div style="color:#0f8; font-weight:bold; font-size:14px; margin-top:10px;">TARGET DOWN. Plane Sunk. +5,000 Troops recovered!</div>`;
+    
+    // Grant Reward
+    if (GS.players[GS.myIndex]) {
+      GS.countries[Object.keys(GS.countries)[0]].troops += 0.5; // add roughly 5k to a random province to simulate recovery, or just add to reserves
+      GS.reinforceLeft += 0.5; // adding 0.5 translates to 5k
+      updateDashboard();
+      setLog("💥 Plane shootdown confirmed! +5,000 reserve troops added.");
+    }
+    
+    if (window.shooterState.planeMesh) {
+       scene.remove(window.shooterState.planeMesh);
+       window.planeMarkers = window.planeMarkers.filter(b => b.parent !== window.shooterState.planeMesh);
+    }
+  } else if (window.shooterState.ammo <= 0) {
+    window.shooterState.active = false;
+    document.getElementById('btn-fire-rpg').style.display = 'none';
+    log.innerHTML += `<div style="color:#f55; font-weight:bold; font-size:14px; margin-top:10px;">OUT OF AMMO. Target escaped.</div>`;
   }
 };
 
