@@ -941,6 +941,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   <button id="btn-toggle-boats" onclick="toggleBoats()" style="display:none; position:absolute; bottom:143px; right:calc(25px + 25vw + 10px); left:auto; width:90px; text-align:center; padding:4px 8px; border:1px solid rgba(0,170,255,0.5); background:rgba(0,170,255,0.1); color:#0af; font-family:'Share Tech Mono', monospace; font-size:10px; border-radius:3px; cursor:pointer; z-index:20; pointer-events:auto; transition:0.2s; outline:none;">🚢 BOATS OFF</button>
   <button id="btn-toggle-radio" onclick="toggleRadio()">📻 ON</button>
   <button id="btn-toggle-radio-lock" onclick="toggleRadioLock()" style="display:none;">🔒 LOCK RADIO</button>
+  <button id="btn-toggle-radio-next" onclick="playNextRadio()" style="display:none;">NEXT ➔</button>
 
   <div class="faction-dash" id="dash-1">
     <div class="dash-header">
@@ -1087,6 +1088,28 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 #btn-toggle-radio-lock.radio-locked:hover {
   background: rgba(0,170,255,0.3);
   border-color: #0af;
+}
+
+#btn-toggle-radio-next {
+  position: absolute;
+  bottom: 8px;
+  left: calc(20px + 25vw + 10px);
+  padding: 4px 8px;
+  border: 1px solid rgba(255,170,0,0.5);
+  background: rgba(255,170,0,0.1);
+  color: #fa0;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  z-index: 20;
+  pointer-events: auto;
+  transition: 0.2s;
+  outline: none;
+}
+#btn-toggle-radio-next:hover {
+  background: rgba(255,170,0,0.3);
+  border-color: #fa0;
 }
 
 #ops-sidebar {
@@ -4924,6 +4947,7 @@ function closeOnboarding() {
       radioStarted = true;
       fetchRadios();
       document.getElementById('btn-toggle-radio-lock').style.display = 'block';
+      document.getElementById('btn-toggle-radio-next').style.display = 'block';
   }
 }
 
@@ -6659,6 +6683,7 @@ window.toggleRadio = function() {
   if (typeof _sfxClick !== 'undefined') _sfxClick();
   const btn = document.getElementById('btn-toggle-radio');
   const lockBtn = document.getElementById('btn-toggle-radio-lock');
+  const nextBtn = document.getElementById('btn-toggle-radio-next'); // Added
   window.isRadioOn = !window.isRadioOn;
   
   if (!window.isRadioOn) {
@@ -6667,10 +6692,12 @@ window.toggleRadio = function() {
     btn.innerHTML = '🔇 OFF';
     btn.classList.add('radio-off');
     lockBtn.style.display = 'none';
+    nextBtn.style.display = 'none'; // Added
   } else {
     btn.innerHTML = '📻 ON';
     btn.classList.remove('radio-off');
     lockBtn.style.display = 'block';
+    nextBtn.style.display = 'block'; // Added
     if (!radioStarted) {
       radioStarted = true;
       fetchRadios();
