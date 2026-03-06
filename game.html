@@ -3196,7 +3196,7 @@ function handleGlobeClick(e) {
   }
   
   // Intercept clicks on Airplane Markers for Shooter Mini-Game
-  if (window.isRedSkin && boatsActive && window.planeMarkers && window.planeMarkers.length > 0) {
+  if (window.isRedSkin && window.planeMarkers && window.planeMarkers.length > 0) {
     const planeHits = ray.intersectObjects(window.planeMarkers, false);
     if (planeHits.length > 0) {
       if (typeof window.openShooterGame === 'function') {
@@ -5246,6 +5246,12 @@ function animate() {
       const sat = redSats[i];
       sat.pivot.rotateOnAxis(sat.axis, sat.speed * ((dt*60)||1));
     }
+    if (window.planeData) {
+      for(let i=0; i<window.planeData.length; i++) {
+        const p = window.planeData[i];
+        if (p && p.pivot) p.pivot.rotateOnAxis(p.axis, p.speed * ((dt*60)||1));
+      }
+    }
   }
 
   // Auto-rotate when idle (even during missile flight)
@@ -6555,15 +6561,6 @@ window.toggleBoats = function() {
     clearInterval(boatInterval);
     boatInterval = null;
     clearBoatMarkers();
-    
-    // Clear planes
-    if (window.planeMarkers) {
-      window.planeMarkers.forEach(p => {
-        if (p.parent) p.parent.children.forEach(c => { if(c.material) c.material.dispose(); if(c.geometry) c.geometry.dispose(); });
-        if (p.parent) scene.remove(p.parent);
-      });
-      window.planeMarkers = [];
-    }
   }
 };
 
@@ -6695,19 +6692,20 @@ window.fireNavalTorpedo = function() {
 // ================= AIRPLANE SHOOTER MINI-GAME =================
 
 window.planeMarkers = [];
+window.planeData = [];
 window.shooterState = { active: false, ammo: 3, aiHp: 100, planeMesh: null };
 
 window.spawnRedPlanes = function() {
   if (typeof scene === 'undefined' || typeof THREE === 'undefined') return;
   
   // Clear old planes
-  window.planeMarkers.forEach(p => {
-      if (p.children) p.children.forEach(c => { if(c.material) c.material.dispose(); if(c.geometry) c.geometry.dispose(); });
-      scene.remove(p);
-  });
+  if (window.planeData) {
+     window.planeData.forEach(p => scene.remove(p.pivot));
+  }
   window.planeMarkers = [];
+  window.planeData = [];
   
-  if (!window.isRedSkin || !boatsActive) return;
+  if (!window.isRedSkin) return;
   
   const R = typeof GLOBE_R !== 'undefined' ? GLOBE_R + 0.045 : 1.045; // Fly slightly higher than boats
   const planeMat = new THREE.MeshBasicMaterial({ color: 0xffffff, depthTest: true });
@@ -6744,23 +6742,32 @@ window.spawnRedPlanes = function() {
     
     // Random heading
     planeGroup.rotateZ(Math.random() * Math.PI * 2);
-    
-    // Set user data for raycaster
-    planeGroup.userData = { isPlane: true };
-    
+
     // Fix raycast targeting on groups by adding invisible hit box
     const hitBoxGeo = new THREE.BoxGeometry(0.1, 0.05, 0.1);
     const hitBoxMat = new THREE.MeshBasicMaterial({visible: false});
     const hitBox = new THREE.Mesh(hitBoxGeo, hitBoxMat);
     planeGroup.add(hitBox);
+    
+    // Wrap in orbital pivot
+    const pivot = new THREE.Group();
+    pivot.add(planeGroup);
+    
+    // Set user data for raycaster
+    hitBox.userData = { isPlane: true, pivot: pivot };
 
-    scene.add(planeGroup);
+    scene.add(pivot);
     window.planeMarkers.push(hitBox); // Raycast against the hitbox
+    
+    // Save orbital mechanics
+    const axis = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
+    const speed = Math.random() * 0.002 + 0.001; 
+    window.planeData.push({ pivot, axis, speed });
   }
 };
 
 window.openShooterGame = function(hitBoxMesh) {
-  if (!window.isRedSkin || !boatsActive) return;
+  if (!window.isRedSkin) return;
   SFX.playClick();
   
   const parentPlane = hitBoxMesh.parent;
@@ -6818,8 +6825,11 @@ window.fireRPG = function() {
     }
     
     if (window.shooterState.planeMesh) {
-       scene.remove(window.shooterState.planeMesh);
-       window.planeMarkers = window.planeMarkers.filter(b => b.parent !== window.shooterState.planeMesh);
+       const hitBoxMesh = window.shooterState.planeMesh;
+       const pivot = hitBoxMesh.userData.pivot;
+       if (pivot) scene.remove(pivot);
+       window.planeMarkers = window.planeMarkers.filter(b => b !== hitBoxMesh);
+       if (window.planeData) window.planeData = window.planeData.filter(p => p.pivot !== pivot);
     }
   } else if (window.shooterState.ammo <= 0) {
     window.shooterState.active = false;
@@ -6874,6 +6884,7 @@ window.toggleRedSkin = function() {
     btn.innerHTML = '🌍 LIVE SKIN';
     btn.classList.add('active-normal');
     boatBtn.style.display = 'block'; // Show boats toggle on red skin
+    if (typeof window.spawnRedPlanes === 'function') window.spawnRedPlanes();
   } else {
     if(typeof globeMat !== 'undefined') globeMat.color.setHex(0xffffff);
     btn.innerHTML = '🔴 RED SKIN';
@@ -6882,6 +6893,21 @@ window.toggleRedSkin = function() {
     
     // Auto turn off boats if returning to normal skin
     if (boatsActive) toggleBoats();
+    
+    // Clear planes
+    if (window.planeMarkers) {
+      window.planeMarkers.forEach(p => {
+        const pivot = p.userData.pivot;
+        if (pivot) {
+           pivot.children.forEach(gc => {
+               if(gc.children) gc.children.forEach(c => { if(c.material) c.material.dispose(); if(c.geometry) c.geometry.dispose(); });
+           });
+           scene.remove(pivot);
+        }
+      });
+      window.planeData = [];
+      window.planeMarkers = [];
+    }
   }
 };
 
