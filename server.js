@@ -699,7 +699,11 @@ function initWebSockets() {
             ws.send(JSON.stringify({ type: 'leaderboard_data', data: res.rows }));
           } catch(err) {
             console.error('DB Error on get_leaderboard:', err.message);
+            ws.send(JSON.stringify({ type: 'leaderboard_data', data: [] }));
           }
+        } else {
+             // Fallback for local development without Postgres
+             ws.send(JSON.stringify({ type: 'leaderboard_data', data: [] }));
         }
         break;
       }

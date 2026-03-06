@@ -4164,7 +4164,7 @@ function scheduleRandomGroundBomb() {
 
 function spawnSonarSweep3D(lat, lon) {
   if (lat === undefined || lon === undefined) return;
-  SFX.playEvent(); // Use an appropriate radar/ping sound
+  SFX.playClick(); // Use an appropriate radar/ping sound
   const c = ll2v(lat, lon, GLOBE_R + .003);
   const up = c.clone().normalize();
   let t1 = new THREE.Vector3(-up.z, 0, up.x);
@@ -4777,7 +4777,7 @@ function initWS() {
       case 'd3x_reward':
         if (typeof setLog === 'function') {
           setLog(`🎁 AIRDROP REWARD: ${msg.message}`);
-          SFX.playEvent();
+          SFX.playClick();
         }
         break;
         
