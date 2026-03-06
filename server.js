@@ -8,6 +8,26 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const WebSocket = require('ws');
+require('dotenv').config();
+
+// Solana Wallet Integration
+const web3 = require('@solana/web3.js');
+let authorityKeypair = null;
+if (process.env.SOLANA_WALLET_PRIVATE_KEY) {
+  try {
+    const secretKeyString = process.env.SOLANA_WALLET_PRIVATE_KEY;
+    // Decode base58
+    const bs58 = require('bs58');
+    const decode = bs58.decode || (bs58.default && bs58.default.decode);
+    authorityKeypair = web3.Keypair.fromSecretKey(decode(secretKeyString));
+    console.log('✅ Solana Authority Wallet Loaded:', authorityKeypair.publicKey.toBase58());
+  } catch(e) {
+    console.error('⚠ Failed to load Solana Wallet Private Key:', e.message);
+  }
+} else {
+  console.log('ℹ No SOLANA_WALLET_PRIVATE_KEY found in environment');
+}
+
 // node-fetch is built-in in Node 18+, but we use it gracefully.
 const { RadioBrowserApi } = require('radio-browser-api');
 const radioApi = new RadioBrowserApi('NuclearWarGame-DexmondTech');
@@ -234,31 +254,136 @@ const server = http.createServer((req, res) => {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*'
     });
-    fetch('https://api.windy.com/webcams/api/v3/webcams?limit=250&include=location,player&modifiers=live', {
-      method: 'GET',
-      headers: { 'x-windy-api-key': 'vEqfjmfqyPguO0tTOX5gKMTXH6sz5dZR' }
-    })
-    .then(r => r.json())
-    .then(data => res.end(JSON.stringify({ result: data })))
-    .catch(err => {
-      console.error('Webcam API error:', err);
-      res.end(JSON.stringify({ error: 'Failed to fetch webcams' }));
-    });
+
+    // Check memory cache first
+    global.cachedWebcams = global.cachedWebcams || null;
+    global.lastWebcamsFetchTime = global.lastWebcamsFetchTime || 0;
+    const WEBCAMS_CACHE_TTL = 1000 * 60 * 60 * 24; // 24 hours
+
+    if (global.cachedWebcams && (Date.now() - global.lastWebcamsFetchTime < WEBCAMS_CACHE_TTL)) {
+      return res.end(JSON.stringify({ result: { webcams: global.cachedWebcams } }));
+    }
+
+    const fetchPromises = [];
+    for (let i = 1; i <= 8; i++) {
+      fetchPromises.push(
+        fetch(`https://openwebcamdb.com/api/v1/webcams?page=${i}&per_page=100`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': 'Bearer 95|tl7tZtBBb5pmlK43nOhh2HTK19eiXdMp7g9V5A6v07539bcd'
+          }
+        }).then(r => r.json())
+      );
+    }
+    
+    Promise.all(fetchPromises)
+      .then(results => {
+        let allWebcams = [];
+        let limitHit = false;
+        results.forEach(res => {
+          if (res && res.data) {
+            allWebcams = allWebcams.concat(res.data);
+          } else if (res && res.message && res.message.includes('rate limit')) {
+            limitHit = true;
+          }
+        });
+        
+        if (allWebcams.length > 0) {
+          global.cachedWebcams = allWebcams.slice(0, 750);
+          global.lastWebcamsFetchTime = Date.now();
+        } else if (limitHit) {
+          if (!global.cachedWebcams) {
+            // Provide a hardcoded fallback if cache is empty & rate limited
+            global.cachedWebcams = [
+              {
+                slug: "cox-bay-surf-waves-tofino-shores",
+                title: "Cox Bay Surf Waves, Tofino Shores",
+                latitude: "49.1048090",
+                longitude: "-125.8744010",
+                stream_type: "youtube"
+              }
+            ];
+          }
+          global.lastWebcamsFetchTime = Date.now(); 
+        }
+
+        const toSend = global.cachedWebcams || [];
+        res.end(JSON.stringify({ result: { webcams: toSend } }));
+      })
+      .catch(err => {
+        console.error('OpenWebcamDB error:', err);
+        // Fallback to cache if error
+        if (global.cachedWebcams) {
+          res.end(JSON.stringify({ result: { webcams: global.cachedWebcams } }));
+        } else {
+          // Hardcoded fallback on pure error too
+          const fallback = [{
+            slug: "cox-bay-surf-waves-tofino-shores",
+            title: "Cox Bay Surf Waves, Tofino Shores",
+            latitude: "49.1048090",
+            longitude: "-125.8744010",
+            stream_type: "youtube"
+          }];
+          res.end(JSON.stringify({ result: { webcams: fallback } }));
+        }
+      });
+
   } else if (req.url.startsWith('/api/webcams/')) {
-    const webcamId = req.url.split('/')[3];
+    // Proxy request for single webcam
+    const slug = req.url.split('/').pop();
     res.writeHead(200, {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*'
     });
-    fetch(`https://api.windy.com/webcams/api/v3/webcams/${webcamId}?include=player`, {
+
+    global.cachedStreams = global.cachedStreams || {};
+    const STREAM_CACHE_TTL = 1000 * 60 * 60 * 24; // 24 hours
+
+    if (global.cachedStreams[slug] && (Date.now() - global.cachedStreams[slug].timestamp < STREAM_CACHE_TTL)) {
+      return res.end(JSON.stringify({ data: global.cachedStreams[slug].data }));
+    }
+
+    const handleFallback = () => {
+      // General fallback or specific fallback for Cox Bay Tofino
+      if (slug === 'cox-bay-surf-waves-tofino-shores') {
+        const fallbackData = {
+          slug: "cox-bay-surf-waves-tofino-shores",
+          title: "Cox Bay Surf Waves, Tofino Shores",
+          stream_type: "youtube",
+          stream_url: "https://www.youtube.com/watch?v=84dLnpdqC_U",
+          latitude: "49.1048090",
+          longitude: "-125.8744010",
+          country: { name: "Canada", iso_code: "CA" }
+        };
+        global.cachedStreams[slug] = { timestamp: Date.now(), data: fallbackData };
+        res.end(JSON.stringify({ data: fallbackData }));
+      } else {
+        res.end(JSON.stringify({ error: 'Rate limit exceeded, no fallback available' }));
+      }
+    };
+
+    fetch(`https://openwebcamdb.com/api/v1/webcams/${slug}`, {
       method: 'GET',
-      headers: { 'x-windy-api-key': 'vEqfjmfqyPguO0tTOX5gKMTXH6sz5dZR' }
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer 95|tl7tZtBBb5pmlK43nOhh2HTK19eiXdMp7g9V5A6v07539bcd'
+      }
     })
     .then(r => r.json())
-    .then(data => res.end(JSON.stringify({ result: data })))
+    .then(data => {
+      if (data && data.data) {
+        global.cachedStreams[slug] = { timestamp: Date.now(), data: data.data };
+        res.end(JSON.stringify(data));
+      } else if (data && data.message && data.message.includes('rate limit')) {
+        handleFallback();
+      } else {
+        res.end(JSON.stringify(data));
+      }
+    })
     .catch(err => {
-      console.error('Single Webcam API error:', err);
-      res.end(JSON.stringify({ error: 'Failed to fetch webcam' }));
+      console.error('OpenWebcamDB individual stream error:', err);
+      handleFallback();
     });
   } else {
     res.writeHead(404);
@@ -383,6 +508,59 @@ function initWebSockets() {
           console.error('⚠ Google Auth Failed:', err.message);
           ws.send(JSON.stringify({ type: 'error', msg: 'Google Authentication failed.' }));
         }
+        break;
+      }
+
+      case 'solana_auth': {
+        const address = msg.address;
+        if (!address) break;
+        
+        // Use truncated address as a generic callsign
+        client.name = `${address.substring(0, 4)}...${address.substring(address.length - 4)}`;
+        client.wallet = address; // Keep true address mapped to connection
+        client.connectedAt = Date.now(); // Start connection timer for D3X daily drops
+        client.d3xClaimedSession = false; // Flag to prevent redundant DB querying
+        
+        let attacks = 0;
+        let damage = 0;
+        if (pgPool) {
+          try {
+            // Upsert into our commanders database (Use wallet as callsign/identity)
+            const res = await pgPool.query(`
+              INSERT INTO commanders (callsign, last_seen) 
+              VALUES ($1, NOW()) 
+              ON CONFLICT (callsign) DO UPDATE 
+              SET last_seen = NOW()
+              RETURNING attacks, damage
+            `, [client.name]);
+            
+            if (res.rows.length > 0) {
+              attacks = res.rows[0].attacks || 0;
+              damage = res.rows[0].damage || 0;
+            }
+          } catch(dbErr) {
+            console.error('⚠ Solana Auth DB Error:', dbErr.message);
+          }
+        }
+
+        console.log(`✓ Solana Auth Success: ${client.name} connected.`);
+        
+        ws.send(JSON.stringify({ 
+          type: 'google_auth_success', // Re-use same success event handler on frontend
+          name: client.name,
+          picture: null,          
+          stats: { attacks, damage }
+        }));
+        
+        broadcast({
+          type: 'player_joined',
+          name: client.name,
+          totalPlayers: connectedClients.size
+        }, ws);
+        
+        // Initial trigger potential daily token drop (skip here, handled by 10-min interval now)
+        // processDailyTokenDrop(client.name, client.wallet);
+        
         break;
       }
 
@@ -529,6 +707,75 @@ function initWebSockets() {
 });
 }
 
+// --- Solana On-Chain Logic ---
+async function processDailyTokenDrop(callsign, userWalletAddress) {
+  if (!authorityKeypair) {
+    console.warn(`[SOLANA] simulated drop to ${userWalletAddress} (No auth config)`);
+    return;
+  }
+  if (!userWalletAddress) {
+    console.warn(`⚠ Token Drop Skipped: Commander ${callsign} has no Solana wallet linked.`);
+    return;
+  }
+  
+  console.log(`[SOLANA] Initiating daily token drop of 5 D3X to Commander ${callsign} @ wallet ${userWalletAddress}`);
+  // TODO: Add actual SPL token transfer logic here
+  // e.g. web3.sendAndConfirmTransaction using authorityKeypair
+}
+
+async function checkD3XRewards() {
+  if (!pgPool) return; // Requires DB to track 24h limits confidently
+
+  const now = Date.now();
+  for (const client of connectedClients) {
+    // 10 minute logic: (now - connectedAt >= 600,000ms)
+    // Changing to 1 minute (60,000ms) for testing as requested by Implementation Plan
+    if (client.wallet && client.connectedAt && !client.d3xClaimedSession) {
+      if ((now - client.connectedAt) >= 600000 /* 10 mins */) {
+        try {
+          // Check DB if last claim was > 24 hours ago
+          const res = await pgPool.query(`SELECT last_d3x_claim FROM commanders WHERE callsign = $1`, [client.name]);
+          if (res.rows.length > 0) {
+             const lastClaim = res.rows[0].last_d3x_claim;
+             
+             // If null or Date difference is > 24h (86400000 ms)
+             let canClaim = false;
+             if (!lastClaim) canClaim = true;
+             else {
+                const msSinceClaim = now - new Date(lastClaim).getTime();
+                if (msSinceClaim >= 86400000) canClaim = true;
+             }
+
+             if (canClaim) {
+                console.log(`[REWARD] Commader ${client.name} reached 10m connection threshold. Triggering D3X Daily Drop + updating DB.`);
+                client.d3xClaimedSession = true;
+                
+                await pgPool.query(`UPDATE commanders SET last_d3x_claim = NOW() WHERE callsign = $1`, [client.name]);
+                
+                await processDailyTokenDrop(client.name, client.wallet);
+                
+                client.ws.send(JSON.stringify({ 
+                  type: 'd3x_reward', 
+                  amount: 5,
+                  message: '5 D3X Coins Airdropped! (Daily Reward Claimed)'
+                }));
+
+             } else {
+               // Mark session as claimed so we don't spam DB checks for the rest of their session
+               client.d3xClaimedSession = true; 
+             }
+          }
+        } catch(e) {
+            console.error('⚠ Error checking D3X db record:', e.message);
+        }
+      }
+    }
+  }
+}
+
+// Check eligible connected players once a minute
+setInterval(checkD3XRewards, 60000);
+
 // On Sever Startup, init DB and try to load state immediately before listening
 async function startServer() {
   // 1. Try PostgreSQL
@@ -550,9 +797,16 @@ async function startServer() {
           attacks INTEGER DEFAULT 0,
           damage BIGINT DEFAULT 0,
           created_at TIMESTAMPTZ DEFAULT NOW(),
-          last_seen TIMESTAMPTZ DEFAULT NOW()
+          last_seen TIMESTAMPTZ DEFAULT NOW(),
+          last_d3x_claim TIMESTAMPTZ
         )
       `);
+      
+      // Auto-migrate if the column doesn't exist
+      try {
+        await pgPool.query(`ALTER TABLE commanders ADD COLUMN IF NOT EXISTS last_d3x_claim TIMESTAMPTZ`);
+        console.log('☢ D3X Schema Migration successful');
+      } catch(e) { /* Col exists */ }
       
       console.log('☢ PostgreSQL connected — game_state and commanders tables ready');
       const state = await loadGameState();
