@@ -949,7 +949,6 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   </div>
   <div style="position:absolute; bottom:12px; left:20px; font-family:'Share Tech Mono', monospace; font-size:10px; font-weight:normal; letter-spacing:3px; color:#0af; text-transform:uppercase; z-index:15; pointer-events:none; text-shadow:0 0 5px rgba(0,170,255,0.8);">DEXMOND TECHNOLOGIES Ltd</div>
   <button id="btn-toggle-skin" onclick="toggleRedSkin()">🔴 RED SKIN</button>
-  <button id="btn-toggle-boats" onclick="toggleBoats()" style="display:none; position:absolute; bottom:143px; right:calc(25px + 25vw + 10px); left:auto; width:90px; text-align:center; padding:4px 8px; border:1px solid rgba(0,170,255,0.5); background:rgba(0,170,255,0.1); color:#0af; font-family:'Share Tech Mono', monospace; font-size:10px; border-radius:3px; cursor:pointer; z-index:20; pointer-events:auto; transition:0.2s; outline:none;">🚢 BOATS OFF</button>
   <button id="btn-toggle-radio" onclick="toggleRadio()">📻 ON</button>
   <button id="btn-toggle-radio-lock" onclick="toggleRadioLock()" style="display:none;">🔒 LOCK RADIO</button>
   <button id="btn-toggle-radio-next" onclick="playNextRadio()" style="display:none;">NEXT ➔</button>
@@ -1607,6 +1606,64 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   </div>
 </div>
 
+<div id="shooter-modal">
+  <div style="background:rgba(20,5,0,0.95); border:1px solid rgba(255,170,0,0.5); padding:25px; width:500px; max-width:90%; color:#fa0; font-family:'Share Tech Mono', monospace; box-shadow:0 0 30px rgba(255,170,0,0.15); position:relative;">
+    <button onclick="document.getElementById('shooter-modal').classList.remove('show')" style="position:absolute; top:10px; right:12px; background:none; border:none; color:#f55; cursor:pointer; font-size:16px;">✕</button>
+    <div style="text-align:center; font-size:22px; font-weight:bold; letter-spacing:4px; margin-bottom:20px; border-bottom:1px solid rgba(255,170,0,0.3); padding-bottom:8px; text-shadow:0 0 10px #fa0;">
+      ANTI-AIR ENGAGEMENT
+    </div>
+    
+    <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+      <div style="text-align:center; flex:1; border-right:1px solid rgba(255,170,0,0.2);">
+        <div style="font-size:10px; color:#fa0; letter-spacing:2px; margin-bottom:5px;">RPG-7 AMMO</div>
+        <div style="font-size:24px; font-weight:bold; color:#fa0;" id="shooter-ammo">3</div>
+      </div>
+      <div style="text-align:center; flex:1;">
+        <div style="font-size:10px; color:#f55; letter-spacing:2px; margin-bottom:5px;">RAINCLOUD AI</div>
+        <div style="font-size:24px; font-weight:bold; color:#f55;" id="shooter-hp-ai">100</div>
+        <div style="width:80%; height:4px; background:rgba(255,85,85,0.2); margin:8px auto; border-radius:2px; overflow:hidden;">
+          <div id="shooter-bar-ai" style="height:100%; width:100%; background:#f55; transition:0.3s;"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="shooter-log" style="height:120px; overflow-y:auto; background:rgba(255,170,0,0.05); border:1px solid rgba(255,170,0,0.2); padding:10px; font-size:11px; margin-bottom:15px; display:flex; flex-direction:column; gap:4px;">
+      <div style="opacity:0.7;">RPG-7 armed. Target aircraft locked.</div>
+    </div>
+    
+    <button id="btn-fire-rpg" onclick="fireRPG()" style="width:100%; padding:15px; background:linear-gradient(135deg,rgba(255,170,0,0.2),rgba(255,170,0,0.4)); border:1px solid #fa0; color:#fa0; font-family:'Share Tech Mono', monospace; font-size:16px; font-weight:bold; letter-spacing:3px; cursor:pointer; transition:0.2s;">FIRE ROCKET</button>
+  </div>
+</div>
+
+<!-- RPG Aiming Mini-Game Overlay -->
+<div id="rpg-aim-screen" onmousedown="onRpgFire()" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:10000; background:radial-gradient(circle at center, rgba(100,150,250,0.6) 0%, rgba(10,20,40,0.95) 100%); cursor:crosshair; overflow:hidden; user-select:none;">
+  <!-- UI Text -->
+  <div style="position:absolute; top:8vh; width:100%; text-align:center; color:#fa0; font-family:'Share Tech Mono', monospace; font-size:28px; text-shadow:0 0 15px #f00, 0 0 5px #000; z-index:10002; pointer-events:none;">
+    MANUAL TARGETING OVERRIDE<br>
+    <span style="font-size:16px; opacity:0.9; color:#fff; text-shadow:none;">WAIT FOR LOCK-ON. CLICK ANYWHERE TO FIRE.</span>
+  </div>
+  
+  <!-- The moving target airplane -->
+  <div id="rpg-target" style="position:absolute; top:50%; left:50%; width:80px; height:80px; transform:translate(-50%, -50%); pointer-events:none; z-index:10001;">
+    <svg viewBox="0 0 24 24" fill="#f55" width="80" height="80" style="filter:drop-shadow(0 0 10px #f00); transform:rotate(45deg);">
+       <path d="M21,16V14L13,9V3.5A1.5,1.5 0 0,0 11.5,2A1.5,1.5 0 0,0 10,3.5V9L2,14V16L10,13.5V19L8,20.5V22L11.5,21L15,22V20.5L13,19V13.5L21,16Z"/>
+    </svg>
+  </div>
+  
+  <!-- Dynamic Targeting Crosshair -->
+  <div id="rpg-crosshair" style="position:absolute; top:50vh; left:50vw; width:100vw; height:100vh; transform:translate(-50%, -50%); pointer-events:none; z-index:10002;">
+    <!-- Horizontal & Vertical Lines -->
+    <div style="position:absolute; top:50vh; left:-50vw; width:200vw; height:2px; background:rgba(0,255,136,0.2);"></div>
+    <div style="position:absolute; top:-50vh; left:50vw; width:2px; height:200vh; background:rgba(0,255,136,0.2);"></div>
+    
+    <!-- Aiming Circle -->
+    <div style="position:absolute; top:50vh; left:50vw; width:120px; height:120px; border:3px solid #0f8; border-radius:50%; transform:translate(-50%, -50%); box-shadow:0 0 20px rgba(0,255,136,0.5), inset 0 0 20px rgba(0,255,136,0.5);"></div>
+    
+    <!-- Center Dot -->
+    <div id="rpg-crosshair-dot" style="position:absolute; top:50vh; left:50vw; width:6px; height:6px; background:#f00; border-radius:50%; transform:translate(-50%, -50%); box-shadow:0 0 10px #f00;"></div>
+  </div>
+</div>
+
 <!-- Game Over -->
 <div id="gameover">
   <div id="go-title">— WINS THE WORLD —</div>
@@ -1956,6 +2013,253 @@ let redSatGroup = new THREE.Group();
 redSatGroup.visible = false;
 let redSats = [];
 scene.add(redSatGroup);
+
+let naturalResourcesGroup = new THREE.Group();
+naturalResourcesGroup.visible = false;
+scene.add(naturalResourcesGroup);
+
+function initNaturalResources() {
+  const createResSprite = (lat, lon, color, size, label) => {
+    // Render a small glowing dot
+    const c = document.createElement('canvas'); c.width=32; c.height=32;
+    const ctx = c.getContext('2d');
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = color;
+    ctx.fillStyle = color;
+    ctx.beginPath(); ctx.arc(16,16,10,0,Math.PI*2); ctx.fill();
+    const tex = new THREE.CanvasTexture(c);
+    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: true, opacity: 0.85 });
+    const sprite = new THREE.Sprite(mat);
+    sprite.scale.set(size, size, 1);
+    
+    // Position slightly above ground
+    const pos = ll2v(lat, lon, GLOBE_R + 0.012);
+    sprite.position.copy(pos);
+    naturalResourcesGroup.add(sprite);
+  };
+
+  const resourcesData = [
+    { name: 'Wood', color: '#118833', size: 0.025, regions: [{lat:-5,lon:-65}, {lat:-10,lon:-60}, {lat:0,lon:20}, {lat:60,lon:-110}, {lat:60,lon:90}, {lat:0,lon:110}, {lat:5,lon:115}] },
+    { name: 'Cotton', color: '#ffffff', size: 0.02, regions: [{lat:20,lon:78}, {lat:40,lon:80}, {lat:32,lon:-100}, {lat:-10,lon:-50}, {lat:26,lon:30}] },
+    { name: 'Oil', color: '#ff5500', size: 0.025, regions: [{lat:24,lon:45}, {lat:8,lon:-66}, {lat:30,lon:48}, {lat:60,lon:75}, {lat:31,lon:-100}] },
+    { name: 'Natural Gas', color: '#ffff00', size: 0.025, regions: [{lat:66,lon:76}, {lat:25,lon:51}, {lat:32,lon:53}, {lat:39,lon:-95}] },
+    { name: 'Coal', color: '#888888', size: 0.02, regions: [{lat:35,lon:105}, {lat:-25,lon:135}, {lat:40,lon:-80}, {lat:23,lon:80}] },
+    { name: 'Uranium', color: '#00ff00', size: 0.03, regions: [{lat:48,lon:68}, {lat:56,lon:-106}, {lat:-25,lon:135}, {lat:-22,lon:15}] },
+    { name: 'Phosphate', color: '#ffaaaa', size: 0.02, regions: [{lat:31,lon:-7}, {lat:30,lon:105}, {lat:27,lon:-81}] },
+    { name: 'Potash', color: '#ffcc00', size: 0.02, regions: [{lat:53,lon:28}, {lat:50,lon:-105}, {lat:58,lon:56}] },
+    { name: 'Salt', color: '#ddddff', size: 0.02, regions: [{lat:35,lon:-115}, {lat:22,lon:72}, {lat:-20,lon:-68}] },
+    { name: 'Limestone', color: '#cccccc', size: 0.02, regions: [{lat:40,lon:10}, {lat:35,lon:110}, {lat:40,lon:-100}] },
+    { name: 'Gypsum', color: '#eeddaa', size: 0.02, regions: [{lat:40,lon:-110}, {lat:36,lon:50}, {lat:25,lon:-100}] },
+    { name: 'Water', color: '#0088ff', size: 0.03, regions: [{lat:-5,lon:-60}, {lat:45,lon:-85}, {lat:2,lon:15}, {lat:60,lon:90}, {lat:55,lon:-110}] }
+  ];
+
+  resourcesData.forEach(res => {
+    res.regions.forEach(r => {
+      // Create density cluster
+      for(let i=0; i<12; i++) { // Render more dots per region
+         createResSprite(r.lat + (Math.random()*8-4), r.lon + (Math.random()*8-4), res.color, res.size, res.name);
+      }
+    });
+  });
+
+  console.log("Natural Resources Overlay Initialized (12 Global Resources).");
+}
+// Initialize immediately
+initNaturalResources();
+
+let armsIndustryGroup = new THREE.Group();
+armsIndustryGroup.visible = false;
+scene.add(armsIndustryGroup);
+
+function initArmsIndustry() {
+  const createArmsSprite = (lat, lon, size, label) => {
+    const c = document.createElement('canvas'); c.width=32; c.height=32;
+    const ctx = c.getContext('2d');
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = '#ff6600';
+    ctx.fillStyle = '#ff9900';
+    ctx.beginPath(); ctx.arc(16,16,10,0,Math.PI*2); ctx.fill();
+    const tex = new THREE.CanvasTexture(c);
+    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: true, opacity: 0.9 });
+    const sprite = new THREE.Sprite(mat);
+    sprite.scale.set(size, size, 1);
+    const pos = ll2v(lat, lon, GLOBE_R + 0.015);
+    sprite.position.copy(pos);
+    armsIndustryGroup.add(sprite);
+  };
+
+  const armsData = [
+    { name: 'USA Hubs', size: 0.035, regions: [{lat:39,lon:-77}, {lat:34,lon:-118}, {lat:47,lon:-122}, {lat:32,lon:-97}] }, // DC, LA, Seattle, Dallas (Lockheed, Raytheon, Boeing, etc)
+    { name: 'UK Hubs', size: 0.03, regions: [{lat:51,lon:-0.1}, {lat:53,lon:-2.2}] }, // London area, BAE
+    { name: 'France/EU', size: 0.03, regions: [{lat:48,lon:2}, {lat:43,lon:1.4}] }, // Paris, Toulouse (Thales, Airbus)
+    { name: 'Germany', size: 0.025, regions: [{lat:51,lon:10}] }, // Rheinmetall
+    { name: 'Sweden', size: 0.025, regions: [{lat:59,lon:18}] }, // Saab
+    { name: 'Russia', size: 0.035, regions: [{lat:55,lon:37}, {lat:56,lon:60}, {lat:55,lon:82}] }, // Moscow, Urals, Siberia (Rostec)
+    { name: 'China', size: 0.035, regions: [{lat:39,lon:116}, {lat:34,lon:108}, {lat:30,lon:104}] }, // Beijing, Xi'an, Chengdu (AVIC, NORINCO, CETC)
+    { name: 'India', size: 0.025, regions: [{lat:28,lon:77}, {lat:12,lon:77}] }, // Hindustan Aeronautics
+    { name: 'South Korea', size: 0.025, regions: [{lat:37,lon:127}, {lat:35,lon:128}] }, // KAI
+    { name: 'Ukraine', size: 0.025, regions: [{lat:50,lon:30}] } // JSC
+  ];
+
+  armsData.forEach(hub => {
+    hub.regions.forEach(r => {
+      for(let i=0; i<8; i++) {
+         createArmsSprite(r.lat + (Math.random()*4-2), r.lon + (Math.random()*4-2), hub.size, hub.name);
+      }
+    });
+  });
+
+  console.log("Global Arms Industry Overlay Initialized.");
+}
+initArmsIndustry();
+
+window.globalTradeGroup = new THREE.Group();
+window.globalTradeGroup.visible = false;
+scene.add(window.globalTradeGroup);
+
+window.activeTrades = [];
+
+function initGlobalTradeNetwork() {
+  const R = typeof GLOBE_R !== 'undefined' ? GLOBE_R : 1;
+  
+  const createTradeRoute = (lat1, lon1, lat2, lon2, type) => {
+    // ll2v helper uses degrees
+    const phi1 = (90 - lat1) * (Math.PI / 180);
+    const theta1 = (lon1 + 180) * (Math.PI / 180);
+    const p1 = new THREE.Vector3(
+      -(R * Math.sin(phi1) * Math.cos(theta1)),
+      R * Math.cos(phi1),
+      R * Math.sin(phi1) * Math.sin(theta1)
+    );
+    
+    const phi2 = (90 - lat2) * (Math.PI / 180);
+    const theta2 = (lon2 + 180) * (Math.PI / 180);
+    const p2 = new THREE.Vector3(
+      -(R * Math.sin(phi2) * Math.cos(theta2)),
+      R * Math.cos(phi2),
+      R * Math.sin(phi2) * Math.sin(theta2)
+    );
+    
+    // Midpoint elevated
+    const mid = p1.clone().lerp(p2, 0.5);
+    const dist = p1.distanceTo(p2);
+    
+    let elevation = 0;
+    let color = 0xffffff;
+    let speed = 0;
+    let meshGroup = new THREE.Group();
+    
+    if (type === 'plane') {
+      elevation = dist * 0.2 + 0.1; // Arch high
+      color = 0x00ffff;
+      speed = 0.0004 + Math.random() * 0.0003;
+      
+      const planeGeo = new THREE.ConeGeometry(0.012, 0.035, 3);
+      planeGeo.rotateX(Math.PI/2);
+      const planeMat = new THREE.MeshBasicMaterial({color: 0x00ffff, depthTest: true});
+      const planeMesh = new THREE.Mesh(planeGeo, planeMat);
+      meshGroup.add(planeMesh);
+      
+    } else if (type === 'ship') {
+      elevation = 0.01; // Surface skim
+      color = 0xffaa00;
+      speed = 0.0001 + Math.random() * 0.00008;
+      
+      // Ship Hull
+      const shipGeo = new THREE.BoxGeometry(0.018, 0.01, 0.04);
+      const shipMat = new THREE.MeshBasicMaterial({color: 0xaa6600, depthTest: true});
+      const shipMesh = new THREE.Mesh(shipGeo, shipMat);
+      
+      // Cargo blocks
+      const cgeo = new THREE.BoxGeometry(0.012, 0.01, 0.025);
+      const cmat = new THREE.MeshBasicMaterial({color: 0xff4444, depthTest: true});
+      const cmesh = new THREE.Mesh(cgeo, cmat);
+      cmesh.position.y = 0.01;
+      
+      meshGroup.add(shipMesh);
+      meshGroup.add(cmesh);
+      
+    } else if (type === 'train') {
+      elevation = 0.005; // Tight to ground
+      color = 0x55ff55;
+      speed = 0.0002 + Math.random() * 0.0001;
+      
+      // Multiple cargo cars
+      for(let i=0; i<4; i++) {
+         const carGeo = new THREE.BoxGeometry(0.01, 0.01, 0.018);
+         const carMat = new THREE.MeshBasicMaterial({color: 0x55ff55, depthTest: true});
+         const carMesh = new THREE.Mesh(carGeo, carMat);
+         carMesh.position.z = -i * 0.022; // Trail behind
+         meshGroup.add(carMesh);
+      }
+    }
+
+    mid.normalize().multiplyScalar(R + elevation);
+    
+    const curve = new THREE.QuadraticBezierCurve3(p1, mid, p2);
+    
+    // Draw the faint route line
+    const points = curve.getPoints(40);
+    const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
+    const lineMat = new THREE.LineBasicMaterial({
+      color: color, 
+      transparent: true, 
+      opacity: 0.12, 
+      blending: THREE.AdditiveBlending 
+    });
+    const curveLine = new THREE.Line(lineGeo, lineMat);
+    
+    window.globalTradeGroup.add(curveLine);
+    window.globalTradeGroup.add(meshGroup);
+    
+    window.activeTrades.push({
+      curve: curve,
+      mesh: meshGroup,
+      t: Math.random(), // Staggered starts
+      speed: speed
+    });
+  };
+
+  const routes = [
+    // PLANES (Aviation Trade)
+    {from: [40.7, -74.0], to: [51.5, -0.1], type: 'plane'}, // NY -> London
+    {from: [39.9, 116.4], to: [37.7, -122.4], type: 'plane'}, // Beijing -> SF
+    {from: [25.2, 55.2], to: [51.5, -0.1], type: 'plane'}, // Dubai -> London
+    {from: [35.6, 139.6], to: [-33.8, 151.2], type: 'plane'}, // Tokyo -> Sydney
+    {from: [1.3, 103.8], to: [22.3, 114.1], type: 'plane'}, // Singapore -> HK
+    {from: [48.8, 2.3], to: [-23.5, -46.6], type: 'plane'}, // Paris -> Sao Paulo
+    
+    // SHIPS (Maritime Cargo)
+    {from: [31.2, 121.4], to: [34.0, -118.2], type: 'ship'}, // Shanghai -> LA
+    {from: [22.5, 114.0], to: [51.9, 4.4], type: 'ship'}, // Shenzhen -> Rotterdam
+    {from: [1.2, 103.8], to: [23.8, 56.6], type: 'ship'}, // Singapore -> Oman Gulf
+    {from: [29.9, -90.0], to: [53.5, 9.9], type: 'ship'}, // New Orleans -> Hamburg
+    {from: [-23.9, -46.3], to: [31.2, 121.4], type: 'ship'}, // Santos BR -> Shanghai
+    {from: [-33.9, 18.4], to: [24.8, 66.9], type: 'ship'}, // Cape Town -> Karachi
+    {from: [38.9, 117.2], to: [54.0, -2.9], type: 'ship'}, // Tianjin -> Liverpool
+    
+    // TRAINS/TYRES (Overland Supply Chains)
+    {from: [39.9, 116.4], to: [52.5, 13.4], type: 'train'}, // Beijing -> Berlin (Eurasian Belt)
+    {from: [41.8, -87.6], to: [34.0, -118.2], type: 'train'}, // Chicago -> LA (Continental US)
+    {from: [40.7, -74.0], to: [29.7, -95.3], type: 'train'}, // NY -> Houston
+    {from: [55.7, 37.6], to: [43.1, 131.9], type: 'train'}, // Moscow -> Vladivostok (Trans-Siberian)
+    {from: [28.6, 77.2], to: [19.0, 72.8], type: 'train'}, // Delhi -> Mumbai (Indian Rail)
+    {from: [-34.6, -58.3], to: [-23.5, -46.6], type: 'train'}, // Buenos Aires -> Sao Paulo
+    {from: [-26.2, 28.0], to: [-33.9, 18.4], type: 'train'} // Johannesburg -> Cape Town
+  ];
+
+  routes.forEach(rt => {
+    // Inject 3 vehicles traversing each global route back-to-back
+    for(let i=0; i<3; i++) {
+       createTradeRoute(rt.from[0], rt.from[1], rt.to[0], rt.to[1], rt.type);
+       // Also reverse route for 2 way traffic
+       createTradeRoute(rt.to[0], rt.to[1], rt.from[0], rt.from[1], rt.type);
+    }
+  });
+
+  console.log("Global Trade Network Initialized (" + window.activeTrades.length + " discrete assets tracked).");
+}
+initGlobalTradeNetwork();
 
 // Stars
 const sg = new THREE.BufferGeometry();
@@ -2752,6 +3056,10 @@ function buildTroopSprites() {
     const pos = ll2v(cd.lat, cd.lon, GLOBE_R + .04);
     sprite.position.copy(pos);
     sprite.scale.set(.12,.06,1);
+    
+    // Hide if currently on a clean skin
+    sprite.visible = !(window.SKINS && window.SKINS[window.currentSkinIndex] && window.SKINS[window.currentSkinIndex].cleanGlobe);
+    
     sprite.userData = {iso};
     scene.add(sprite);
     troopSprites[iso] = sprite;
@@ -2769,6 +3077,10 @@ function updateTroopSprite(iso) {
   const sprite = new THREE.Sprite(mat);
   sprite.position.copy(ll2v(cd.lat, cd.lon, GLOBE_R+.04));
   sprite.scale.set(.12,.06,1);
+  
+  // Hide if currently on a clean skin
+  sprite.visible = !(window.SKINS && window.SKINS[window.currentSkinIndex] && window.SKINS[window.currentSkinIndex].cleanGlobe);
+  
   sprite.userData={iso};
   scene.add(sprite);
   troopSprites[iso]=sprite;
@@ -3185,7 +3497,7 @@ function handleGlobeClick(e) {
   }
   
   // Intercept clicks on Boat Markers for Naval War Mini-Game
-  if (window.isRedSkin && boatsActive && boatMarkers && boatMarkers.length > 0) {
+  if (window.isRedSkin && boatMarkers && boatMarkers.length > 0) {
     const boatHits = ray.intersectObjects(boatMarkers, false);
     if (boatHits.length > 0) {
       if (typeof window.openNavalWar === 'function') {
@@ -3197,7 +3509,7 @@ function handleGlobeClick(e) {
   
   // Intercept clicks on Airplane Markers for Shooter Mini-Game
   if (window.isRedSkin && window.planeMarkers && window.planeMarkers.length > 0) {
-    const planeHits = ray.intersectObjects(window.planeMarkers, false);
+    const planeHits = ray.intersectObjects(window.planeMarkers, true);
     if (planeHits.length > 0) {
       if (typeof window.openShooterGame === 'function') {
         window.openShooterGame(planeHits[0].object);
@@ -3282,11 +3594,240 @@ canvas.addEventListener('mousemove', e => {
   } else tip.classList.remove('show');
 });
 
+function showGreenSkinResourceModal(iso) {
+  if (typeof _sfxClick !== 'undefined') _sfxClick();
+  const cd = countryData[iso] || {name: iso};
+  const cName = cd.name.toUpperCase();
+  
+  // Custom tailored metals data for major global producers
+  const METALS_DATA = {
+    'CHILE': [
+      { name: 'Copper', color: '#b87333', desc: 'Codelco state monopoly, world\'s largest producer.' },
+      { name: 'Lithium', color: '#e6e6fa', desc: 'Ongoing nationalization efforts and strict state oversight.' }
+    ],
+    'CHINA': [
+      { name: 'Aluminum (Bauxite)', color: '#d9d9d9', desc: 'State-owned enterprises like Aluminum Corporation of China (Chalco).' },
+      { name: 'Copper', color: '#b87333', desc: 'State-owned giants like Zijin.' },
+      { name: 'Rare Earth Elements', color: '#ffb6c1', desc: 'China Rare Earth Group and strict state dominance of processing.' },
+      { name: 'Iron ore', color: '#a19d94', desc: 'State-dominated giants and consolidation efforts.' },
+      { name: 'Gold', color: '#ffd700', desc: 'State-owned or consolidated mining firms.' }
+    ],
+    'INDONESIA': [
+      { name: 'Nickel', color: '#c0c0c0', desc: 'MIND ID stakes and significant state holding in producers like Vale Indonesia.' },
+      { name: 'Copper', color: '#b87333', desc: 'Government majority stakes and oversight in operations like Freeport.' },
+      { name: 'Tin', color: '#d3d4d5', desc: 'State gatekeeping and management of production.' }
+    ],
+    'RUSSIA': [
+      { name: 'Iron ore', color: '#a19d94', desc: 'State-linked or heavily regulated firms.' },
+      { name: 'Nickel', color: '#c0c0c0', desc: 'Heavy state influence and regulation.' },
+      { name: 'Gold', color: '#ffd700', desc: 'Heavy government oversight.' }
+    ],
+    'PERU': [
+      { name: 'Copper', color: '#b87333', desc: 'Significant government stakes, oversight, and regulation.' }
+    ],
+    'BRAZIL': [
+      { name: 'Iron ore', color: '#a19d94', desc: 'Public resource management and strategic oversight.' }
+    ],
+    'GUINEA': [
+      { name: 'Aluminum', color: '#d9d9d9', desc: 'Government leasing and strategic state partnerships.' }
+    ],
+    'MEXICO': [
+      { name: 'Lithium', color: '#e6e6fa', desc: 'State enterprise Litio para Mexico after nationalization of reserves.' }
+    ],
+    'ARGENTINA': [
+      { name: 'Lithium', color: '#e6e6fa', desc: 'Government resource management in the lithium triangle.' }
+    ],
+    'BOLIVIA': [
+      { name: 'Lithium', color: '#e6e6fa', desc: 'Stringent government resource management in the lithium triangle.' }
+    ],
+    'DEMOCRATIC REPUBLIC OF THE CONGO': [
+      { name: 'Cobalt', color: '#0047ab', desc: 'Government oversight, state partnerships, and regulations on foreign mining.' }
+    ]
+  };
+
+  let metalsHtml = '';
+  // Check if we have tailored metal data for this exact country name
+  if (METALS_DATA[cName]) {
+    metalsHtml = `<div style="margin-top:20px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px;">
+      <b style="color:#0f8; font-size:13px; display:block; margin-bottom:10px;">★ STATE-CONTROLLED METALS</b>`;
+    METALS_DATA[cName].forEach(m => {
+      metalsHtml += `
+      <div class="strat-item">
+        <div class="strat-item-title" style="color:${m.color};">⛏ ${m.name}</div>
+        <div class="strat-item-desc">${m.desc}</div>
+      </div>`;
+    });
+    metalsHtml += `</div>`;
+  }
+  
+  const content = `
+    <div style="font-size:11px; margin-bottom:12px; color:#fff; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 8px;">
+      <span style="opacity:0.6;">Owned and managed by:</span><br>
+      <b style="font-size:14px; color:#0f8;">${cName} GOVERNMENT</b>
+    </div>
+    <div style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
+      <div class="strat-item">
+        <div class="strat-item-title" style="color:#fa0;">🛢 Oil (Petroleum)</div>
+        <div class="strat-item-desc">State monopolies or direct government control over production (e.g., National Oil Companies).</div>
+      </div>
+      <div class="strat-item">
+        <div class="strat-item-title" style="color:#0f8;">💨 Natural Gas</div>
+        <div class="strat-item-desc">State-controlled extraction, reserves owned by the nation.</div>
+      </div>
+      <div class="strat-item">
+        <div class="strat-item-title" style="color:#aaa;">⛏ Coal</div>
+        <div class="strat-item-desc">Government-dominated production or heavily regulated public land leasing.</div>
+      </div>
+      <div class="strat-item">
+        <div class="strat-item-title" style="color:#0f0;">☢ Uranium</div>
+        <div class="strat-item-desc">Heavily regulated and state-controlled for strategic/security purposes.</div>
+      </div>
+      <div class="strat-item">
+        <div class="strat-item-title" style="color:#f88;">🌿 Phosphate Rock</div>
+        <div class="strat-item-desc">Key fertilizer component; production is strictly state-influenced or owned.</div>
+      </div>
+      <div class="strat-item">
+        <div class="strat-item-title" style="color:#ffc;">🌾 Potash</div>
+        <div class="strat-item-desc">Essential agricultural resource; governed by state leases and public resource management.</div>
+      </div>
+      <div class="strat-item">
+        <div class="strat-item-title" style="color:#ddf;">🧂 Salt</div>
+        <div class="strat-item-desc">State-produced resource or regulated government monopoly.</div>
+      </div>
+      <div class="strat-item">
+        <div class="strat-item-title" style="color:#ccc;">🧱 Limestone</div>
+        <div class="strat-item-desc">State-leased or directly controlled on public lands for construction.</div>
+      </div>
+      <div class="strat-item">
+        <div class="strat-item-title" style="color:#eda;">🏠 Gypsum</div>
+        <div class="strat-item-desc">Managed through state building materials oversight and leasing.</div>
+      </div>
+      <div class="strat-item">
+        <div class="strat-item-title" style="color:#08f;">💧 Water (Freshwater)</div>
+        <div class="strat-item-desc">Governments strictly control extraction, distribution, and ownership.</div>
+      </div>
+      ${metalsHtml}
+    </div>
+  `;
+  
+  if (typeof openDrawer === 'function') {
+    openDrawer('natural-res', `🌍 NATURAL RESOURCES`, content);
+  }
+}
+
+function showYellowSkinArmsModal(iso) {
+  if (typeof _sfxClick !== 'undefined') _sfxClick();
+  const cd = countryData[iso] || {name: iso};
+  const cName = cd.name.toUpperCase();
+  
+  // SIPRI 2023 Top 100 Arms Revenue Data mapping
+  const ARMS_DATA = {
+    'UNITED STATES': [
+      { name: 'National Industry Overview', desc: 'Extremely self-reliant (<1% import ratio). The largest global arms producer. Strong government preference for domestic procurement creates massive localized industry.' },
+      { name: '1. Lockheed Martin', desc: '$60.8B (-1.6% YoY) — ~90% of total company revenue comes from arms.' },
+      { name: '2. RTX', desc: '$40.6B (-1.3% YoY).' },
+      { name: '3. Northrop Grumman', desc: '$35.5B (+5.8% YoY).' },
+      { name: '4. Boeing', desc: '$31.1B (+2.0% YoY) — ~40% of total revenue is arms.' },
+      { name: '5. General Dynamics', desc: '$30.2B (+3.2% YoY).' }
+    ],
+    'CHINA': [
+      { name: 'National Industry Overview', desc: 'Second largest national arms industry globally. Highly consolidated state-owned enterprises (SOEs).' },
+      { name: '8. AVIC', desc: '$20.8B (+5.6% YoY).' },
+      { name: '9. NORINCO', desc: '$20.5B (-2.7% YoY).' },
+      { name: '10. CETC', desc: '$16.0B (+13% YoY).' }
+    ],
+    'RUSSIA': [
+      { name: 'National Industry Overview', desc: 'Massive domestic demand surge due to escalating geopolitical conflict.' },
+      { name: '7. Rostec', desc: '$21.7B (+49% YoY) — Massive surge reflecting wartime state procurement.' }
+    ],
+    'UNITED KINGDOM': [
+      { name: 'National Industry Overview', desc: 'Major European producer. Significant domestic and export market presence.' },
+      { name: '6. BAE Systems', desc: '$29.8B (+2.3% YoY) — ~98% of total revenue is arms.' }
+    ],
+    'FRANCE': [
+      { name: 'National Industry Overview', desc: 'Strong aerospace and defense sector, deeply integrated into European procurement.' },
+      { name: '16. Thales', desc: 'Major defense electronics and systems exporter.' },
+      { name: '12. Airbus', desc: '$12.8B (Trans-European, significant operations in France).' }
+    ],
+    'GERMANY': [
+      { name: 'National Industry Overview', desc: 'Growing European dependency on imports, but retains strong localized manufacturing (e.g. tanks, systems).' },
+      { name: '26. Rheinmetall', desc: 'Rapidly expanding production capacity amid rising European tensions.' },
+      { name: '12. Airbus', desc: '$12.8B (Trans-European, significant operations in Germany).' }
+    ],
+    'SWEDEN': [
+      { name: 'National Industry Overview', desc: 'Highly advanced localized domestic production despite small population.' },
+      { name: 'Saab', desc: 'Advanced aerospace and defense systems, submarines, and fighter aircraft.' }
+    ],
+    'INDIA': [
+      { name: 'National Industry Overview', desc: 'Massive importer pushing aggressively for "Make in India" domestic arms production.' },
+      { name: 'Hindustan Aeronautics (HAL)', desc: 'Leading state-owned aerospace and defense company.' }
+    ],
+    'SOUTH KOREA': [
+      { name: 'National Industry Overview', desc: 'Rapidly emerging as a global top-tier arms exporter. Strong growth fueled by geopolitical tensions.' },
+      { name: 'Korea Aerospace Industries (KAI)', desc: 'Driving significant export expansion in fighter jets and light combat aircraft.' }
+    ],
+    'UKRAINE': [
+      { name: 'National Industry Overview', desc: 'Wartime mobilization radically expanding domestic production capabilities.' },
+      { name: 'JSC Ukrainian Defense Industry', desc: '+69% YoY revenue growth due to massive domestic procurement demands.' }
+    ]
+  };
+
+  let armsHtml = '';
+  if (ARMS_DATA[cName]) {
+    armsHtml = `<div style="margin-top:20px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px;">
+      <b style="color:#ffaa00; font-size:13px; display:block; margin-bottom:10px;">★ MAJOR PRODUCERS (SIPRI TOP 100)</b>`;
+    ARMS_DATA[cName].forEach(m => {
+      armsHtml += `
+      <div class="strat-item" style="border-left: 2px solid #ffaa00;">
+        <div class="strat-item-title" style="color:#fff;">🛡 ${m.name}</div>
+        <div class="strat-item-desc" style="color:#ddd;">${m.desc}</div>
+      </div>`;
+    });
+    armsHtml += `</div>`;
+  } else {
+    armsHtml = `<div style="margin-top:20px; padding: 15px; background: rgba(255,100,0,0.1); border-radius: 4px;">
+      <span style="color:#ffaa00;">No top 100 SIPRI headquarter producers located here.</span><br><br>
+      <span style="opacity:0.7;">This nation acts primarily as an importer or localized consumer in the global supply chain. High import reliance is common outside of major hubs.</span>
+    </div>`;
+  }
+  
+  const content = `
+    <div style="font-size:11px; margin-bottom:12px; color:#fff; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 8px;">
+      <span style="opacity:0.6;">National Procurement Jurisdiction:</span><br>
+      <b style="font-size:14px; color:#ffaa00;">${cName}</b>
+    </div>
+    <div style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
+      <div class="strat-item">
+        <div class="strat-item-title" style="color:#ffaa00;">📉 The "Global" Arms Industry Illusion</div>
+        <div class="strat-item-desc">Global arms revenues reached <b>$632 billion</b> in 2023. However, governments heavily favor domestic procurement for security reasons, resulting in critically low true intra-industry trade compared to civilian sectors.</div>
+      </div>
+      <div class="strat-item">
+        <div class="strat-item-title" style="color:#ffaa00;">🏭 Decreasing Concentration</div>
+        <div class="strat-item-desc">The Top 5 companies' share of the Top 100 revenues has consistently fallen (from 45% in 2002 to 31.4% in 2023), allowing more regional defense contractors to rise.</div>
+      </div>
+      ${armsHtml}
+    </div>
+  `;
+  
+  if (typeof openDrawer === 'function') {
+    openDrawer('arms-ind', `⚙ ARMS PRODUCTION (2023)`, content);
+  }
+}
+
 function selectCountry(iso) {
   const prev = GS.selected;
   if(prev) highlightCountry(prev,false);
   GS.selected = iso;
   highlightCountry(iso,true);
+
+  if (window.currentSkinIndex === 2) { // Green Skin exclusively ignores normal ops
+    showGreenSkinResourceModal(iso);
+    return;
+  }
+  if (window.currentSkinIndex === 3) { // Yellow Skin exclusively ignores normal ops
+    showYellowSkinArmsModal(iso);
+    return;
+  }
 
   const c = GS.countries[iso];
   const cd = countryData[iso];
@@ -5055,16 +5596,19 @@ function joinGlobalWar() {
   // Start ambient real-time visual flights
   if (window._ambientFlightInterval) clearInterval(window._ambientFlightInterval);
   window._ambientFlightInterval = setInterval(() => {
+    if (window.SKINS && window.SKINS[window.currentSkinIndex] && window.SKINS[window.currentSkinIndex].cleanGlobe) return;
     if (Math.random() > 0.3) spawnFakeTroops();
     
     // Offset the jet animation by 2 seconds for continuity
     setTimeout(() => {
+      if (window.SKINS && window.SKINS[window.currentSkinIndex] && window.SKINS[window.currentSkinIndex].cleanGlobe) return;
       if (Math.random() > 0.3) spawnFakeJets();
     }, 2000);
   }, 5000); // Every 5 seconds
 
   if (window._squadronInterval) clearInterval(window._squadronInterval);
   window._squadronInterval = setInterval(() => {
+    if (window.SKINS && window.SKINS[window.currentSkinIndex] && window.SKINS[window.currentSkinIndex].cleanGlobe) return;
     spawnSquadron();
   }, 7000); // Every 7 seconds
 }
@@ -5220,12 +5764,35 @@ function spawnAmbients() {
     const pivot = new THREE.Group();
     pivot.add(sprite);
     
+    // Add blue neon laser beam (hidden by default)
+    const laserMat = new THREE.MeshBasicMaterial({ 
+      color: 0x00aaff, 
+      transparent: true, 
+      opacity: 0.6, 
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    // Create a long thin cylinder representing the beam stretching from satellite to earth
+    const laserHeight = radius - GLOBE_R;
+    const laserGeo = new THREE.CylinderGeometry(0.01, 0.05, laserHeight, 8);
+    // Shift geometry so the origin is at the top (at the satellite)
+    laserGeo.translate(0, -laserHeight/2, 0); 
+    const laserBeam = new THREE.Mesh(laserGeo, laserMat);
+    // Position it exactly at the satellite's position
+    laserBeam.position.copy(sprite.position);
+    // Orient it to point directly at the origin (Earth's center)
+    laserBeam.lookAt(new THREE.Vector3(0,0,0));
+    laserBeam.rotateX(Math.PI / 2); // Correct orientation since cylinder is along Y
+    laserBeam.visible = false;
+    
+    pivot.add(laserBeam);
+    
     // Orbital mechanics (slightly faster for dramatic effect on Red Skin)
     const axis = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
     const speed = Math.random()*0.0015 + 0.0005;
     
     redSatGroup.add(pivot);
-    redSats.push({ pivot, axis, speed, offset: Math.random()*100 });
+    redSats.push({ pivot, axis, speed, offset: Math.random()*100, laser: laserBeam });
   }
 }
 
@@ -5240,8 +5807,40 @@ function animate() {
   const dt=Math.min(clock3.getDelta(),.05);
   time3+=dt;
 
-  // Animate Red Skin Satellites
-  if (window.isRedSkin) {
+  // Animate Satellites & Lasers for all non-LIVE skins
+  if (window.currentSkinIndex && window.currentSkinIndex > 0) {
+    // 30 second cycle for laser scans
+    window.lastLaserTime = window.lastLaserTime || 0;
+    if (time3 - window.lastLaserTime > 30) {
+      window.lastLaserTime = time3;
+      // Turn off all existing lasers
+      redSats.forEach(s => { if(s.laser) s.laser.visible = false; });
+      // Pick 2 random satellites to fire
+      if (redSats.length > 1) {
+        let idx1 = Math.floor(Math.random() * redSats.length);
+        let idx2 = Math.floor(Math.random() * redSats.length);
+        while(idx1 === idx2) idx2 = Math.floor(Math.random() * redSats.length);
+        
+        // Dynamically color the laser based on the current skin color
+        const skinColor = SKINS[window.currentSkinIndex].color;
+        
+        if(redSats[idx1].laser) {
+          redSats[idx1].laser.material.color.setHex(skinColor);
+          redSats[idx1].laser.visible = true;
+        }
+        if(redSats[idx2].laser) {
+          redSats[idx2].laser.material.color.setHex(skinColor);
+          redSats[idx2].laser.visible = true;
+        }
+        
+        // Turn them off after 2 seconds
+        setTimeout(() => {
+          if(redSats[idx1] && redSats[idx1].laser) redSats[idx1].laser.visible = false;
+          if(redSats[idx2] && redSats[idx2].laser) redSats[idx2].laser.visible = false;
+        }, 2000);
+      }
+    }
+
     for(let i=0; i<redSats.length; i++) {
       const sat = redSats[i];
       sat.pivot.rotateOnAxis(sat.axis, sat.speed * ((dt*60)||1));
@@ -5559,9 +6158,14 @@ function animate() {
   }
 
   // Cull troop sprites that are behind the globe
+  const isCleanGlobe = window.SKINS && window.SKINS[window.currentSkinIndex] && window.SKINS[window.currentSkinIndex].cleanGlobe;
   const camDir = camera.position.clone().normalize();
   for (const [, sprite] of Object.entries(troopSprites)) {
     if (!sprite.position) continue;
+    if (isCleanGlobe) {
+      sprite.visible = false;
+      continue;
+    }
     const sDir = sprite.position.clone().normalize();
     // dot > 0 = facing camera side. Use a threshold so edge countries don't flicker
     sprite.visible = camDir.dot(sDir) > 0.08;
@@ -5584,6 +6188,27 @@ function animate() {
     const dot = camDir.dot(pos.normalize());
     amb.sprite.visible = dot > 0.08;
   });
+
+  // Animate global trade transportation (Tyres, Trains, Ships, Planes)
+  if (window.activeTrades && window.globalTradeGroup && window.globalTradeGroup.visible) {
+    window.activeTrades.forEach(trade => {
+       trade.t += trade.speed * dt * 60; // Normalize speed to framerate
+       if (trade.t > 1) trade.t = 0; // Wrap around
+       
+       const point = trade.curve.getPointAt(trade.t);
+       trade.mesh.position.copy(point);
+       
+       // Calculate tangent to point nose in direction of travel
+       if (trade.t < 0.99) {
+          const nextPoint = trade.curve.getPointAt(trade.t + 0.01);
+          trade.mesh.lookAt(nextPoint);
+       }
+       
+       // Culling for trade meshes
+       const dot = camDir.dot(point.clone().normalize());
+       trade.mesh.visible = dot > 0.05;
+    });
+  }
 
   renderer.render(scene,camera);
 }
@@ -6536,84 +7161,123 @@ window.toggleIntelLayer = function(layerKey, isChecked) {
   }
 };
 
-let boatsActive = false;
 let boatInterval = null;
 let boatMarkers = []; // Store THREE.js meshes for the boats
 
-window.toggleBoats = function() {
-  if (typeof _sfxClick !== 'undefined') _sfxClick();
-  boatsActive = !boatsActive;
-  const btn = document.getElementById('btn-toggle-boats');
-  
-  if (boatsActive) {
-    btn.innerHTML = '🚢 BOATS ON';
-    btn.style.borderColor = '#0f8';
-    btn.style.color = '#0f8';
-    btn.style.background = 'rgba(0,255,136,0.1)';
-    fetchAndRenderBoats();
-    if (typeof window.spawnRedPlanes === 'function') window.spawnRedPlanes();
-    boatInterval = setInterval(fetchAndRenderBoats, 10000);
-  } else {
-    btn.innerHTML = '🚢 BOATS OFF';
-    btn.style.borderColor = 'rgba(0,170,255,0.5)';
-    btn.style.color = '#0af';
-    btn.style.background = 'rgba(0,170,255,0.1)';
-    clearInterval(boatInterval);
-    boatInterval = null;
-    clearBoatMarkers();
-  }
-};
 
 function clearBoatMarkers() {
   if (typeof scene === 'undefined') return;
   boatMarkers.forEach(b => {
-      if (b.material) b.material.dispose();
-      if (b.geometry) b.geometry.dispose();
-      scene.remove(b);
+      const parent = b.userData ? b.userData.parent : null;
+      if (parent) {
+          // Dispose all visual meshes in the boat group
+          parent.children.forEach(c => {
+              if (c.material) c.material.dispose();
+              if (c.geometry) c.geometry.dispose();
+          });
+          scene.remove(parent);
+      } else {
+          if (b.material) b.material.dispose();
+          if (b.geometry) b.geometry.dispose();
+          scene.remove(b);
+      }
   });
   boatMarkers = [];
 }
 
 function fetchAndRenderBoats() {
   if (typeof scene === 'undefined' || typeof THREE === 'undefined') return;
-  fetch('/api/boats').then(r => r.json()).then(data => {
-      clearBoatMarkers();
-      
-      const R = typeof GLOBE_R !== 'undefined' ? GLOBE_R + 0.025 : 1.025; // Earth radius in THREE.js scene, slightly above surface
-      const boatMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, depthTest: true });
+  if (!window.isRedSkin) return; // STRICT ENFORCEMENT: Boats only on Red Skin
+  
+  clearBoatMarkers();
+  
+  const R = typeof GLOBE_R !== 'undefined' ? GLOBE_R + 0.025 : 1.025; // Earth radius in THREE.js scene, slightly above surface
+  
+  const data = [
+      { lat: 40.7128, lon: -74.0060, cog: 90, name: "US DEFENDER" }, // NY Coast
+      { lat: 35.6895, lon: 139.6917, cog: 180, name: "JP PATROL" },  // Tokyo Bay
+      { lat: 51.5074, lon: -0.1278, cog: 270, name: "UK FRIGATE" },  // London Coast
+      { lat: 25.0330, lon: 121.5654, cog: 45, name: "TW ESCORT" },   // Taiwan Strait
+      { lat: 0, lon: 0, cog: 0, name: "EQUATOR GHOST" }              // Center of map
+  ];
 
-      if (data.length === 0) {
-          // Fallback mock boats if AIS stream is temporarily dead
-          data = [
-              { lat: 40.7128, lon: -74.0060, cog: 90, name: "US DEFENDER" }, // NY Coast
-              { lat: 35.6895, lon: 139.6917, cog: 180, name: "JP PATROL" },  // Tokyo Bay
-              { lat: 51.5074, lon: -0.1278, cog: 270, name: "UK FRIGATE" },  // London Coast
-              { lat: 25.0330, lon: 121.5654, cog: 45, name: "TW ESCORT" },   // Taiwan Strait
-              { lat: 0, lon: 0, cog: 0, name: "EQUATOR GHOST" }              // Center of map
-          ];
-      } else {
-          // Downsample massive datasets to prevent WebGL lag (render 1 in 50 boats)
-          data = data.filter((_, idx) => idx % 50 === 0);
-      data.forEach(boat => {
-          const boatGroup = new THREE.Group();
+  data.forEach(boat => {
+      const boatGroup = new THREE.Group();
           
-          // Hull (length along Y, width X, height Z)
-          const hullGeo = new THREE.BoxGeometry(0.03, 0.08, 0.02);
-          const hull = new THREE.Mesh(hullGeo, boatMat);
-          
-          // Bow (pointing forward +Y)
-          const bowGeo = new THREE.ConeGeometry(0.015, 0.04, 3);
-          const bow = new THREE.Mesh(bowGeo, boatMat);
-          bow.position.set(0, 0.06, 0);
-          
-          // Bridge (back -Y, up +Z)
-          const bridgeGeo = new THREE.BoxGeometry(0.02, 0.03, 0.02);
-          const bridge = new THREE.Mesh(bridgeGeo, boatMat);
-          bridge.position.set(0, -0.02, 0.02);
-          
-          boatGroup.add(hull);
-          boatGroup.add(bow);
-          boatGroup.add(bridge);
+          // Determine boat type based on hash to remain consistent
+          const bHash = boat.name ? boat.name.charCodeAt(0) + boat.name.length : Math.floor(boat.lat * 100);
+          const isCargo = bHash % 2 === 0;
+
+          if (isCargo) {
+              // Cargo Ship
+              const cargoHullMat = new THREE.MeshBasicMaterial({ color: 0x2c3e50, depthTest: true }); // Dark grey/blue
+              const deckMat = new THREE.MeshBasicMaterial({ color: 0x34495e, depthTest: true });
+              
+              const hullGeo = new THREE.BoxGeometry(0.032, 0.08, 0.018);
+              const hull = new THREE.Mesh(hullGeo, cargoHullMat);
+              hull.position.set(0, -0.01, 0);
+              
+              const bowGeo = new THREE.ConeGeometry(0.016, 0.03, 16); 
+              const bow = new THREE.Mesh(bowGeo, cargoHullMat);
+              bow.position.set(0, 0.045, 0);
+
+              const deckGeo = new THREE.BoxGeometry(0.028, 0.076, 0.002);
+              const deck = new THREE.Mesh(deckGeo, deckMat);
+              deck.position.set(0, -0.01, 0.009);
+
+              const bridgeGeo = new THREE.BoxGeometry(0.026, 0.018, 0.02);
+              const bridgeMat = new THREE.MeshBasicMaterial({ color: 0xecf0f1, depthTest: true });
+              const bridge = new THREE.Mesh(bridgeGeo, bridgeMat);
+              bridge.position.set(0, -0.04, 0.015);
+
+              boatGroup.add(hull);
+              boatGroup.add(bow);
+              boatGroup.add(deck);
+              boatGroup.add(bridge);
+
+              // Add some varied colored containers
+              const containerColors = [0xe74c3c, 0x3498db, 0xf1c40f, 0xecf0f1, 0x2ecc71];
+              const containerGeo = new THREE.BoxGeometry(0.024, 0.014, 0.012);
+              for(let i=0; i<3; i++) {
+                  const cMat = new THREE.MeshBasicMaterial({ color: containerColors[(bHash + i) % containerColors.length], depthTest: true });
+                  const container = new THREE.Mesh(containerGeo, cMat);
+                  container.position.set(0, 0.02 - (i * 0.018), 0.016);
+                  boatGroup.add(container);
+              }
+          } else {
+              // Yacht / Speedboat
+              const yachtMat = new THREE.MeshBasicMaterial({ color: 0xffffff, depthTest: true });
+              const deckMat = new THREE.MeshBasicMaterial({ color: 0xd2b48c, depthTest: true }); // Tan wood deck
+              
+              const hullGeo = new THREE.BoxGeometry(0.024, 0.05, 0.015);
+              const hull = new THREE.Mesh(hullGeo, yachtMat);
+              hull.position.set(0, -0.01, 0);
+              
+              const bowGeo = new THREE.ConeGeometry(0.012, 0.035, 16);
+              const bow = new THREE.Mesh(bowGeo, yachtMat);
+              bow.position.set(0, 0.032, 0);
+              
+              const deckGeo = new THREE.BoxGeometry(0.02, 0.04, 0.002);
+              const deck = new THREE.Mesh(deckGeo, deckMat);
+              deck.position.set(0, -0.01, 0.008);
+              
+              const cabinGeo = new THREE.BoxGeometry(0.018, 0.025, 0.01);
+              const cabinMat = new THREE.MeshBasicMaterial({ color: 0xeeeeee, depthTest: true });
+              const cabin = new THREE.Mesh(cabinGeo, cabinMat);
+              cabin.position.set(0, 0.0, 0.012);
+              
+              const glassGeo = new THREE.BoxGeometry(0.016, 0.01, 0.002);
+              const glassMat = new THREE.MeshBasicMaterial({ color: 0x222222, depthTest: true });
+              const glass = new THREE.Mesh(glassGeo, glassMat);
+              glass.position.set(0, 0.012, 0.015);
+              glass.rotation.x = Math.PI * 0.2;
+              
+              boatGroup.add(hull);
+              boatGroup.add(bow);
+              boatGroup.add(deck);
+              boatGroup.add(cabin);
+              boatGroup.add(glass);
+          }
           
           const pos = ll2v(boat.lat, boat.lon, R);
           boatGroup.position.copy(pos);
@@ -6636,7 +7300,6 @@ function fetchAndRenderBoats() {
           scene.add(boatGroup);
           boatMarkers.push(hit);
       });
-  }).catch(e => console.error("Error fetching boats:", e));
 }
 
 // ================= NAVAL WAR MINI-GAME =================
@@ -6644,7 +7307,7 @@ function fetchAndRenderBoats() {
 window.navalWarState = { active: false, humanHp: 100, aiHp: 100, boatMesh: null };
 
 window.openNavalWar = function(mesh) {
-  if (!window.isRedSkin || !boatsActive) return;
+  if (!window.isRedSkin) return;
   SFX.playClick();
   window.navalWarState = { active: true, humanHp: 100, aiHp: 100, boatMesh: mesh };
   
@@ -6820,13 +7483,113 @@ window.openShooterGame = function(hitBoxMesh) {
 
 window.fireRPG = function() {
   if (!window.shooterState.active || window.shooterState.ammo <= 0) return;
-  SFX.playClick(); // Standard click since we don't know if an explosion sound exists
+  SFX.playClick();
+  
+  // Hide shooter modal and open the manual RPG mini-game overlay
+  document.getElementById('shooter-modal').classList.remove('show');
+  const screen = document.getElementById('rpg-aim-screen');
+  screen.style.display = 'block';
+  screen.style.background = 'radial-gradient(circle at center, rgba(100,150,250,0.6) 0%, rgba(10,20,40,0.95) 100%)';
+  
+  window.rpgState = { 
+     active: true, 
+     time: 0, 
+     targetX: 0, targetY: 0, 
+     mouseX: 0, mouseY: 0, 
+     animId: null 
+  };
+  
+  // Track mouse bounded to approx 1/3 viewport from center
+  window._rpgMouseListener = function(e) {
+      if (!window.rpgState.active) return;
+      const mw = window.innerWidth / 2;
+      const mh = window.innerHeight / 2;
+      
+      // Calculate offset from center
+      let dX = e.clientX - mw;
+      let dY = e.clientY - mh;
+      
+      // Clamp to 1/3 viewport
+      const limitX = window.innerWidth / 3;
+      const limitY = window.innerHeight / 3;
+      
+      if (dX > limitX) dX = limitX;
+      if (dX < -limitX) dX = -limitX;
+      if (dY > limitY) dY = limitY;
+      if (dY < -limitY) dY = -limitY;
+      
+      window.rpgState.mouseX = dX;
+      window.rpgState.mouseY = dY;
+  };
+  document.addEventListener('mousemove', window._rpgMouseListener);
+  
+  window.rpgLoop();
+};
+
+window.rpgLoop = function() {
+  if (!window.rpgState.active) return;
+  window.rpgState.time += 0.04; // Speed of the aircraft
+  
+  const t = window.rpgState.time;
+  
+  // Complex sweeping motion with erratic shaking
+  window.rpgState.targetX = Math.sin(t * 1.2) * 400 + Math.sin(t * 3.5) * 80 + (Math.random() * 30 - 15);
+  window.rpgState.targetY = Math.cos(t * 0.9) * 250 + Math.cos(t * 4.2) * 60 + (Math.random() * 30 - 15);
+  
+  const targetEl = document.getElementById('rpg-target');
+  targetEl.style.transform = `translate(calc(-50% + ${window.rpgState.targetX}px), calc(-50% + ${window.rpgState.targetY}px)) rotate(${window.rpgState.targetX * 0.05 + 45}deg)`;
+  
+  // Move crosshair
+  const crosshairEl = document.getElementById('rpg-crosshair');
+  crosshairEl.style.transform = `translate(calc(-50% + ${window.rpgState.mouseX}px), calc(-50% + ${window.rpgState.mouseY}px))`;
+  
+  // Crosshair color feedback if hovering over target (relative distance)
+  const relX = window.rpgState.targetX - window.rpgState.mouseX;
+  const relY = window.rpgState.targetY - window.rpgState.mouseY;
+  const dist = Math.sqrt(relX * relX + relY * relY);
+  
+  const dot = document.getElementById('rpg-crosshair-dot');
+  if (dist < 60) {
+     dot.style.background = '#0f8'; // Locked on
+     dot.style.boxShadow = '0 0 15px #0f8';
+  } else {
+     dot.style.background = '#f00';
+     dot.style.boxShadow = '0 0 10px #f00';
+  }
+  
+  window.rpgState.animId = requestAnimationFrame(window.rpgLoop);
+};
+
+window.onRpgFire = function() {
+  if (!window.rpgState.active) return;
+  window.rpgState.active = false;
+  cancelAnimationFrame(window.rpgState.animId);
+  document.removeEventListener('mousemove', window._rpgMouseListener);
+  
+  SFX.playClick();
+  
+  const relX = window.rpgState.targetX - window.rpgState.mouseX;
+  const relY = window.rpgState.targetY - window.rpgState.mouseY;
+  const dist = Math.sqrt(relX * relX + relY * relY);
+  const isHit = dist < 65; // Tolerance radius (slightly larger than visual crosshair)
+  
+  // Flashbang effect
+  const screen = document.getElementById('rpg-aim-screen');
+  screen.style.background = '#fff';
+  
+  setTimeout(() => {
+    screen.style.display = 'none';
+    window.resolveRpgShot(isHit);
+  }, 120);
+};
+
+window.resolveRpgShot = function(isHit) {
+  document.getElementById('shooter-modal').classList.add('show');
   
   window.shooterState.ammo--;
   
-  // RNG Combat
-  const hitChance = Math.random();
-  const dmg = (hitChance > 0.3) ? Math.floor(40 + Math.random() * 40) : 0; // 70% hit chance
+  // If hit, calculate damage. If missed, 0.
+  const dmg = isHit ? Math.floor(40 + Math.random() * 30) : 0;
   
   window.shooterState.aiHp = Math.max(0, window.shooterState.aiHp - dmg);
   
@@ -6837,9 +7600,9 @@ window.fireRPG = function() {
   
   const log = document.getElementById('shooter-log');
   if (dmg > 0) {
-    log.innerHTML += `<div><span style="color:#0af">DIRECT HIT! ${dmg} DMG!</span></div>`;
+    log.innerHTML += `<div><span style="color:#0af">🎯 DIRECT HIT! ${dmg} DMG!</span></div>`;
   } else {
-    log.innerHTML += `<div><span style="color:#888">MISSED! Rocket flew past target.</span></div>`;
+    log.innerHTML += `<div><span style="color:#888">❌ MISSED! Rocket flew right past target.</span></div>`;
   }
   log.scrollTop = log.scrollHeight;
   
@@ -6852,7 +7615,7 @@ window.fireRPG = function() {
     
     // Grant Reward
     if (GS.players[GS.myIndex]) {
-      GS.countries[Object.keys(GS.countries)[0]].troops += 0.5; // add roughly 5k to a random province to simulate recovery, or just add to reserves
+      GS.countries[Object.keys(GS.countries)[0]].troops += 0.5; // add roughly 5k to a random province to simulate recovery
       GS.reinforceLeft += 0.5; // adding 0.5 translates to 5k
       updateDashboard();
       setLog("💥 Plane shootdown confirmed! +5,000 reserve troops added.");
@@ -6861,7 +7624,7 @@ window.fireRPG = function() {
     if (window.shooterState.planeMesh) {
        const hitBoxMesh = window.shooterState.planeMesh;
        const pivot = hitBoxMesh.userData.pivot;
-       if (pivot) scene.remove(pivot);
+       if (pivot) typeof scene !== 'undefined' && scene.remove(pivot);
        window.planeMarkers = window.planeMarkers.filter(b => b !== hitBoxMesh);
        if (window.planeData) window.planeData = window.planeData.filter(p => p.pivot !== pivot);
     }
@@ -6902,32 +7665,83 @@ document.getElementById('btn-toggle-intel').addEventListener('click', () => {
   }
 });
 
-window.isRedSkin = false;
-window.toggleRedSkin = function() {
-  if(typeof _sfxClick !== 'undefined') _sfxClick();
-  window.isRedSkin = !window.isRedSkin;
-  const btn = document.getElementById('btn-toggle-skin');
-  const boatBtn = document.getElementById('btn-toggle-boats');
-  
-  // Toggle webcam and satellite visibility
-  if (typeof webcamGroup !== 'undefined') webcamGroup.visible = window.isRedSkin;
-  if (typeof redSatGroup !== 'undefined') redSatGroup.visible = window.isRedSkin;
+// Skin Manager: 0 = LIVE (White), 1 = RED, 2 = GREEN, 3 = YELLOW
+window.currentSkinIndex = 0;
+window.isRedSkin = false; // Legacy flag preserved for scripts that might check it directly
 
-  if(window.isRedSkin) {
-    if(typeof globeMat !== 'undefined') globeMat.color.setHex(0xff2222);
-    btn.innerHTML = '🌍 LIVE SKIN';
-    btn.classList.add('active-normal');
-    boatBtn.style.display = 'block'; // Show boats toggle on red skin
-    if (typeof window.spawnRedPlanes === 'function') window.spawnRedPlanes();
+const SKINS = [
+  { name: 'LIVE',  color: 0xffffff, btnText: '🔴 RED SKIN',    btnClass: '',              showOverlays: false, cleanGlobe: false, showResources: false, showArms: false, showBoats: false },
+  { name: 'RED',   color: 0xff2222, btnText: '🟢 GREEN SKIN',  btnClass: 'active-normal', showOverlays: true,  cleanGlobe: false, showResources: false, showArms: false, showBoats: true },
+  { name: 'GREEN', color: 0x22ff22, btnText: '🟡 YLW SKIN',   btnClass: 'active-normal', showOverlays: false, cleanGlobe: true,  showResources: true,  showArms: false, showBoats: false },
+  { name: 'YELLOW',color: 0xffff22, btnText: '🌍 LIVE SKIN',   btnClass: 'active-normal', showOverlays: false, cleanGlobe: true,  showResources: false, showArms: true,  showBoats: false }
+];
+window.SKINS = SKINS;
+
+window.toggleRedSkin = function() {
+  if (typeof _sfxClick !== 'undefined') _sfxClick();
+  
+  // Advance skin
+  window.currentSkinIndex = (window.currentSkinIndex + 1) % SKINS.length;
+  const skin = SKINS[window.currentSkinIndex];
+  
+  window.isRedSkin = (skin.name === 'RED'); // Keep legacy compatibility
+
+  const btn = document.getElementById('btn-toggle-skin');
+  
+  // Apply Globe Color
+  if (typeof globeMat !== 'undefined') globeMat.color.setHex(skin.color);
+  
+  // Update UI Button
+  btn.innerHTML = skin.btnText;
+  if (skin.btnClass) btn.classList.add(skin.btnClass);
+  else btn.classList.remove('active-normal');
+  
+  // Toggle visibility of overlays (Webcams, Sats)
+  if (typeof webcamGroup !== 'undefined') webcamGroup.visible = skin.showOverlays;
+  if (typeof redSatGroup !== 'undefined') redSatGroup.visible = skin.showOverlays;
+  
+  // Toggle Natural Resources map layer
+  if (typeof naturalResourcesGroup !== 'undefined') naturalResourcesGroup.visible = skin.showResources;
+  
+  // Toggle Global Arms map layer
+  if (typeof armsIndustryGroup !== 'undefined') armsIndustryGroup.visible = skin.showArms;
+  
+  // Toggle Global Trade Network
+  if (typeof window.globalTradeGroup !== 'undefined') {
+     window.globalTradeGroup.visible = (skin.name === 'GREEN' || skin.name === 'YELLOW');
+  }
+  
+  // Toggle base map elements (Troops and Borders)
+  const isClean = skin.cleanGlobe;
+  if (typeof troopSprites !== 'undefined') {
+    Object.values(troopSprites).forEach(sprite => {
+      sprite.visible = !isClean;
+    });
+  }
+  if (typeof countryBorders !== 'undefined') {
+    Object.values(countryBorders).forEach(group => {
+      group.visible = !isClean;
+    });
+  }
+
+  // Clear ambient visual flights immediately when toggling to clean skin
+  if (isClean && typeof ambients !== 'undefined') {
+    ambients.forEach(a => {
+      if (a.mesh && a.mesh.parent) a.mesh.parent.remove(a.mesh);
+      if (a.pivot && a.pivot.parent) a.pivot.parent.remove(a.pivot);
+      if (a.pivot && typeof scene !== 'undefined') scene.remove(a.pivot);
+      
+      // Clear associated particle systems
+      if (a.psGroup && typeof scene !== 'undefined') scene.remove(a.psGroup);
+    });
+    ambients.length = 0;
+  }
+  
+  if (skin.showOverlays) {
+    if (typeof window.spawnRedPlanes === 'function' && window.planeData && window.planeData.length === 0) {
+      window.spawnRedPlanes();
+    }
   } else {
-    if(typeof globeMat !== 'undefined') globeMat.color.setHex(0xffffff);
-    btn.innerHTML = '🔴 RED SKIN';
-    btn.classList.remove('active-normal');
-    boatBtn.style.display = 'none'; // Hide on normal skin
-    
-    // Auto turn off boats if returning to normal skin
-    if (boatsActive) toggleBoats();
-    
     // Clear planes
     if (window.planeMarkers) {
       window.planeMarkers.forEach(p => {
@@ -6941,6 +7755,21 @@ window.toggleRedSkin = function() {
       });
       window.planeData = [];
       window.planeMarkers = [];
+    }
+  }
+
+  if (skin.showBoats) {
+    // Auto-start boats
+    if (!boatInterval) {
+      fetchAndRenderBoats();
+      boatInterval = setInterval(fetchAndRenderBoats, 10000);
+    }
+  } else {
+    // FORCE CLEAR BOATS REGARDLESS OF INTERVAL STATUS
+    clearBoatMarkers();
+    if (boatInterval) {
+      clearInterval(boatInterval);
+      boatInterval = null;
     }
   }
 };

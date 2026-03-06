@@ -36,64 +36,6 @@ const { RadioBrowserApi } = require('radio-browser-api');
 const radioApi = new RadioBrowserApi('NuclearWarGame-DexmondTech');
 const { OAuth2Client } = require('google-auth-library');
 
-// Start AISStream Client
-const AIS_KEY = 'da80da037d260301abf6f89de4df9c3ba3395b24';
-const aisSocket = new WebSocket('wss://stream.aisstream.io/v0/stream');
-
-let activeBoats = {};
-
-aisSocket.onopen = () => {
-  console.log('🚢 Connected to AIS Stream');
-  const subscriptionMessage = {
-      Apikey: AIS_KEY,
-      BoundingBoxes: [[[-90, -180], [90, 180]]], // Global
-      FiltersShipMMSI: [], 
-      FilterMessageTypes: ["PositionReport"]
-  };
-  aisSocket.send(JSON.stringify(subscriptionMessage));
-  
-  // Re-subscribe every 5 minutes to keep alive, as aisstream can drop idle connections
-  setInterval(() => {
-     if (aisSocket.readyState === WebSocket.OPEN) {
-         aisSocket.send(JSON.stringify(subscriptionMessage));
-     }
-  }, 5 * 60 * 1000);
-};
-
-aisSocket.onmessage = (event) => {
-  try {
-      const msg = JSON.parse(event.data);
-      console.log('AIS RAW:', msg.MessageType, msg.MetaData?.ShipName);
-      if (msg.MessageType === "PositionReport") {
-          const report = msg.Message.PositionReport;
-          const mmsi = msg.MetaData.MMSI;
-          
-          activeBoats[mmsi] = {
-              mmsi: mmsi,
-              name: msg.MetaData.ShipName ? msg.MetaData.ShipName.trim() : 'UNKNOWN VESSEL',
-              lat: report.Latitude,
-              lon: report.Longitude,
-              cog: report.Cog,      // Course over ground
-              sog: report.Sog,      // Speed over ground
-              timestamp: Date.now()
-          };
-      }
-  } catch (err) {}
-};
-
-aisSocket.onerror = (error) => console.log('AIS WebSocket Error:', error);
-aisSocket.onclose = () => console.log('AIS WebSocket Closed');
-
-// Clean up old boats every minute to prevent memory leak
-setInterval(() => {
-    const now = Date.now();
-    for (const mmsi in activeBoats) {
-        if (now - activeBoats[mmsi].timestamp > 600000) { // 10 minutes
-            delete activeBoats[mmsi];
-        }
-    }
-}, 60000);
-
 
 // REPLACE THIS WITH YOUR ACTUAL GOOGLE CLIENT ID
 const GOOGLE_CLIENT_ID = '787878787390-opqat1n6on9vp0sk8ilkn4qv1t6je1tp.apps.googleusercontent.com';
@@ -166,33 +108,7 @@ async function loadGameStateFallback() {
 
 const PORT = process.env.PORT || 4000;
 
-// --- OpenSky API Caching Proxy ---
-let cachedFlights = '{"time":0,"states":[]}';
-let lastFlightFetch = 0;
-const FLIGHT_CACHE_TTL = 30000; // 30 seconds
-
-async function fetchOpenSky() {
-  if (Date.now() - lastFlightFetch < FLIGHT_CACHE_TTL) return;
-  lastFlightFetch = Date.now();
-  try {
-    // We fetch a global or large bounding box. For stability without auth, we limit to a smaller global box or just all.
-    // The public API /api/states/all can be heavy, but we'll try it and cache heavily.
-    const res = await fetch('https://opensky-network.org/api/states/all');
-    if (res.ok) {
-      const data = await res.text();
-      cachedFlights = data;
-      console.log('✈ Successfully refreshed global flight data from OpenSky.');
-    } else {
-      console.warn('⚠ OpenSky API rate limited or unavailable:', res.status);
-    }
-  } catch (err) {
-    console.error('⚠ OpenSky Fetch Error:', err.message);
-  }
-}
-// Start initial fetch
-fetchOpenSky();
-setInterval(fetchOpenSky, FLIGHT_CACHE_TTL);
-
+// OpenSky API Removed
 
 // Create HTTP server to serve the static frontend
 const server = http.createServer((req, res) => {
@@ -214,12 +130,7 @@ const server = http.createServer((req, res) => {
       res.writeHead(200, { 'Content-Type': 'application/javascript' });
       res.end(data);
     });
-  } else if (req.url === '/api/boats') {
-    res.writeHead(200, {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
-    });
-    res.end(JSON.stringify(Object.values(activeBoats)));
+
   } else if (req.url === '/api/radio/random') {
     res.writeHead(200, {
       'Content-Type': 'application/json',

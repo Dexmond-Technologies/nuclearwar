@@ -1865,7 +1865,6 @@ let intelMap = null;
 let intelMapActive = false;
 
 const INTEL_LAYERS = {
-  liveFlights: '✈ Live Global Flights',
   bases: '🏛 Military Bases',
   nuclear: '☢ Nuclear Sites',
   conflicts: '⚔ Conflict Zones',
@@ -1905,43 +1904,7 @@ function initIntelMap() {
     setLog("⚠ Error loading Intel Map. Check console for details.");
   }
 
-  // --- Start polling proxy server for flights ---
-  function fetchLiveFlights() {
-    const deckWants = intelMap && intelMap.state && intelMap.state.layers && intelMap.state.layers.liveFlights;
-    const nativeWants = intelGroups.liveFlights && intelGroups.liveFlights.visible;
-    if (!deckWants && !nativeWants) return;
-    
-    fetch('/api/flights').then(r => r.json()).then(data => {
-      if (data && data.states) {
-        if (deckWants && intelMap.setCivilianFlights) {
-          intelMap.setCivilianFlights(data.states);
-        }
-        if (nativeWants && intelGroups.liveFlights) {
-          while(intelGroups.liveFlights.children.length > 0){ 
-            intelGroups.liveFlights.remove(intelGroups.liveFlights.children[0]); 
-          }
-          const flightGeo = new THREE.BufferGeometry();
-          const flightMat = new THREE.PointsMaterial({
-            color: 0xffff00, size: 0.025, transparent: true, opacity: 0.8,
-            map: createGlowTexture(0xffff00), blending: THREE.AdditiveBlending, depthWrite: false
-          });
-          const flightPts = [];
-          data.states.forEach(s => {
-            if(s[5] != null && s[6] != null) { // lon[5], lat[6]
-               const v = ll2v(s[6], s[5], GLOBE_R + 0.02 + (s[7] ? s[7]/200000 : 0));
-               flightPts.push(v.x, v.y, v.z);
-            }
-          });
-          flightGeo.setAttribute('position', new THREE.Float32BufferAttribute(flightPts, 3));
-          intelGroups.liveFlights.add(new THREE.Points(flightGeo, flightMat));
-        }
-      }
-    }).catch(e => console.error("Error fetching live flights:", e));
-  }
-  
-  // Fetch immediately and then loop
-  fetchLiveFlights();
-  setInterval(fetchLiveFlights, 30000);
+  // --- Polling proxy server for flights removed ---
 }
 
 function showIntelMapDrawer() {
@@ -1973,12 +1936,6 @@ window.toggleIntelLayer = function(layerKey, isChecked) {
   // 1. Sync Native Three.js Layers
   if (intelGroups[layerKey]) {
     intelGroups[layerKey].visible = isChecked;
-    
-    // Immediately fetch flights if toggled on
-    if (layerKey === 'liveFlights' && isChecked) {
-       // A quick hack to access the fetch map context
-       // fetchLiveFlights is scoped inside initIntelMap, so we'll just wait for its next interval.
-    }
   }
 
   // 2. Sync DeckGL Layers
