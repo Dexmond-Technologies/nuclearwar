@@ -687,6 +687,23 @@ function initWebSockets() {
         break;
       }
 
+      case 'get_leaderboard': {
+        if (pgPool) {
+          try {
+            const res = await pgPool.query(`
+              SELECT callsign, attacks, damage 
+              FROM commanders 
+              ORDER BY damage DESC, attacks DESC 
+              LIMIT 100
+            `);
+            ws.send(JSON.stringify({ type: 'leaderboard_data', data: res.rows }));
+          } catch(err) {
+            console.error('DB Error on get_leaderboard:', err.message);
+          }
+        }
+        break;
+      }
+
       case 'record_attack': {
         const callsign = msg.callsign;
         const damage = msg.damage || 0;

@@ -196,9 +196,18 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 #go-title{font-size:44px;letter-spacing:6px;text-shadow:0 0 30px currentColor;margin-bottom:16px;}
 
 /* Attack Presets Modal */
-#attack-modal{position:absolute;inset:0;background:rgba(0,10,20,.95);display:none;
-  align-items:center;justify-content:center;z-index:1050;backdrop-filter:blur(8px);}
-#attack-modal.show{display:flex; animation: fadeInModal 0.3s ease-out;}
+#attack-modal, #nuke-modal, #leaderboard-modal {
+  position: absolute;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.4);
+  display: none; justify-content: center; align-items: center;
+  z-index: 100;
+  pointer-events: auto;
+}
+#attack-modal.show, #nuke-modal.show, #leaderboard-modal.show { 
+  display: flex !important; 
+  animation: fadeInModal 0.3s ease-out;
+}
 @keyframes fadeInModal { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 .atk-card{background:linear-gradient(135deg,rgba(0,5,10,.95),rgba(0,15,30,.95));border:1px solid #0af;
   border-radius:12px;padding:25px 40px;width:95vw;height:88vh;max-width:1600px;
@@ -929,12 +938,14 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     <div id="d0-reasoning" style="margin-top:12px; padding:10px; background:rgba(0,220,255,0.05); border:1px solid rgba(0,220,255,0.2); border-radius:4px; font-family:'Courier New', monospace; font-size:10px; color:#0af; flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom: 4px;">
       <div style="opacity:0.5">> AWAITING COMMAND INPUT...</div>
     </div>
-    <div id="phase-btns" style="display:flex; gap:10px; align-items:center;">
+    <div id="phase-btns" style="display:flex; gap:10px; align-items:center; margin-bottom: 15px;">
       <button class="phase-btn" id="pb-reinforce" style="flex:1;">REINFORCE</button>
       <button class="phase-btn" id="pb-attack" style="flex:1;">ATTACK</button>
       <button class="phase-btn" id="pb-fortify" style="flex:1;">FORTIFY</button>
-
     </div>
+    
+    <button id="btn-leaderboard" onclick="openLeaderboard()" style="width:100%; height:20px; padding:0; display:flex; align-items:center; justify-content:center; background:rgba(255,170,0,0.1); border:1px solid rgba(255,170,0,0.5); color:#fa0; font-family:'Share Tech Mono', monospace; font-size:10px; font-weight:bold; letter-spacing:2px; cursor:pointer; border-radius:3px; transition:0.2s; outline:none; pointer-events:auto;">LEADERBOARD</button>
+
   </div>
   <div style="position:absolute; bottom:12px; left:20px; font-family:'Share Tech Mono', monospace; font-size:10px; font-weight:normal; letter-spacing:3px; color:#0af; text-transform:uppercase; z-index:15; pointer-events:none; text-shadow:0 0 5px rgba(0,170,255,0.8);">DEXMOND TECHNOLOGIES Ltd</div>
   <button id="btn-toggle-skin" onclick="toggleRedSkin()">🔴 RED SKIN</button>
@@ -1110,6 +1121,11 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 #btn-toggle-radio-next:hover {
   background: rgba(255,170,0,0.3);
   border-color: #fa0;
+}
+
+#btn-leaderboard:hover {
+  background: rgba(255,170,0,0.3) !important;
+  color: #fff !important;
 }
 
 #ops-sidebar {
@@ -1542,7 +1558,20 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 <div id="turn-announce">
   <div id="ta-sub">TURN BEGINS</div>
   <div id="ta-name">—</div>
-  <div id="ta-phase">REINFORCE PHASE</div>
+  <div id="leaderboard-modal">
+  <div style="background:rgba(0,10,20,0.9); border:1px solid rgba(255,170,0,0.5); padding:20px; width:450px; max-width:90%; color:#fa0; font-family:'Share Tech Mono', monospace; font-size:12px; box-shadow:0 0 20px rgba(255,170,0,0.2); position:relative;">
+    <button onclick="document.getElementById('leaderboard-modal').style.display='none'" style="position:absolute; top:10px; right:12px; background:none; border:none; color:#f55; cursor:pointer; font-size:16px;">✕</button>
+    <div style="text-align:center; font-size:16px; font-weight:bold; letter-spacing:2px; margin-bottom:15px; border-bottom:1px solid rgba(255,170,0,0.3); padding-bottom:8px;">
+      GLOBAL COMMANDER LEADERBOARD
+    </div>
+    
+    <div id="leaderboard-content" style="max-height:60vh; overflow-y:auto; padding-right:5px; text-align:left;">
+      <div style="opacity:0.6; text-align:center;">FETCHING DATABASE UPLINK...</div>
+    </div>
+  </div>
+</div>
+
+<div id="ta-phase">REINFORCE PHASE</div>
   <div id="ta-nukes"></div>
 </div>
 
@@ -4751,6 +4780,30 @@ function initWS() {
           SFX.playEvent();
         }
         break;
+        
+      case 'leaderboard_data':
+        const container = document.getElementById('leaderboard-content');
+        if (!container) break;
+        if (!msg.data || msg.data.length === 0) {
+          container.innerHTML = '<div style="opacity:0.6; text-align:center;">NO DATA FOUND</div>';
+          break;
+        }
+        
+        let html = '<table style="width:100%; border-collapse:collapse; text-align:left;">';
+        html += '<tr style="border-bottom:1px solid rgba(255,170,0,0.5);"><th style="padding:6px;">RANK</th><th style="padding:6px;">COMMANDER</th><th style="padding:6px;">ATTACKS</th><th style="padding:6px;">DAMAGE DEALT</th></tr>';
+        
+        msg.data.forEach((row, idx) => {
+          html += `<tr style="border-bottom:1px solid rgba(255,170,0,0.2);">
+            <td style="padding:6px;">#${idx+1}</td>
+            <td style="padding:6px; color:#fff;">${row.callsign.substring(0,25)}</td>
+            <td style="padding:6px; color:#f55;">${row.attacks.toLocaleString()}</td>
+            <td style="padding:6px; color:#fa0;">${formatTroops(row.damage)} MILS</td>
+          </tr>`;
+        });
+        html += '</table>';
+        container.innerHTML = html;
+        break;
+
       case 'player_joined':
         baseTotalPlayers = msg.totalPlayers || 1;
         updateGlobalPlayerCount();
@@ -4900,6 +4953,17 @@ document.getElementById('chat-inp').addEventListener('keydown',e=>{if(e.key==='E
 // LOBBY BUTTON HANDLERS
 // =====================================================================
 function hideLobby(){document.getElementById('lobby').style.display='none';}
+
+window.openLeaderboard = function() {
+  SFX.playClick();
+  document.getElementById('leaderboard-modal').classList.add('show');
+  const container = document.getElementById('leaderboard-content');
+  if (container) container.innerHTML = '<div style="opacity:0.6; text-align:center;">FETCHING DATABASE UPLINK...</div>';
+  
+  if (ws && ws.readyState === 1) {
+    ws.send(JSON.stringify({ type: 'get_leaderboard' }));
+  }
+};
 
 function joinGlobalWar() {
   document.getElementById('lobby-msg').innerHTML = "Establishing secure uplink...";
