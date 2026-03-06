@@ -6565,7 +6565,7 @@ function fetchAndRenderBoats() {
       // Basic boat geometry (Scaled up 7x for better clickability)
       const boatGeo = new THREE.ConeGeometry(0.042, 0.126, 4);
       boatGeo.rotateX(Math.PI / 2); // Point it flat along surface
-      const boatMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, depthTest: false, renderOrder: 10 });
+      const boatMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, depthTest: true });
 
       if (data.length === 0) {
           // Fallback mock boats if AIS stream is temporarily dead
