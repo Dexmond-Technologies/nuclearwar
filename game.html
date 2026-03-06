@@ -3461,7 +3461,7 @@ function executeAttackPreset(type) {
     if (ws && ws.readyState === 1 && dl > 0) {
        ws.send(JSON.stringify({
          type: 'record_attack',
-         callsign: document.getElementById('player-name').value || 'Commander',
+         callsign: document.getElementById('player-name')?.value || 'Commander',
          damage: dl
        }));
     }
