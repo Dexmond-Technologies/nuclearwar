@@ -1558,7 +1558,11 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 <div id="turn-announce">
   <div id="ta-sub">TURN BEGINS</div>
   <div id="ta-name">—</div>
-  <div id="leaderboard-modal">
+  <div id="ta-phase">REINFORCE PHASE</div>
+  <div id="ta-nukes"></div>
+</div>
+
+<div id="leaderboard-modal">
   <div style="background:rgba(0,10,20,0.9); border:1px solid rgba(255,170,0,0.5); padding:20px; width:450px; max-width:90%; color:#fa0; font-family:'Share Tech Mono', monospace; font-size:12px; box-shadow:0 0 20px rgba(255,170,0,0.2); position:relative;">
     <button onclick="document.getElementById('leaderboard-modal').classList.remove('show')" style="position:absolute; top:10px; right:12px; background:none; border:none; color:#f55; cursor:pointer; font-size:16px;">✕</button>
     <div style="text-align:center; font-size:16px; font-weight:bold; letter-spacing:2px; margin-bottom:15px; border-bottom:1px solid rgba(255,170,0,0.3); padding-bottom:8px;">
@@ -1569,10 +1573,6 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       <div style="opacity:0.6; text-align:center;">FETCHING DATABASE UPLINK...</div>
     </div>
   </div>
-</div>
-
-<div id="ta-phase">REINFORCE PHASE</div>
-  <div id="ta-nukes"></div>
 </div>
 
 <!-- Game Over -->
