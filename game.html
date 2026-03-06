@@ -3360,6 +3360,15 @@ function tryNuke(targetIso) {
   if (GS.countries[targetIso]?.owner === GS.myIndex) { window._nukeFrom=null;return; }
   const def = GS.countries[targetIso];
   const nukeStr = Math.floor(6 + Math.random()*5); // 6-10 dmg
+  
+  if (ws && ws.readyState === 1 && nukeStr > 0) {
+     ws.send(JSON.stringify({
+       type: 'record_attack',
+       callsign: window.myCallsign || document.getElementById('player-name')?.value || 'Commander',
+       damage: nukeStr
+     }));
+  }
+  
   def.troops = Math.max(0, def.troops - nukeStr);
   def.nuked  = 3;
   GS.players[GS.myIndex].nukes--;
@@ -3564,7 +3573,7 @@ function executeAttackPreset(type) {
     if (ws && ws.readyState === 1 && dl > 0) {
        ws.send(JSON.stringify({
          type: 'record_attack',
-         callsign: document.getElementById('player-name')?.value || 'Commander',
+         callsign: window.myCallsign || document.getElementById('player-name')?.value || 'Commander',
          damage: dl
        }));
     }
@@ -4762,6 +4771,7 @@ function initWS() {
       }
       case 'google_auth_success':
         // The server verified the JWT. We are officially connected.
+        window.myCallsign = msg.name;
         document.getElementById('us-name').textContent = 'COM-' + msg.name.toUpperCase().substring(0, 15);
         document.getElementById('lobby-auth-status').innerHTML = "✓ UPLINK AUTHENTICATED. READY FOR DEPLOYMENT.";
         if (msg.stats) {
