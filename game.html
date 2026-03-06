@@ -873,9 +873,6 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   </div>
   <div id="side-panel">
     <button id="sp-close" onclick="document.getElementById('side-panel').classList.remove('show');GS.selected=null;" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#f55;font-size:16px;cursor:pointer;line-height:1;padding:4px;" title="Close Panel">✕</button>
-    <button class="sp-btn" id="btn-toggle-skin" style="position:absolute; right:15px; width:100px; text-align:center; bottom:204px; background:#02050a; color:#0af; border:1px solid #0af; z-index:99999; padding:4px 8px; font-size:10px; cursor:pointer;" title="Toggle live webcams map skin">
-  🌍 LIVE SKIN
-</button>
     <div id="sp-cname">—</div>
     <div id="sp-info"></div>
     <div id="sp-actions">
@@ -2653,9 +2650,28 @@ window.buildFakeStaticMarkers = function() {
     const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: true });
     const sprite = new THREE.Sprite(mat);
     
-    // Spread them randomly across the entire globe surface
-    const lat = (Math.asin(Math.random() * 2 - 1) * 180 / Math.PI) * 0.85; 
-    const lon = Math.random() * 360 - 180;
+    let lat, lon;
+    
+    if (i < 80) {
+      // 80% on land: pick a random country from countryData
+      const isos = Object.keys(countryData);
+      const randomIso = isos[Math.floor(Math.random() * isos.length)];
+      const cd = countryData[randomIso];
+      
+      // If country data exists, use its coordinates with a small random jitter (+/- 2 degrees)
+      if (cd && cd.lat !== undefined && cd.lon !== undefined) {
+        lat = cd.lat + (Math.random() * 4 - 2);
+        lon = cd.lon + (Math.random() * 4 - 2);
+      } else {
+        // Fallback to random if no data
+        lat = (Math.asin(Math.random() * 2 - 1) * 180 / Math.PI) * 0.85; 
+        lon = Math.random() * 360 - 180;
+      }
+    } else {
+      // 20% random across the entire globe surface
+      lat = (Math.asin(Math.random() * 2 - 1) * 180 / Math.PI) * 0.85; 
+      lon = Math.random() * 360 - 180;
+    }
     
     sprite.position.copy(ll2v(lat, lon, GLOBE_R + 0.04));
     // Size it similarly to real markers
@@ -3852,11 +3868,11 @@ function spawnExplosion3D(lat,lon,col){
     scene.add(ring);
     rings.push({ring,mat,pts,t1,t2,c,delay:r*.12});
   }
-  const flashGeo=new THREE.SphereGeometry(.0225,12,12); // smaller explosion
+  const flashGeo=new THREE.SphereGeometry(.01125,12,12); // smaller explosion (half size)
   const flashMat=new THREE.MeshBasicMaterial({color:0xff8800,transparent:true,opacity:1}); // bright fire yellow/orange
   const flash=new THREE.Mesh(flashGeo,flashMat);
   flash.position.copy(c); scene.add(flash);
-  explosions3D.push({rings,flash,flashMat,life:1.0});
+  explosions3D.push({rings,flash,flashMat,life:1.0, maxLife:1.0, maxRadius:0.012, flashGrowth:2.4}); // Reduced 50%
 }
 
 // =====================================================================
@@ -3890,11 +3906,11 @@ function spawnMegaBombExplosion3D(lat, lon, col) {
   }
 
   // Inner huge flash
-  const flashGeo = new THREE.SphereGeometry(.11, 16, 16); // 5x bigger sphere
+  const flashGeo = new THREE.SphereGeometry(.055, 16, 16); // 5x bigger sphere (reduced 50%)
   const flashMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 1 });
   const flash = new THREE.Mesh(flashGeo, flashMat);
   flash.position.copy(c); scene.add(flash);
-  explosions3D.push({ rings, flash, flashMat, life: 1.5 }); // last a bit longer
+  explosions3D.push({ rings, flash, flashMat, life: 1.5, maxLife:1.5, maxRadius:0.060, flashGrowth:2.4 }); // last a bit longer, reduced 50%
 }
 
 function scheduleRandomMegaBomb() {
@@ -3949,11 +3965,11 @@ function spawnEMP3D(lat, lon) {
   }
 
   // Inner huge flash
-  const flashGeo = new THREE.SphereGeometry(.14, 16, 16); 
-  const flashMat = new THREE.MeshBasicMaterial({ color: 0x00ff66, transparent: true, opacity: 0.9 });
+  const flashGeo = new THREE.SphereGeometry(.05, 16, 16); // Reduced to 1/3 size
+  const flashMat = new THREE.MeshBasicMaterial({ color: 0x00ff66, transparent: true, opacity: 0.4 });
   const flash = new THREE.Mesh(flashGeo, flashMat);
   flash.position.copy(c); scene.add(flash);
-  explosions3D.push({ rings, flash, flashMat, life: 1.2 }); // Dissipates slightly faster
+  explosions3D.push({ rings, flash, flashMat, life: 1.2, maxLife:1.2, maxRadius:0.060, flashGrowth:2.0, maxRingOpacity:0.4, maxFlashOpacity:0.4 }); // Reduced radius to 1/3 (0.180 -> 0.060)
 }
 
 function scheduleRandomEMP() {
@@ -4004,11 +4020,11 @@ function spawnGroundBomb3D(lat, lon) {
   }
 
   // Inner huge flash
-  const flashGeo = new THREE.SphereGeometry(.09, 16, 16); 
-  const flashMat = new THREE.MeshBasicMaterial({ color: 0x00aaff, transparent: true, opacity: 1 });
+  const flashGeo = new THREE.SphereGeometry(.045, 16, 16); // Reduced to half size
+  const flashMat = new THREE.MeshBasicMaterial({ color: 0x00aaff, transparent: true, opacity: 0.4 });
   const flash = new THREE.Mesh(flashGeo, flashMat);
   flash.position.copy(c); scene.add(flash);
-  explosions3D.push({ rings, flash, flashMat, life: 1.4 }); 
+  explosions3D.push({ rings, flash, flashMat, life: 1.4, maxLife:1.4, maxRadius:0.075, flashGrowth:2.5, maxRingOpacity:0.4, maxFlashOpacity:0.4 }); // Reduced radius to half (0.150 -> 0.075)
 }
 
 function scheduleRandomGroundBomb() {
@@ -4062,7 +4078,8 @@ function spawnSonarSweep3D(lat, lon) {
   const flashMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.5 });
   const flash = new THREE.Mesh(flashGeo, flashMat);
   flash.position.copy(c); scene.add(flash);
-  explosions3D.push({ rings, flash, flashMat, life: 2.0 }); // Long life for the sweeping effect to be visible
+  // Sonar sweep pushes further context (huge radius, long duration)
+  explosions3D.push({ rings, flash, flashMat, life: 2.0, maxLife:2.0, maxRadius:0.250, flashGrowth:2.0 }); 
 }
 
 function scheduleRandomSonarSweep() {
@@ -4081,6 +4098,152 @@ function scheduleRandomSonarSweep() {
     }
     // Schedule the next one automatically
     scheduleRandomSonarSweep();
+  }, delay);
+}
+
+// =====================================================================
+// VISUAL EFFECTS FOR NAVAL PINGS AND CYBER GLITCH
+// =====================================================================
+const cyberGlitches = [];
+
+function spawnCyberGlitch(iso) {
+  const g = countryBorders[iso];
+  if (!g) return;
+  
+  const c = GS.countries[iso];
+  const origColor = c ? getOwnerColor(c.owner).int : 0x445566; // Fallback to neutral INT
+  
+  SFX.playSelect(); // A glitchy sound would be better if we had one
+  
+  // Push glitch to array to be animated
+  cyberGlitches.push({ iso, mesh: g, origColor, life: 3.0 });
+}
+
+function spawnNavalPing3D(lat, lon) {
+  if (lat === undefined || lon === undefined) return;
+  const c = ll2v(lat, lon, GLOBE_R + .002);
+  const up = c.clone().normalize();
+  let t1 = new THREE.Vector3(-up.z, 0, up.x);
+  if (t1.length() < .001) t1 = new THREE.Vector3(0, up.z, -up.y);
+  t1.normalize();
+  const t2 = new THREE.Vector3().crossVectors(up, t1);
+  const rings = [];
+  
+  for (let r = 0; r < 2; r++) {
+    const pts = Array.from({ length: 45 }, (_, i) => {
+      const a = (i / 44) * Math.PI * 2;
+      return c.clone().addScaledVector(t1, Math.cos(a) * .003).addScaledVector(t2, Math.sin(a) * .003);
+    });
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    const mat = new THREE.LineBasicMaterial({ color: 0x0088ff, transparent: true, opacity: 0.6, linewidth: 1 });
+    const ring = new THREE.Line(geo, mat);
+    scene.add(ring);
+    rings.push({ ring, mat, pts, t1, t2, c, delay: r * .25 }); 
+  }
+
+  const flashGeo = new THREE.SphereGeometry(.015, 12, 12); 
+  const flashMat = new THREE.MeshBasicMaterial({ color: 0x0088ff, transparent: true, opacity: 0.3 });
+  const flash = new THREE.Mesh(flashGeo, flashMat);
+  flash.position.copy(c); scene.add(flash);
+  
+  explosions3D.push({ rings, flash, flashMat, life: 2.5, maxLife:2.5, maxRadius:0.045, flashGrowth:1.0, maxRingOpacity:0.6, maxFlashOpacity:0.3 }); 
+}
+
+function scheduleRandomNavalPing() {
+  const delay = 30 * 1000; // Exactly 30 seconds
+  
+  setTimeout(() => {
+    let spawnedCount = 0;
+    
+    for (let p = 0; p < 23; p++) {
+      let valid = false;
+      let attempts = 0;
+      let lat, lon;
+      
+      while (!valid && attempts < 50) { 
+        lat = (Math.asin(Math.random() * 2 - 1) * 180 / Math.PI) * 0.85; 
+        lon = Math.random() * 360 - 180;
+        valid = true;
+        
+        for (const iso in countryData) {
+          const cd = countryData[iso];
+          if (cd && cd.lat !== undefined && cd.lon !== undefined) {
+            const dLat = Math.abs(lat - cd.lat);
+            let dLon = Math.abs(lon - cd.lon);
+            if (dLon > 180) dLon = 360 - dLon; // Handle wrap-around
+            if (Math.sqrt(dLat*dLat + dLon*dLon) < 8) { 
+              valid = false; 
+              break;
+            }
+          }
+        }
+        attempts++;
+      }
+
+      if (valid) {
+        spawnNavalPing3D(lat, lon);
+        spawnedCount++;
+      }
+    }
+    
+    if (spawnedCount > 0 && Math.random() > 0.5) {
+      setLog(`🌊 ${spawnedCount} UNIDENTIFIED SUBMERGED CONTACTS IN DEEP WATERS`);
+    }
+    
+    scheduleRandomNavalPing();
+  }, delay);
+}
+
+// =====================================================================
+// VISUAL EFFECTS FOR SPACE ROCKET LAUNCHES
+// =====================================================================
+function spawnSpaceRocket3D(lat, lon) {
+  if (lat === undefined || lon === undefined) return;
+  const c = ll2v(lat, lon, GLOBE_R + 0.005);
+  
+  // Basic Rocket Body
+  const texJet = new THREE.CanvasTexture(createJetCanvas()); // We can reuse the jet canvas as a basic pointer
+  const bodyMat = new THREE.SpriteMaterial({map: texJet, color: 0xffffff, transparent:true, depthTest:true});
+  const body = new THREE.Sprite(bodyMat);
+  body.scale.set(.06, .06, 1);
+  
+  const trailMat = new THREE.LineBasicMaterial({color:0xffaa00, transparent:true, opacity:0.8, linewidth: 2}); // Fiery trail
+  
+  const group = new THREE.Group();
+  group.add(body);
+  scene.add(group);
+  
+  // A space rocket's target is essentially the exact same lat/lon, but with a much higher altitude
+  // We'll shoot it way out into space (2x Globe Radius)
+  const ed = ll2v(lat, lon, GLOBE_R * 2.5);
+  const sd = c.clone();
+  
+  fakeJets3D.push({
+    group, body, trailMat, sd, ed,
+    progress: 0,
+    trailLine: null,
+    trailPts: [],
+    speed: 0.15 // Slower, dramatic launch
+  });
+  
+  // Optional: Add a little launch flash at the coordinate
+  spawnExplosion3D(lat, lon, 0xffaa00);
+}
+
+function scheduleRandomSpaceRocket() {
+  const delay = 3 * 60 * 1000; // Exact 3 minutes
+  
+  setTimeout(() => {
+    const spaceFaringIsos = Object.keys(countryData);
+    if (spaceFaringIsos.length > 0) {
+      const targetIso = spaceFaringIsos[Math.floor(Math.random() * spaceFaringIsos.length)];
+      const cd = countryData[targetIso];
+      if (cd && cd.lat !== undefined && cd.lon !== undefined) {
+        spawnSpaceRocket3D(cd.lat, cd.lon);
+        setLog(`🚀 SPACE AGENCY LAUNCH DETECTED FROM ${cd.name}`);
+      }
+    }
+    scheduleRandomSpaceRocket();
   }, delay);
 }
 
@@ -4636,7 +4799,7 @@ function createJetCanvas() {
   const ctx = c.getContext('2d');
   ctx.fillStyle = '#11ff88'; // Bright neon green
   ctx.shadowColor = '#11ff88'; ctx.shadowBlur = 15;
-  ctx.translate(64, 64); ctx.rotate(Math.PI/4); // Point top right
+  ctx.translate(64, 64); ctx.rotate(Math.PI/4); // Restore to original rotation
   ctx.beginPath(); ctx.moveTo(0, -30); ctx.lineTo(24, 20); ctx.lineTo(0, 10); ctx.lineTo(-24, 20); ctx.fill();
   return c;
 }
@@ -4929,7 +5092,7 @@ function animate() {
 
     // Sprite rotation angle
     const flatFwd=new THREE.Vector3().crossVectors(up,right).normalize();
-    let angle=Math.atan2(flatFwd.y,flatFwd.x) - Math.PI/2;
+    let angle=Math.atan2(flatFwd.y,flatFwd.x) - Math.PI/2 - Math.PI/6; // Added 30deg left turn
     
     // Apply layout offsets for each jet
     sq.jets.forEach(jet => {
@@ -4954,6 +5117,7 @@ function animate() {
     });
 
     if(sq.progress>=1){
+      sq.jets.forEach(j=>{if(j.trailLine){sq.group.remove(j.trailLine); j.trailLine.geometry.dispose();}});
       scene.remove(sq.group);
       squadrons3D.splice(i,1);
     }
@@ -4964,18 +5128,49 @@ function animate() {
     const ex=explosions3D[i];
     ex.life-=dt*.7;
     if(ex.life<=0){ex.rings.forEach(r=>scene.remove(r.ring));scene.remove(ex.flash);explosions3D.splice(i,1);continue;}
+    
+    const startLife = ex.maxLife || 1.0; 
+    const maxR = ex.maxRadius || 0.024;
+    const fGrowth = ex.flashGrowth || 4.8;
+    const maxROpacity = ex.maxRingOpacity || 0.9;
+    const maxFOpacity = ex.maxFlashOpacity || 1.0;
+    
     ex.rings.forEach((g,ri)=>{
-      const t=Math.max(0,(1-ex.life)*(1-g.delay*.5));
-      const s=t*.024+.001; // reduced 60%
-      const pts=Array.from({length:65},(_,j)=>{
-        const a=(j/64)*Math.PI*2;
+      const t=Math.max(0,(startLife-ex.life)*(1-g.delay*.5));
+      const s=t*maxR+.001; 
+      const len = g.pts ? g.pts.length : 65;
+      const pts=Array.from({length:len},(_,j)=>{
+        const a=(j/(len-1))*Math.PI*2;
         return g.c.clone().addScaledVector(g.t1,Math.cos(a)*s).addScaledVector(g.t2,Math.sin(a)*s);
       });
       g.ring.geometry.setFromPoints(pts);
-      g.mat.opacity=ex.life*.9;
+      g.mat.opacity=(ex.life/startLife)*maxROpacity;
     });
-    ex.flashMat.opacity=Math.min(1,ex.life*3);
-    ex.flash.scale.setScalar(1+(1-ex.life)*4.8); // reduced 60%
+    ex.flashMat.opacity=Math.min(maxFOpacity,(ex.life/startLife)*3.*maxFOpacity);
+    ex.flash.scale.setScalar(1+(startLife-ex.life)*fGrowth); 
+  }
+
+  // Update cyber glitches
+  for(let i=cyberGlitches.length-1;i>=0;i--){
+    const cg = cyberGlitches[i];
+    cg.life -= dt;
+    if(cg.life <= 0) {
+      cg.mesh.traverse(obj => {
+        if(obj.isLine && obj.material) obj.material.color.setHex(cg.origColor);
+      });
+      cyberGlitches.splice(i,1);
+      continue;
+    }
+    // Glitch effect: rapidly alternate between matrix green and a darker green/original
+    cg.mesh.traverse(obj => {
+      if(obj.isLine && obj.material) {
+        if (Math.random() > 0.5) {
+          obj.material.color.setHex(Math.random() > 0.5 ? 0x00ff44 : 0x008822);
+        } else {
+          obj.material.color.setHex(cg.origColor);
+        }
+      }
+    });
   }
 
   // Cull troop sprites that are behind the globe
@@ -5056,6 +5251,26 @@ function triggerAmbientWarfare() {
 // Start ambient war loop after brief initial delay
 setTimeout(triggerAmbientWarfare, 8000);
 
+setTimeout(() => {
+  if (typeof ws_isHost !== 'undefined') {
+    if (ws_isHost || (!GS.isOnline)) {
+      scheduleRandomMegaBomb();
+      scheduleRandomEMP();
+      scheduleRandomGroundBomb();
+      scheduleRandomSonarSweep();
+      scheduleRandomNavalPing();
+      scheduleRandomSpaceRocket();
+    }
+  } else {
+    // Fallback if networking isn't initialized yet
+    scheduleRandomMegaBomb();
+    scheduleRandomEMP();
+    scheduleRandomGroundBomb();
+    scheduleRandomSonarSweep();
+    scheduleRandomNavalPing();
+    scheduleRandomSpaceRocket();
+  }
+}, 8000);
 spawnAmbients();
 animate();
 
@@ -5238,6 +5453,7 @@ function executeSpyAction(actionId, targetIso) {
     case 'INTEL':
       GS.spyState.intelActive = 5;
       fogEnabled = false;
+      spawnCyberGlitch(targetIso);
       setLog(`👁 INTEL SUCCESS: Full visibility for 5 turns.`);
       applyFogOfWar();
       triggerNewsEvent('INTELLIGENCE BREAKTHROUGH — ENEMY POSITIONS REVEALED');
@@ -5248,6 +5464,7 @@ function executeSpyAction(actionId, targetIso) {
         tgt.troops = 1;
         refreshBorder(targetIso);
         updateTroopSprite(targetIso);
+        spawnCyberGlitch(targetIso);
         setLog(`💼 COUP SUCCESS: ${tgt.name} flipped to your control!`);
         triggerNewsEvent(`${tgt.name.toUpperCase()} GOVERNMENT OVERTHROWN IN COUP`);
       } else {
@@ -5255,6 +5472,7 @@ function executeSpyAction(actionId, targetIso) {
       }
       break;
     case 'FALSE_INTEL':
+      spawnCyberGlitch(targetIso);
       setLog(`📡 DISINFORMATION planted in ${tgt.name}. Enemy confused!`);
       triggerNewsEvent('WIDESPREAD MISINFORMATION CAMPAIGN DETECTED');
       break;
@@ -5862,14 +6080,6 @@ const _origInitGame = window.initGame;
 window.initGame = function(names, idx) {
   if (typeof _origInitGame === 'function') _origInitGame(names, idx);
   setTimeout(() => { renderDoomsdayClock(); }, 1000);
-  
-  // Start Mega Bomb sequence if Host
-  if (ws_isHost || (!GS.isOnline)) {
-    scheduleRandomMegaBomb();
-    scheduleRandomEMP();
-    scheduleRandomGroundBomb();
-    scheduleRandomSonarSweep();
-  }
 };
 
 // =====================================================================
