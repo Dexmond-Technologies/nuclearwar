@@ -299,13 +299,21 @@ const server = http.createServer((req, res) => {
           if (!global.cachedWebcams) {
             // Provide a hardcoded fallback if cache is empty & rate limited
             global.cachedWebcams = [
-              {
-                slug: "cox-bay-surf-waves-tofino-shores",
-                title: "Cox Bay Surf Waves, Tofino Shores",
-                latitude: "49.1048090",
-                longitude: "-125.8744010",
-                stream_type: "youtube"
-              }
+              { slug: "cox-bay-surf-waves-tofino-shores", title: "Cox Bay Surf Waves, Tofino Shores", latitude: "49.1048090", longitude: "-125.8744010", stream_type: "youtube" },
+              { slug: "times-square-nyc-live-cam", title: "Times Square, New York", latitude: "40.7580", longitude: "-73.9855", stream_type: "youtube" },
+              { slug: "shibuya-crossing-tokyo", title: "Shibuya Crossing, Tokyo", latitude: "35.6595", longitude: "-139.7005", stream_type: "youtube" },
+              { slug: "abbey-road-crossing-london", title: "Abbey Road Crossing, London", latitude: "51.5321", longitude: "-0.1773", stream_type: "youtube" },
+              { slug: "sydney-harbour-bridge", title: "Sydney Harbour Bridge", latitude: "-33.8523", longitude: "151.2108", stream_type: "youtube" },
+              { slug: "eiffel-tower-paris", title: "Eiffel Tower View, Paris", latitude: "48.8584", longitude: "2.2945", stream_type: "youtube" },
+              { slug: "copacabana-beach-rio", title: "Copacabana Beach, Rio de Janeiro", latitude: "-22.9711", longitude: "-43.1822", stream_type: "youtube" },
+              { slug: "dubai-marina-live", title: "Dubai Marina", latitude: "25.0805", longitude: "55.1403", stream_type: "youtube" },
+              { slug: "venice-grand-canal", title: "Grand Canal, Venice", latitude: "45.4381", longitude: "12.3315", stream_type: "youtube" },
+              { slug: "table-mountain-cape-town", title: "Table Mountain, Cape Town", latitude: "-33.9249", longitude: "18.4241", stream_type: "youtube" },
+              { slug: "hollywood-blvd-live", title: "Hollywood Blvd, Los Angeles", latitude: "34.1016", longitude: "-118.3316", stream_type: "youtube" },
+              { slug: "wailing-wall-jerusalem", title: "Western Wall, Jerusalem", latitude: "31.7767", longitude: "35.2345", stream_type: "youtube" },
+              { slug: "kiev-maidan-square", title: "Maidan Nezalezhnosti, Kiev", latitude: "50.4501", longitude: "30.5234", stream_type: "youtube" },
+              { slug: "moscow-red-square-live", title: "Red Square area, Moscow", latitude: "55.7539", longitude: "37.6208", stream_type: "youtube" },
+              { slug: "beijing-cbd-view", title: "CBD View, Beijing", latitude: "39.9042", longitude: "116.4074", stream_type: "youtube" }
             ];
           }
           global.lastWebcamsFetchTime = Date.now(); 
@@ -321,13 +329,13 @@ const server = http.createServer((req, res) => {
           res.end(JSON.stringify({ result: { webcams: global.cachedWebcams } }));
         } else {
           // Hardcoded fallback on pure error too
-          const fallback = [{
-            slug: "cox-bay-surf-waves-tofino-shores",
-            title: "Cox Bay Surf Waves, Tofino Shores",
-            latitude: "49.1048090",
-            longitude: "-125.8744010",
-            stream_type: "youtube"
-          }];
+          const fallback = [
+            { slug: "cox-bay-surf-waves-tofino-shores", title: "Cox Bay Surf Waves, Tofino Shores", latitude: "49.1048090", longitude: "-125.8744010", stream_type: "youtube" },
+            { slug: "times-square-nyc-live-cam", title: "Times Square, New York", latitude: "40.7580", longitude: "-73.9855", stream_type: "youtube" },
+            { slug: "shibuya-crossing-tokyo", title: "Shibuya Crossing, Tokyo", latitude: "35.6595", longitude: "139.7005", stream_type: "youtube" },
+            { slug: "abbey-road-crossing-london", title: "Abbey Road Crossing, London", latitude: "51.5321", longitude: "-0.1773", stream_type: "youtube" },
+            { slug: "sydney-harbour-bridge", title: "Sydney Harbour Bridge", latitude: "-33.8523", longitude: "151.2108", stream_type: "youtube" }
+          ];
           res.end(JSON.stringify({ result: { webcams: fallback } }));
         }
       });
@@ -348,16 +356,31 @@ const server = http.createServer((req, res) => {
     }
 
     const handleFallback = () => {
-      // General fallback or specific fallback for Cox Bay Tofino
-      if (slug === 'cox-bay-surf-waves-tofino-shores') {
+      // General fallback or specific fallback for Tofino or others
+      let camInfo = global.cachedWebcams ? global.cachedWebcams.find(c => c.slug === slug) : null;
+      
+      if (camInfo || slug === 'cox-bay-surf-waves-tofino-shores') {
+        const title = camInfo ? camInfo.title : "Live Feed";
+        const lat = camInfo ? camInfo.latitude : "0";
+        const lon = camInfo ? camInfo.longitude : "0";
+        
+        // Ensure a working fallback youtube video for testing/demo
+        const fallbackStreams = {
+          "cox-bay-surf-waves-tofino-shores": "https://www.youtube.com/watch?v=84dLnpdqC_U",
+          "times-square-nyc-live-cam": "https://www.youtube.com/watch?v=1-iS7LArLcs",
+          "shibuya-crossing-tokyo": "https://www.youtube.com/watch?v=HpdO5Kq3o7Y",
+          "dubai-marina-live": "https://www.youtube.com/watch?v=yW6IuFk7V5Y"
+        };
+        const streamUrl = fallbackStreams[slug] || "https://www.youtube.com/watch?v=1-iS7LArLcs";
+        
         const fallbackData = {
-          slug: "cox-bay-surf-waves-tofino-shores",
-          title: "Cox Bay Surf Waves, Tofino Shores",
+          slug: slug,
+          title: title,
           stream_type: "youtube",
-          stream_url: "https://www.youtube.com/watch?v=84dLnpdqC_U",
-          latitude: "49.1048090",
-          longitude: "-125.8744010",
-          country: { name: "Canada", iso_code: "CA" }
+          stream_url: streamUrl,
+          latitude: lat,
+          longitude: lon,
+          country: { name: "Target Region", iso_code: "N/A" }
         };
         global.cachedStreams[slug] = { timestamp: Date.now(), data: fallbackData };
         res.end(JSON.stringify({ data: fallbackData }));

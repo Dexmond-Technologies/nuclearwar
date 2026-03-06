@@ -518,7 +518,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   z-index:999;text-align:center;padding:6px 0;border-top:2px solid #f00;border-bottom:2px solid #f00;
   display:none;align-items:center;justify-content:center;box-shadow:0 0 50px rgba(255,0,0,0.8);
   backdrop-filter:blur(10px);overflow:hidden;}
-#news-alert.show{display:flex;animation:slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, alertFlash 1s infinite alternate;}
+#news-alert.show{display:flex !important; z-index:9999 !important; animation:slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, alertFlash 1s infinite alternate;}
 #news-alert.hide{animation:slideOut 0.4s ease-in forwards;}
 #na-label{position:absolute;top:2px;left:20px;font-size:6px;font-family:'Share Tech Mono',monospace;letter-spacing:4px;color:#ffb8b8;}
 #na-text{font-size:12px;font-family:'Orbitron',sans-serif;font-weight:900;letter-spacing:6px;text-transform:uppercase;text-shadow:0 0 20px #fff;}
@@ -2105,6 +2105,27 @@ async function loadCountries(retries = 3) {
 
     countryData[iso] = { name: p.name||iso, lat: bestLat, lon: bestLon, polys };
 
+    if (iso === 'USA') {
+      for (let i = 1; i <= 10; i++) {
+        countryData[`USA_V${i}`] = {
+          name: `US Sector ${i}`,
+          lat: 30 + Math.random() * 18,
+          lon: -125 + Math.random() * 50,
+          polys: []
+        };
+      }
+    }
+    if (iso === 'CHN') {
+      for (let i = 1; i <= 10; i++) {
+        countryData[`CHN_V${i}`] = {
+          name: `China Sector ${i}`,
+          lat: 22 + Math.random() * 18,
+          lon: 80 + Math.random() * 40,
+          polys: []
+        };
+      }
+    }
+
     // Draw border lines
     // Build border lines geometry but do not render them on the globe
     const mat = new THREE.LineBasicMaterial({color:NEUTRAL.int, transparent:true, opacity:.6});
@@ -2293,6 +2314,11 @@ function initGame(playerNames, myIndex) {
     // If neutral, randomly assign to a player 70% of the time to ensure they are NOT GREYED OUT
     if (owner === -1 && Math.random() < 0.70) {
       owner = Math.random() > 0.5 ? 0 : 1;
+    }
+
+    if (iso.startsWith('USA_V') || iso.startsWith('CHN_V')) {
+      const num = parseInt(iso.split('_V')[1]);
+      owner = num <= 5 ? 0 : 1;
     }
     const stats = getCountryStat(iso);
     
@@ -3057,6 +3083,46 @@ function handleGlobeClick(e) {
   mouse.x = (e.clientX/innerWidth)*2-1;
   mouse.y = -(e.clientY/innerHeight)*2+1;
   ray.setFromCamera(mouse, camera);
+
+  // 0. Intercept global actions first (Spy / Naval) before any UI blocks it
+  if (window._pendingSpyAction) {
+    const hits = ray.intersectObject(globeMesh, false);
+    if (hits.length) {
+      const pt = hits[0].point.normalize();
+      const lat = Math.asin(pt.y)/RAD; // Reverse 3D spherical translation mapping
+      const lon = Math.atan2(pt.z,pt.x)/RAD;
+      const iso = getCountryAt(lat, lon);
+      if (iso && GS.countries[iso]) {
+        const action = window._pendingSpyAction;
+        window._pendingSpyAction = null;
+        if (typeof window.executeSpyAction === 'function') {
+           window.executeSpyAction(action, iso);
+        }
+        return;
+      }
+    }
+  }
+
+  if (window._pendingNaval) {
+    const hits = ray.intersectObject(globeMesh, false);
+    if (hits.length) {
+      const pt = hits[0].point.normalize();
+      const lat = Math.asin(pt.y)/RAD;
+      const lon = Math.atan2(pt.z,pt.x)/RAD;
+      const iso = getCountryAt(lat, lon);
+      if (iso && GS.countries[iso]) {
+        const action = window._pendingNaval;
+        window._pendingNaval = null;
+        if      (action === 'DEPLOY')      deployNavalFleet(iso);
+        else if (action === 'AIRWING')     deployAirWing(iso);
+        else if (action === 'BLOCKADE')    navalBlockade(iso);
+        else if (action === 'BOMBING')     strategicBombing(iso);
+        else if (action === 'DEVELOP')     developTerritory(iso);
+        else if (action === 'CARRIER_ATK') carrierStrike(iso);
+        return;
+      }
+    }
+  }
 
   const hits = ray.intersectObject(globeMesh, false);
   if (!hits.length) return;
@@ -4094,7 +4160,7 @@ function spawnSonarSweep3D(lat, lon) {
 }
 
 function scheduleRandomSonarSweep() {
-  const delay = 15 * 1000; // Exact 15 seconds (was 30s)
+  const delay = 5 * 1000; // Exact 5 seconds (was 15s)
   
   setTimeout(() => {
     const isos = Object.keys(countryData);
@@ -4208,12 +4274,89 @@ function scheduleRandomNavalPing() {
 // =====================================================================
 // VISUAL EFFECTS FOR SPACE ROCKET LAUNCHES
 // =====================================================================
+function createSpaceRocketCanvas() {
+  const c = document.createElement('canvas'); c.width = 128; c.height = 128;
+  const ctx = c.getContext('2d');
+  
+  ctx.translate(64, 64);
+  // Removed Math.PI/4 rotation so it naturally points UP
+  
+  // Outer glow for realism
+  ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
+  ctx.shadowBlur = 12;
+  
+  // Base color: bright white
+  ctx.fillStyle = '#ffffff';
+
+  // MAIN CORE FLUID SHAPE
+  ctx.beginPath();
+  // Nose Cone (Payload Fairing)
+  ctx.moveTo(0, -45); 
+  ctx.quadraticCurveTo(8, -25, 8, -10); // Smooth flare
+  // Main Body Section
+  ctx.lineTo(8, 35);
+  // Bottom Base
+  ctx.lineTo(-8, 35);
+  // Left Side Body
+  ctx.lineTo(-8, -10);
+  ctx.quadraticCurveTo(-8, -25, 0, -45); // Left nose cone flare
+  ctx.fill();
+
+  // LEFT SOLID ROCKET BOOSTER
+  ctx.beginPath();
+  ctx.moveTo(-9, -5);   // Booster Tip
+  ctx.lineTo(-14, 5);   // Booster Flare Out
+  ctx.lineTo(-14, 35);  // Booster Bottom Out
+  ctx.lineTo(-9, 35);   // Booster Bottom In
+  ctx.closePath();
+  ctx.fill();
+
+  // RIGHT SOLID ROCKET BOOSTER
+  ctx.beginPath();
+  ctx.moveTo(9, -5);    // Booster Tip
+  ctx.lineTo(14, 5);    // Booster Flare Out
+  ctx.lineTo(14, 35);   // Booster Bottom Out
+  ctx.lineTo(9, 35);    // Booster Bottom In
+  ctx.closePath();
+  ctx.fill();
+  
+  // ENGINE NOZZLES (Main & Boosters) - Optional grey shading
+  ctx.fillStyle = '#888888';
+  ctx.shadowBlur = 0; // Turn off glow for engines
+  
+  // Main Engine
+  ctx.beginPath();
+  ctx.moveTo(-6, 35);
+  ctx.lineTo(6, 35);
+  ctx.lineTo(8, 40);
+  ctx.lineTo(-8, 40);
+  ctx.fill();
+  
+  // Left Booster Nozzle
+  ctx.beginPath();
+  ctx.moveTo(-13, 35);
+  ctx.lineTo(-10, 35);
+  ctx.lineTo(-9, 39);
+  ctx.lineTo(-14, 39);
+  ctx.fill();
+  
+  // Right Booster Nozzle
+  ctx.beginPath();
+  ctx.moveTo(10, 35);
+  ctx.lineTo(13, 35);
+  ctx.lineTo(14, 39);
+  ctx.lineTo(9, 39);
+  ctx.fill();
+  
+  return c;
+}
+
 function spawnSpaceRocket3D(lat, lon) {
   if (lat === undefined || lon === undefined) return;
   const c = ll2v(lat, lon, GLOBE_R + 0.005);
   
   // Basic Rocket Body
-  const texJet = new THREE.CanvasTexture(createJetCanvas()); // We can reuse the jet canvas as a basic pointer
+  const texJet = new THREE.CanvasTexture(createSpaceRocketCanvas()); // Custom white rocket canvas
   const bodyMat = new THREE.SpriteMaterial({map: texJet, color: 0xffffff, transparent:true, depthTest:true});
   const body = new THREE.Sprite(bodyMat);
   body.scale.set(.06, .06, 1);
@@ -4225,8 +4368,8 @@ function spawnSpaceRocket3D(lat, lon) {
   scene.add(group);
   
   // A space rocket's target is essentially the exact same lat/lon, but with a much higher altitude
-  // We'll shoot it way out into space (2x Globe Radius)
-  const ed = ll2v(lat, lon, GLOBE_R * 2.5);
+  // We'll shoot it way out into space (reduced to 5x Globe Radius so its visual speed is slower over the same duration)
+  const ed = ll2v(lat, lon, GLOBE_R * 5.0);
   const sd = c.clone();
   
   fakeJets3D.push({
@@ -4234,7 +4377,8 @@ function spawnSpaceRocket3D(lat, lon) {
     progress: 0,
     trailLine: null,
     trailPts: [],
-    speed: 0.15 // Slower, dramatic launch
+    speed: 0.05, // 50 percent slower for more screen time
+    straight: true // Flag to use linear interpolation instead of spherical arc
   });
   
   // Optional: Add a little launch flash at the coordinate
@@ -4242,7 +4386,7 @@ function spawnSpaceRocket3D(lat, lon) {
 }
 
 function scheduleRandomSpaceRocket() {
-  const delay = 3 * 60 * 1000; // Exact 3 minutes
+  const delay = 120 * 1000; // Exact 10 seconds (was 3 minutes)
   
   setTimeout(() => {
     const spaceFaringIsos = Object.keys(countryData);
@@ -4252,6 +4396,7 @@ function scheduleRandomSpaceRocket() {
       if (cd && cd.lat !== undefined && cd.lon !== undefined) {
         spawnSpaceRocket3D(cd.lat, cd.lon);
         setLog(`🚀 SPACE AGENCY LAUNCH DETECTED FROM ${cd.name}`);
+        triggerRedAlert(`${cd.name.toUpperCase()} JUST LAUNCHED SPACE ROCKET`);
       }
     }
     scheduleRandomSpaceRocket();
@@ -4265,13 +4410,22 @@ function triggerRedAlert(msg) {
   const el = document.getElementById('news-alert');
   const txt = document.getElementById('na-text');
   const label = document.getElementById('na-label');
+  
+  if (typeof newsTimeout !== 'undefined' && newsTimeout) clearTimeout(newsTimeout);
+
+  el.classList.remove('hide');
+  el.classList.remove('show');
+  void el.offsetWidth; // trigger reflow to reset animation
+  
   label.style.color = '#ff0000';
   txt.style.color = '#ff4444';
   txt.textContent = msg;
   el.classList.add('show');
-  setTimeout(() => {
+  
+  newsTimeout = setTimeout(() => {
     el.classList.remove('show');
-    setTimeout(()=> { label.style.color=''; txt.style.color=''; }, 500);
+    el.classList.add('hide'); // Add hide animation class
+    setTimeout(()=> { label.style.color=''; txt.style.color=''; el.classList.remove('hide'); }, 500);
   }, 4000);
 }
 
@@ -5052,36 +5206,109 @@ function animate() {
     if(fj.trailLine){fj.group.remove(fj.trailLine);fj.trailLine.geometry.dispose();}
 
     // Build contrail (steamy white/gray) fading back
+    // For straight rockets, fade the trail out over distance
     const STEPS=40;
     const pts=[];
+    const colors=[]; // For vertex coloring the fading trail
+    const customMat = fj.straight ? new THREE.LineBasicMaterial({
+      vertexColors: true,
+      transparent: true,
+      linewidth: 3,
+      opacity: 1.0
+    }) : fj.trailMat;
+
     for(let s=0;s<=STEPS;s++){
+      // T goes from 0 at the tail, to fj.progress at the head
       const t=(s/STEPS)*fj.progress;
-      const d=slerp3D(fj.sd,fj.ed,t).normalize();
+      let pos;
       
-      // Arc slightly to not clip
-      const arcH = GLOBE_R + 0.04 + Math.sin(t * Math.PI) * 0.15;
-      pts.push(d.clone().multiplyScalar(arcH));
+      if (fj.straight) {
+        pos = fj.sd.clone().lerp(fj.ed, t);
+        // Calculate fade based on distance from the current rocket head
+        // Head is at fj.progress. Tail is at 0.
+        // We want the tail to fade to 0 opacity.
+        // But for rockets we want the trail to slowly dissipate, so points near the bottom fade away.
+        const distanceBehindHead = fj.progress - t; // 0 at head, up to fj.progress at bottom
+        
+        let alpha = 1.0 - (distanceBehindHead * 3.0); // dissipates twice as fast
+        if (alpha < 0) alpha = 0;
+        
+        // Orange/yellow fire at the head, fading to smoke/invisible at the tail
+        const color = new THREE.Color(1.0, 0.7 + (0.3 * alpha), alpha);
+        colors.push(color.r, color.g, color.b);
+        // Pack alpha into a hacky way or just fade to black if additive blending (LineBasicMaterial doesn't do per-vertex alpha cleanly by default without ShaderMaterial, but we can fade to black with additive blending or just let it cut off). We will use vertex colors grading to black for fade.
+        if (alpha <= 0.01) {
+           colors[colors.length-3] = 0;
+           colors[colors.length-2] = 0;
+           colors[colors.length-1] = 0;
+        } else {
+           // dim the color to act like alpha pre-multiplied against a dark background
+           colors[colors.length-3] *= alpha;
+           colors[colors.length-2] *= alpha;
+           colors[colors.length-1] *= alpha;
+        }
+      } else {
+        const d=slerp3D(fj.sd,fj.ed,t).normalize();
+        const arcH = GLOBE_R + 0.04 + Math.sin(t * Math.PI) * 0.15;
+        pos = d.clone().multiplyScalar(arcH);
+      }
+      pts.push(pos);
     }
+    
     if(pts.length>1) {
-      fj.trailLine=new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),fj.trailMat);
+      const geo = new THREE.BufferGeometry().setFromPoints(pts);
+      if (fj.straight) {
+        geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+        customMat.blending = THREE.AdditiveBlending;
+        fj.trailLine = new THREE.Line(geo, customMat);
+      } else {
+        fj.trailLine = new THREE.Line(geo, customMat);
+      }
       fj.group.add(fj.trailLine);
     }
 
     // Position sprite
-    const currentDir=slerp3D(fj.sd,fj.ed,fj.progress).normalize();
-    
-    const arcH = GLOBE_R + 0.04 + Math.sin(fj.progress * Math.PI) * 0.15;
-    const pos=currentDir.clone().multiplyScalar(arcH);
+    let pos, currentDir;
+    if (fj.straight) {
+      pos = fj.sd.clone().lerp(fj.ed, fj.progress);
+      currentDir = fj.ed.clone().sub(fj.sd).normalize(); // Fixed collinear direction
+    } else {
+      currentDir=slerp3D(fj.sd,fj.ed,fj.progress).normalize();
+      const arcH = GLOBE_R + 0.04 + Math.sin(fj.progress * Math.PI) * 0.15;
+      pos=currentDir.clone().multiplyScalar(arcH);
+    }
     fj.body.position.copy(pos);
 
     // Orient sprite to flight direction
-    const prevDir=slerp3D(fj.sd,fj.ed,Math.max(0,fj.progress-0.01)).normalize();
+    let prevDir;
+    if (fj.straight) {
+        prevDir = currentDir;
+    } else {
+        prevDir=slerp3D(fj.sd,fj.ed,Math.max(0,fj.progress-0.01)).normalize();
+    }
     const up=pos.clone().normalize();
-    const forward=currentDir.clone().sub(prevDir).normalize();
-    const right=new THREE.Vector3().crossVectors(forward,up).normalize();
-    const flatFwd=new THREE.Vector3().crossVectors(up,right).normalize();
-    let angle=Math.atan2(flatFwd.y,flatFwd.x);
-    fj.body.material.rotation = angle - Math.PI/2;
+    
+    // For straight rockets heading outward, the forward vector IS the up vector essentially
+    let forward;
+    if (fj.straight) {
+       forward = currentDir.clone();
+    } else {
+       forward = currentDir.clone().sub(prevDir).normalize();
+    }
+    
+    if (fj.straight) {
+      // Space rockets should always point OUTWARD radially on the 2D screen view
+      const screenPos = pos.clone().project(camera);
+      const centerPos = new THREE.Vector3(0,0,0).project(camera); // Globe center
+      const dx = screenPos.x - centerPos.x;
+      const dy = screenPos.y - centerPos.y;
+      fj.body.material.rotation = Math.atan2(dy, dx) - Math.PI/2;
+    } else {
+      let right=new THREE.Vector3().crossVectors(forward,up).normalize();
+      const flatFwd=new THREE.Vector3().crossVectors(up,right).normalize();
+      let angle=Math.atan2(flatFwd.y,flatFwd.x);
+      fj.body.material.rotation = angle - Math.PI/2;
+    }
 
     if(fj.progress>=1){
       scene.remove(fj.group);
@@ -5448,6 +5675,9 @@ function executeSpyAction(actionId, targetIso) {
   GS.players[GS.myIndex].budget -= action.cost;
   const tgt = GS.countries[targetIso];
   if (!tgt || tgt.owner === GS.myIndex) { setLog('🔎 Must target an enemy territory.'); return; }
+
+  // Trigger submarine sonar ripple effect for PSY/STRATEGY (Espionage) moves
+  spawnSonarSweep3D(tgt.lat, tgt.lon);
 
   const roll = Math.random();
   const success = roll < action.successBase;
@@ -6026,23 +6256,7 @@ function showWeatherInfo() {
 // =====================================================================
 const _origHandleGlobeClick = window.handleGlobeClick;
 window.handleGlobeClick = function(iso) {
-  if (window._pendingSpyAction && iso) {
-    const action = window._pendingSpyAction;
-    window._pendingSpyAction = null;
-    executeSpyAction(action, iso);
-    return;
-  }
-  if (window._pendingNaval && iso) {
-    const action = window._pendingNaval;
-    window._pendingNaval = null;
-    if      (action === 'DEPLOY')      deployNavalFleet(iso);
-    else if (action === 'AIRWING')     deployAirWing(iso);
-    else if (action === 'BLOCKADE')    navalBlockade(iso);
-    else if (action === 'BOMBING')     strategicBombing(iso);
-    else if (action === 'DEVELOP')     developTerritory(iso);
-    else if (action === 'CARRIER_ATK') carrierStrike(iso);
-    return;
-  }
+  // Logic migrated directly into actual click handler early return
   
   // Trigger sonar sweep on any manual globe click selection
   const cd = countryData[iso];

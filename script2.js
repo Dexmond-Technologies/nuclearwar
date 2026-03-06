@@ -539,13 +539,13 @@ function createGlowTexture(colorHex) {
   return tex;
 }
 
-// --- 4. Webcams (Fetched from Proxy) ---
+  // --- 4. Webcams (Fetched from Proxy) ---
 async function initWebcamsLayer() {
   try {
     const res = await fetch("/api/webcams");
     if (!res.ok) return;
     const data = await res.json();
-    if (!data.webcams) return;
+    if (!data.result || !data.result.webcams) return;
 
     // Fix: make the points MUCH larger so they are visible, and turn off depthTest so they overlay the red globe
     const webcamMat = new THREE.PointsMaterial({
@@ -556,19 +556,21 @@ async function initWebcamsLayer() {
     const pts = [];
     window.webcamsData = []; // ensure it's clean
     
-    data.webcams.forEach((cam) => {
-      // Validate lat/lon
-      if (!cam.location || cam.location.latitude === undefined || cam.location.longitude === undefined) return;
-      if (!cam.player || (!cam.player.day && !cam.player.lifetime)) return; // needs a player
+    data.result.webcams.forEach((cam) => {
+      // Validate lat/lon directly on 'cam' instead of 'cam.location'
+      if (cam.latitude === undefined || cam.longitude === undefined) return;
+      
+      // We embed the youtube stream
+      let embedSrc = `https://www.youtube.com/embed/${cam.slug}?autoplay=1&mute=1`;
       
       // Fix: Raise the radius slightly more to ensure they float above the sphere geometry
-      const v = ll2v(cam.location.latitude, cam.location.longitude, GLOBE_R + 0.05);
+      const v = ll2v(parseFloat(cam.latitude), parseFloat(cam.longitude), GLOBE_R + 0.05);
       pts.push(v.x, v.y, v.z);
       
       window.webcamsData.push({
         title: cam.title,
-        city: cam.location.city || 'Unknown',
-        playerEmbed: cam.player.day || cam.player.lifetime
+        city: cam.city || 'Unknown',
+        playerEmbed: embedSrc
       });
     });
     

@@ -722,6 +722,39 @@ function createJetCanvas() {
   return c;
 }
 
+function createSpaceRocketCanvas() {
+  const c = document.createElement('canvas'); c.width=128; c.height=128;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#ffffff'; // White rocket
+  ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 10;
+  ctx.translate(64, 64); ctx.rotate(Math.PI/4); // Point top right
+  
+  // Fuselage
+  ctx.beginPath(); 
+  ctx.moveTo(0, -40); // nose
+  ctx.lineTo(8, -20);
+  ctx.lineTo(8, 30);
+  ctx.lineTo(-8, 30);
+  ctx.lineTo(-8, -20);
+  ctx.fill();
+  
+  // Left fin
+  ctx.beginPath();
+  ctx.moveTo(-8, 10);
+  ctx.lineTo(-20, 30);
+  ctx.lineTo(-8, 30);
+  ctx.fill();
+  
+  // Right fin
+  ctx.beginPath();
+  ctx.moveTo(8, 10);
+  ctx.lineTo(20, 30);
+  ctx.lineTo(8, 30);
+  ctx.fill();
+  
+  return c;
+}
+
 function createSubCanvas() {
   const c = document.createElement('canvas'); c.width=128; c.height=128;
   const ctx = c.getContext('2d');

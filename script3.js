@@ -715,6 +715,25 @@ function handleGlobeClick(e) {
   mouse.y = -(e.clientY/innerHeight)*2+1;
   ray.setFromCamera(mouse, camera);
 
+  // 0. Intercept global actions first (Spy / Naval) before any UI blocks it
+  if (window._pendingSpyAction) {
+    const hits = ray.intersectObject(globeMesh, false);
+    if (hits.length) {
+      const pt = hits[0].point.normalize();
+      const lat = Math.asin(pt.y)/RAD;
+      const lon = Math.atan2(pt.z,pt.x)/RAD;
+      const iso = getCountryAt(lat, lon);
+      if (iso && GS.countries[iso]) {
+        const action = window._pendingSpyAction;
+        window._pendingSpyAction = null;
+        if (typeof window.executeSpyAction === 'function') {
+          window.executeSpyAction(action, iso);
+        }
+        return;
+      }
+    }
+  }
+
   // 1. Check if the Hostile Skin is active and if we clicked a Webcam
   if (isHostileSkin && intelGroups.webcams && intelGroups.webcams.visible) {
     // Determine intersect with the points cloud
