@@ -2587,14 +2587,22 @@ function updateDashboard() {
     if(pi===0){
       const pEl=document.getElementById('d0-players');
       if(pEl) pEl.textContent=`⚡ ${GS.players[0].name.toUpperCase()} IN COMMAND`;
-      // Update User Stats box name
+      // Update User Stats box name if not already authenticated
       const usName = document.getElementById('us-name');
       const inputName = document.getElementById('player-name')?.value;
-      if(usName) usName.textContent = inputName ? inputName : GS.players[0].name;
+      if(usName && (!usName.textContent.startsWith('COM-') || usName.textContent === 'COM-—')) {
+         usName.textContent = 'COM-' + (inputName ? inputName.substring(0,15) : GS.players[0].name.substring(0,15)).toUpperCase();
+      }
+      
+      // Update User Stats Box dynamic metrics
+      const usTerr = document.getElementById('us-terr');
+      const usTrp = document.getElementById('us-trp');
+      if (usTerr) usTerr.textContent = terrCount;
+      if (usTrp) usTrp.textContent = formatTroops(totalTroopsRaw);
     }
   });
 
-  // Local UI Update for User Stats Box - handled by WebSocket response now.
+  // Local UI Update for User Stats Box - handled by WebSocket response now for ATK/DMG
   // The US UI is updated directly via 'commander_stats' WSS event.
 }
 
