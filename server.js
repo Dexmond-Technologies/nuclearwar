@@ -12,6 +12,9 @@ require('dotenv').config();
 
 // Solana Wallet Integration
 const web3 = require('@solana/web3.js');
+const splToken = require('@solana/spl-token');
+const D3X_MINT_ADDRESS = new web3.PublicKey('AGN8SrMCMEgiP1ghvPHa5VRf5rPFDSYVrGFyBGE1Cqpa');
+const solanaConnection = new web3.Connection(web3.clusterApiUrl('mainnet-beta'), 'confirmed');
 let authorityKeypair = null;
 if (process.env.SOLANA_WALLET_PRIVATE_KEY) {
   try {
@@ -719,8 +722,44 @@ async function processDailyTokenDrop(callsign, userWalletAddress) {
   }
   
   console.log(`[SOLANA] Initiating daily token drop of 5 D3X to Commander ${callsign} @ wallet ${userWalletAddress}`);
-  // TODO: Add actual SPL token transfer logic here
-  // e.g. web3.sendAndConfirmTransaction using authorityKeypair
+  try {
+    const toPublicKey = new web3.PublicKey(userWalletAddress);
+    
+    // Retrieve the Sender's ATA for D3X
+    const fromTokenAccount = await splToken.getOrCreateAssociatedTokenAccount(
+        solanaConnection,
+        authorityKeypair,    // payer
+        D3X_MINT_ADDRESS,    // mint
+        authorityKeypair.publicKey // owner
+    );
+    
+    // Retrieve or Create the Receiver's ATA for D3X
+    // The authorityKeypair covers the rent storage cost if they don't have the ATA yet!
+    const toTokenAccount = await splToken.getOrCreateAssociatedTokenAccount(
+        solanaConnection,
+        authorityKeypair,
+        D3X_MINT_ADDRESS,
+        toPublicKey
+    );
+    
+    // Query the mint directly to dynamically fetch the decimals
+    const mintInfo = await splToken.getMint(solanaConnection, D3X_MINT_ADDRESS);
+    const transferAmount = 5 * Math.pow(10, mintInfo.decimals); // Exact 5.0 tokens
+    
+    // Execute the Token Transfer!
+    const signature = await splToken.transfer(
+        solanaConnection,
+        authorityKeypair,
+        fromTokenAccount.address,
+        toTokenAccount.address,
+        authorityKeypair.publicKey,
+        transferAmount
+    );
+    
+    console.log(`✅ [SOLANA] Successfully Dropped 5 D3X to ${callsign} (${userWalletAddress}). Tx Signature: ${signature}`);
+  } catch (err) {
+    console.error(`❌ [SOLANA] Token Drop to ${callsign} FAILED:`, err.message);
+  }
 }
 
 async function checkD3XRewards() {
