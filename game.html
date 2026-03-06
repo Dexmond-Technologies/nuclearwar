@@ -2029,9 +2029,9 @@ async function loadCountries(retries = 3) {
     let sumLat=0, sumLon=0, cnt=0;
     const polys = [];
 
-    // Helper to apply -30 degree prime meridian offset and wrap dateline
+    // Helper to apply prime meridian offset and wrap dateline
     const oLon = (lon) => {
-      let l = lon - 30;
+      let l = lon;
       if (l < -180) l += 360;
       if (l > 180) l -= 360;
       return l;
@@ -2103,7 +2103,7 @@ async function loadCountries(retries = 3) {
     const group = new THREE.Group();
     geos.forEach(geo => group.add(new THREE.Line(geo, mat.clone())));
     group.userData = { iso, mat };
-    group.visible = false; // Hide borders per user request
+    group.visible = true; // Show borders per user request
     countryBorders[iso] = group;
     scene.add(group);
   });
@@ -3860,6 +3860,231 @@ function spawnExplosion3D(lat,lon,col){
 }
 
 // =====================================================================
+// VISUAL EFFECTS FOR MEGA BOMB
+// =====================================================================
+function spawnMegaBombExplosion3D(lat, lon, col) {
+  if (lat === undefined || lon === undefined) return;
+  SFX.playExplosion();
+  const c = ll2v(lat, lon, GLOBE_R + .003);
+  const up = c.clone().normalize();
+  let t1 = new THREE.Vector3(-up.z, 0, up.x);
+  if (t1.length() < .001) t1 = new THREE.Vector3(0, up.z, -up.y);
+  t1.normalize();
+  const t2 = new THREE.Vector3().crossVectors(up, t1);
+  const rings = [];
+  
+  // Outer rings
+  for (let r = 0; r < 5; r++) {
+    const pts = Array.from({ length: 65 }, (_, i) => {
+      const a = (i / 64) * Math.PI * 2;
+      return c.clone().addScaledVector(t1, Math.cos(a) * .005).addScaledVector(t2, Math.sin(a) * .005); // 5x bigger radius
+    });
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    let color = 0xff0000; // Red
+    if (r % 3 === 1) color = 0xffff00; // Yellow
+    if (r % 3 === 2) color = 0x0000ff; // Blue
+    const mat = new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 1, linewidth: 3 });
+    const ring = new THREE.Line(geo, mat);
+    scene.add(ring);
+    rings.push({ ring, mat, pts, t1, t2, c, delay: r * .08 });
+  }
+
+  // Inner huge flash
+  const flashGeo = new THREE.SphereGeometry(.11, 16, 16); // 5x bigger sphere
+  const flashMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 1 });
+  const flash = new THREE.Mesh(flashGeo, flashMat);
+  flash.position.copy(c); scene.add(flash);
+  explosions3D.push({ rings, flash, flashMat, life: 1.5 }); // last a bit longer
+}
+
+function scheduleRandomMegaBomb() {
+  const minDelay = 1 * 60 * 1000; // 1 min (was 2)
+  const maxDelay = 2 * 60 * 1000; // 2 min (was 4)
+  const delay = minDelay + Math.random() * (maxDelay - minDelay);
+  
+  setTimeout(() => {
+    const isos = Object.keys(countryData);
+    if (isos.length > 0) {
+      const targetIso = isos[Math.floor(Math.random() * isos.length)];
+      const cd = countryData[targetIso];
+      if (cd && cd.lat !== undefined && cd.lon !== undefined) {
+        // Red, Yellow, Blue alternating ring colors are handled in the spawn function
+        spawnMegaBombExplosion3D(cd.lat, cd.lon);
+        triggerRedAlert(`BOMB EXPLODED [ LAT: ${cd.lat.toFixed(2)}, LON: ${cd.lon.toFixed(2)} ]`);
+        setLog(`☢ MEGA BOMB EXPLODED at ${cd.name} [LAT: ${cd.lat.toFixed(2)}, LON: ${cd.lon.toFixed(2)}]`);
+      }
+    }
+    // Schedule the next one ad infinitum
+    scheduleRandomMegaBomb();
+  }, delay);
+}
+
+// =====================================================================
+// VISUAL EFFECTS FOR EMP AND GROUND BOMB
+// =====================================================================
+function spawnEMP3D(lat, lon) {
+  if (lat === undefined || lon === undefined) return;
+  SFX.playExplosion(); // Consider a custom EMP sound if available
+  const c = ll2v(lat, lon, GLOBE_R + .003);
+  const up = c.clone().normalize();
+  let t1 = new THREE.Vector3(-up.z, 0, up.x);
+  if (t1.length() < .001) t1 = new THREE.Vector3(0, up.z, -up.y);
+  t1.normalize();
+  const t2 = new THREE.Vector3().crossVectors(up, t1);
+  const rings = [];
+  
+  // Outer rings (Green EMP wave)
+  for (let r = 0; r < 4; r++) {
+    const pts = Array.from({ length: 90 }, (_, i) => {
+      const a = (i / 89) * Math.PI * 2;
+      return c.clone().addScaledVector(t1, Math.cos(a) * .007).addScaledVector(t2, Math.sin(a) * .007);
+    });
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    let color = 0x00ff00; // Bright Green
+    if (r % 2 === 1) color = 0x00cc00; // Darker Green
+    const mat = new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 0.8, linewidth: 4 });
+    const ring = new THREE.Line(geo, mat);
+    scene.add(ring);
+    rings.push({ ring, mat, pts, t1, t2, c, delay: r * .05 });
+  }
+
+  // Inner huge flash
+  const flashGeo = new THREE.SphereGeometry(.14, 16, 16); 
+  const flashMat = new THREE.MeshBasicMaterial({ color: 0x00ff66, transparent: true, opacity: 0.9 });
+  const flash = new THREE.Mesh(flashGeo, flashMat);
+  flash.position.copy(c); scene.add(flash);
+  explosions3D.push({ rings, flash, flashMat, life: 1.2 }); // Dissipates slightly faster
+}
+
+function scheduleRandomEMP() {
+  const minDelay = 30 * 1000; // 30s (was 60)
+  const maxDelay = 60 * 1000; // 60s (was 120)
+  const delay = minDelay + Math.random() * (maxDelay - minDelay);
+  
+  setTimeout(() => {
+    const isos = Object.keys(countryData);
+    if (isos.length > 0) {
+      const targetIso = isos[Math.floor(Math.random() * isos.length)];
+      const cd = countryData[targetIso];
+      if (cd && cd.lat !== undefined && cd.lon !== undefined) {
+        spawnEMP3D(cd.lat, cd.lon);
+        triggerRedAlert(`EMP DETECTED [ LAT: ${cd.lat.toFixed(2)}, LON: ${cd.lon.toFixed(2)} ]`);
+        setLog(`⚡ EMP DETECTED at ${cd.name} [LAT: ${cd.lat.toFixed(2)}, LON: ${cd.lon.toFixed(2)}]`);
+      }
+    }
+    // Schedule the next one automatically
+    scheduleRandomEMP();
+  }, delay);
+}
+
+function spawnGroundBomb3D(lat, lon) {
+  if (lat === undefined || lon === undefined) return;
+  SFX.playExplosion();
+  const c = ll2v(lat, lon, GLOBE_R + .003);
+  const up = c.clone().normalize();
+  let t1 = new THREE.Vector3(-up.z, 0, up.x);
+  if (t1.length() < .001) t1 = new THREE.Vector3(0, up.z, -up.y);
+  t1.normalize();
+  const t2 = new THREE.Vector3().crossVectors(up, t1);
+  const rings = [];
+  
+  // Outer rings (Blue Ground Bomb wave)
+  for (let r = 0; r < 5; r++) {
+    const pts = Array.from({ length: 65 }, (_, i) => {
+      const a = (i / 64) * Math.PI * 2;
+      return c.clone().addScaledVector(t1, Math.cos(a) * .004).addScaledVector(t2, Math.sin(a) * .004); // Slightly smaller than Mega Bomb
+    });
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    let color = 0x0000ff; // Bright Blue
+    if (r % 2 === 1) color = 0x00aaff; // Light Blue
+    const mat = new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 1, linewidth: 2 });
+    const ring = new THREE.Line(geo, mat);
+    scene.add(ring);
+    rings.push({ ring, mat, pts, t1, t2, c, delay: r * .08 });
+  }
+
+  // Inner huge flash
+  const flashGeo = new THREE.SphereGeometry(.09, 16, 16); 
+  const flashMat = new THREE.MeshBasicMaterial({ color: 0x00aaff, transparent: true, opacity: 1 });
+  const flash = new THREE.Mesh(flashGeo, flashMat);
+  flash.position.copy(c); scene.add(flash);
+  explosions3D.push({ rings, flash, flashMat, life: 1.4 }); 
+}
+
+function scheduleRandomGroundBomb() {
+  const minDelay = 30 * 1000; // 30s (was 60s)
+  const maxDelay = 60 * 1000; // 60s (was 120s)
+  const delay = minDelay + Math.random() * (maxDelay - minDelay);
+  
+  setTimeout(() => {
+    const isos = Object.keys(countryData);
+    if (isos.length > 0) {
+      const targetIso = isos[Math.floor(Math.random() * isos.length)];
+      const cd = countryData[targetIso];
+      if (cd && cd.lat !== undefined && cd.lon !== undefined) {
+        spawnGroundBomb3D(cd.lat, cd.lon);
+        triggerRedAlert(`GROUND BOMB DETECTED [ LAT: ${cd.lat.toFixed(2)}, LON: ${cd.lon.toFixed(2)} ]`);
+        setLog(`💥 GROUND BOMB DETECTED at ${cd.name} [LAT: ${cd.lat.toFixed(2)}, LON: ${cd.lon.toFixed(2)}]`);
+      }
+    }
+    // Schedule the next one automatically
+    scheduleRandomGroundBomb();
+  }, delay);
+}
+
+function spawnSonarSweep3D(lat, lon) {
+  if (lat === undefined || lon === undefined) return;
+  SFX.playEvent(); // Use an appropriate radar/ping sound
+  const c = ll2v(lat, lon, GLOBE_R + .003);
+  const up = c.clone().normalize();
+  let t1 = new THREE.Vector3(-up.z, 0, up.x);
+  if (t1.length() < .001) t1 = new THREE.Vector3(0, up.z, -up.y);
+  t1.normalize();
+  const t2 = new THREE.Vector3().crossVectors(up, t1);
+  const rings = [];
+  
+  // Concentric Sonar Rings
+  for (let r = 0; r < 3; r++) {
+    const pts = Array.from({ length: 65 }, (_, i) => {
+      const a = (i / 64) * Math.PI * 2;
+      return c.clone().addScaledVector(t1, Math.cos(a) * .006).addScaledVector(t2, Math.sin(a) * .006);
+    });
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    const color = r === 1 ? 0x00aaff : 0x00ffff; // Cyan/Blue alternating
+    const mat = new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 0.9, linewidth: 2 });
+    const ring = new THREE.Line(geo, mat);
+    scene.add(ring);
+    rings.push({ ring, mat, pts, t1, t2, c, delay: r * .15 }); // Slower delay for sonar pacing
+  }
+
+  // Very subtle inner flash
+  const flashGeo = new THREE.SphereGeometry(.04, 16, 16); 
+  const flashMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.5 });
+  const flash = new THREE.Mesh(flashGeo, flashMat);
+  flash.position.copy(c); scene.add(flash);
+  explosions3D.push({ rings, flash, flashMat, life: 2.0 }); // Long life for the sweeping effect to be visible
+}
+
+function scheduleRandomSonarSweep() {
+  const delay = 15 * 1000; // Exact 15 seconds (was 30s)
+  
+  setTimeout(() => {
+    const isos = Object.keys(countryData);
+    if (isos.length > 0) {
+      const targetIso = isos[Math.floor(Math.random() * isos.length)];
+      const cd = countryData[targetIso];
+      if (cd && cd.lat !== undefined && cd.lon !== undefined) {
+        spawnSonarSweep3D(cd.lat, cd.lon);
+        triggerRedAlert(`SATELLITE RECON DETECTED [ LAT: ${cd.lat.toFixed(2)}, LON: ${cd.lon.toFixed(2)} ]`);
+        setLog(`📡 SATELLITE RECONNAISSANCE SCAN over ${cd.name}`);
+      }
+    }
+    // Schedule the next one automatically
+    scheduleRandomSonarSweep();
+  }, delay);
+}
+
+// =====================================================================
 // VISUAL EFFECTS FOR AI
 // =====================================================================
 function triggerRedAlert(msg) {
@@ -5586,6 +5811,13 @@ window.handleGlobeClick = function(iso) {
     else if (action === 'CARRIER_ATK') carrierStrike(iso);
     return;
   }
+  
+  // Trigger sonar sweep on any manual globe click selection
+  const cd = countryData[iso];
+  if(cd && cd.lat !== undefined && cd.lon !== undefined) {
+    spawnSonarSweep3D(cd.lat, cd.lon);
+  }
+
   if (typeof _origHandleGlobeClick === 'function') _origHandleGlobeClick(iso);
 };
 
@@ -5625,10 +5857,19 @@ function carrierStrike(iso) {
 }
 
 // Initialize doomsday clock after game starts
+// Initialize doomsday clock after game starts
 const _origInitGame = window.initGame;
 window.initGame = function(names, idx) {
   if (typeof _origInitGame === 'function') _origInitGame(names, idx);
   setTimeout(() => { renderDoomsdayClock(); }, 1000);
+  
+  // Start Mega Bomb sequence if Host
+  if (ws_isHost || (!GS.isOnline)) {
+    scheduleRandomMegaBomb();
+    scheduleRandomEMP();
+    scheduleRandomGroundBomb();
+    scheduleRandomSonarSweep();
+  }
 };
 
 // =====================================================================
