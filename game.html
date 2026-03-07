@@ -2211,12 +2211,13 @@ function initGlobalTradeNetwork() {
       speed = 0.0002 + Math.random() * 0.0001;
     }
     
-    color = 0x00ffff; // Enforce Light Blue / Cyan network color globally per user request
+    const isRaincloud = Math.random() < 0.20;
+    color = isRaincloud ? 0xff0000 : 0x00ffff; // 20% red for Raincloud AI, 80% Cyan
     
-    // Cyan Diamond/Arrow mesh matching reference picture
+    // Diamond/Arrow mesh matching reference picture
     const arrowGeo = new THREE.ConeGeometry(0.012, 0.035, 4);
     arrowGeo.rotateX(-Math.PI/2); // Point forward along travel path (-Z is forward for lookAt)
-    const arrowMat = new THREE.MeshBasicMaterial({color: 0x00ffff, depthTest: false, transparent: true, opacity: 0.9});
+    const arrowMat = new THREE.MeshBasicMaterial({color: color, depthTest: false, transparent: true, opacity: 0.9});
     const arrowMesh = new THREE.Mesh(arrowGeo, arrowMat);
     meshGroup.add(arrowMesh);
 
@@ -2228,7 +2229,7 @@ function initGlobalTradeNetwork() {
     const points = curve.getPoints(40);
     const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
     const lineMat = new THREE.LineBasicMaterial({
-      color: 0x00ffff, // Use pure cyan for trailing faint path
+      color: color, // Use matching color for trailing faint path
       transparent: true, 
       opacity: 0.25, 
       blending: THREE.AdditiveBlending 
