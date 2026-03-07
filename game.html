@@ -774,6 +774,16 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   overflow:visible;
   animation:drawerFadeInCenter 0.2s ease-out;
 }
+.strat-drawer.centered-mode {
+  top:50%;
+  left:50%;
+  bottom:auto;
+  transform:translate(-50%, -50%);
+  width:max-content;
+  min-width:600px;
+  max-width:90vw;
+  animation:drawerFadeInCenter 0.2s ease-out;
+}
 @keyframes drawerFadeInCenter {
   from { opacity:0; transform:translate(-50%, -45%); }
   to   { opacity:1; transform:translate(-50%, -50%); }
@@ -6894,7 +6904,9 @@ function openDrawer(id, titleHtml, bodyHtml) {
   closeAllModals();
   _openDrawerId = id;
   const drawer = document.createElement('div');
-  drawer.className = id === 'intel-layers' ? 'strat-drawer intel-mode' : 'strat-drawer';
+  drawer.className = 'strat-drawer';
+  if (id === 'intel-layers') drawer.classList.add('intel-mode');
+  if (id === 'arms-ind') drawer.classList.add('centered-mode');
   drawer.id = 'drawer-' + id;
   drawer.innerHTML = `
     <div class="strat-drawer-title">
