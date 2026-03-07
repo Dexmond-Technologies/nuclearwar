@@ -1954,6 +1954,8 @@ document.getElementById('btn-toggle-intel').addEventListener('click', () => {
   const canvas = document.getElementById('c');
   const container = document.getElementById('deckgl-container');
   const btn = document.getElementById('btn-toggle-intel');
+  const dash0 = document.getElementById('dash-0');
+  const dash1 = document.getElementById('dash-1');
   
   if (intelMapActive) {
     if(!window.DeckGLMap) {
@@ -1967,6 +1969,8 @@ document.getElementById('btn-toggle-intel').addEventListener('click', () => {
     btn.innerHTML = '🌍 RETURN TO WAR MAP';
     btn.style.background = 'linear-gradient(135deg, #f24, #600)';
     btn.style.borderColor = '#f24';
+    if (dash0) dash0.style.opacity = '0.2';
+    if (dash1) dash1.style.opacity = '0.2';
     showIntelMapDrawer();
   } else {
     canvas.style.display = 'block';
@@ -1974,6 +1978,8 @@ document.getElementById('btn-toggle-intel').addEventListener('click', () => {
     btn.innerHTML = '👁 HOSTILE INTEL';
     btn.style.background = '';
     btn.style.borderColor = '';
+    if (dash0) dash0.style.opacity = '1';
+    if (dash1) dash1.style.opacity = '1';
     closeAllModals();
   }
 });
