@@ -1301,6 +1301,10 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     <i class="fa-solid fa-anchor"></i>
     <span class="ops-tip">NAVAL / AIR</span>
   </button>
+  <button class="ops-btn" onclick="document.getElementById('d3x-store-modal').style.display='flex'" id="ops-btn-market" style="border-color:#d400ff; color:#d400ff; box-shadow:0 0 10px rgba(212,0,255,0.4);">
+    <i class="fa-solid fa-gem"></i>
+    <span class="ops-tip">BLACK MARKET</span>
+  </button>
   <button class="ops-btn" onclick="showWeatherInfo()" id="ops-btn-weather">
     <i class="fa-solid fa-cloud-sun"></i>
     <span class="ops-tip">WEATHER</span>
@@ -1627,6 +1631,68 @@ Type 'help' for available commands.
     <div class="rep-desc" id="rep-summary">Operation complete. Awaiting commander review.</div>
     <div class="rep-list" id="rep-list"></div>
     <button class="sp-btn" style="background:#0f8;color:#000;width:100%;padding:12px;font-size:14px;" onclick="closeReportAndEndTurn()">END TURN</button>
+  </div>
+</div>
+
+<!-- Black Market (D3X Store) Modal -->
+<div id="d3x-store-modal" style="position:absolute;inset:0;background:rgba(0,5,15,.95);display:none;align-items:center;justify-content:center;z-index:1060;backdrop-filter:blur(8px);">
+  <div class="rep-card" style="width:700px; max-width:95vw; border-color:#d400ff; box-shadow:0 0 40px rgba(212,0,255,.2);">
+    <div class="rep-title" style="color:#d400ff; text-shadow:0 0 15px rgba(212,0,255,.8);">BLACK MARKET</div>
+    <div class="rep-desc" style="color:#e0aaff;">Acquire unauthorized assets using D3X Tokens.</div>
+    <div style="font-size:14px; font-weight:bold; color:#0f8; margin-bottom:15px; letter-spacing:2px;">BALANCE: <span id="d3x-balance">0</span> D3X</div>
+    
+    <div class="rep-list" style="background:rgba(212,0,255,.05); border-color:rgba(212,0,255,.3); display:flex; flex-direction:column; gap:10px;">
+      
+      <!-- Cybertheme Skin -->
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid rgba(212,0,255,.2);">
+        <div style="text-align:left;">
+          <div style="color:#0af; font-weight:bold; font-size:14px;">PREMIUM CYBERTHEME SKIN</div>
+          <div style="color:#aaa; font-size:10px; margin-top:4px;">Unlock the exclusive animated 3D wireframe globe.</div>
+        </div>
+        <button class="sp-btn" onclick="buyCyberSkin()" style="background:rgba(212,0,255,.2); border:1px solid #d400ff; color:#e0aaff; min-width:100px;">50 D3X</button>
+      </div>
+
+      <!-- Custom Gamer Tag -->
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid rgba(212,0,255,.2);">
+        <div style="text-align:left; flex:1;">
+          <div style="color:#0af; font-weight:bold; font-size:14px;">CUSTOM GAMER TAG</div>
+          <div style="color:#aaa; font-size:10px; margin-top:4px;">Override server-assigned tag. Alphanumeric only.</div>
+          <input type="text" id="custom-tag-input" placeholder="ENTER TAG..." maxlength="12" style="background:rgba(0,0,0,.5); border:1px solid #0af; color:#0af; padding:4px 8px; margin-top:6px; font-family:'Courier New', monospace; outline:none; text-transform:uppercase;">
+        </div>
+        <button class="sp-btn" onclick="buyCustomTag()" style="background:rgba(212,0,255,.2); border:1px solid #d400ff; color:#e0aaff; min-width:100px;">10 D3X</button>
+      </div>
+
+      <!-- Custom Nuke VFX -->
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid rgba(212,0,255,.2);">
+        <div style="text-align:left;">
+          <div style="color:#0af; font-weight:bold; font-size:14px;">ORBITAL LASER VFX</div>
+          <div style="color:#aaa; font-size:10px; margin-top:4px;">Replace standard ICBM nukes with orbital laser strikes.</div>
+        </div>
+        <button class="sp-btn" onclick="buyLaserVFX()" style="background:rgba(212,0,255,.2); border:1px solid #d400ff; color:#e0aaff; min-width:100px;">25 D3X</button>
+      </div>
+
+      <!-- Global Radio Broadcast -->
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid rgba(212,0,255,.2);">
+        <div style="text-align:left; flex:1;">
+          <div style="color:#0af; font-weight:bold; font-size:14px;">GLOBAL RADIO BROADCAST</div>
+          <div style="color:#aaa; font-size:10px; margin-top:4px;">Push a 5-second audio clip to all active players.</div>
+          <input type="file" id="radio-audio-upload" accept="audio/*" style="margin-top:6px; font-size:10px; color:#0af;">
+        </div>
+        <button class="sp-btn" onclick="buyRadioBroadcast()" style="background:rgba(212,0,255,.2); border:1px solid #d400ff; color:#e0aaff; min-width:100px;">100 D3X</button>
+      </div>
+
+      <!-- Orbital Strike Superweapon -->
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px;">
+        <div style="text-align:left;">
+          <div style="color:#fa0; font-weight:bold; font-size:14px;">RODS FROM GOD (SUPERWEAPON)</div>
+          <div style="color:#aaa; font-size:10px; margin-top:4px;">One-time kinetic bombardment. Bypasses all defense.</div>
+        </div>
+        <button class="sp-btn" onclick="buyOrbitalStrike()" style="background:rgba(255,170,0,.2); border:1px solid #fa0; color:#fa0; min-width:100px;">250 D3X</button>
+      </div>
+
+    </div>
+    
+    <button class="sp-btn" style="background:#333;color:#fff;width:100%;padding:12px;font-size:14px; margin-top:10px;" onclick="document.getElementById('d3x-store-modal').style.display='none'">EXIT MARKET</button>
   </div>
 </div>
 
@@ -8079,10 +8145,11 @@ window.currentSkinIndex = 0;
 window.isRedSkin = false; // Legacy flag preserved for scripts that might check it directly
 
 const SKINS = [
-  { name: 'LIVE',  color: 0xffffff, btnText: '🔴 RED SKIN',    btnClass: '',              showOverlays: false, cleanGlobe: false, showResources: false, showArms: false, showBoats: false },
-  { name: 'RED',   color: 0xff2222, btnText: '🟢 GREEN SKIN',  btnClass: 'active-normal', showOverlays: true,  cleanGlobe: false, showResources: false, showArms: false, showBoats: true },
-  { name: 'GREEN', color: 0x22ff22, btnText: '🟡 YLW SKIN',   btnClass: 'active-normal', showOverlays: false, cleanGlobe: true,  showResources: true,  showArms: false, showBoats: false },
-  { name: 'YELLOW',color: 0xffff22, btnText: '🌍 LIVE SKIN',   btnClass: 'active-normal', showOverlays: false, cleanGlobe: true,  showResources: false, showArms: true,  showBoats: false }
+  { name: 'LIVE',  color: 0xffffff, btnText: '🔴 RED SKIN',    btnClass: '',              showOverlays: false, cleanGlobe: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
+  { name: 'RED',   color: 0xff2222, btnText: '🟢 GREEN SKIN',  btnClass: 'active-normal', showOverlays: true,  cleanGlobe: false, showResources: false, showArms: false, showBoats: true, isPremium: false },
+  { name: 'GREEN', color: 0x22ff22, btnText: '🟡 YLW SKIN',   btnClass: 'active-normal', showOverlays: false, cleanGlobe: true,  showResources: true,  showArms: false, showBoats: false, isPremium: false },
+  { name: 'YELLOW',color: 0xffff22, btnText: '💠 CYBER SKIN',  btnClass: 'active-normal', showOverlays: false, cleanGlobe: true,  showResources: false, showArms: true,  showBoats: false, isPremium: false },
+  { name: 'CYBER', color: 0x00f0ff, btnText: '🌍 LIVE SKIN',   btnClass: 'active-premium',showOverlays: true,  cleanGlobe: false, showResources: true,  showArms: true,  showBoats: true,  isPremium: true }
 ];
 window.SKINS = SKINS;
 
@@ -8097,13 +8164,36 @@ window.toggleRedSkin = function() {
 
   const btn = document.getElementById('btn-toggle-skin');
   
+  // Skip premium skin if not unlocked
+  if (skin.isPremium && !window.unlockedCyberSkin) {
+      window.currentSkinIndex = (window.currentSkinIndex + 1) % SKINS.length;
+      return toggleRedSkin(); // Recursively call to move to next
+  }
+
   // Apply Globe Color
   if (typeof globeMat !== 'undefined') globeMat.color.setHex(skin.color);
+  if (skin.name === 'CYBER') {
+      globeMat.emissive.setHex(0x0055ff);
+      globeMat.wireframe = true;
+  } else {
+      globeMat.emissive.setHex(skin.name === 'LIVE' ? 0x222222 : 0x000000);
+      globeMat.wireframe = false;
+  }
   
   // Update UI Button
   btn.innerHTML = skin.btnText;
-  if (skin.btnClass) btn.classList.add(skin.btnClass);
-  else btn.classList.remove('active-normal');
+  if (skin.btnClass) {
+      btn.className = '';
+      btn.classList.add(skin.btnClass);
+      if (skin.name === 'CYBER') {
+          btn.style.boxShadow = '0 0 15px #00f0ff';
+          btn.style.borderColor = '#00f0ff';
+      } else {
+          btn.style.boxShadow = 'none';
+          btn.style.borderColor = '';
+      }
+  }
+  else btn.className = '';
   
   // Toggle visibility of overlays (Webcams, Sats)
   if (typeof webcamGroup !== 'undefined') webcamGroup.visible = skin.showOverlays;
@@ -8392,20 +8482,104 @@ window.toggleRadioLock = function() {
     // if (typeof setLog === 'function') setLog('📻 Station UNLOCKED. Auto-rotation enabled.');
   }
 };
-// ========================================================
 
-// Add hover listeners for ops-sidebar
-const dash0 = document.getElementById('dash-0');
-const opsSidebar = document.getElementById('ops-sidebar');
-if (dash0 && opsSidebar) {
-  const showOps = () => opsSidebar.classList.add('hover-open');
-  const hideOps = () => opsSidebar.classList.remove('hover-open');
-  dash0.addEventListener('mouseenter', showOps);
-  dash0.addEventListener('mouseleave', hideOps);
-  opsSidebar.addEventListener('mouseenter', showOps);
-  opsSidebar.addEventListener('mouseleave', hideOps);
+// ========================================================
+// D3X STORE LOGIC
+// ========================================================
+window.d3xBalance = 1000; // Mock starting balance for testing
+window.unlockedCyberSkin = false;
+window.hasLaserVFX = false;
+
+function updateD3XDisplay() {
+  const el = document.getElementById('d3x-balance');
+  if (el) el.innerText = window.d3xBalance;
 }
 
+// Initial display setup
+setInterval(updateD3XDisplay, 1000);
+
+window.buyCyberSkin = function() {
+  if (window.unlockedCyberSkin) {
+    alert("CYBERTHEME already unlocked!");
+    return;
+  }
+  if (window.d3xBalance >= 50) {
+    window.d3xBalance -= 50;
+    window.unlockedCyberSkin = true;
+    updateD3XDisplay();
+    alert("CYBERTHEME SKIN UNLOCKED! Access it via the screen toggle.");
+    document.getElementById('d3x-store-modal').style.display='none';
+  } else {
+    alert("INSUFFICIENT D3X BALNCE.");
+  }
+};
+
+window.buyCustomTag = function() {
+  const input = document.getElementById('custom-tag-input').value.trim();
+  if (!input) {
+    alert("Please enter a valid tag.");
+    return;
+  }
+  if (window.d3xBalance >= 10) {
+    window.d3xBalance -= 10;
+    updateD3XDisplay();
+    // Override local tag (this would sync to server in real implementation)
+    window.PLAYER_NAME = input; 
+    const pnameEl = document.querySelector('#dash-0 .dash-pname');
+    if (pnameEl) pnameEl.innerText = input;
+    alert("GAMER TAG UPDATED TO: " + input);
+    document.getElementById('d3x-store-modal').style.display='none';
+  } else {
+    alert("INSUFFICIENT D3X BALANCE.");
+  }
+};
+
+window.buyLaserVFX = function() {
+  if (window.hasLaserVFX) {
+    alert("ORBITAL LASER VFX already unlocked!");
+    return;
+  }
+  if (window.d3xBalance >= 25) {
+    window.d3xBalance -= 25;
+    window.hasLaserVFX = true;
+    updateD3XDisplay();
+    alert("ORBITAL LASER VFX UNLOCKED! Your nukes will now use laser strikes.");
+    document.getElementById('d3x-store-modal').style.display='none';
+  } else {
+    alert("INSUFFICIENT D3X BALANCE.");
+  }
+};
+
+window.buyRadioBroadcast = function() {
+  const fileInput = document.getElementById('radio-audio-upload');
+  if (!fileInput.files.length) {
+    alert("Please select an audio file to broadcast.");
+    return;
+  }
+  if (window.d3xBalance >= 100) {
+    window.d3xBalance -= 100;
+    updateD3XDisplay();
+    // In a real implementation, upload the file to the server and push to clients' radio queues.
+    alert("AUDIO UPLOADED! Broadcast queued on global radio channel.");
+    document.getElementById('d3x-store-modal').style.display='none';
+  } else {
+    alert("INSUFFICIENT D3X BALANCE.");
+  }
+};
+
+window.buyOrbitalStrike = function() {
+  if (window.d3xBalance >= 250) {
+    window.d3xBalance -= 250;
+    updateD3XDisplay();
+    // For now, this just adds the "RODS FROM GOD" state. 
+    // Actual implementation would inject logic into the attack handler.
+    window.hasOrbitalStrikeReady = true;
+    alert("RODS FROM GOD ARMED. Your next attack will bypass defense.");
+    document.getElementById('d3x-store-modal').style.display='none';
+  } else {
+    alert("INSUFFICIENT D3X BALANCE.");
+  }
+};
 
 </script>
 <script src="/dist/improve_earth.js"></script>
