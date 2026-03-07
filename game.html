@@ -8078,7 +8078,7 @@ window.toggleRadioLock = function() {
   window.isRadioLocked = !window.isRadioLocked;
   
   if (window.isRadioLocked) {
-    btn.innerHTML = '🔓 UNLOCK RADIO';
+    btn.innerHTML = '🔓 UNLK RADIO';
     btn.classList.add('radio-locked');
     if (radioRotationTimer) {
       clearTimeout(radioRotationTimer);
@@ -8291,125 +8291,133 @@ const MockTradeEconomy = (function() {
   }
 
   function runTurn() {
-    initCountries();
-    if (countries.length === 0) return;
+    try {
+      initCountries();
+      if (countries.length === 0) return;
 
-    const skin = window.SKINS && window.SKINS[window.currentSkinIndex] ? window.SKINS[window.currentSkinIndex].name : null;
-    if (skin !== 'GREEN' && skin !== 'YELLOW') return;
+      const skin = window.SKINS && window.SKINS[window.currentSkinIndex] ? window.SKINS[window.currentSkinIndex].name : null;
+      if (skin !== 'GREEN' && skin !== 'YELLOW') return;
 
-    turn++;
-    let log = `\n--- TURN ${turn} (SKIN: ${skin}) ---\n\nPRODUCTION:\n`;
-    const gExp = [], gImp = [], yExp = [], yImp = [];
-    
-    // Step 1, 2, 3: Production, Fluctuation, Pressure
-    countries.forEach(c => {
-      c.gProd *= 0.9 + Math.random() * 0.2;
-      c.yProd *= 0.9 + Math.random() * 0.2;
-      c.gStock += c.gProd;
-      c.yStock += c.yProd;
+      turn++;
+      let log = `\n--- TURN ${turn} (SKIN: ${skin}) ---\n\nPRODUCTION:\n`;
+      const gExp = [], gImp = [], yExp = [], yImp = [];
       
-      if (Math.random() < 0.1) log += `${c.name} +${Math.round(c.gProd)} GreenSkin, +${Math.round(c.yProd)} YellowSkin\n`;
-      
-      const gPres = c.gStock - c.gDem;
-      const yPres = c.yStock - c.yDem;
-      if (gPres > 40) gExp.push(c);
-      if (gPres < -20) gImp.push(c);
-      if (yPres > 40) yExp.push(c);
-      if (yPres < -20) yImp.push(c);
-    });
+      // Step 1, 2, 3: Production, Fluctuation, Pressure
+      countries.forEach(c => {
+        c.gProd *= 0.9 + Math.random() * 0.2;
+        c.yProd *= 0.9 + Math.random() * 0.2;
+        c.gStock += c.gProd;
+        c.yStock += c.yProd;
+        
+        if (Math.random() < 0.1) log += `${c.name} +${Math.round(c.gProd)} GreenSkin, +${Math.round(c.yProd)} YellowSkin\n`;
+        
+        const gPres = c.gStock - c.gDem;
+        const yPres = c.yStock - c.yDem;
+        if (gPres > 40) gExp.push(c);
+        if (gPres < -20) gImp.push(c);
+        if (yPres > 40) yExp.push(c);
+        if (yPres < -20) yImp.push(c);
+      });
 
-    log += '\nTRADE:\n';
-    
-    // Step 4: Trade Matching Algorithm
-    // Green trades return Yellow
-    gExp.forEach(exp => {
-      // Find importer that isn't the exporter
-      const imp = gImp.find(i => i.name !== exp.name);
-      if (imp) {
-         // Calculate amount constraint
-         const amt = Math.floor(Math.min(exp.gStock * 0.2, (imp.gDem - imp.gStock > 0 ? imp.gDem - imp.gStock : 50) * 0.5, 10 + Math.random() * 30));
-         if (amt > 0) {
-            exp.gStock -= amt; imp.gStock += amt;
-            exp.yStock += amt * 0.6; imp.yStock -= amt * 0.6;
-            log += `${exp.name} -> ${imp.name} : ${amt} GreenSkin\n`;
-            log += `${imp.name} -> ${exp.name} : ${Math.floor(amt * 0.6)} YellowSkin\n\n`;
+      log += '\nTRADE:\n';
+      
+      // Step 4: Trade Matching Algorithm
+      // Green trades return Yellow
+      gExp.forEach(exp => {
+        // Find importer that isn't the exporter
+        const imp = gImp.find(i => i.name !== exp.name);
+        if (imp) {
+           // Calculate amount constraint
+           const amt = Math.floor(Math.min(exp.gStock * 0.2, (imp.gDem - imp.gStock > 0 ? imp.gDem - imp.gStock : 50) * 0.5, 10 + Math.random() * 30));
+           if (amt > 0) {
+              exp.gStock -= amt; imp.gStock += amt;
+              exp.yStock += amt * 0.6; imp.yStock -= amt * 0.6;
+              log += `${exp.name} -> ${imp.name} : ${amt} GreenSkin\n`;
+              log += `${imp.name} -> ${exp.name} : ${Math.floor(amt * 0.6)} YellowSkin\n\n`;
+           }
+        }
+      });
+
+      // Yellow trades return Green
+      yExp.forEach(exp => {
+        const imp = yImp.find(i => i.name !== exp.name);
+        if (imp) {
+           const amt = Math.floor(Math.min(exp.yStock * 0.2, (imp.yDem - imp.yStock > 0 ? imp.yDem - imp.yStock : 50) * 0.5, 10 + Math.random() * 30));
+           if (amt > 0) {
+              exp.yStock -= amt; imp.yStock += amt;
+              exp.gStock += amt * 1.5; imp.gStock -= amt * 1.5;
+              log += `${exp.name} -> ${imp.name} : ${amt} YellowSkin\n`;
+              log += `${imp.name} -> ${exp.name} : ${Math.floor(amt * 1.5)} GreenSkin\n\n`;
+           }
+        }
+      });
+
+      log += 'EVENT:\n';
+      // Step 5: Event Layer (7% vol. trigger)
+      countries.forEach(c => {
+         if (Math.random() < 0.07) {
+            const ev = Math.random();
+            if (ev < 0.3) { c.gProd *= 1.25; log += `${c.name} harvest boom (+25% Green prod)\n`; }
+            else if (ev < 0.6) { c.yProd *= 0.7; log += `${c.name} mining strike (-30% Yellow prod)\n`; }
+            else if (ev < 0.8) { c.gProd *= 1.1; c.yProd *= 1.1; log += `${c.name} infra upgrade (+10% both)\n`; }
+            else { c.yStock += 80; log += `${c.name} resource discovery (+80 Yellow stock)\n`; }
+         }
+      });
+
+      log += '\nSUMMARY:\n';
+      // Hook Live UI Updates
+      const formatPct = (now, prev) => {
+         if (!prev || prev === 0) return `<span style="color:#888;">0.0%</span>`;
+         const pct = ((now - prev) / prev) * 100;
+         const sign = pct >= 0 ? '+' : '';
+         const col = pct >= 0 ? '#0f8' : '#ff4444';
+         const arr = pct >= 0 ? '▲' : '▼';
+         return `<span style="color:${col};">${sign}${pct.toFixed(1)}% ${arr}</span>`;
+      };
+
+      const gBox = document.getElementById('mock-trade-green-ui');
+      if (gBox) {
+         const cn = gBox.getAttribute('data-country-name');
+         const cObj = getCountry(cn);
+         const dBox = document.getElementById('mock-trade-green-data');
+         if (dBox) {
+            const p = lastStats[cObj.name] || { gStock: cObj.gStock, gProd: cObj.gProd };
+            dBox.innerHTML = `
+              <table width="100%" style="margin-top:5px;">
+                <tr><td style="opacity:0.8; padding-bottom:4px;">Stockpile:</td><td align="right" style="font-weight:bold;">${Math.round(cObj.gStock)} <span style="font-weight:normal;font-size:10px;">Vol</span></td><td align="right">${formatPct(cObj.gStock, p.gStock)}</td></tr>
+                <tr><td style="opacity:0.8;">Est. Prod:</td><td align="right" style="font-weight:bold;">${Math.round(cObj.gProd)} <span style="font-weight:normal;font-size:10px;">/min</span></td><td align="right">${formatPct(cObj.gProd, p.gProd)}</td></tr>
+              </table>
+            `;
          }
       }
-    });
 
-    // Yellow trades return Green
-    yExp.forEach(exp => {
-      const imp = yImp.find(i => i.name !== exp.name);
-      if (imp) {
-         const amt = Math.floor(Math.min(exp.yStock * 0.2, (imp.yDem - imp.yStock > 0 ? imp.yDem - imp.yStock : 50) * 0.5, 10 + Math.random() * 30));
-         if (amt > 0) {
-            exp.yStock -= amt; imp.yStock += amt;
-            exp.gStock += amt * 1.5; imp.gStock -= amt * 1.5;
-            log += `${exp.name} -> ${imp.name} : ${amt} YellowSkin\n`;
-            log += `${imp.name} -> ${exp.name} : ${Math.floor(amt * 1.5)} GreenSkin\n\n`;
+      const yBox = document.getElementById('mock-trade-yellow-ui');
+      if (yBox) {
+         const cn = yBox.getAttribute('data-country-name');
+         const cObj = getCountry(cn);
+         const dBox = document.getElementById('mock-trade-yellow-data');
+         if (dBox) {
+            const p = lastStats[cObj.name] || { yStock: cObj.yStock, yProd: cObj.yProd };
+            dBox.innerHTML = `
+              <table width="100%" style="margin-top:5px;">
+                <tr><td style="opacity:0.8; padding-bottom:4px;">Stockpile:</td><td align="right" style="font-weight:bold; color:#ffa;">${Math.round(cObj.yStock)} <span style="font-weight:normal;font-size:10px;">Vol</span></td><td align="right">${formatPct(cObj.yStock, p.yStock)}</td></tr>
+                <tr><td style="opacity:0.8;">Est. Prod:</td><td align="right" style="font-weight:bold; color:#ffa;">${Math.round(cObj.yProd)} <span style="font-weight:normal;font-size:10px;">/min</span></td><td align="right">${formatPct(cObj.yProd, p.yProd)}</td></tr>
+              </table>
+            `;
          }
       }
-    });
 
-    log += 'EVENT:\n';
-    // Step 5: Event Layer (7% vol. trigger)
-    countries.forEach(c => {
-       if (Math.random() < 0.07) {
-          const ev = Math.random();
-          if (ev < 0.3) { c.gProd *= 1.25; log += `${c.name} harvest boom (+25% Green prod)\n`; }
-          else if (ev < 0.6) { c.yProd *= 0.7; log += `${c.name} mining strike (-30% Yellow prod)\n`; }
-          else if (ev < 0.8) { c.gProd *= 1.1; c.yProd *= 1.1; log += `${c.name} infra upgrade (+10% both)\n`; }
-          else { c.yStock += 80; log += `${c.name} resource discovery (+80 Yellow stock)\n`; }
-       }
-    });
-
-    log += '\nSUMMARY:\n';
-    // Hook Live UI Updates
-    const formatPct = (now, prev) => {
-       if (!prev || prev === 0) return `<span style="color:#888;">0.0%</span>`;
-       const pct = ((now - prev) / prev) * 100;
-       const sign = pct >= 0 ? '+' : '';
-       const col = pct >= 0 ? '#0f8' : '#ff4444';
-       const arr = pct >= 0 ? '▲' : '▼';
-       return `<span style="color:${col};">${sign}${pct.toFixed(1)}% ${arr}</span>`;
-    };
-
-    const gBox = document.getElementById('mock-trade-green-ui');
-    if (gBox) {
-       const cn = gBox.getAttribute('data-country-name');
-       const cObj = getCountry(cn);
-       const dBox = document.getElementById('mock-trade-green-data');
-       if (dBox) {
-          const p = lastStats[cObj.name] || { gStock: cObj.gStock, gProd: cObj.gProd };
-          dBox.innerHTML = `
-            <table width="100%" style="margin-top:5px;">
-              <tr><td style="opacity:0.8; padding-bottom:4px;">Stockpile:</td><td align="right" style="font-weight:bold;">${Math.round(cObj.gStock)} <span style="font-weight:normal;font-size:10px;">Vol</span></td><td align="right">${formatPct(cObj.gStock, p.gStock)}</td></tr>
-              <tr><td style="opacity:0.8;">Est. Prod:</td><td align="right" style="font-weight:bold;">${Math.round(cObj.gProd)} <span style="font-weight:normal;font-size:10px;">/min</span></td><td align="right">${formatPct(cObj.gProd, p.gProd)}</td></tr>
-            </table>
-          `;
-       }
+      // Save state for next turn percentages
+      countries.forEach(c => {
+         lastStats[c.name] = { gStock: c.gStock, yStock: c.yStock, gProd: c.gProd, yProd: c.yProd };
+      });
+    } catch (err) {
+      console.error("Trade Simulation Error", err);
+      const gBox = document.getElementById('mock-trade-green-data');
+      if(gBox) gBox.innerHTML = `<span style="color:red; font-size:10px;">Err: ${err.message}</span>`;
+      const yBox = document.getElementById('mock-trade-yellow-data');
+      if(yBox) yBox.innerHTML = `<span style="color:red; font-size:10px;">Err: ${err.message}</span>`;
     }
-
-    const yBox = document.getElementById('mock-trade-yellow-ui');
-    if (yBox) {
-       const cn = yBox.getAttribute('data-country-name');
-       const cObj = getCountry(cn);
-       const dBox = document.getElementById('mock-trade-yellow-data');
-       if (dBox) {
-          const p = lastStats[cObj.name] || { yStock: cObj.yStock, yProd: cObj.yProd };
-          dBox.innerHTML = `
-            <table width="100%" style="margin-top:5px;">
-              <tr><td style="opacity:0.8; padding-bottom:4px;">Stockpile:</td><td align="right" style="font-weight:bold; color:#ffa;">${Math.round(cObj.yStock)} <span style="font-weight:normal;font-size:10px;">Vol</span></td><td align="right">${formatPct(cObj.yStock, p.yStock)}</td></tr>
-              <tr><td style="opacity:0.8;">Est. Prod:</td><td align="right" style="font-weight:bold; color:#ffa;">${Math.round(cObj.yProd)} <span style="font-weight:normal;font-size:10px;">/min</span></td><td align="right">${formatPct(cObj.yProd, p.yProd)}</td></tr>
-            </table>
-          `;
-       }
-    }
-
-    // Save state for next turn percentages
-    countries.forEach(c => {
-       lastStats[c.name] = { gStock: c.gStock, yStock: c.yStock, gProd: c.gProd, yProd: c.yProd };
-    });
   }
 
   // Inject initial populate on demand if box exists before first tick
