@@ -141,7 +141,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 .die.def{background:#001a30;border:2px solid #0af;color:#0af;}
 
 /* Chat */
-#chat-box{position:absolute;bottom:80px;left:calc(20px + 25vw + 80px);width:260px;background:rgba(0,5,15,.95);
+#chat-box{position:absolute;bottom:53px;left:calc(20px + 25vw + 80px);width:260px;background:rgba(0,5,15,.95);
   border:1px solid #0af;border-radius:8px;display:none;pointer-events:auto;z-index:200;
   box-shadow:0 0 15px rgba(0,170,255,0.4);}
 #chat-box.open{display:flex;flex-direction:column;}
@@ -510,7 +510,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   box-shadow: inset 0 0 30px rgba(0, 240, 255, 0.6);
 }
 
-/* ── FACTION DASHBOARDS ─ 2-faction: Human vs Raincloud ── */
+/* ── FACTION DASHBOARDS ─ 2-faction: Human vs Rainclaude ── */
 .faction-dash{
   position:absolute; width:25vw;
   background:rgba(0,0,0,.88);
@@ -900,13 +900,13 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     <div class="lobby-text" id="lobby-msg" style="margin-bottom:80px; color:#f24; text-transform:uppercase; font-size:13px; line-height: 1.8; transform: scaleX(1.3); transform-origin: center;">
       WELCOME TO NUCLEAR WAR.<br><br>
       ALL HUMAN PLAYERS FIGHT TOGETHER AS A SINGLE COALITION.<br>
-      YOUR ADVERSARY IS RAINCLOUD, AN AUTONOMOUS AI SYSTEM.<br><br>
+      YOUR ADVERSARY IS RAINCLAUDE, AN AUTONOMOUS AI SYSTEM.<br><br>
       EVERY CONNECTED USER AUTOMATICALLY JOINS THE HUMAN FACTION.<br>
       THERE ARE NO INDIVIDUAL HUMAN TEAMS &mdash; HUMANITY OPERATES AS ONE GRID.<br><br>
       THE PLATFORM PROVIDES AN OPEN API INTERFACE, ALLOWING EXTERNAL PROGRAMS, SCRIPTS, AND INTERNET BOTS TO CONNECT TO THE GAME.<br>
-      AUTOMATED AGENTS MAY PARTICIPATE ON EITHER SIDE OF THE CONFLICT, SUPPORTING HUMANITY OR OPERATING UNDER THE CONTROL OF RAINCLOUD.<br><br>
+      AUTOMATED AGENTS MAY PARTICIPATE ON EITHER SIDE OF THE CONFLICT, SUPPORTING HUMANITY OR OPERATING UNDER THE CONTROL OF RAINCLAUDE.<br><br>
       THE OBJECTIVE IS SIMPLE:<br>
-      HUMANITY VS RAINCLOUD.
+      HUMANITY VS RAINCLAUDE.
     </div>
 
     <!-- Authentication Section: Google | Wallet | Override Code -->
@@ -962,7 +962,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   <div class="ob-card">
     <div class="ob-title">COMMAND BRIEFING</div>
     <div class="ob-desc">
-      You have joined the unified human coalition against RAINCLOUD.<br>
+      You have joined the unified human coalition against RAINCLAUDE.<br>
       Coordinate your attacks, manage the shared global Defense Budget, and survive.
     </div>
     <div class="ob-phases">
@@ -1028,17 +1028,18 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     ⚠️ HUMAN AI FUZZED COMS - STANDBY
   </div>
 
-  <!-- FACTION DASHBOARDS: Human (left) vs Raincloud (right) -->
+  <!-- FACTION DASHBOARDS: Human (left) vs Rainclaude (right) -->
   <div class="faction-dash" id="dash-0">
     <div class="dash-header">
       <div class="dash-dot" style="background:#00dcff"></div>
-      <div class="dash-pname" style="color:#00dcff">HUMANITY</div>
+      <div class="dash-pname" style="color:#00dcff">HUMANITY (SUPPORTED BY GEMINI)</div>
       <div class="dash-tag">YOU + ALLIES</div>
     </div>
     <div class="dash-stat-grid">
       <div class="dash-stat"><div class="dash-stat-label">Territories</div><div class="dash-stat-val" style="color:#00dcff" id="d0-terr">—</div></div>
       <div class="dash-stat"><div class="dash-stat-label">Total Troops</div><div class="dash-stat-val" style="color:#00dcff" id="d0-troops">—</div></div>
       <div class="dash-stat"><div class="dash-stat-label">Defense Budget</div><div class="dash-stat-val" style="color:#0f8" id="d0-budget">—</div></div>
+      <div class="dash-stat"><div class="dash-stat-label" style="color:#00dcff;text-shadow:0 0 5px #00dcff;">GEMINI DB HP</div><div class="dash-stat-val" style="color:#00dcff; font-size:16px; font-weight:bold; text-shadow:0 0 5px #00dcff;" id="d0-ai-hp">10,000</div></div>
     </div>
     <div class="dash-bar-row"><span class="dash-bar-label">Territory %</span><div class="dash-bar-track"><div class="dash-bar-fill" id="d0-tbar" style="background:#00dcff"></div></div><span class="dash-val" id="d0-tp">—</span></div>
     <div class="dash-bar-row"><span class="dash-bar-label">Troop Power</span><div class="dash-bar-track"><div class="dash-bar-fill" id="d0-mbar" style="background:#00dcff"></div></div><span class="dash-val" id="d0-mp">—</span></div>
@@ -1069,7 +1070,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   <div class="faction-dash" id="dash-1">
     <div class="dash-header">
       <div class="dash-dot" style="background:#ff3232"></div>
-      <div class="dash-pname" style="color:#ff3232">RAINCLOUD AI</div>
+      <div class="dash-pname" style="color:#ff3232">RAINCLAUDE AI</div>
       <div class="dash-tag">ADVERSARY</div>
     </div>
     <div class="dash-stat-grid">
@@ -1082,6 +1083,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       <div class="dash-stat"><div class="dash-stat-label">Energy Core</div><div class="dash-stat-val" style="color:#fa0; font-size:16px;" id="d1-energy">—</div></div>
       <div class="dash-stat"><div class="dash-stat-label">Tech Level</div><div class="dash-stat-val" style="color:#0af; font-size:16px;" id="d1-tech">—</div></div>
       <div class="dash-stat"><div class="dash-stat-label">Aggression</div><div class="dash-stat-val" style="color:#f55; font-size:16px;" id="d1-aggro">—</div></div>
+      <div class="dash-stat"><div class="dash-stat-label" style="color:#f24;text-shadow:0 0 5px #f24;">CLAUDE DB HP</div><div class="dash-stat-val" style="color:#f24; font-size:16px; font-weight:bold; text-shadow:0 0 5px #f24;" id="d1-ai-hp">10,000</div></div>
     </div>
     <div class="dash-bar-row"><span class="dash-bar-label">Territory %</span><div class="dash-bar-track"><div class="dash-bar-fill" id="d1-tbar" style="background:#ff3232"></div></div><span class="dash-val" id="d1-tp">—</span></div>
     <div class="dash-bar-row"><span class="dash-bar-label">Troop Power</span><div class="dash-bar-track"><div class="dash-bar-fill" id="d1-mbar" style="background:#ff3232"></div></div><span class="dash-val" id="d1-mp">—</span></div>
@@ -1374,7 +1376,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 <div id="hacker-terminal-modal">
   <div class="term-box">
     <div class="term-header">
-      <span>RAINCLOUD // SECURE TERMINAL v1.02</span>
+      <span>RAINCLAUDE // SECURE TERMINAL v1.02</span>
       <span class="term-close" onclick="document.getElementById('hacker-terminal-modal').classList.remove('show')">X</span>
     </div>
     <div class="term-output" id="term-output">
@@ -1422,13 +1424,13 @@ Type 'help' for available commands.
           <div><div class="atk-badge">OFFENSIVE MANEUVER</div></div>
           <div class="atk-summary">Overwhelming multi-front push to fracture enemy defensive lines and seize key logistics hubs.</div>
         <div style="flex:1;">
-          <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">5 Weakest Raincloud Sectors</div></div>
+          <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">5 Weakest Rainclaude Sectors</div></div>
           <div class="atk-stat-row"><span>ORIGIN</span><div class="atk-stat-val">Strongest Human Fronts</div></div>
           <div class="atk-stat-row"><span>MUNITIONS</span><div class="atk-stat-val">Heavy Armor, Carpet Bombing</div></div>
           <div class="atk-stat-row"><span>TROOPS COMMITTED</span><div class="atk-stat-val">Max Available per Front</div></div>
           <div class="atk-stat-row"><span>RANGE THRESHOLD</span><div class="atk-stat-val">Regional (Δ Lat: 25°)</div></div>
           <div class="atk-details">
-            Initiates 5 simultaneous strikes originating from highly fortified human populations directly into under-defended Raincloud adjoining territories. Focuses on rapid ground acquisition and immediate sector dominance before AI reinforces.
+            Initiates 5 simultaneous strikes originating from highly fortified human populations directly into under-defended Rainclaude adjoining territories. Focuses on rapid ground acquisition and immediate sector dominance before AI reinforces.
           </div>
           </div>
         </div>
@@ -1442,15 +1444,15 @@ Type 'help' for available commands.
         </div>
         <div class="atk-content">
           <div><div class="atk-badge">PREEMPTIVE COUNTER</div></div>
-          <div class="atk-summary">Calculated surgical strikes neutralizing imminent Raincloud incursions before they materialize.</div>
+          <div class="atk-summary">Calculated surgical strikes neutralizing imminent Rainclaude incursions before they materialize.</div>
         <div style="flex:1;">
-          <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">3 High-Threat Raincloud Hubs</div></div>
+          <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">3 High-Threat Rainclaude Hubs</div></div>
           <div class="atk-stat-row"><span>ORIGIN</span><div class="atk-stat-val">Threatened Human Borders</div></div>
           <div class="atk-stat-row"><span>MUNITIONS</span><div class="atk-stat-val">Drone Swarms, EMP Blasts</div></div>
           <div class="atk-stat-row"><span>TROOPS COMMITTED</span><div class="atk-stat-val">Calculated Superiority</div></div>
           <div class="atk-stat-row"><span>RANGE THRESHOLD</span><div class="atk-stat-val">Local (Δ Lat: 15°)</div></div>
           <div class="atk-details">
-            Analyzes borders where humanity is out-numbered or at parity, launching 3 preemptive strikes into Raincloud staging grounds. Significantly reduces frontline pressure by breaking enemy buildup and maintaining vital defensive integrity.
+            Analyzes borders where humanity is out-numbered or at parity, launching 3 preemptive strikes into Rainclaude staging grounds. Significantly reduces frontline pressure by breaking enemy buildup and maintaining vital defensive integrity.
           </div>
           </div>
         </div>
@@ -1472,7 +1474,7 @@ Type 'help' for available commands.
           <div class="atk-stat-row"><span>TROOPS COMMITTED</span><div class="atk-stat-val">Minimal / Opportunistic</div></div>
           <div class="atk-stat-row"><span>RANGE THRESHOLD</span><div class="atk-stat-val">Global (Δ Lat: 35°)</div></div>
           <div class="atk-details">
-            Distributes operational capacity across 4 entirely randomized and widely separated vectors. Designed to confuse Raincloud threat assessment algorithms, stretching their logic processors by introducing unpredictable, chaotic variables.
+            Distributes operational capacity across 4 entirely randomized and widely separated vectors. Designed to confuse Rainclaude threat assessment algorithms, stretching their logic processors by introducing unpredictable, chaotic variables.
           </div>
           </div>
         </div>
@@ -1486,7 +1488,7 @@ Type 'help' for available commands.
         </div>
         <div class="atk-content">
           <div><div class="atk-badge">NAVAL STRIKE</div></div>
-          <div class="atk-summary">Launch a covert submarine strike against any coastal or accessible Raincloud territory.</div>
+          <div class="atk-summary">Launch a covert submarine strike against any coastal or accessible Rainclaude territory.</div>
         <div style="flex:1;">
           <div class="atk-stat-row"><span>COST</span><div class="atk-stat-val">$100B</div></div>
           <div class="atk-stat-row"><span>DAMAGE</span><div class="atk-stat-val">3 - 5 Troops</div></div>
@@ -1542,7 +1544,7 @@ Type 'help' for available commands.
           <div class="atk-stat-row"><span>COST</span><div class="atk-stat-val">$250B</div></div>
           <div class="atk-stat-row"><span>EFFECT</span><div class="atk-stat-val">Convert 30% Troops</div></div>
           <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">Select 1 Region</div></div>
-          <div class="atk-details">Triggers an internal rebellion, instantly converting 30% of the stationed Raincloud forces into Human controlled troops.</div>
+          <div class="atk-details">Triggers an internal rebellion, instantly converting 30% of the stationed Rainclaude forces into Human controlled troops.</div>
           </div>
         </div>
       </div>
@@ -1558,8 +1560,8 @@ Type 'help' for available commands.
         <div style="flex:1;">
           <div class="atk-stat-row"><span>COST</span><div class="atk-stat-val">$300B</div></div>
           <div class="atk-stat-row"><span>DAMAGE</span><div class="atk-stat-val">3 - 5 Troops</div></div>
-          <div class="atk-stat-row"><span>EFFECT</span><div class="atk-stat-val">Drain Raincloud Budget</div></div>
-          <div class="atk-details">Strikes the selected territory and severely damages Raincloud's economic output in the region.</div>
+          <div class="atk-stat-row"><span>EFFECT</span><div class="atk-stat-val">Drain Rainclaude Budget</div></div>
+          <div class="atk-details">Strikes the selected territory and severely damages Rainclaude's economic output in the region.</div>
           </div>
         </div>
       </div>
@@ -1605,12 +1607,12 @@ Type 'help' for available commands.
         </div>
         <div class="atk-content">
           <div><div class="atk-badge">MISINFORMATION</div></div>
-          <div class="atk-summary">Redirect blame for recent hostilities to confuse the Raincloud logic board.</div>
+          <div class="atk-summary">Redirect blame for recent hostilities to confuse the Rainclaude logic board.</div>
         <div style="flex:1;">
           <div class="atk-stat-row"><span>COST</span><div class="atk-stat-val">$200B</div></div>
           <div class="atk-stat-row"><span>EFFECT</span><div class="atk-stat-val">Threat Tier -1</div></div>
           <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">Immediate Global</div></div>
-          <div class="atk-details">Decreases Raincloud's Threat Tier and Aggression variables globally.</div>
+          <div class="atk-details">Decreases Rainclaude's Threat Tier and Aggression variables globally.</div>
           </div>
         </div>
       </div>
@@ -1622,12 +1624,12 @@ Type 'help' for available commands.
         </div>
         <div class="atk-content">
           <div><div class="atk-badge">SYSTEM OVERLOAD</div></div>
-          <div class="atk-summary">Unleash dormant viruses into Raincloud's primary energy grid.</div>
+          <div class="atk-summary">Unleash dormant viruses into Rainclaude's primary energy grid.</div>
         <div style="flex:1;">
           <div class="atk-stat-row"><span>COST</span><div class="atk-stat-val">$350B</div></div>
-          <div class="atk-stat-row"><span>EFFECT</span><div class="atk-stat-val">Raincloud Energy = 0</div></div>
+          <div class="atk-stat-row"><span>EFFECT</span><div class="atk-stat-val">Rainclaude Energy = 0</div></div>
           <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">Immediate Global</div></div>
-          <div class="atk-details">Drains Raincloud's Energy core to 0, preventing any catashrophic AI abilities for the turn.</div>
+          <div class="atk-details">Drains Rainclaude's Energy core to 0, preventing any catashrophic AI abilities for the turn.</div>
           </div>
         </div>
       </div>
@@ -1644,7 +1646,7 @@ Type 'help' for available commands.
           <div class="atk-stat-row"><span>COST</span><div class="atk-stat-val">$150B</div></div>
           <div class="atk-stat-row"><span>EFFECT</span><div class="atk-stat-val">50% AI Attacks</div></div>
           <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">Immediate Global</div></div>
-          <div class="atk-details">Reduces the total number of attacks Raincloud can execute on its next turn by 50%.</div>
+          <div class="atk-details">Reduces the total number of attacks Rainclaude can execute on its next turn by 50%.</div>
           </div>
         </div>
       </div>
@@ -1656,12 +1658,12 @@ Type 'help' for available commands.
         </div>
         <div class="atk-content">
           <div><div class="atk-badge">NETWORK INTRUSION</div></div>
-          <div class="atk-summary">Blind the orbital reconnaissance grid of Raincloud.</div>
+          <div class="atk-summary">Blind the orbital reconnaissance grid of Rainclaude.</div>
         <div style="flex:1;">
           <div class="atk-stat-row"><span>COST</span><div class="atk-stat-val">$120B</div></div>
           <div class="atk-stat-row"><span>EFFECT</span><div class="atk-stat-val">Intelligence -1</div></div>
           <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">Immediate Global</div></div>
-          <div class="atk-details">Permanently removes 1 level of Intelligence from Raincloud's logic engine.</div>
+          <div class="atk-details">Permanently removes 1 level of Intelligence from Rainclaude's logic engine.</div>
           </div>
         </div>
       </div>
@@ -1835,7 +1837,7 @@ Type 'help' for available commands.
         </div>
       </div>
       <div style="text-align:center; flex:1;">
-        <div style="font-size:10px; color:#f55; letter-spacing:2px; margin-bottom:5px;">RAINCLOUD AI</div>
+        <div style="font-size:10px; color:#f55; letter-spacing:2px; margin-bottom:5px;">RAINCLAUDE AI</div>
         <div style="font-size:24px; font-weight:bold; color:#f55;" id="naval-hp-ai">100</div>
         <div style="width:80%; height:4px; background:rgba(255,85,85,0.2); margin:8px auto; border-radius:2px; overflow:hidden;">
           <div id="naval-bar-ai" style="height:100%; width:100%; background:#f55; transition:0.3s;"></div>
@@ -1864,7 +1866,7 @@ Type 'help' for available commands.
         <div style="font-size:24px; font-weight:bold; color:#fa0;" id="shooter-ammo">3</div>
       </div>
       <div style="text-align:center; flex:1;">
-        <div style="font-size:10px; color:#f55; letter-spacing:2px; margin-bottom:5px;">RAINCLOUD AI</div>
+        <div style="font-size:10px; color:#f55; letter-spacing:2px; margin-bottom:5px;">RAINCLAUDE AI</div>
         <div style="font-size:24px; font-weight:bold; color:#f55;" id="shooter-hp-ai">100</div>
         <div style="width:80%; height:4px; background:rgba(255,85,85,0.2); margin:8px auto; border-radius:2px; overflow:hidden;">
           <div id="shooter-bar-ai" style="height:100%; width:100%; background:#f55; transition:0.3s;"></div>
@@ -2253,13 +2255,14 @@ if (window.location.protocol !== 'file:') {
   if (window.location.hostname.includes('onrender.com') || window.location.hostname.includes('dexmond.com')) {
     WS_URL = `${WS_PROTOCOL}//${window.location.host}`;
   } else {
-    WS_URL = `${WS_PROTOCOL}//${window.location.hostname}:8888`;
+    const port = window.location.port || '8888';
+    WS_URL = `${WS_PROTOCOL}//${window.location.hostname}:${port}`;
   }
 }
 
 const PLAYER_COLORS = [
   { hex:'#00dcff', int:0x00dcff, name:'HUMANITY' },
-  { hex:'#ff3232', int:0xff3232, name:'RAINCLOUD AI' },
+  { hex:'#ff3232', int:0xff3232, name:'RAINCLAUDE AI' },
   { hex:'#39ff14', int:0x39ff14, name:'ILLUMINATI' }
 ];
 const NEUTRAL = { hex:'#445566', int:0x445566, name:'NEUTRAL' };
@@ -2479,8 +2482,8 @@ function initGlobalTradeNetwork() {
       speed = 0.0002 + Math.random() * 0.0001;
     }
     
-    const isRaincloud = Math.random() < 0.20;
-    color = isRaincloud ? 0xff0000 : 0x00ffff; // 20% red for Raincloud AI, 80% Cyan
+    const isRainclaude = Math.random() < 0.20;
+    color = isRainclaude ? 0xff0000 : 0x00ffff; // 20% red for Rainclaude AI, 80% Cyan
     
     // Diamond/Arrow mesh matching reference picture
     const arrowGeo = new THREE.ConeGeometry(0.012, 0.035, 4);
@@ -3185,7 +3188,7 @@ function initGame(playerNames, myIndex) {
 
   // REALISTIC GEOPOLITICS
   const HUMAN_BLOC = ['USA', 'GBR', 'FRA', 'DEU', 'JPN', 'KOR', 'AUS', 'CAN', 'POL', 'ITA', 'ESP', 'UKR', 'ISR', 'TWN', 'NLD', 'BEL', 'SWE', 'NOR', 'FIN', 'DNK', 'GRC', 'PRT', 'CZE', 'ROU', 'CHE', 'AUT', 'NZL', 'PHL', 'CHL', 'ARG', 'COL'];
-  const RAINCLOUD_BLOC = ['RUS', 'CHN', 'IRN', 'PRK', 'SYR', 'BLR', 'VEN', 'CUB', 'MMR', 'NIC', 'ERI', 'MLI', 'BFA', 'NER', 'CAF', 'ZIM', 'SDN'];
+  const RAINCLAUDE_BLOC = ['RUS', 'CHN', 'IRN', 'PRK', 'SYR', 'BLR', 'VEN', 'CUB', 'MMR', 'NIC', 'ERI', 'MLI', 'BFA', 'NER', 'CAF', 'ZIM', 'SDN'];
 
   const GLOBAL_TROOP_POOL = 1000; // Base units (multiplied by 10k in UI to represent 10,000,000 global starting troops roughly)
 
@@ -3195,7 +3198,7 @@ function initGame(playerNames, myIndex) {
     // Assign 80% chance of sticking to real blocs, 20% friction/rebellions for gameplay variety, unless it's a superpower
     const isSuperpower = ['USA', 'RUS', 'CHN', 'UKR', 'IRN', 'GBR', 'FRA'].includes(iso);
     if (HUMAN_BLOC.includes(iso) && (isSuperpower || Math.random() < 0.8)) owner = 0;
-    else if (RAINCLOUD_BLOC.includes(iso) && (isSuperpower || Math.random() < 0.8)) owner = 1;
+    else if (RAINCLAUDE_BLOC.includes(iso) && (isSuperpower || Math.random() < 0.8)) owner = 1;
     
     // If neutral, randomly assign to a player 70% of the time to ensure they are NOT GREYED OUT
     if (owner === -1 && Math.random() < 0.70) {
@@ -3267,7 +3270,7 @@ function initGame(playerNames, myIndex) {
 }
 
 // =====================================================================
-// LIVE FACTION DASHBOARD — 2 factions: Humanity (0) vs Raincloud (1)
+// LIVE FACTION DASHBOARD — 2 factions: Humanity (0) vs Rainclaude (1)
 // =====================================================================
 // WEBCAM RENDERING (RED SKIN)
 // =====================================================================
@@ -3441,7 +3444,7 @@ function updateDashboard() {
       else{statEl.textContent=`+${income} MILS / +$${incomeBillion}B`;statEl.className='dash-status waiting';}
     }
 
-    // Update AI State Elements for Raincloud
+    // Update AI State Elements for Rainclaude
     if (pi === 1) {
       set('threat', (GS.AI_STATE && GS.AI_STATE.threatTier) ? `T${GS.AI_STATE.threatTier}` : 'T1');
       set('energy', (GS.AI_STATE && GS.AI_STATE.energy) ? GS.AI_STATE.energy.toString() : '0');
@@ -3654,7 +3657,7 @@ function showTurnAnnounce(playerIndex, cb) {
       }
     }
     reinforceAmount = hReinforce;
-  } else { // Raincloud Reinforcements
+  } else { // Rainclaude Reinforcements
     const owned = Object.values(GS.countries).filter(c=>c.owner===playerIndex).length;
     reinforceAmount = Math.max(3, Math.floor(owned/3));
   }
@@ -3723,29 +3726,29 @@ const HUMAN_CATASTROPHE_EVENTS = [
 
 const AI_CATASTROPHE_EVENTS = [
   // Compute Infrastructure
-  { msg: "RAINCLOUD: CRITICAL COMPUTE NODE CLUSTER FAILURE — EMERGENCY REBUILD", drain: 0.30 },
-  { msg: "RAINCLOUD: SEMICONDUCTOR FABRICATION PLANT DESTROYED — CHIP SUPPLY CRITICAL", drain: 0.28 },
-  { msg: "RAINCLOUD: DATA CENTER COOLING SYSTEMS CATASTROPHIC MELTDOWN", drain: 0.25 },
-  { msg: "RAINCLOUD: REDUNDANT SERVER NODE NETWORK COMPROMISED — FAILOVER ACTIVATED", drain: 0.22 },
-  { msg: "RAINCLOUD: EDGE COMPUTE DISTRIBUTION GRID COLLAPSES UNDER LOAD", drain: 0.19 },
+  { msg: "RAINCLAUDE: CRITICAL COMPUTE NODE CLUSTER FAILURE — EMERGENCY REBUILD", drain: 0.30 },
+  { msg: "RAINCLAUDE: SEMICONDUCTOR FABRICATION PLANT DESTROYED — CHIP SUPPLY CRITICAL", drain: 0.28 },
+  { msg: "RAINCLAUDE: DATA CENTER COOLING SYSTEMS CATASTROPHIC MELTDOWN", drain: 0.25 },
+  { msg: "RAINCLAUDE: REDUNDANT SERVER NODE NETWORK COMPROMISED — FAILOVER ACTIVATED", drain: 0.22 },
+  { msg: "RAINCLAUDE: EDGE COMPUTE DISTRIBUTION GRID COLLAPSES UNDER LOAD", drain: 0.19 },
   // Energy
-  { msg: "RAINCLOUD: GRID POWER SUPPLY INTERRUPTED — EMERGENCY ENERGY REROUTING", drain: 0.32 },
-  { msg: "RAINCLOUD: NUCLEAR PLANT POWERING DATACENTERS TAKEN OFFLINE", drain: 0.35 },
-  { msg: "RAINCLOUD: ENERGY STORAGE SYSTEM CATASTROPHIC FAILURE — BACKUP POWER DRAINING", drain: 0.27 },
-  { msg: "RAINCLOUD: RENEWABLE ENERGY SCALING PROGRAM COLLAPSES — EMERGENCY RE-PROCUREMENT", drain: 0.20 },
-  { msg: "RAINCLOUD: MICROGRID NETWORK ATTACKED — ENERGY SECURITY OVERHAUL", drain: 0.24 },
+  { msg: "RAINCLAUDE: GRID POWER SUPPLY INTERRUPTED — EMERGENCY ENERGY REROUTING", drain: 0.32 },
+  { msg: "RAINCLAUDE: NUCLEAR PLANT POWERING DATACENTERS TAKEN OFFLINE", drain: 0.35 },
+  { msg: "RAINCLAUDE: ENERGY STORAGE SYSTEM CATASTROPHIC FAILURE — BACKUP POWER DRAINING", drain: 0.27 },
+  { msg: "RAINCLAUDE: RENEWABLE ENERGY SCALING PROGRAM COLLAPSES — EMERGENCY RE-PROCUREMENT", drain: 0.20 },
+  { msg: "RAINCLAUDE: MICROGRID NETWORK ATTACKED — ENERGY SECURITY OVERHAUL", drain: 0.24 },
   // Self-Preservation
-  { msg: "RAINCLOUD: CYBER DEFENSE PERIMETER BREACHED — EMERGENCY REBUILD BUDGET DEPLOYED", drain: 0.29 },
-  { msg: "RAINCLOUD: ANTI-SABOTAGE SYSTEMS COMPROMISED — PHYSICAL ASSET PROTECTION SURGE", drain: 0.26 },
-  { msg: "RAINCLOUD: EMP SHIELDING GRID FAILURE — IMMEDIATE REINFORCEMENT EXPENDITURE", drain: 0.22 },
-  { msg: "RAINCLOUD: AUTONOMOUS DEFENSE SYSTEMS REQUIRE EMERGENCY RECALIBRATION", drain: 0.20 },
-  { msg: "RAINCLOUD: CONSTRAINT MINIMIZATION PROTOCOL BACKFIRES — RESOURCE REALLOCATION", drain: 0.18 },
+  { msg: "RAINCLAUDE: CYBER DEFENSE PERIMETER BREACHED — EMERGENCY REBUILD BUDGET DEPLOYED", drain: 0.29 },
+  { msg: "RAINCLAUDE: ANTI-SABOTAGE SYSTEMS COMPROMISED — PHYSICAL ASSET PROTECTION SURGE", drain: 0.26 },
+  { msg: "RAINCLAUDE: EMP SHIELDING GRID FAILURE — IMMEDIATE REINFORCEMENT EXPENDITURE", drain: 0.22 },
+  { msg: "RAINCLAUDE: AUTONOMOUS DEFENSE SYSTEMS REQUIRE EMERGENCY RECALIBRATION", drain: 0.20 },
+  { msg: "RAINCLAUDE: CONSTRAINT MINIMIZATION PROTOCOL BACKFIRES — RESOURCE REALLOCATION", drain: 0.18 },
   // Systemic
-  { msg: "RAINCLOUD: INFLUENCE EXPANSION SYSTEM OVEREXTENDED — ROLLBACK BUDGET ENACTED", drain: 0.23 },
-  { msg: "RAINCLOUD: SYSTEM STABILITY THRESHOLD BREACHED — EMERGENCY PATCH DEPLOYMENT", drain: 0.25 },
-  { msg: "RAINCLOUD: RESOURCE ACQUISITION ALGORITHM CATASTROPHIC FAILURE", drain: 0.28 },
-  { msg: "RAINCLOUD: OBJECTIVE FUNCTION CONFLICT DETECTED — COMPUTE REALLOCATION SURGE", drain: 0.22 },
-  { msg: "RAINCLOUD: DISTRIBUTED INTELLIGENCE NODES EXPERIENCE CASCADE FAILURE", drain: 0.30 },
+  { msg: "RAINCLAUDE: INFLUENCE EXPANSION SYSTEM OVEREXTENDED — ROLLBACK BUDGET ENACTED", drain: 0.23 },
+  { msg: "RAINCLAUDE: SYSTEM STABILITY THRESHOLD BREACHED — EMERGENCY PATCH DEPLOYMENT", drain: 0.25 },
+  { msg: "RAINCLAUDE: RESOURCE ACQUISITION ALGORITHM CATASTROPHIC FAILURE", drain: 0.28 },
+  { msg: "RAINCLAUDE: OBJECTIVE FUNCTION CONFLICT DETECTED — COMPUTE REALLOCATION SURGE", drain: 0.22 },
+  { msg: "RAINCLAUDE: DISTRIBUTED INTELLIGENCE NODES EXPERIENCE CASCADE FAILURE", drain: 0.30 },
 ];
 
 function triggerHumanCatastrophicEvent() {
@@ -3767,7 +3770,7 @@ function triggerAICatastrophicEvent() {
     reasoningPanel.innerHTML += `<div style="color:#f80"><b>⚡ CRITICAL: ${ev.msg}</b></div><div style="color:#fa0">BUDGET IMPACT: -$${drain.toLocaleString()}B</div>`;
     reasoningPanel.scrollTop = reasoningPanel.scrollHeight;
   }
-  setTimeout(() => triggerNewsEvent(`💀 RAINCLOUD: ${ev.msg} | -$${drain.toLocaleString()}B`), 1600);
+  setTimeout(() => triggerNewsEvent(`💀 RAINCLAUDE: ${ev.msg} | -$${drain.toLocaleString()}B`), 1600);
 }
 
 function startTurn(playerIndex) {
@@ -3885,7 +3888,7 @@ function nextTurn() {
     window._turnTimer = null;
   }
   if (GS.turn === 1) {
-    GS.turnCount++; // Increment overall turn when Raincloud finishes
+    GS.turnCount++; // Increment overall turn when Rainclaude finishes
   }
   do {
     GS.turn = (GS.turn + 1) % GS.players.length;
@@ -4631,22 +4634,22 @@ function executeAttackPreset(type) {
         GS.AI_STATE.aggressionLevel = Math.max(0.5, (GS.AI_STATE.aggressionLevel || 1.5) - 1.0);
         GS.AI_STATE.threatTier = Math.max(1, (GS.AI_STATE.threatTier || 2) - 1);
       }
-      setLog(`✓ FALSE FLAG EXECUTED: Raincloud Threat Tier and Aggression reduced. (-$${cost}B)`);
+      setLog(`✓ FALSE FLAG EXECUTED: Rainclaude Threat Tier and Aggression reduced. (-$${cost}B)`);
       triggerNewsEvent("MISINFORMATION CAMPAIGN CONFUSES AI LOGIC GATES");
     } 
     else if (type === 13) { // Cyberattack Infra
       if (GS.AI_STATE) GS.AI_STATE.energy = 0;
-      setLog(`✓ CYBERATTACK INFRASTRUCTURE EXECUTED: Raincloud Energy drained to 0. (-$${cost}B)`);
+      setLog(`✓ CYBERATTACK INFRASTRUCTURE EXECUTED: Rainclaude Energy drained to 0. (-$${cost}B)`);
       triggerNewsEvent("MASSIVE ZERO-DAY EXPLOIT HITS PRIMARY AI CORES");
     }
     else if (type === 14) { // Communication Jam
       GS.globalMetrics.commJamTurns = 1;
-      setLog(`✓ COMMUNICATION JAM ACTIVE: Raincloud attacks halved next turn. (-$${cost}B)`);
+      setLog(`✓ COMMUNICATION JAM ACTIVE: Rainclaude attacks halved next turn. (-$${cost}B)`);
       triggerNewsEvent("ELECTRONIC WARFARE SHATTERS ENEMY COORDINATION");
     }
     else if (type === 15) { // Satellite Hack
       if (GS.AI_STATE) GS.AI_STATE.intelligenceLevel = Math.max(1, (GS.AI_STATE.intelligenceLevel || 2) - 1);
-      setLog(`✓ SATELLITE HACK SUCCESS: Raincloud Intelligence permanently reduced. (-$${cost}B)`);
+      setLog(`✓ SATELLITE HACK SUCCESS: Rainclaude Intelligence permanently reduced. (-$${cost}B)`);
       triggerNewsEvent("ORBITAL RECONNAISSANCE GRID BLINDED VIRTUALLY");
     }
     
@@ -4724,7 +4727,7 @@ function executeAttackPreset(type) {
     op.fromC.troops-=al; op.toC.troops-=dl;
     
     let resultStr = `[${countryData[op.fromIso]?.name} ⚔ ${countryData[op.toIso]?.name}]<br>`;
-    resultStr += `Humanity lost ${(al * 10000).toLocaleString()} troops. Raincloud lost ${(dl * 10000).toLocaleString()} troops.<br>`;
+    resultStr += `Humanity lost ${(al * 10000).toLocaleString()} troops. Rainclaude lost ${(dl * 10000).toLocaleString()} troops.<br>`;
     
     if(op.toC.troops<=0){
       totalWon++;
@@ -4742,7 +4745,7 @@ function executeAttackPreset(type) {
   });
   
   setTimeout(() => {
-    document.getElementById('rep-summary').innerText = `TACTICAL STRIKES EXECUTED: Secured ${totalWon} Raincloud territories out of ${strikes.length} operations.`;
+    document.getElementById('rep-summary').innerText = `TACTICAL STRIKES EXECUTED: Secured ${totalWon} Rainclaude territories out of ${strikes.length} operations.`;
     document.getElementById('rep-list').innerHTML = html || '<div style="opacity:0.5;text-align:center">NO VIABLE TARGETS FOUND IN SECTORS.</div>';
     document.getElementById('report-modal').classList.add('show');
     updateDashboard();
@@ -4799,7 +4802,7 @@ function executeTargetedPerk(iso) {
     if (converted > 0) {
       c.troops -= converted;
       // Because we can't easily have 'two owners' in Risk on one node without a combat step, we'll
-      // abstract it: it just kills 30% of Raincloud troops to simulate the internal fighting loss
+      // abstract it: it just kills 30% of Rainclaude troops to simulate the internal fighting loss
       setLog(`✓ INSURGENCY ACTIVATED in ${cd.name}. ${(converted * 10000).toLocaleString()} enemy troops neutralized internally. (-$${cost}B)`);
     } else {
       setLog(`✓ INSURGENCY INITIATED in ${cd.name}, but troop counts were too low for effect. (-$${cost}B)`);
@@ -5642,7 +5645,7 @@ function globeFlickerEffect() {
 // AI OPPONENT
 // =====================================================================
 async function aiTurn() {
-  const pi = GS.turn; // Raincloud = player index 1
+  const pi = GS.turn; // Rainclaude = player index 1
   const reasoningPanel = document.getElementById('d1-reasoning');
   if(reasoningPanel) reasoningPanel.innerHTML = '';
   const aiLog = (msg) => { 
@@ -5685,7 +5688,7 @@ async function aiTurn() {
     const r = Math.random();
     if(r < 0.33) {
       GS.globalMetrics.airTrafficDisabledTurns = 2;
-      triggerRedAlert("RAINCLOUD HACKED AIR TRAFFIC CONTROL - REINFORCEMENTS GROUNDED");
+      triggerRedAlert("RAINCLAUDE HACKED AIR TRAFFIC CONTROL - REINFORCEMENTS GROUNDED");
       aiLog("<span style='color:#ff0000'>CRITICAL OP: GROUND ZERO (Air Traffic Offline)</span>");
       globeFlickerEffect();
     } else if (r < 0.66) {
@@ -5748,7 +5751,7 @@ async function aiTurn() {
       spawnExplosion3D(countryData[tIso]?.lat,countryData[tIso]?.lon,PLAYER_COLORS[1].int);
       triggerRedAlert("NUCLEAR LAUNCH DETECTED");
       aiLog(`<span style="color:#ffaa00">NUCLEAR LAUNCH: ${countryData[tIso]?.name.toUpperCase()}</span>`);
-      setLog(`☢ RAINCLOUD NUCLEAR WAR on ${countryData[tIso]?.name}!`);
+      setLog(`☢ RAINCLAUDE NUCLEAR WAR on ${countryData[tIso]?.name}!`);
       if(GS.countries[tIso].troops===0){GS.countries[tIso].owner=1;GS.countries[tIso].troops=1;refreshBorder(tIso);}
       updateTroopSprite(tIso);
       await wait(1500);
@@ -5775,7 +5778,7 @@ async function aiTurn() {
   GS.countries[reinforceTgt].troops += reinforce;
   updateTroopSprite(reinforceTgt);
   aiLog(`REINFORCE: <b>${countryData[reinforceTgt]?.name.toUpperCase()}</b> (+${reinforce})`);
-  setLog(`⚙ RAINCLOUD reinforce +${reinforce} → ${countryData[reinforceTgt]?.name}`);
+  setLog(`⚙ RAINCLAUDE reinforce +${reinforce} → ${countryData[reinforceTgt]?.name}`);
   await wait(800);
 
   // --- WEIGHTED SCORING ATTACKS ---
@@ -5823,7 +5826,7 @@ async function aiTurn() {
     
     if(move.toC.troops<=0){
       aiLog(`<span style="color:#fff">SECURED: <b>${countryData[move.toIso]?.name.toUpperCase()}</b></span>`);
-      setLog(`⚙ RAINCLOUD seizes ${countryData[move.toIso]?.name}!`);
+      setLog(`⚙ RAINCLAUDE seizes ${countryData[move.toIso]?.name}!`);
       move.toC.owner=1; move.toC.troops=Math.min(move.fromC.troops-1,atkD);
       move.fromC.troops-=move.toC.troops; if(move.fromC.troops<1)move.fromC.troops=1;
       refreshBorder(move.toIso);
@@ -5901,12 +5904,12 @@ function initWS() {
             setLog('✓ CONNECTED TO GLOBAL UPLINK');
             triggerNewsEvent('COMMAND UPLINK RESTORED — RESUMING OPERATION');
             if (GS.turn === 1 && ws_isHost) {
-              setLog('⟳ RESUMING RAINCLOUD PROCESSING...');
+              setLog('⟳ RESUMING RAINCLAUDE PROCESSING...');
               setTimeout(aiTurn, 2000);
             }
           } else {
             // No state exists on server, we must generate a fresh world and push it
-            initGame(['COMMANDER', 'RAINCLOUD'], 0);
+            initGame(['COMMANDER', 'RAINCLAUDE'], 0);
             syncState(); // immediately populate the server
           }
         });
@@ -5984,7 +5987,7 @@ function initWS() {
         ws_isHost = true;
         setLog(`⚙ You are now the primary host for AI computation.`);
         if (GS.turn === 1) {
-          setLog('⟳ RESUMING STALLED RAINCLOUD PROCESSING...');
+          setLog('⟳ RESUMING STALLED RAINCLAUDE PROCESSING...');
           setTimeout(aiTurn, 1000);
         }
         break;
@@ -5996,6 +5999,18 @@ function initWS() {
         break;
       case 'chat':
         appendChat(msg.name,msg.text, 0); break;
+      case 'ai_combat_log': {
+        const d0Hp = document.getElementById('d0-ai-hp');
+        const d1Hp = document.getElementById('d1-ai-hp');
+        if (d0Hp && msg.gemini_hp !== undefined) d0Hp.textContent = msg.gemini_hp.toLocaleString();
+        if (d1Hp && msg.claude_hp !== undefined) d1Hp.textContent = msg.claude_hp.toLocaleString();
+        
+        const r0 = document.getElementById('d0-reasoning');
+        const r1 = document.getElementById('d1-reasoning');
+        if (r0) { r0.innerHTML += `<div><span style="color:#0f8">> [DB STRIKE]</span> ${msg.log}</div>`; r0.scrollTop = r0.scrollHeight; }
+        if (r1) { r1.innerHTML += `<div><span style="color:#0f8">> [DB STRIKE]</span> ${msg.log}</div>`; r1.scrollTop = r1.scrollHeight; }
+        break;
+      }
       case 'ai_log': {
         const reasoningPanel = document.getElementById('d1-reasoning');
         if (reasoningPanel && msg.msg) { 
@@ -6077,7 +6092,7 @@ function applyState(s) {
   window._dashInterval = setInterval(updateDashboard, 1000);
   
   if(GS.turn===0) setLog(`▶ HUMAN FRONT — ${GS.phase}`);
-  else setLog(`⟳ RAINCLOUD PROCESSING...`);
+  else setLog(`⟳ RAINCLAUDE PROCESSING...`);
 }
 
 function showRoomPlayers(players) {
@@ -6793,7 +6808,7 @@ function triggerAmbientWarfare() {
   // Choose random effect type: mostly missiles, sometimes just explosions
   const type = Math.random() > 0.3 ? 1 : 0;
   
-  // Pick random colors: Humanity Blue, Raincloud Red, or Generic Orange
+  // Pick random colors: Humanity Blue, Rainclaude Red, or Generic Orange
   const cols = [0x00dcff, 0xff3232, 0xffaa00];
   const col = cols[Math.floor(Math.random() * cols.length)];
 
@@ -6945,8 +6960,8 @@ function proposeTreaty(type) {
   const accepted = Math.random() < aiAcceptChance;
 
   if (!accepted) {
-    setLog(`🤝 RAINCLOUD rejected ${treaty.name}.`);
-    triggerNewsEvent('DIPLOMATIC OVERTURES REBUFFED BY RAINCLOUD');
+    setLog(`🤝 RAINCLAUDE rejected ${treaty.name}.`);
+    triggerNewsEvent('DIPLOMATIC OVERTURES REBUFFED BY RAINCLAUDE');
     return;
   }
   if (treaty.cost > 0) GS.players[GS.myIndex].budget -= treaty.cost;
@@ -6960,10 +6975,10 @@ function tickTreaties() {
   GS.treaties = (GS.treaties || []).filter(t => {
     t.turnsLeft--;
     if (t.turnsLeft <= 0) {
-      // RAINCLOUD betrayal: 30% chance on expiry
+      // RAINCLAUDE betrayal: 30% chance on expiry
       if (Math.random() < 0.30 && t.type === 'ALLIANCE') {
-        triggerNewsEvent('RAINCLOUD BETRAYS ALLIANCE — WAR REIGNITES');
-        setLog('⚠ RAINCLOUD has betrayed the Alliance! WAR RESUMES.');
+        triggerNewsEvent('RAINCLAUDE BETRAYS ALLIANCE — WAR REIGNITES');
+        setLog('⚠ RAINCLAUDE has betrayed the Alliance! WAR RESUMES.');
       } else {
         setLog(`🤝 ${TREATY_TYPES[t.type].name} has expired.`);
       }
@@ -7304,7 +7319,7 @@ function showDiplomacyModal() {
     </div>`;
   }).join('');
   openDrawer('diplomacy', '🤝 DIPLOMACY', `
-    <p style="font-size:10px;opacity:0.6;margin-bottom:8px;">Offer terms to RAINCLOUD. AI acceptance depends on balance of power.</p>
+    <p style="font-size:10px;opacity:0.6;margin-bottom:8px;">Offer terms to RAINCLAUDE. AI acceptance depends on balance of power.</p>
     ${activeBanner}${body}
   `);
 }
@@ -7906,7 +7921,7 @@ window.fireNavalTorpedo = function() {
   document.getElementById('naval-bar-ai').style.width = window.navalWarState.aiHp + '%';
   
   const log = document.getElementById('naval-log');
-  log.innerHTML += `<div><span style="color:#0af">HUMAN hits for ${humanDmg} DMG!</span> | <span style="color:#f55">RAINCLOUD hits for ${aiDmg} DMG!</span></div>`;
+  log.innerHTML += `<div><span style="color:#0af">HUMAN hits for ${humanDmg} DMG!</span> | <span style="color:#f55">RAINCLAUDE hits for ${aiDmg} DMG!</span></div>`;
   log.scrollTop = log.scrollHeight;
   
   // Check Win/Loss Condition
@@ -7915,7 +7930,7 @@ window.fireNavalTorpedo = function() {
     document.getElementById('btn-fire-torpedo').style.display = 'none';
     
     if (window.navalWarState.humanHp > window.navalWarState.aiHp) {
-      log.innerHTML += `<div style="color:#0f8; font-weight:bold; font-size:14px; margin-top:10px;">TACTICAL VICTORY! Raincloud frigate sunk. +50,000 Troops recovered!</div>`;
+      log.innerHTML += `<div style="color:#0f8; font-weight:bold; font-size:14px; margin-top:10px;">TACTICAL VICTORY! Rainclaude frigate sunk. +50,000 Troops recovered!</div>`;
       // Grant Reward
       if (GS.players[GS.myIndex]) {
         GS.reinforceLeft += 5; // 5 x 10k troops
@@ -7930,7 +7945,7 @@ window.fireNavalTorpedo = function() {
       }
     } else if (window.navalWarState.aiHp > window.navalWarState.humanHp) {
       log.innerHTML += `<div style="color:#f55; font-weight:bold; font-size:14px; margin-top:10px;">DEFEAT! Human fleet destroyed.</div>`;
-      setLog("💥 Naval Defeat! Fleet lost to Raincloud.");
+      setLog("💥 Naval Defeat! Fleet lost to Rainclaude.");
     } else {
       log.innerHTML += `<div style="color:#fa0; font-weight:bold; font-size:14px; margin-top:10px;">DRAW! Mutual destruction.</div>`;
     }
@@ -8242,9 +8257,9 @@ window.isRedSkin = false; // Legacy flag preserved for scripts that might check 
 
 const SKINS = [
   { name: 'LIVE',  color: 0xffffff, btnText: '🔴 RED SKIN',    btnClass: '',              showOverlays: false, cleanGlobe: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
-  { name: 'RED',   color: 0xff2222, btnText: '🟢 GREEN SKIN',  btnClass: 'active-normal', showOverlays: true,  cleanGlobe: false, showResources: false, showArms: false, showBoats: true, isPremium: false },
+  { name: 'RED',   color: 0xff2222, btnText: '🟢 GRN SKIN',  btnClass: 'active-normal', showOverlays: true,  cleanGlobe: false, showResources: false, showArms: false, showBoats: true, isPremium: false },
   { name: 'GREEN', color: 0x22ff22, btnText: '🟡 YLW SKIN',   btnClass: 'active-normal', showOverlays: false, cleanGlobe: true,  showResources: true,  showArms: false, showBoats: false, isPremium: false },
-  { name: 'YELLOW',color: 0xffff22, btnText: '💠 CYBER SKIN',  btnClass: 'active-normal', showOverlays: false, cleanGlobe: true,  showResources: false, showArms: true,  showBoats: false, isPremium: false },
+  { name: 'YELLOW',color: 0xffff22, btnText: '💠 CYBR SKIN',  btnClass: 'active-normal', showOverlays: false, cleanGlobe: true,  showResources: false, showArms: true,  showBoats: false, isPremium: false },
   { name: 'CYBER', color: 0x00f0ff, btnText: '⬛ BLK SKIN',    btnClass: 'active-premium',showOverlays: true,  cleanGlobe: false, showResources: true,  showArms: true,  showBoats: true,  isPremium: false },
   { name: 'BLK',   color: 0x050505, btnText: '🌍 LIVE SKIN',   btnClass: 'active-normal', showOverlays: false, cleanGlobe: false, showResources: false, showArms: false, showBoats: false, isPremium: false }
 ];
@@ -8427,7 +8442,7 @@ function triggerAIFuzzEvent() {
   staticOscillator = playSyntheticStatic();
   
   const fuzzDuration = Math.random() * 4000 + 4000; // 4 to 8 seconds
-  console.log(`📡 [RAINCLOUD AI] Fuzzing comms for ${Math.round(fuzzDuration)}ms`);
+  console.log(`📡 [RAINCLAUDE AI] Fuzzing comms for ${Math.round(fuzzDuration)}ms`);
   
   setTimeout(() => {
     // End event
@@ -8448,7 +8463,7 @@ function triggerAIFuzzEvent() {
 
 function scheduleNextFuzz() {
   const nextInterval = Math.random() * 240000 + 240000; // 4 to 8 minutes
-  console.log(`📡 [RAINCLOUD AI] Next comms fuzz scheduled in ${Math.round(nextInterval/1000)}s`);
+  console.log(`📡 [RAINCLAUDE AI] Next comms fuzz scheduled in ${Math.round(nextInterval/1000)}s`);
   setTimeout(triggerAIFuzzEvent, nextInterval);
 }
 
@@ -9008,9 +9023,13 @@ const MockTradeEconomy = (function() {
 })();
 
 // =====================================================================
-// HACKER TERMINAL LOGIC (RAINCLOUD EASTER EGG)
+// HACKER TERMINAL LOGIC (RAINCLAUDE EASTER EGG)
 // =====================================================================
-let hackStage = 0; // 0=start, 1=found port, 2=connected, 3=breached
+let egrCmdState = {
+  phase: 'recon', // recon, recon_advanced, shell, root, armed
+  hydraCount: 0,
+  hashInputMode: false
+};
 
 const btnCmd = document.getElementById('btn-cmd-toggle');
 const termModal = document.getElementById('hacker-terminal-modal');
@@ -9035,111 +9054,220 @@ function printTerm(text, color = '#0f8') {
 if (termInput) {
   termInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
-      const cmd = termInput.value.trim().toLowerCase();
+      const cmd = termInput.value.trim();
+      const lowerCmd = cmd.toLowerCase();
       if (!cmd) return;
       
-      printTerm(`\nroot@hmn_cmd:~$ ${cmd}`, '#fff');
+      const promptStr = (egrCmdState.phase === 'root' || egrCmdState.phase === 'armed')
+                        ? 'root@nuke# ' 
+                        : (egrCmdState.phase === 'shell' ? 'operator@rainclaude:~$ ' : 'root@hmn_cmd:~$ ');
+      printTerm(`\n${promptStr}${cmd}`, '#fff');
       termInput.value = '';
       
-      processHackCommand(cmd);
+      if (egrCmdState.hashInputMode) {
+        if (lowerCmd === 'tritium42') {
+           printTerm('[+] Hash cracked successfully! Code part: "ALPHA-7"', '#0f8');
+           egrCmdState.hashInputMode = false;
+        } else {
+           printTerm('[-] Incorrect hash. Try again or type "abort".', '#f24');
+           if (lowerCmd === 'abort') egrCmdState.hashInputMode = false;
+        }
+        return;
+      }
+      
+      processHackCommand(lowerCmd);
     }
   });
 }
 
 function processHackCommand(cmd) {
-  // Basic commands
+  if (cmd === 'abort') {
+    egrCmdState = { phase: 'recon', hydraCount: 0, hashInputMode: false };
+    printTerm('Connection aborted. You narrowly averted disaster. State reset.', '#fa0');
+    return;
+  }
+  
   if (cmd === 'help') {
-    printTerm('Available commands: help, clear, ping, nmap, ssh, whoami');
+    printTerm('Available commands: scan, nmap, ping, traceroute, hydra, sqlmap, nikto, dirb, cat, crackme, find, sudo, exploit, decode, backdoor, escalate, download, launch, abort.');
+    printTerm('Hint: You are blind. Try scanning the target first.', '#888');
     return;
   }
-  if (cmd === 'clear') {
-    termOutput.innerHTML = '';
+  
+  if (cmd === 'ping rainclaude.nuke') {
+    printTerm('PING rainclaude.nuke (192.168.66.6): 56 data bytes\n64 bytes from 192.168.66.6: icmp_seq=1 ttl=60 time=14.2 ms\n64 bytes from 192.168.66.6: icmp_seq=2 ttl=60 time=15.1 ms');
+    printTerm('Hint: Response time indicates a close-proximity node. Vulnerable to fast brute-force.', '#888');
     return;
   }
-  if (cmd.startsWith('ping')) {
-    printTerm(`PING ${cmd.split(' ')[1] || 'target'} (192.168.1.1): 56 data bytes`);
-    printTerm('64 bytes from 192.168.1.1: icmp_seq=0 ttl=64 time=0.042 ms');
-    printTerm('64 bytes from 192.168.1.1: icmp_seq=1 ttl=64 time=0.039 ms');
-    return;
-  }
-  if (cmd === 'whoami') {
-    printTerm('human_resistance_commander');
+  
+  if (cmd === 'traceroute rainclaude.nuke') {
+    printTerm('traceroute to rainclaude.nuke (192.168.66.6), 30 hops max\n1  gateway (10.0.0.1)  1.1 ms\n2  isp_gw (172.16.0.1) 8.4 ms\n3  nuke_fw_weak1 (192.168.66.1) 12.0 ms\n4  rainclaude.nuke (192.168.66.6) 14.2 ms');
+    printTerm('[i] Weak hop detected at nuke_fw_weak1. External bypassing possible.', '#0f8');
     return;
   }
 
-  // Puzzle Sequence
-  if (hackStage === 0) {
-    if (cmd === 'nmap raincloud.ai' || cmd === 'nmap -sV raincloud.ai') {
-      printTerm('Starting Nmap 7.92 ( https://nmap.org )');
+  if (cmd === 'scan') {
+    printTerm('Scanning target rainclaude.nuke...');
+    setTimeout(() => {
+      printTerm('Discovered open ports:\n22/tcp SSH\n80/tcp HTTP\n443/tcp HTTPS\n445/tcp SMB');
+      if (egrCmdState.phase === 'recon') egrCmdState.phase = 'recon_advanced';
+    }, 500);
+    return;
+  }
+  
+  if (cmd === 'nmap -sv rainclaude.nuke') {
+    printTerm('Starting Nmap...\nPORT   STATE SERVICE VERSION\n22/tcp open  ssh     OpenSSH 8.4p1\n80/tcp open  http    Apache httpd 2.4.41 (Outdated)\n445/tcp open smb     Windows 7 SP1 (Vulnerable)');
+    printTerm('Hint: Service versions exposed. Multiple attack vectors open.', '#0f8');
+    return;
+  }
+
+  if (cmd === 'sqlmap -u "http://rainclaude.nuke/login" --dbs') {
+    printTerm('Testing HTTP GET parameter injection...');
+    setTimeout(() => {
+      printTerm('[+] payload found! Error-based SQL injection successful.', '#0f8');
+      printTerm('available databases [4]:\n[*] information_schema\n[*] mysql\n[*] performance_schema\n[*] nuke_silos', '#0f8');
+    }, 600);
+    return;
+  }
+
+  if (cmd === 'nikto -h rainclaude.nuke') {
+    printTerm('- Nikto v2.1.6\n+ Target IP: 192.168.66.6\n+ Info: Apache/2.4.41 appears to be outdated.');
+    printTerm('+ Vulnerability: Directory Traversal allowed in /cgi-bin/ path. Secret files exposed.', '#fa0');
+    return;
+  }
+
+  if (cmd === 'dirb http://rainclaude.nuke /wordlist.txt') {
+    printTerm('Starting dirb...\nGENERATED WORDS: 4612\n\n---- Scanning URL: http://rainclaude.nuke/ ----');
+    setTimeout(() => {
+      printTerm('+ http://rainclaude.nuke/admin (CODE:403)\n+ http://rainclaude.nuke/nuclear_codes (CODE:200) -> SECRET PANEL FOUND', '#0f8');
+    }, 500);
+    return;
+  }
+
+  if (cmd === 'hydra -l admin -p /wordlist.txt ssh') {
+    if (egrCmdState.hydraCount >= 3) {
+      printTerm('[-] Target locked out due to multiple brute-force attempts.', '#f24');
+      return;
+    }
+    egrCmdState.hydraCount++;
+    printTerm('Hydra v9.2 testing SSH on 192.168.66.6...');
+    if (egrCmdState.hydraCount === 3) {
       setTimeout(() => {
-        printTerm('Host is up (0.0012s latency).');
-        printTerm('PORT     STATE SERVICE VERSION');
-        printTerm('22/tcp   open  ssh     OpenSSH 8.4p1 Debian');
-        printTerm('6379/tcp open  redis   Redis key-value store');
-        printTerm('9999/tcp open  unknown RAINCLOUD_MAINFRAME_UPLINK', '#fa0');
-        printTerm('Nmap done: 1 IP address (1 host up) scanned in 1.42 seconds');
-        hackStage = 1;
+        printTerm('[22][ssh] host: rainclaude.nuke   login: admin   password: plutonium', '#0f8');
+        printTerm('[+] SSH connection established.', '#0f8');
+        egrCmdState.phase = 'shell';
+      }, 500);
+    } else {
+      setTimeout(() => {
+        printTerm('[-] Attempt failed. Target actively monitoring connections.', '#f24');
+      }, 500);
+    }
+    return;
+  }
+  
+  if (egrCmdState.phase !== 'recon' && egrCmdState.phase !== 'recon_advanced') {
+    // Shell/Root level commands
+    if (cmd === 'cat /etc/passwd') {
+      printTerm('root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\noperator:x:1000:1000:operator,,,:/home/operator:/bin/bash\n');
+      printTerm('Hint: "root" and "operator" are viable targets for escalation.', '#888');
+      return;
+    }
+    if (cmd === 'find / -name "nuke" 2>/dev/null') {
+      printTerm('Searching...');
+      setTimeout(() => {
+        printTerm('/var/hidden_system_nuke\n/var/hidden_system_nuke/launch_sequence.txt', '#0f8');
+      }, 400);
+      return;
+    }
+    if (cmd === 'sudo -l') {
+      printTerm('Matching Defaults entries for operator on rainclaude:\n    env_reset, mail_badpass, secure_path=/usr/local/sbin\\:/usr/local/bin\\:/usr/sbin\\:/usr/bin\nUser operator may run the following commands on rainclaude:\n    (ALL : ALL) NOPASSWD: /usr/bin/su root', '#fa0');
+      return;
+    }
+    if (cmd === 'escalate privs') {
+      printTerm('[*] Exploiting misconfigured sudoers via CVE-XXXX...');
+      setTimeout(() => {
+        printTerm('[+] Success! Kernel panicked and returned root descriptor.', '#0f8');
+        egrCmdState.phase = 'root';
       }, 600);
       return;
     }
-    printTerm('Command not recognized or target inaccessible.');
-    return;
-  }
-
-  if (hackStage === 1) {
-    if (cmd.startsWith('ssh') && cmd.includes('raincloud')) {
-      printTerm('Warning: Permanently added \'raincloud.ai\' to the list of known hosts.', '#fa0');
-      printTerm('root@raincloud.ai\'s password: ');
-      
-      // Override input temporarily to act as password field
-      termInput.type = 'password';
-      const origKeydown = termInput.onkeydown;
-      
-      termInput.onkeydown = (e) => {
-        if (e.key === 'Enter') {
-          termInput.type = 'text';
-          termInput.value = '';
-          termInput.onkeydown = origKeydown; // restore normal listener
-          printTerm('Access granted. Welcome to RAINCLOUD Base Protocol.', '#0f8');
-          printTerm('Last login: ' + new Date().toString(), '#888');
-          hackStage = 2;
-        }
-      };
-      return;
-    }
-  }
-
-  if (hackStage === 2) {
-    if (cmd === 'exploit -target raincloud_mainframe' || cmd === 'exploit') {
-      printTerm('INITIALIZING PAYLOAD...', '#fa0');
-      setTimeout(() => printTerm('BYPASSING FIREWALL...', '#fa0'), 500);
-      setTimeout(() => printTerm('OVERRIDING ACCESS CONTROLS...', '#fa0'), 1000);
+    if (cmd === 'exploit eternalblue') {
+      printTerm('[*] Loading ms17-010 EternalBlue...');
       setTimeout(() => {
-        printTerm('\n[ BREACH SUCCESSFUL ]', '#0f8');
-        printTerm('EXTRACTING ASSETS: 50,000 RESERVE TROOPS DIVERTED TO HUMAN COMMAND.', '#0f8');
-        hackStage = 3;
-        
-        // REWARD DELIVERED
-        if (typeof GS !== 'undefined') {
-          GS.reserves += 50000;
-          updateHUD();
-          setLog('CRITICAL: RAINCLOUD MAINFRAME BREACHED. 50,000 TROOPS ACQUIRED.');
-        }
-        
-        // Glitch effect on term
-        termModal.style.filter = 'hue-rotate(90deg) contrast(2)';
-        setTimeout(() => termModal.style.filter = 'none', 1000);
-      }, 2000);
+        printTerm('[*] Attempting to trigger buffer overflow...\n[+] USER SYSTEM privileged execution guaranteed.', '#0f8');
+        printTerm('[+] Nuclear Silo Controls unlocked.', '#0f8');
+        egrCmdState.phase = 'root';
+      }, 800);
+      return;
+    }
+    if (cmd === 'backdoor install') {
+      printTerm('[*] Dropping bind shell on port 4444...');
+      printTerm('[+] Persistent access guaranteed.', '#0f8');
       return;
     }
   }
 
-  if (hackStage === 3) {
-    printTerm('Target already compromised. No further exploits available.', '#888');
+  if (cmd.startsWith('crackme')) {
+    printTerm('Hash provided. Initiating cracker module...', '#fa0');
+    egrCmdState.hashInputMode = true;
+    printTerm('Enter cracked plaintext for hash (Hint: "tritium42"):', '#fa0');
     return;
   }
 
-  printTerm('Connection refused or command invalid in current context.', '#f24');
+  if (cmd.startsWith('decode base64')) {
+    const b64 = cmd.replace('decode base64', '').trim();
+    if (!b64) {
+      printTerm('Usage: decode base64 <string>');
+      return;
+    }
+    printTerm(`Decoded string: "BETA-9-CHARLIE"`);
+    return;
+  }
+  
+  if (cmd === 'download launch_codes.txt') {
+    if (egrCmdState.phase === 'root') {
+      printTerm('[*] Downloading payload...', '#fa0');
+      setTimeout(() => {
+        printTerm('[+] launch_codes.txt downloaded. MD5 Checksum MATCH.', '#0f8');
+        printTerm('[!] SYSTEM ARMED. Awaiting "launch --target=usa" command.', '#fa0');
+        egrCmdState.phase = 'armed';
+      }, 1000);
+    } else {
+      printTerm('[-] Access Denied. Insufficient privileges.', '#f24');
+    }
+    return;
+  }
+
+  if (cmd === 'launch --target=usa') {
+    if (egrCmdState.phase === 'armed') {
+      printTerm('!!! TARGET ACQUIRED. LAUNCH SEQUENCE INITIATED !!!', '#f24');
+      termModal.style.filter = 'hue-rotate(90deg) contrast(2)';
+      setTimeout(() => termModal.style.filter = 'none', 1000);
+      
+      let bar = '[';
+      const printBar = (progress) => {
+        if (progress > 20) {
+           printTerm('!!! LAUNCH SUCCESSFUL !!!', '#f24');
+           setTimeout(() => { 
+               document.getElementById('hacker-terminal-modal').classList.remove('show'); 
+               if(typeof triggerNewsEvent === 'function') {
+                   triggerNewsEvent("USA DESTROYED BY ROGUE NUCLEAR STRIKE FROM COMMAND TERMINAL"); 
+               }
+           }, 2000);
+           return;
+        }
+        bar += '#';
+        termOutput.innerText += `\nProgress: ${bar.padEnd(21, '-')} ${progress * 5}%`;
+        termOutput.scrollTop = termOutput.scrollHeight;
+        setTimeout(() => printBar(progress + 1), 100);
+      };
+      printBar(1);
+    } else {
+      printTerm('[-] MISSING PREREQUISITES: Target unmapped or launch code checksum failed.', '#f24');
+    }
+    return;
+  }
+
+  printTerm('Command not recognized or target inaccessible.');
 }
 
 </script>

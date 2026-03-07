@@ -1,11 +1,11 @@
 # NUCLEAR WAR - Game Mechanics & Commands Overview
 
 ## Core Gameplay
-Nuclear War is a turn-based global domination strategy game played on a 3D spherical rendering of Earth. The framework is heavily inspired by the classic board game "Risk", but expanded with modern warfare tactics, asynchronous multiplayer capabilities, dynamic AI, and an economic system. Players ("COMMANDERS") fight against a sophisticated AI opponent known as "RAINCLOUD" (or against each other).
+Nuclear War is a turn-based global domination strategy game played on a 3D spherical rendering of Earth. The framework is heavily inspired by the classic board game "Risk", but expanded with modern warfare tactics, asynchronous multiplayer capabilities, dynamic AI, and an economic system. Players ("COMMANDERS") fight against a sophisticated AI opponent known as "RAINCLAUDE" (or against each other).
 
 ## Factions
 1. **Humanity / Commander (Player 0):** Represents human coalition forces. Relies on economy, strategic perks, and troop management.
-2. **RAINCLOUD (Player 1):** The AI adversary. An evolving neural network faction that scales in threat, manages energy, and uses weighted tactical scoring to launch devastating attacks and cyber-warfare operations.
+2. **RAINCLAUDE (Player 1):** The AI adversary. An evolving neural network faction that scales in threat, manages energy, and uses weighted tactical scoring to launch devastating attacks and cyber-warfare operations.
 
 ---
 
@@ -45,7 +45,7 @@ Each player's turn consists of three distinct phases:
 - **Effect:** Immediately wipes out 6-10 enemy troops in the targeted region. If it brings troops to 0, the territory is automatically conquered.
 - **Fallout:** The targeted territory suffers "Nuclear Fallout" for 3 turns, visually indicating radiation.
 
-### RAINCLOUD AI Evolution
+### RAINCLAUDE AI Evolution
 The AI doesn't just play Risk—it actively evolves throughout the game:
 - **Adaptability & Intelligence:** Increases over time, allowing the AI to prioritize higher-value targets.
 - **Aggression Level:** Scales up if the AI is losing territory.
@@ -58,10 +58,10 @@ During a turn, human players can spend their Defense Budget ($B) to execute deva
 
 ### Global Operations (Immediate Effect)
 These operations sabotage the AI functionally:
-- **False Flag ($200B):** Confuses AI logic gates, reducing RAINCLOUD's Threat Tier and Aggression.
-- **Cyberattack Infra ($350B):** Executes a zero-day exploit, draining RAINCLOUD's Energy to 0 to prevent it from launching cyber operations on its next turn.
-- **Communication Jam ($150B):** Shatters enemy coordination. Halves the maximum number of attacks RAINCLOUD can perform next turn.
-- **Satellite Hack ($120B):** Blinds orbital reconnaissance, permanently reducing RAINCLOUD's intelligence level.
+- **False Flag ($200B):** Confuses AI logic gates, reducing RAINCLAUDE's Threat Tier and Aggression.
+- **Cyberattack Infra ($350B):** Executes a zero-day exploit, draining RAINCLAUDE's Energy to 0 to prevent it from launching cyber operations on its next turn.
+- **Communication Jam ($150B):** Shatters enemy coordination. Halves the maximum number of attacks RAINCLAUDE can perform next turn.
+- **Satellite Hack ($120B):** Blinds orbital reconnaissance, permanently reducing RAINCLAUDE's intelligence level.
 
 ### Targeted Operations (Requires Territory Selection)
 These operations directly impact the game board:

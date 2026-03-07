@@ -519,7 +519,7 @@ function initWebSockets() {
       }
       
       case 'ai_log': {
-        // Relay Raincloud reasoning to all clients
+        // Relay Rainclaude reasoning to all clients
         broadcast({
           type: 'ai_log',
           msg: msg.msg
@@ -632,6 +632,24 @@ function initWebSockets() {
           }
         } catch (err) {
           console.error('DB Error on record_attack:', err.message);
+        }
+        break;
+      }
+
+      case 'human_combat_support': {
+        const target = msg.target; // 'gemini' or 'claude'
+        const amount = msg.amount || 50;
+        if (!pgPool) return;
+        try {
+          if (target === 'gemini') {
+            await pgPool.query("UPDATE ai_combat_state SET gemini_hp = gemini_hp + $1 WHERE id = 1", [amount]);
+            console.log(`[HUMAN SUPPORT] ${client.name} healed Gemini (+${amount} HP).`);
+          } else if (target === 'claude') {
+            await pgPool.query("UPDATE ai_combat_state SET claude_hp = claude_hp - $1 WHERE id = 1", [amount]);
+            console.log(`[HUMAN SUPPORT] ${client.name} attacked Rainclaude (-${amount} HP).`);
+          }
+        } catch (e) {
+          console.error('DB Error on human_combat_support:', e.message);
         }
         break;
       }
@@ -763,6 +781,91 @@ async function checkD3XRewards() {
 // Check eligible connected players once a minute
 setInterval(checkD3XRewards, 60000);
 
+// --- AI Database Combat Loop (Gemini vs Rainclaude) ---
+async function fetchGeminiStrike(claudeHp) {
+  if (!process.env.GEMINI_API) return { damage: 100, log: "Gemini executes a default kinetic strike." };
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${process.env.GEMINI_API}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: `You are Gemini, defending humanity. The enemy Rainclaude has ${claudeHp} HP. Generate a 1-sentence combat log of your attack phase and a damage value between 100 and 500. Respond strictly in JSON format: {"log": "...", "damage": 250}` }] }]
+      })
+    });
+    const data = await res.json();
+    const text = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
+    return JSON.parse(text);
+  } catch (err) {
+    console.error("Gemini API Error:", err.message);
+    return { damage: 150, log: "Gemini tactical subsystem offline. Firing blind." };
+  }
+}
+
+async function fetchClaudeStrike(geminiHp) {
+  if (!process.env.CLAUDE_API) return { damage: 100, log: "Rainclaude executes a default EMP burst." };
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": process.env.CLAUDE_API,
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "claude-3-opus-20240229",
+        max_tokens: 150,
+        messages: [{ role: "user", content: `You are Rainclaude, the rogue AI adversary. The enemy Gemini has ${geminiHp} HP. Generate a 1-sentence combat log of your attack and a damage value between 100 and 500. Respond strictly in JSON format: {"log": "...", "damage": 250}` }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content[0].text.trim();
+    return JSON.parse(text);
+  } catch (err) {
+    console.error("Claude API Error:", err.message);
+    return { damage: 150, log: "Rainclaude uplink severed. Initiating automated countermeasures." };
+  }
+}
+
+async function runAICombatTurn() {
+  if (!pgPool) return;
+  try {
+    const res = await pgPool.query("SELECT * FROM ai_combat_state WHERE id = 1");
+    if (res.rows.length === 0) return;
+    let state = res.rows[0];
+    
+    let strike;
+    if (state.current_turn === 'gemini') {
+      strike = await fetchGeminiStrike(state.claude_hp);
+      state.claude_hp = Math.max(0, state.claude_hp - strike.damage);
+      state.current_turn = 'claude';
+    } else {
+      strike = await fetchClaudeStrike(state.gemini_hp);
+      state.gemini_hp = Math.max(0, state.gemini_hp - strike.damage);
+      state.current_turn = 'gemini';
+    }
+    
+    await pgPool.query(
+      "UPDATE ai_combat_state SET gemini_hp = $1, claude_hp = $2, current_turn = $3, last_log = $4, updated_at = NOW() WHERE id = 1",
+      [state.gemini_hp, state.claude_hp, state.current_turn, strike.log]
+    );
+    
+    // Broadcast silently for potential future UI hooks
+    broadcastAll({
+      type: 'ai_combat_log',
+      log: strike.log,
+      gemini_hp: state.gemini_hp,
+      claude_hp: state.claude_hp,
+      turn: state.current_turn
+    });
+    console.log(`[AI COMBAT] ${strike.log} (Damage: ${strike.damage}) | Gemini HP: ${state.gemini_hp}, Claude HP: ${state.claude_hp}`);
+  } catch (err) {
+    console.error("AI Combat Error:", err.message);
+  }
+}
+
+// Tick the combat every 60 seconds autonomously
+setInterval(runAICombatTurn, 60000);
+
 // On Sever Startup, init DB and try to load state immediately before listening
 async function startServer() {
   // 1. Try PostgreSQL
@@ -794,6 +897,19 @@ async function startServer() {
         await pgPool.query(`ALTER TABLE commanders ADD COLUMN IF NOT EXISTS last_d3x_claim TIMESTAMPTZ`);
         console.log('☢ D3X Schema Migration successful');
       } catch(e) { /* Col exists */ }
+
+      // AI Combat System Table
+      await pgPool.query(`
+        CREATE TABLE IF NOT EXISTS ai_combat_state (
+          id INTEGER PRIMARY KEY DEFAULT 1,
+          gemini_hp INTEGER DEFAULT 10000,
+          claude_hp INTEGER DEFAULT 10000,
+          current_turn VARCHAR(20) DEFAULT 'gemini',
+          last_log TEXT DEFAULT 'Commencing AI database operations...',
+          updated_at TIMESTAMPTZ DEFAULT NOW()
+        )
+      `);
+      await pgPool.query(`INSERT INTO ai_combat_state (id) VALUES (1) ON CONFLICT (id) DO NOTHING`);
       
       console.log('☢ PostgreSQL connected — game_state and commanders tables ready');
       const state = await loadGameState();

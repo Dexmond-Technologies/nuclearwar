@@ -207,7 +207,7 @@ function globeFlickerEffect() {
 // AI OPPONENT
 // =====================================================================
 async function aiTurn() {
-  const pi = GS.turn; // Raincloud = player index 1
+  const pi = GS.turn; // Rainclaude = player index 1
   const reasoningPanel = document.getElementById('d1-reasoning');
   if(reasoningPanel) reasoningPanel.innerHTML = '';
   const aiLog = (msg) => { 
@@ -250,7 +250,7 @@ async function aiTurn() {
     const r = Math.random();
     if(r < 0.33) {
       GS.globalMetrics.airTrafficDisabledTurns = 2;
-      triggerRedAlert("RAINCLOUD HACKED AIR TRAFFIC CONTROL - REINFORCEMENTS GROUNDED");
+      triggerRedAlert("RAINCLAUDE HACKED AIR TRAFFIC CONTROL - REINFORCEMENTS GROUNDED");
       aiLog("<span style='color:#ff0000'>CRITICAL OP: GROUND ZERO (Air Traffic Offline)</span>");
       globeFlickerEffect();
     } else if (r < 0.66) {
@@ -313,7 +313,7 @@ async function aiTurn() {
       spawnExplosion3D(countryData[tIso]?.lat,countryData[tIso]?.lon,PLAYER_COLORS[1].int);
       triggerRedAlert("NUCLEAR LAUNCH DETECTED");
       aiLog(`<span style="color:#ffaa00">NUCLEAR LAUNCH: ${countryData[tIso]?.name.toUpperCase()}</span>`);
-      setLog(`☢ RAINCLOUD NUCLEAR WAR on ${countryData[tIso]?.name}!`);
+      setLog(`☢ RAINCLAUDE NUCLEAR WAR on ${countryData[tIso]?.name}!`);
       if(GS.countries[tIso].troops===0){GS.countries[tIso].owner=1;GS.countries[tIso].troops=1;refreshBorder(tIso);}
       updateTroopSprite(tIso);
       await wait(1500);
@@ -340,7 +340,7 @@ async function aiTurn() {
   GS.countries[reinforceTgt].troops += reinforce;
   updateTroopSprite(reinforceTgt);
   aiLog(`REINFORCE: <b>${countryData[reinforceTgt]?.name.toUpperCase()}</b> (+${reinforce})`);
-  setLog(`⚙ RAINCLOUD reinforce +${reinforce} → ${countryData[reinforceTgt]?.name}`);
+  setLog(`⚙ RAINCLAUDE reinforce +${reinforce} → ${countryData[reinforceTgt]?.name}`);
   await wait(800);
 
   // --- WEIGHTED SCORING ATTACKS ---
@@ -388,7 +388,7 @@ async function aiTurn() {
     
     if(move.toC.troops<=0){
       aiLog(`<span style="color:#fff">SECURED: <b>${countryData[move.toIso]?.name.toUpperCase()}</b></span>`);
-      setLog(`⚙ RAINCLOUD seizes ${countryData[move.toIso]?.name}!`);
+      setLog(`⚙ RAINCLAUDE seizes ${countryData[move.toIso]?.name}!`);
       move.toC.owner=1; move.toC.troops=Math.min(move.fromC.troops-1,atkD);
       move.fromC.troops-=move.toC.troops; if(move.fromC.troops<1)move.fromC.troops=1;
       refreshBorder(move.toIso);
@@ -465,12 +465,12 @@ function initWS() {
             setLog('✓ CONNECTED TO GLOBAL UPLINK');
             triggerNewsEvent('COMMAND UPLINK RESTORED — RESUMING OPERATION');
             if (GS.turn === 1 && ws_isHost) {
-              setLog('⟳ RESUMING RAINCLOUD PROCESSING...');
+              setLog('⟳ RESUMING RAINCLAUDE PROCESSING...');
               setTimeout(aiTurn, 2000);
             }
           } else {
             // No state exists on server, we must generate a fresh world and push it
-            initGame(['COMMANDER', 'RAINCLOUD'], 0);
+            initGame(['COMMANDER', 'RAINCLAUDE'], 0);
             syncState(); // immediately populate the server
           }
         });
@@ -511,7 +511,7 @@ function initWS() {
         ws_isHost = true;
         setLog(`⚙ You are now the primary host for AI computation.`);
         if (GS.turn === 1) {
-          setLog('⟳ RESUMING STALLED RAINCLOUD PROCESSING...');
+          setLog('⟳ RESUMING STALLED RAINCLAUDE PROCESSING...');
           setTimeout(aiTurn, 1000);
         }
         break;
@@ -603,7 +603,7 @@ function applyState(s) {
   window._dashInterval = setInterval(updateDashboard, 1000);
   
   if(GS.turn===0) setLog(`▶ HUMAN FRONT — ${GS.phase}`);
-  else setLog(`⟳ RAINCLOUD PROCESSING...`);
+  else setLog(`⟳ RAINCLAUDE PROCESSING...`);
 }
 
 function showRoomPlayers(players) {
@@ -1027,7 +1027,7 @@ function triggerAmbientWarfare() {
   // Choose random effect type: mostly missiles, sometimes just explosions
   const type = Math.random() > 0.3 ? 1 : 0;
   
-  // Pick random colors: Humanity Blue, Raincloud Red, or Generic Orange
+  // Pick random colors: Humanity Blue, Rainclaude Red, or Generic Orange
   const cols = [0x00dcff, 0xff3232, 0xffaa00];
   const col = cols[Math.floor(Math.random() * cols.length)];
 
@@ -1159,8 +1159,8 @@ function proposeTreaty(type) {
   const accepted = Math.random() < aiAcceptChance;
 
   if (!accepted) {
-    setLog(`🤝 RAINCLOUD rejected ${treaty.name}.`);
-    triggerNewsEvent('DIPLOMATIC OVERTURES REBUFFED BY RAINCLOUD');
+    setLog(`🤝 RAINCLAUDE rejected ${treaty.name}.`);
+    triggerNewsEvent('DIPLOMATIC OVERTURES REBUFFED BY RAINCLAUDE');
     return;
   }
   if (treaty.cost > 0) GS.players[GS.myIndex].budget -= treaty.cost;
@@ -1174,10 +1174,10 @@ function tickTreaties() {
   GS.treaties = (GS.treaties || []).filter(t => {
     t.turnsLeft--;
     if (t.turnsLeft <= 0) {
-      // RAINCLOUD betrayal: 30% chance on expiry
+      // RAINCLAUDE betrayal: 30% chance on expiry
       if (Math.random() < 0.30 && t.type === 'ALLIANCE') {
-        triggerNewsEvent('RAINCLOUD BETRAYS ALLIANCE — WAR REIGNITES');
-        setLog('⚠ RAINCLOUD has betrayed the Alliance! WAR RESUMES.');
+        triggerNewsEvent('RAINCLAUDE BETRAYS ALLIANCE — WAR REIGNITES');
+        setLog('⚠ RAINCLAUDE has betrayed the Alliance! WAR RESUMES.');
       } else {
         setLog(`🤝 ${TREATY_TYPES[t.type].name} has expired.`);
       }
@@ -1510,7 +1510,7 @@ function showDiplomacyModal() {
     </div>`;
   }).join('');
   openDrawer('diplomacy', '🤝 DIPLOMACY', `
-    <p style="font-size:10px;opacity:0.6;margin-bottom:8px;">Offer terms to RAINCLOUD. AI acceptance depends on balance of power.</p>
+    <p style="font-size:10px;opacity:0.6;margin-bottom:8px;">Offer terms to RAINCLAUDE. AI acceptance depends on balance of power.</p>
     ${activeBanner}${body}
   `);
 }

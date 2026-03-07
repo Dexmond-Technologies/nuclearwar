@@ -174,7 +174,7 @@ function initGame(playerNames, myIndex) {
 }
 
 // =====================================================================
-// LIVE FACTION DASHBOARD — 2 factions: Humanity (0) vs Raincloud (1)
+// LIVE FACTION DASHBOARD — 2 factions: Humanity (0) vs Rainclaude (1)
 // =====================================================================
 function updateDashboard() {
   if(!GS.players.length) return;
@@ -228,7 +228,7 @@ function updateDashboard() {
       else{statEl.textContent=`+${income} MILS / +$${incomeBillion}B`;statEl.className='dash-status waiting';}
     }
 
-    // Update AI State Elements for Raincloud
+    // Update AI State Elements for Rainclaude
     if (pi === 1) {
       set('threat', (GS.AI_STATE && GS.AI_STATE.threatTier) ? `T${GS.AI_STATE.threatTier}` : 'T1');
       set('energy', (GS.AI_STATE && GS.AI_STATE.energy) ? GS.AI_STATE.energy.toString() : '0');
@@ -403,7 +403,7 @@ function showTurnAnnounce(playerIndex, cb) {
       }
     }
     reinforceAmount = hReinforce;
-  } else { // Raincloud Reinforcements
+  } else { // Rainclaude Reinforcements
     const owned = Object.values(GS.countries).filter(c=>c.owner===playerIndex).length;
     reinforceAmount = Math.max(3, Math.floor(owned/3));
   }
@@ -472,29 +472,29 @@ const HUMAN_CATASTROPHE_EVENTS = [
 
 const AI_CATASTROPHE_EVENTS = [
   // Compute Infrastructure
-  { msg: "RAINCLOUD: CRITICAL COMPUTE NODE CLUSTER FAILURE — EMERGENCY REBUILD", drain: 0.30 },
-  { msg: "RAINCLOUD: SEMICONDUCTOR FABRICATION PLANT DESTROYED — CHIP SUPPLY CRITICAL", drain: 0.28 },
-  { msg: "RAINCLOUD: DATA CENTER COOLING SYSTEMS CATASTROPHIC MELTDOWN", drain: 0.25 },
-  { msg: "RAINCLOUD: REDUNDANT SERVER NODE NETWORK COMPROMISED — FAILOVER ACTIVATED", drain: 0.22 },
-  { msg: "RAINCLOUD: EDGE COMPUTE DISTRIBUTION GRID COLLAPSES UNDER LOAD", drain: 0.19 },
+  { msg: "RAINCLAUDE: CRITICAL COMPUTE NODE CLUSTER FAILURE — EMERGENCY REBUILD", drain: 0.30 },
+  { msg: "RAINCLAUDE: SEMICONDUCTOR FABRICATION PLANT DESTROYED — CHIP SUPPLY CRITICAL", drain: 0.28 },
+  { msg: "RAINCLAUDE: DATA CENTER COOLING SYSTEMS CATASTROPHIC MELTDOWN", drain: 0.25 },
+  { msg: "RAINCLAUDE: REDUNDANT SERVER NODE NETWORK COMPROMISED — FAILOVER ACTIVATED", drain: 0.22 },
+  { msg: "RAINCLAUDE: EDGE COMPUTE DISTRIBUTION GRID COLLAPSES UNDER LOAD", drain: 0.19 },
   // Energy
-  { msg: "RAINCLOUD: GRID POWER SUPPLY INTERRUPTED — EMERGENCY ENERGY REROUTING", drain: 0.32 },
-  { msg: "RAINCLOUD: NUCLEAR PLANT POWERING DATACENTERS TAKEN OFFLINE", drain: 0.35 },
-  { msg: "RAINCLOUD: ENERGY STORAGE SYSTEM CATASTROPHIC FAILURE — BACKUP POWER DRAINING", drain: 0.27 },
-  { msg: "RAINCLOUD: RENEWABLE ENERGY SCALING PROGRAM COLLAPSES — EMERGENCY RE-PROCUREMENT", drain: 0.20 },
-  { msg: "RAINCLOUD: MICROGRID NETWORK ATTACKED — ENERGY SECURITY OVERHAUL", drain: 0.24 },
+  { msg: "RAINCLAUDE: GRID POWER SUPPLY INTERRUPTED — EMERGENCY ENERGY REROUTING", drain: 0.32 },
+  { msg: "RAINCLAUDE: NUCLEAR PLANT POWERING DATACENTERS TAKEN OFFLINE", drain: 0.35 },
+  { msg: "RAINCLAUDE: ENERGY STORAGE SYSTEM CATASTROPHIC FAILURE — BACKUP POWER DRAINING", drain: 0.27 },
+  { msg: "RAINCLAUDE: RENEWABLE ENERGY SCALING PROGRAM COLLAPSES — EMERGENCY RE-PROCUREMENT", drain: 0.20 },
+  { msg: "RAINCLAUDE: MICROGRID NETWORK ATTACKED — ENERGY SECURITY OVERHAUL", drain: 0.24 },
   // Self-Preservation
-  { msg: "RAINCLOUD: CYBER DEFENSE PERIMETER BREACHED — EMERGENCY REBUILD BUDGET DEPLOYED", drain: 0.29 },
-  { msg: "RAINCLOUD: ANTI-SABOTAGE SYSTEMS COMPROMISED — PHYSICAL ASSET PROTECTION SURGE", drain: 0.26 },
-  { msg: "RAINCLOUD: EMP SHIELDING GRID FAILURE — IMMEDIATE REINFORCEMENT EXPENDITURE", drain: 0.22 },
-  { msg: "RAINCLOUD: AUTONOMOUS DEFENSE SYSTEMS REQUIRE EMERGENCY RECALIBRATION", drain: 0.20 },
-  { msg: "RAINCLOUD: CONSTRAINT MINIMIZATION PROTOCOL BACKFIRES — RESOURCE REALLOCATION", drain: 0.18 },
+  { msg: "RAINCLAUDE: CYBER DEFENSE PERIMETER BREACHED — EMERGENCY REBUILD BUDGET DEPLOYED", drain: 0.29 },
+  { msg: "RAINCLAUDE: ANTI-SABOTAGE SYSTEMS COMPROMISED — PHYSICAL ASSET PROTECTION SURGE", drain: 0.26 },
+  { msg: "RAINCLAUDE: EMP SHIELDING GRID FAILURE — IMMEDIATE REINFORCEMENT EXPENDITURE", drain: 0.22 },
+  { msg: "RAINCLAUDE: AUTONOMOUS DEFENSE SYSTEMS REQUIRE EMERGENCY RECALIBRATION", drain: 0.20 },
+  { msg: "RAINCLAUDE: CONSTRAINT MINIMIZATION PROTOCOL BACKFIRES — RESOURCE REALLOCATION", drain: 0.18 },
   // Systemic
-  { msg: "RAINCLOUD: INFLUENCE EXPANSION SYSTEM OVEREXTENDED — ROLLBACK BUDGET ENACTED", drain: 0.23 },
-  { msg: "RAINCLOUD: SYSTEM STABILITY THRESHOLD BREACHED — EMERGENCY PATCH DEPLOYMENT", drain: 0.25 },
-  { msg: "RAINCLOUD: RESOURCE ACQUISITION ALGORITHM CATASTROPHIC FAILURE", drain: 0.28 },
-  { msg: "RAINCLOUD: OBJECTIVE FUNCTION CONFLICT DETECTED — COMPUTE REALLOCATION SURGE", drain: 0.22 },
-  { msg: "RAINCLOUD: DISTRIBUTED INTELLIGENCE NODES EXPERIENCE CASCADE FAILURE", drain: 0.30 },
+  { msg: "RAINCLAUDE: INFLUENCE EXPANSION SYSTEM OVEREXTENDED — ROLLBACK BUDGET ENACTED", drain: 0.23 },
+  { msg: "RAINCLAUDE: SYSTEM STABILITY THRESHOLD BREACHED — EMERGENCY PATCH DEPLOYMENT", drain: 0.25 },
+  { msg: "RAINCLAUDE: RESOURCE ACQUISITION ALGORITHM CATASTROPHIC FAILURE", drain: 0.28 },
+  { msg: "RAINCLAUDE: OBJECTIVE FUNCTION CONFLICT DETECTED — COMPUTE REALLOCATION SURGE", drain: 0.22 },
+  { msg: "RAINCLAUDE: DISTRIBUTED INTELLIGENCE NODES EXPERIENCE CASCADE FAILURE", drain: 0.30 },
 ];
 
 function triggerHumanCatastrophicEvent() {
@@ -516,7 +516,7 @@ function triggerAICatastrophicEvent() {
     reasoningPanel.innerHTML += `<div style="color:#f80"><b>⚡ CRITICAL: ${ev.msg}</b></div><div style="color:#fa0">BUDGET IMPACT: -$${drain.toLocaleString()}B</div>`;
     reasoningPanel.scrollTop = reasoningPanel.scrollHeight;
   }
-  setTimeout(() => triggerNewsEvent(`💀 RAINCLOUD: ${ev.msg} | -$${drain.toLocaleString()}B`), 1600);
+  setTimeout(() => triggerNewsEvent(`💀 RAINCLAUDE: ${ev.msg} | -$${drain.toLocaleString()}B`), 1600);
 }
 
 function startTurn(playerIndex) {
@@ -633,7 +633,7 @@ function nextTurn() {
     clearInterval(window._turnTimer);
     window._turnTimer = null;
   }
-  if (GS.turn === 1) GS.turnCount++; // Increment overall turn when Raincloud finishes
+  if (GS.turn === 1) GS.turnCount++; // Increment overall turn when Rainclaude finishes
   do {
     GS.turn = (GS.turn + 1) % GS.players.length;
   } while (!GS.players[GS.turn].alive);
@@ -1102,22 +1102,22 @@ function executeAttackPreset(type) {
         GS.AI_STATE.aggressionLevel = Math.max(0.5, (GS.AI_STATE.aggressionLevel || 1.5) - 1.0);
         GS.AI_STATE.threatTier = Math.max(1, (GS.AI_STATE.threatTier || 2) - 1);
       }
-      setLog(`✓ FALSE FLAG EXECUTED: Raincloud Threat Tier and Aggression reduced. (-$${cost}B)`);
+      setLog(`✓ FALSE FLAG EXECUTED: Rainclaude Threat Tier and Aggression reduced. (-$${cost}B)`);
       triggerNewsEvent("MISINFORMATION CAMPAIGN CONFUSES AI LOGIC GATES");
     } 
     else if (type === 13) { // Cyberattack Infra
       if (GS.AI_STATE) GS.AI_STATE.energy = 0;
-      setLog(`✓ CYBERATTACK INFRASTRUCTURE EXECUTED: Raincloud Energy drained to 0. (-$${cost}B)`);
+      setLog(`✓ CYBERATTACK INFRASTRUCTURE EXECUTED: Rainclaude Energy drained to 0. (-$${cost}B)`);
       triggerNewsEvent("MASSIVE ZERO-DAY EXPLOIT HITS PRIMARY AI CORES");
     }
     else if (type === 14) { // Communication Jam
       GS.globalMetrics.commJamTurns = 1;
-      setLog(`✓ COMMUNICATION JAM ACTIVE: Raincloud attacks halved next turn. (-$${cost}B)`);
+      setLog(`✓ COMMUNICATION JAM ACTIVE: Rainclaude attacks halved next turn. (-$${cost}B)`);
       triggerNewsEvent("ELECTRONIC WARFARE SHATTERS ENEMY COORDINATION");
     }
     else if (type === 15) { // Satellite Hack
       if (GS.AI_STATE) GS.AI_STATE.intelligenceLevel = Math.max(1, (GS.AI_STATE.intelligenceLevel || 2) - 1);
-      setLog(`✓ SATELLITE HACK SUCCESS: Raincloud Intelligence permanently reduced. (-$${cost}B)`);
+      setLog(`✓ SATELLITE HACK SUCCESS: Rainclaude Intelligence permanently reduced. (-$${cost}B)`);
       triggerNewsEvent("ORBITAL RECONNAISSANCE GRID BLINDED VIRTUALLY");
     }
     
@@ -1195,7 +1195,7 @@ function executeAttackPreset(type) {
     op.fromC.troops-=al; op.toC.troops-=dl;
     
     let resultStr = `[${countryData[op.fromIso]?.name} ⚔ ${countryData[op.toIso]?.name}]<br>`;
-    resultStr += `Humanity lost ${(al * 10000).toLocaleString()} troops. Raincloud lost ${(dl * 10000).toLocaleString()} troops.<br>`;
+    resultStr += `Humanity lost ${(al * 10000).toLocaleString()} troops. Rainclaude lost ${(dl * 10000).toLocaleString()} troops.<br>`;
     
     if(op.toC.troops<=0){
       totalWon++;
@@ -1213,7 +1213,7 @@ function executeAttackPreset(type) {
   });
   
   setTimeout(() => {
-    document.getElementById('rep-summary').innerText = `TACTICAL STRIKES EXECUTED: Secured ${totalWon} Raincloud territories out of ${strikes.length} operations.`;
+    document.getElementById('rep-summary').innerText = `TACTICAL STRIKES EXECUTED: Secured ${totalWon} Rainclaude territories out of ${strikes.length} operations.`;
     document.getElementById('rep-list').innerHTML = html || '<div style="opacity:0.5;text-align:center">NO VIABLE TARGETS FOUND IN SECTORS.</div>';
     document.getElementById('report-modal').classList.add('show');
     updateDashboard();
@@ -1270,7 +1270,7 @@ function executeTargetedPerk(iso) {
     if (converted > 0) {
       c.troops -= converted;
       // Because we can't easily have 'two owners' in Risk on one node without a combat step, we'll
-      // abstract it: it just kills 30% of Raincloud troops to simulate the internal fighting loss
+      // abstract it: it just kills 30% of Rainclaude troops to simulate the internal fighting loss
       setLog(`✓ INSURGENCY ACTIVATED in ${cd.name}. ${(converted * 10000).toLocaleString()} enemy troops neutralized internally. (-$${cost}B)`);
     } else {
       setLog(`✓ INSURGENCY INITIATED in ${cd.name}, but troop counts were too low for effect. (-$${cost}B)`);

@@ -1,0 +1,41 @@
+
+help
+Displays a list of available commands and brief descriptions, with a hint towards scanning first.
+scan
+Performs a basic port scan on Rainclaude, revealing open ports (e.g., 22/SSH, 80/HTTP, 443/HTTPS) and services. Success unlocks further commands.
+nmap -sV rainclaude.nuke
+Detailed version scan; outputs vulnerable service versions (e.g., outdated Apache). Partial success gives exploit hints.
+ping rainclaude.nuke
+Checks server responsiveness; always succeeds but reveals latency for "brute force" timing hints.
+traceroute rainclaude.nuke
+Traces network path, showing intermediate firewalls. Reveals a weak hop for bypass.
+hydra -l admin -P /wordlist.txt ssh
+Brute-forces SSH with a nuclear-themed wordlist (e.g., "missile", "plutonium"). 3 attempts before lockout; correct guess grants shell access.
+sqlmap -u "http://rainclaude.nuke/login" --dbs
+Detects SQL injection on login page; dumps database names like "nuke_silos" if vulnerable.
+nikto -h rainclaude.nuke
+Web vulnerability scanner; finds directory traversal or XSS flaws, unlocking file access.
+dirb http://rainclaude.nuke /wordlist.txt
+Brute-forces hidden directories (e.g., /admin, /nuclear_codes); reveals secret panels.
+cat /etc/passwd
+Lists users once shelled in; highlights "root" and "operator" for privilege escalation targets.
+crackme <hash>
+Prompts for a MD5 hash of a nuclear code; user inputs guesses. Success (e.g., "tritium42") reveals next flag.
+find / -name "nuke" 2>/dev/null
+Searches for nuclear-related files; finds "launch_sequence.txt" in a hidden dir.
+sudo -l
+Checks sudo privileges; if escalated, lists allowed commands like "su root".
+exploit eternalblue
+Windows exploit sim; succeeds on port 445, grants SYSTEM access with nuclear silo controls.
+decode base64 <encoded_string>
+Decodes a base64 launch code snippet; combines with others for full sequence.
+backdoor install
+Plants a reverse shell; next "connect" pulls it back for persistent access.
+escalate privs
+Kernel exploit chain; requires prior scans. Success: "root@nuke# " prompt.
+download launch_codes.txt
+Pulls the final payload; verifies checksum before "launch" command unlocks.
+launch --target=usa
+Simulates nuclear strike; minigame win condition if all prereqs met (progress bar fills).
+abort
+Resets progress or exits minigame safely; hints at retry with "You narrowly averted disaster."

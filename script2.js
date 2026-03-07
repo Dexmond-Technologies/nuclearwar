@@ -333,7 +333,7 @@ if (window.location.protocol !== 'file:') {
 
 const PLAYER_COLORS = [
   { hex:'#00dcff', int:0x00dcff, name:'HUMANITY' },
-  { hex:'#ff3232', int:0xff3232, name:'RAINCLOUD AI' }
+  { hex:'#ff3232', int:0xff3232, name:'RAINCLAUDE AI' }
 ];
 const NEUTRAL = { hex:'#445566', int:0x445566, name:'NEUTRAL' };
 
