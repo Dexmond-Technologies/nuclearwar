@@ -7852,7 +7852,7 @@ window.toggleRedSkin = function() {
   }
   if (typeof countryBorders !== 'undefined') {
     Object.values(countryBorders).forEach(group => {
-      group.visible = !isClean;
+      group.visible = true; // Always show red/blue borders on all skins
     });
   }
 
