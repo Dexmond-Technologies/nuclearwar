@@ -321,12 +321,12 @@ async function fetchLiveNews() {
 const GLOBE_R = 1.0, RAD = Math.PI/180;
 
 // Dynamic WebSocket URL to support both local and production environments
-let WS_URL = 'ws://localhost:4000';
+let WS_URL = 'ws://localhost:8888';
 if (window.location.protocol !== 'file:') {
   const WS_PROTOCOL = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
   WS_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-    ? `ws://${window.location.hostname}:4000` 
-    : `${WS_PROTOCOL}//${window.location.host}`;
+    ? `ws://${window.location.hostname}:8888` 
+    : `${WS_PROTOCOL}//${window.location.hostname}:8888`;
 }
 
 const PLAYER_COLORS = [
