@@ -8257,25 +8257,41 @@ if (dash0 && opsSidebar) {
 // MOCK GLOBAL TRADE ECONOMY (GREEN & YELLOW SKINS)
 // =====================================================================
 const MockTradeEconomy = (function() {
-  const cnames = ["USA", "China", "Russia", "Brazil", "Germany", "India", "Canada", "Australia", 
-    "Japan", "South Africa", "UK", "France", "Mexico", "Indonesia", "Saudi Arabia",
-    "Argentina", "Turkey", "Nigeria", "South Korea", "Italy", "Spain", "Poland",
-    "Iran", "Egypt", "Thailand", "Vietnam", "Malaysia", "Chile", "Peru", "Colombia"];
-  
-  const countries = cnames.map(name => ({
-    name,
-    gProd: 40 + Math.random() * 80,
-    yProd: 30 + Math.random() * 80,
-    gStock: 100 + Math.random() * 200,
-    yStock: 100 + Math.random() * 200,
-    gDem: 50 + Math.random() * 50,
-    yDem: 50 + Math.random() * 50
-  }));
-  
+  let countries = [];
   let turn = 0;
   let lastStats = {};
 
+  function getCountry(name) {
+    let c = countries.find(x => x.name.toUpperCase() === name.toUpperCase());
+    if (!c) {
+       c = {
+          name: name,
+          gProd: 40 + Math.random() * 80,
+          yProd: 30 + Math.random() * 80,
+          gStock: 100 + Math.random() * 200,
+          yStock: 100 + Math.random() * 200,
+          gDem: 50 + Math.random() * 50,
+          yDem: 50 + Math.random() * 50
+       };
+       countries.push(c);
+    }
+    return c;
+  }
+
+  function initCountries() {
+    if (countries.length > 0) return;
+    if (typeof window.countryData === 'undefined' || Object.keys(window.countryData).length === 0) return;
+    
+    // Seed the simulation with the full map list to ensure activity spans the globe evenly
+    Object.values(window.countryData).forEach(cd => {
+       if(cd.name) getCountry(cd.name);
+    });
+  }
+
   function runTurn() {
+    initCountries();
+    if (countries.length === 0) return;
+
     const skin = window.SKINS && window.SKINS[window.currentSkinIndex] ? window.SKINS[window.currentSkinIndex].name : null;
     if (skin !== 'GREEN' && skin !== 'YELLOW') return;
 
@@ -8359,9 +8375,9 @@ const MockTradeEconomy = (function() {
     const gBox = document.getElementById('mock-trade-green-ui');
     if (gBox) {
        const cn = gBox.getAttribute('data-country-name');
-       const cObj = countries.find(x => x.name.toUpperCase() === cn);
+       const cObj = getCountry(cn);
        const dBox = document.getElementById('mock-trade-green-data');
-       if (cObj && dBox) {
+       if (dBox) {
           const p = lastStats[cObj.name] || { gStock: cObj.gStock, gProd: cObj.gProd };
           dBox.innerHTML = `
             <table width="100%" style="margin-top:5px;">
@@ -8369,17 +8385,15 @@ const MockTradeEconomy = (function() {
               <tr><td style="opacity:0.8;">Est. Prod:</td><td align="right" style="font-weight:bold;">${Math.round(cObj.gProd)} <span style="font-weight:normal;font-size:10px;">/min</span></td><td align="right">${formatPct(cObj.gProd, p.gProd)}</td></tr>
             </table>
           `;
-       } else if (dBox) {
-          dBox.innerHTML = `<span style="color:#aaa;">Market data unavailable for this region.</span>`;
        }
     }
 
     const yBox = document.getElementById('mock-trade-yellow-ui');
     if (yBox) {
        const cn = yBox.getAttribute('data-country-name');
-       const cObj = countries.find(x => x.name.toUpperCase() === cn);
+       const cObj = getCountry(cn);
        const dBox = document.getElementById('mock-trade-yellow-data');
-       if (cObj && dBox) {
+       if (dBox) {
           const p = lastStats[cObj.name] || { yStock: cObj.yStock, yProd: cObj.yProd };
           dBox.innerHTML = `
             <table width="100%" style="margin-top:5px;">
@@ -8387,8 +8401,6 @@ const MockTradeEconomy = (function() {
               <tr><td style="opacity:0.8;">Est. Prod:</td><td align="right" style="font-weight:bold; color:#ffa;">${Math.round(cObj.yProd)} <span style="font-weight:normal;font-size:10px;">/min</span></td><td align="right">${formatPct(cObj.yProd, p.yProd)}</td></tr>
             </table>
           `;
-       } else if (dBox) {
-          dBox.innerHTML = `<span style="color:#aaa;">Market data unavailable for this region.</span>`;
        }
     }
 
