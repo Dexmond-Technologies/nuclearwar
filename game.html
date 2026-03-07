@@ -2451,29 +2451,117 @@ scene.add(globeMesh);
 const issOrbitGroup = new THREE.Group(); // Parent group to rotate around Earth center
 const issGroup = new THREE.Group();      // The actual station mesh group
 
-// ISS Main Truss/Body (Silver/White)
-const trussMat = new THREE.MeshPhongMaterial({color: 0xcccccc, specular: 0xffffff, shininess: 50});
-const mainTube = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.3, 8), trussMat);
-mainTube.rotation.z = Math.PI / 2;
-issGroup.add(mainTube);
+// --- REALISTIC ISS COMPOSITE BUILD ---
+// Materials
+const trussMat = new THREE.MeshPhongMaterial({color: 0x999999, wireframe: true}); // Fake structural look
+const moduleMat = new THREE.MeshPhongMaterial({color: 0xe0e0e0, specular: 0xffffff, shininess: 30});
+const moduleDetailMat = new THREE.MeshPhongMaterial({color: 0xb0b0b0, specular: 0xffffff, shininess: 10});
+const panelMat = new THREE.MeshPhongMaterial({color: 0x1a4b8c, specular: 0x5599ff, shininess: 100, side: THREE.DoubleSide});
+const radiatorMat = new THREE.MeshPhongMaterial({color: 0xffffff, specular: 0xaaaaaa, shininess: 10, side: THREE.DoubleSide});
+const goldMat = new THREE.MeshPhongMaterial({color: 0xffaa00, specular: 0xffffff, shininess: 90});
 
-const habModule = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.15, 8), trussMat);
-habModule.rotation.x = Math.PI / 2;
-issGroup.add(habModule);
+// 1. Integrated Truss Structure (The long spine)
+const mainTruss = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.02, 0.02), trussMat);
+issGroup.add(mainTruss);
 
-// ISS Solar Panels (Copper/Bronze)
-const panelMat = new THREE.MeshPhongMaterial({color: 0xb87333, specular: 0xffaa00, shininess: 80, side: THREE.DoubleSide});
-const panelGeo = new THREE.PlaneGeometry(0.12, 0.25);
+// 2. Central Modules (Zarya, Zvezda, Unity, Destiny, etc. stacked along Z axis)
+const habCore = new THREE.Group();
 
-const panel1 = new THREE.Mesh(panelGeo, panelMat);
-panel1.position.set(-0.1, 0, 0);
-panel1.rotation.x = Math.PI / 2;
-issGroup.add(panel1);
+// Russian Segment (rear)
+const zvezda = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.02, 0.1, 16), moduleMat);
+zvezda.rotation.x = Math.PI / 2;
+zvezda.position.z = -0.15;
+habCore.add(zvezda);
 
-const panel2 = new THREE.Mesh(panelGeo, panelMat);
-panel2.position.set(0.1, 0, 0);
-panel2.rotation.x = Math.PI / 2;
-issGroup.add(panel2);
+const zarya = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.12, 16), moduleMat);
+zarya.rotation.x = Math.PI / 2;
+zarya.position.z = -0.04;
+habCore.add(zarya);
+
+// US Segment (front)
+const unityNode = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.06, 16), moduleDetailMat);
+unityNode.rotation.x = Math.PI / 2;
+unityNode.position.z = 0.05;
+habCore.add(unityNode);
+
+const destinyLab = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.12, 16), moduleMat);
+destinyLab.rotation.x = Math.PI / 2;
+destinyLab.position.z = 0.14;
+habCore.add(destinyLab);
+
+const harmonyNode = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.08, 16), moduleDetailMat);
+harmonyNode.rotation.x = Math.PI / 2;
+harmonyNode.position.z = 0.24;
+habCore.add(harmonyNode);
+
+// Columbus (Side attached to Node 2)
+const columbus = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.08, 16), moduleMat);
+columbus.rotation.z = Math.PI / 2;
+columbus.position.set(0.05, 0, 0.24);
+habCore.add(columbus);
+
+// Kibo (Side attached to Node 2)
+const kibo = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.12, 16), moduleMat);
+kibo.rotation.z = Math.PI / 2;
+kibo.position.set(-0.07, 0, 0.24);
+habCore.add(kibo);
+
+// 3. Docked Vehicles (Soyuz/Dragon capsules)
+const dragon = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.01, 0.04, 16), moduleMat);
+dragon.rotation.x = Math.PI / 2;
+dragon.position.set(0, 0.04, 0.24); // Docked to zenith harmony
+habCore.add(dragon);
+
+const soyuz = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.012, 0.05, 16), moduleDetailMat);
+soyuz.rotation.x = Math.PI / 2;
+soyuz.position.set(0, -0.04, -0.15); // Docked to nadir zvezda
+habCore.add(soyuz);
+
+issGroup.add(habCore);
+
+// 4. Solar Arrays (8 pairs total, simplified as 4 large dual-plane structures)
+const createSolarWing = (xPos) => {
+    const wing = new THREE.Group();
+    const panelGeo = new THREE.PlaneGeometry(0.08, 0.25);
+    // Forward panel
+    const p1 = new THREE.Mesh(panelGeo, panelMat);
+    p1.rotation.x = Math.PI / 2;
+    p1.position.set(0, 0, 0.06);
+    wing.add(p1);
+    // Aft panel
+    const p2 = new THREE.Mesh(panelGeo, panelMat);
+    p2.rotation.x = Math.PI / 2;
+    p2.position.set(0, 0, -0.06);
+    wing.add(p2);
+    
+    // Gold supporting mast
+    const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.003, 0.3, 4), goldMat);
+    mast.rotation.x = Math.PI / 2;
+    wing.add(mast);
+
+    wing.position.x = xPos;
+    return wing;
+};
+
+// Add wings to the truss (far port, inner port, inner stbd, far stbd)
+issGroup.add(createSolarWing(-0.35));
+issGroup.add(createSolarWing(-0.22));
+issGroup.add(createSolarWing(0.22));
+issGroup.add(createSolarWing(0.35));
+
+// 5. Radiator Panels (Thermal dissipation)
+const createRadiator = (xPos, zOrient) => {
+    const rad = new THREE.Mesh(new THREE.PlaneGeometry(0.04, 0.15), radiatorMat);
+    rad.rotation.y = Math.PI / 2;
+    rad.position.set(xPos, -0.08, zOrient);
+    return rad;
+};
+
+// Central radiating systems dropping down
+issGroup.add(createRadiator(-0.05, 0.05));
+issGroup.add(createRadiator(0.05, 0.05));
+issGroup.add(createRadiator(-0.05, -0.05));
+issGroup.add(createRadiator(0.05, -0.05));
 
 // Position the ISS in low earth orbit (shifted further out and scaled smaller)
 issGroup.scale.setScalar(0.25);
