@@ -2285,17 +2285,16 @@ function initGlobalTradeNetwork() {
     {from: [35.7, 51.4], to: [41.0, 29.0], type: 'train'} // Tehran -> Istanbul
   ];
 
-  // Multiply exact routes array volume by 6x parametrically
-  const citiesList = Object.values(countryData).filter(c => c.lat !== undefined);
-  if (citiesList.length > 5) {
-     const typesStr = ['plane', 'ship', 'train'];
-     for(let j=0; j < 160; j++) {
-        const c1 = citiesList[Math.floor(Math.random() * citiesList.length)];
-        const c2 = citiesList[Math.floor(Math.random() * citiesList.length)];
-        if(c1 !== c2) {
-           routes.push({from: [c1.lat, c1.lon], to: [c2.lat, c2.lon], type: typesStr[j % 3]});
-        }
-     }
+  // Multiply exact routes array volume by 6x parametrically using coordinate drift
+  const baseRoutesLength = routes.length;
+  for(let j=0; j < 160; j++) {
+     const baseRt = routes[Math.floor(Math.random() * baseRoutesLength)];
+     // Add random offsets to create new parallel / divergent routes
+     const fromLat = Math.max(-80, Math.min(80, baseRt.from[0] + (Math.random() * 50 - 25)));
+     const fromLon = baseRt.from[1] + (Math.random() * 50 - 25);
+     const toLat = Math.max(-80, Math.min(80, baseRt.to[0] + (Math.random() * 50 - 25)));
+     const toLon = baseRt.to[1] + (Math.random() * 50 - 25);
+     routes.push({from: [fromLat, fromLon], to: [toLat, toLon], type: baseRt.type});
   }
 
   routes.forEach(rt => {
