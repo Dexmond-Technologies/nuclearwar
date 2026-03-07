@@ -176,7 +176,58 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   transform: scale(1.1);
 }
 
-/* Tooltip */
+/* CMD Hacker Button */
+#btn-cmd-toggle {
+  position: absolute;
+  left: calc(20px + 25vw + 16px);
+  bottom: 111px; /* Just above chat button */
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(0, 255, 136, 0.15);
+  border: 1px solid #0f8;
+  color: #0f8;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+  pointer-events: auto;
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+  transition: all 0.2s;
+  display: none;
+}
+#btn-cmd-toggle:hover {
+  background: rgba(0, 255, 136, 0.3);
+  box-shadow: 0 0 25px rgba(0, 255, 136, 0.8);
+  transform: scale(1.1);
+}
+
+/* Hacker Terminal Modal */
+#hacker-terminal-modal {
+  position: absolute; inset: 0; background: rgba(0, 10, 20, 0.85); display: none;
+  align-items: center; justify-content: center; z-index: 1060; backdrop-filter: blur(4px);
+}
+#hacker-terminal-modal.show { display: flex; animation: fadeInModal 0.2s ease-out; }
+.term-box {
+  background: #000; border: 1px solid #0f8; width: 600px; max-width: 90vw; height: 400px;
+  border-radius: 4px; display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 0 30px rgba(0, 255, 136, 0.2), inset 0 0 20px rgba(0, 255, 136, 0.05);
+  font-family: 'Courier New', monospace; color: #0f8; font-size: 13px;
+}
+.term-header {
+  background: #02050a; border-bottom: 1px solid #0f8; padding: 6px 10px;
+  display: flex; justify-content: space-between; align-items: center; font-size: 11px; letter-spacing: 2px;
+}
+.term-close { color: #f24; cursor: pointer; font-weight: bold; padding: 2px 6px; }
+.term-close:hover { background: rgba(255, 50, 50, 0.2); }
+.term-output { flex: 1; padding: 10px; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word; line-height: 1.4; text-shadow: 0 0 2px #0f8; }
+.term-input-row { display: flex; padding: 8px 10px; border-top: 1px dashed rgba(0, 255, 136, 0.4); background: rgba(0, 255, 136, 0.05); }
+.term-prompt { margin-right: 8px; font-weight: bold; }
+.term-input { flex: 1; background: transparent; border: none; color: #0f8; font-family: 'Courier New', monospace; font-size: 13px; outline: none; text-shadow: 0 0 2px #0f8; }
 #tip{position:absolute;pointer-events:none;background:rgba(0,8,20,.95);border:1px solid rgba(0,180,255,.3);
   padding:5px 10px;font-size:10px;display:none;z-index:30;border-radius:3px;}
 #tip.show{display:block;}
@@ -1250,13 +1301,37 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 </div>
 
 <!-- Chat -->
-<button id="btn-chat-toggle" style="display:none">💬</button>
+  <button id="btn-chat-toggle" title="Open Global Chat"><i class="fas fa-comment-dots"></i></button>
+
+  <!-- CMD HACKER TERMINAL BUTTON -->
+  <button id="btn-cmd-toggle" title="ACCESS SECURE TERMINAL">CMD</button>
+  
 </div>
 <div id="chat-box">
   <div id="chat-msgs"></div>
   <div class="chat-input-row" style="display:flex;border-top:1px solid rgba(0,180,255,.1)">
     <input id="chat-inp" placeholder="message..." maxlength="100"/>
     <button id="chat-send" onclick="sendChat()">➤</button>
+  </div>
+</div>
+
+<!-- HACKER TERMINAL MODAL -->
+<div id="hacker-terminal-modal">
+  <div class="term-box">
+    <div class="term-header">
+      <span>RAINCLOUD // SECURE TERMINAL v1.02</span>
+      <span class="term-close" onclick="document.getElementById('hacker-terminal-modal').classList.remove('show')">X</span>
+    </div>
+    <div class="term-output" id="term-output">
+Establishing secure connection...
+Connection established.
+Warning: Unauthorized access is strictly prohibited.
+Type 'help' for available commands.
+</div>
+    <div class="term-input-row">
+      <span class="term-prompt">root@hmn_cmd:~$</span>
+      <input type="text" id="term-input" class="term-input" autocomplete="off" spellcheck="false" autofocus>
+    </div>
   </div>
 </div>
 
@@ -8442,6 +8517,141 @@ const MockTradeEconomy = (function() {
 
   return { countries, runTurn };
 })();
+
+// =====================================================================
+// HACKER TERMINAL LOGIC (RAINCLOUD EASTER EGG)
+// =====================================================================
+let hackStage = 0; // 0=start, 1=found port, 2=connected, 3=breached
+
+const btnCmd = document.getElementById('btn-cmd-toggle');
+const termModal = document.getElementById('hacker-terminal-modal');
+const termInput = document.getElementById('term-input');
+const termOutput = document.getElementById('term-output');
+
+if (btnCmd) {
+  btnCmd.addEventListener('click', () => {
+    termModal.classList.add('show');
+    termInput.focus();
+  });
+}
+
+function printTerm(text, color = '#0f8') {
+  const line = document.createElement('div');
+  line.style.color = color;
+  line.innerText = text;
+  termOutput.appendChild(line);
+  termOutput.scrollTop = termOutput.scrollHeight;
+}
+
+if (termInput) {
+  termInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const cmd = termInput.value.trim().toLowerCase();
+      if (!cmd) return;
+      
+      printTerm(`\nroot@hmn_cmd:~$ ${cmd}`, '#fff');
+      termInput.value = '';
+      
+      processHackCommand(cmd);
+    }
+  });
+}
+
+function processHackCommand(cmd) {
+  // Basic commands
+  if (cmd === 'help') {
+    printTerm('Available commands: help, clear, ping, nmap, ssh, whoami');
+    return;
+  }
+  if (cmd === 'clear') {
+    termOutput.innerHTML = '';
+    return;
+  }
+  if (cmd.startsWith('ping')) {
+    printTerm(`PING ${cmd.split(' ')[1] || 'target'} (192.168.1.1): 56 data bytes`);
+    printTerm('64 bytes from 192.168.1.1: icmp_seq=0 ttl=64 time=0.042 ms');
+    printTerm('64 bytes from 192.168.1.1: icmp_seq=1 ttl=64 time=0.039 ms');
+    return;
+  }
+  if (cmd === 'whoami') {
+    printTerm('human_resistance_commander');
+    return;
+  }
+
+  // Puzzle Sequence
+  if (hackStage === 0) {
+    if (cmd === 'nmap raincloud.ai' || cmd === 'nmap -sV raincloud.ai') {
+      printTerm('Starting Nmap 7.92 ( https://nmap.org )');
+      setTimeout(() => {
+        printTerm('Host is up (0.0012s latency).');
+        printTerm('PORT     STATE SERVICE VERSION');
+        printTerm('22/tcp   open  ssh     OpenSSH 8.4p1 Debian');
+        printTerm('6379/tcp open  redis   Redis key-value store');
+        printTerm('9999/tcp open  unknown RAINCLOUD_MAINFRAME_UPLINK', '#fa0');
+        printTerm('Nmap done: 1 IP address (1 host up) scanned in 1.42 seconds');
+        hackStage = 1;
+      }, 600);
+      return;
+    }
+    printTerm('Command not recognized or target inaccessible.');
+    return;
+  }
+
+  if (hackStage === 1) {
+    if (cmd.startsWith('ssh') && cmd.includes('raincloud')) {
+      printTerm('Warning: Permanently added \'raincloud.ai\' to the list of known hosts.', '#fa0');
+      printTerm('root@raincloud.ai\'s password: ');
+      
+      // Override input temporarily to act as password field
+      termInput.type = 'password';
+      const origKeydown = termInput.onkeydown;
+      
+      termInput.onkeydown = (e) => {
+        if (e.key === 'Enter') {
+          termInput.type = 'text';
+          termInput.value = '';
+          termInput.onkeydown = origKeydown; // restore normal listener
+          printTerm('Access granted. Welcome to RAINCLOUD Base Protocol.', '#0f8');
+          printTerm('Last login: ' + new Date().toString(), '#888');
+          hackStage = 2;
+        }
+      };
+      return;
+    }
+  }
+
+  if (hackStage === 2) {
+    if (cmd === 'exploit -target raincloud_mainframe' || cmd === 'exploit') {
+      printTerm('INITIALIZING PAYLOAD...', '#fa0');
+      setTimeout(() => printTerm('BYPASSING FIREWALL...', '#fa0'), 500);
+      setTimeout(() => printTerm('OVERRIDING ACCESS CONTROLS...', '#fa0'), 1000);
+      setTimeout(() => {
+        printTerm('\n[ BREACH SUCCESSFUL ]', '#0f8');
+        printTerm('EXTRACTING ASSETS: 50,000 RESERVE TROOPS DIVERTED TO HUMAN COMMAND.', '#0f8');
+        hackStage = 3;
+        
+        // REWARD DELIVERED
+        if (typeof GS !== 'undefined') {
+          GS.reserves += 50000;
+          updateHUD();
+          setLog('CRITICAL: RAINCLOUD MAINFRAME BREACHED. 50,000 TROOPS ACQUIRED.');
+        }
+        
+        // Glitch effect on term
+        termModal.style.filter = 'hue-rotate(90deg) contrast(2)';
+        setTimeout(() => termModal.style.filter = 'none', 1000);
+      }, 2000);
+      return;
+    }
+  }
+
+  if (hackStage === 3) {
+    printTerm('Target already compromised. No further exploits available.', '#888');
+    return;
+  }
+
+  printTerm('Connection refused or command invalid in current context.', '#f24');
+}
 
 </script>
 
