@@ -694,7 +694,9 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   padding:18px 20px;
   z-index:9999;
   pointer-events:auto;
-  width:320px;
+  width:auto;
+  min-width:340px;
+  max-width:420px;
   max-height:70vh;
   overflow-y:auto;
   font-family:'Courier New',monospace;
@@ -3770,7 +3772,7 @@ function showGreenSkinResourceModal(iso) {
       <span style="opacity:0.6;">Owned and managed by:</span><br>
       <b style="font-size:14px; color:#0f8;">${cName} GOVERNMENT</b>
     </div>
-    <div style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
+    <div style="padding-right: 5px;">
       <div class="strat-item">
         <div class="strat-item-title" style="color:#fa0;">🛢 Oil (Petroleum)</div>
         <div class="strat-item-desc">State monopolies or direct government control over production (e.g., National Oil Companies).</div>
@@ -3905,7 +3907,7 @@ function showYellowSkinArmsModal(iso) {
       <span style="opacity:0.6;">National Defense Infrastructure:</span><br>
       <b style="font-size:14px; color:#ffaa00;">${cName}</b>
     </div>
-    <div style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
+    <div style="padding-right: 5px;">
       <div class="strat-item">
         <div class="strat-item-title" style="color:#ffaa00;">📉 The "Global" Arms Industry Illusion</div>
         <div class="strat-item-desc">Global arms revenues reached <b>$632 billion</b> in 2023. However, governments heavily favor domestic procurement for security reasons, resulting in critically low true intra-industry trade compared to civilian sectors.</div>
@@ -8413,10 +8415,10 @@ const MockTradeEconomy = (function() {
   // Inject initial populate on demand if box exists before first tick
   setInterval(() => {
      if (document.getElementById('mock-trade-green-ui') && document.getElementById('mock-trade-green-data').innerHTML.includes("Loading")) {
-         if(turn > 0) runTurn(); // Force update if already ticking
+         runTurn(); // Force update
      }
      if (document.getElementById('mock-trade-yellow-ui') && document.getElementById('mock-trade-yellow-data').innerHTML.includes("Loading")) {
-         if(turn > 0) runTurn(); 
+         runTurn(); 
      }
   }, 1000);
 
