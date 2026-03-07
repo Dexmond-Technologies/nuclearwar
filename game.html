@@ -4860,19 +4860,38 @@ document.getElementById('btn-end-turn').onclick = () => { if(GS.turn===GS.myInde
 // =====================================================================
 function setLog(msg){ 
   document.getElementById('log').textContent=msg;
-  // Mirror human-relevant messages into the Humanity reasoning panel
-  const humanPanel = document.getElementById('d0-reasoning');
-  if (humanPanel && msg && !msg.startsWith('⟳') && !msg.startsWith('✓ ') && !msg.startsWith('⚙') && !msg.startsWith('LOADING')) {
-    const entry = document.createElement('div');
-    entry.textContent = '> ' + msg;
-    // Color code by action type
-    if (msg.includes('CONQUERED') || msg.includes('seizes') || msg.includes('nuclear')) entry.style.color = '#0f8';
-    else if (msg.includes('casualties') || msg.includes('NUCLEAR')) entry.style.color = '#fa0';
-    else if (msg.includes('☢') || msg.includes('NUKE')) entry.style.color = '#f24';
-    humanPanel.appendChild(entry);
-    // Keep only last 20 entries
-    while (humanPanel.children.length > 20) humanPanel.removeChild(humanPanel.firstChild);
-    humanPanel.scrollTop = humanPanel.scrollHeight;
+  if (!msg) return;
+
+  const isExcluded = msg.startsWith('⟳') || msg.startsWith('✓ ') || msg.startsWith('⚙') || msg.startsWith('LOADING');
+  const isAI = msg.includes('RAINCLAUDE') || msg.includes('RAINCLOUD') || msg.includes('SATELLITE RECONNAISSANCE SCAN');
+
+  if (!isExcluded) {
+    if (isAI) {
+      const aiPanel = document.getElementById('d1-reasoning');
+      if (aiPanel) {
+        const entry = document.createElement('div');
+        entry.textContent = '> ' + msg;
+        if (msg.includes('SATELLITE')) entry.style.color = '#ffaa00';
+        else if (msg.includes('NUCLEAR')) entry.style.color = '#f24';
+        aiPanel.appendChild(entry);
+        while (aiPanel.children.length > 20) aiPanel.removeChild(aiPanel.firstChild);
+        aiPanel.scrollTop = aiPanel.scrollHeight;
+      }
+    } else {
+      const humanPanel = document.getElementById('d0-reasoning');
+      if (humanPanel) {
+        const entry = document.createElement('div');
+        entry.textContent = '> ' + msg;
+        // Color code by action type
+        if (msg.includes('CONQUERED') || msg.includes('seizes') || msg.includes('nuclear')) entry.style.color = '#0f8';
+        else if (msg.includes('casualties') || msg.includes('NUCLEAR')) entry.style.color = '#fa0';
+        else if (msg.includes('☢') || msg.includes('NUKE')) entry.style.color = '#f24';
+        humanPanel.appendChild(entry);
+        // Keep only last 20 entries
+        while (humanPanel.children.length > 20) humanPanel.removeChild(humanPanel.firstChild);
+        humanPanel.scrollTop = humanPanel.scrollHeight;
+      }
+    }
   }
 }
 
