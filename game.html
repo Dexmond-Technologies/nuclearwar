@@ -141,7 +141,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 .die.def{background:#001a30;border:2px solid #0af;color:#0af;}
 
 /* Chat */
-#chat-box{position:absolute;bottom:120px;left:calc(20px + 25vw + 80px);width:260px;background:rgba(0,5,15,.95);
+#chat-box{position:absolute;bottom:80px;left:calc(20px + 25vw + 80px);width:260px;background:rgba(0,5,15,.95);
   border:1px solid #0af;border-radius:8px;display:none;pointer-events:auto;z-index:200;
   box-shadow:0 0 15px rgba(0,170,255,0.4);}
 #chat-box.open{display:flex;flex-direction:column;}
@@ -190,7 +190,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   font-family: 'Share Tech Mono', monospace;
   font-size: 14px;
   font-weight: bold;
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -198,7 +198,6 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   pointer-events: auto;
   box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
   transition: all 0.2s;
-  display: none;
 }
 #btn-cmd-toggle:hover {
   background: rgba(0, 255, 136, 0.3);
@@ -266,12 +265,54 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 .atk-title{font-size:28px;font-family:'Orbitron',sans-serif;font-weight:900;letter-spacing:6px;color:#0af;margin-bottom:8px;text-transform:uppercase;text-shadow:0 0 20px rgba(0,170,255,0.8);}
 .atk-desc{font-size:12px;font-family:'Share Tech Mono',monospace;color:#0f8;opacity:0.9;margin-bottom:20px;line-height:1.5;letter-spacing:1px;text-transform:uppercase;}
 .atk-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:15px;flex:1;min-height:0;overflow-y:auto;padding-right:10px;}
-.atk-preset{background:linear-gradient(180deg,rgba(0,20,40,.8),rgba(0,10,20,.9));border:1px solid rgba(0,170,255,0.4);border-radius:8px;
-  padding:15px 20px;cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;gap:10px;text-align:left;position:relative;}
-.atk-preset::before{content:'';position:absolute;top:0;left:0;width:100%;height:4px;background:#0af;opacity:0.5;transition:opacity 0.2s;}
-.atk-preset:hover{background:linear-gradient(180deg,rgba(0,40,80,.9),rgba(0,20,40,.95));transform:translateY(-3px);border-color:#0af;box-shadow:0 8px 20px rgba(0,170,255,0.2);}
-.atk-preset:hover::before{opacity:1;box-shadow:0 0 15px #0af;}
-.atk-preset h3{color:#0af;font-size:18px;margin:0;letter-spacing:1px;font-family:'Orbitron',sans-serif;text-shadow:0 0 5px rgba(0,170,255,0.5);}
+
+.atk-preset {
+  background:linear-gradient(180deg,rgba(0,15,30,.9),rgba(0,5,15,.95));
+  border:1px solid rgba(0,170,255,0.4);
+  border-radius:8px;
+  cursor:pointer;
+  transition:all 0.2s;
+  display:flex;
+  flex-direction:column;
+  text-align:left;
+  position:relative;
+  overflow:hidden;
+}
+.atk-preset::before {
+  content:'';position:absolute;top:0;left:0;width:100%;height:100%;
+  box-shadow: inset 0 0 30px rgba(0,170,255,0.05);
+  pointer-events:none; transition:box-shadow 0.2s; z-index:2;
+}
+.atk-preset:hover {
+  transform:translateY(-4px);
+  border-color:#0af;
+  box-shadow:0 12px 30px rgba(0,170,255,0.3);
+}
+.atk-preset:hover::before {
+  box-shadow: inset 0 0 50px rgba(0,170,255,0.3);
+}
+.atk-img-banner {
+  width:100%;
+  height:130px;
+  background-size:cover;
+  background-position:center;
+  position:relative;
+  border-bottom:2px solid rgba(0,170,255,0.7);
+}
+.atk-img-overlay {
+  position:absolute;inset:0;
+  background:linear-gradient(to top, rgba(0,10,20,1) 0%, rgba(0,170,255,0.3) 100%);
+}
+.atk-content {
+  padding:15px;
+  display:flex;flex-direction:column;gap:8px;flex:1;
+  position:relative; z-index:3;
+}
+.atk-preset h3 {
+  color:#fff;font-size:20px;margin:0;letter-spacing:1px;
+  font-family:'Orbitron',sans-serif;text-shadow:0 0 10px #0af, 0 0 20px #0af;
+  position:absolute; bottom:10px; left:15px; z-index:4;
+}
 .atk-badge{display:inline-block;padding:3px 6px;background:rgba(0,170,255,0.15);border:1px solid #0af;color:#fff;font-size:9px;letter-spacing:1px;border-radius:3px;margin-bottom:6px;}
 .atk-summary{font-size:12px;color:#fff;opacity:0.9;line-height:1.4;margin-bottom:10px;font-style:italic;}
 .atk-stat-row{font-size:10px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(0,170,255,0.15);padding:6px 0;}
@@ -279,11 +320,16 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 .atk-stat-val{color:#ddd;text-align:right;}
 .atk-details{margin-top:10px;font-size:10px;color:#aaa;line-height:1.5;background:rgba(0,0,0,0.4);padding:10px;border-radius:4px;border-left:2px solid #0af;}
 .atk-override{border-color:#fa0;}
-.atk-override::before{background:#fa0;}
-.atk-override h3{color:#fa0;text-shadow:0 0 10px rgba(255,170,0,0.5);}
+.atk-override::before{box-shadow: inset 0 0 30px rgba(255,170,0,0.05);}
+.atk-override:hover{border-color:#fa0;box-shadow:0 12px 30px rgba(255,170,0,0.3);}
+.atk-override:hover::before { box-shadow: inset 0 0 50px rgba(255,170,0,0.3); }
+.atk-override h3{color:#fff;text-shadow:0 0 10px #fa0, 0 0 20px #fa0;}
+.atk-override .atk-img-banner { border-bottom-color: rgba(255,170,0,0.7); }
+.atk-override .atk-img-overlay { background:linear-gradient(to top, rgba(0,10,20,1) 0%, rgba(255,170,0,0.3) 100%); }
 .atk-override .atk-stat-row span{color:#fa0;}
 .atk-override .atk-badge{background:rgba(255,170,0,0.15);border-color:#fa0;}
 .atk-override .atk-details{border-left-color:#fa0;}
+
 .atk-cancel{margin-top:15px;padding:12px;text-align:center;background:rgba(255,50,50,0.1);border:1px solid rgba(255,50,50,0.3);color:#f24;font-size:13px;letter-spacing:3px;cursor:pointer;transition:all 0.2s;border-radius:4px;font-family:'Share Tech Mono',monospace;text-transform:uppercase;}
 .atk-cancel:hover{background:rgba(255,50,50,0.3);border-color:#f24;color:#fff;box-shadow:0 0 15px rgba(255,50,50,0.4);}
 
@@ -1017,7 +1063,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   <button id="btn-toggle-skin" onclick="toggleRedSkin()">🔴 RED SKIN</button>
   <button id="btn-toggle-radio" onclick="toggleRadio()">📻 ON</button>
   <button id="btn-toggle-radio-lock" onclick="toggleRadioLock()" style="display:none;">🔒 LOCK RADIO</button>
-  <div id="infinite-world-radio-label" style="position:absolute; bottom:34px; left:calc(20px + 25vw + 16px); color:white; font-family:'Share Tech Mono', monospace; font-size:9px; letter-spacing:1px; z-index:20; opacity:0.8; pointer-events:none; display:none;">INFINITE WORLD RADIO</div>
+  <div id="infinite-world-radio-label" style="position:absolute; bottom:28px; left:calc(20px + 25vw - 34px); transform:translateX(-50%); width:max-content; color:white; font-family:'Share Tech Mono', monospace; font-size:9px; letter-spacing:1px; z-index:20; opacity:0.8; pointer-events:none; display:none;">INFINITE WORLD RADIO</div>
   <button id="btn-toggle-radio-next" onclick="playNextRadio()" style="display:none;">NEXT ➔</button>
 
   <div class="faction-dash" id="dash-1">
@@ -1107,7 +1153,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 
 #btn-toggle-radio {
   position: absolute;
-  bottom: 8px;
+  bottom: 3px;
   left: calc(20px + 25vw - 128px);
   padding: 4px 8px;
   border: 1px solid rgba(0,255,136,0.5);
@@ -1138,7 +1184,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 
 #btn-toggle-radio-lock {
   position: absolute;
-  bottom: 8px;
+  bottom: 3px;
   left: calc(20px + 25vw - 78px);
   padding: 4px 8px;
   border: 1px solid rgba(255,170,0,0.5);
@@ -1169,7 +1215,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 
 #btn-toggle-radio-next {
   position: absolute;
-  bottom: 8px;
+  bottom: 3px;
   left: calc(20px + 25vw + 10px);
   padding: 4px 8px;
   border: 1px solid rgba(255,170,0,0.5);
@@ -1197,9 +1243,9 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 #ops-sidebar {
   position: fixed;
   top: 72px;
-  left: 20px;
+  left: calc(20px + 25vw + 12px);
   display: flex !important;
-  opacity: 0;
+  opacity: 1;
   flex-direction: column;
   gap: 8px;
   background: rgba(0, 8, 22, 0.88);
@@ -1207,15 +1253,9 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   border-radius: 28px;
   padding: 10px 7px;
   z-index: 50;
-  pointer-events: none;
+  pointer-events: auto;
   box-shadow: 0 0 20px rgba(0, 170, 255, 0.12), 0 4px 30px rgba(0,0,0,0.5);
   backdrop-filter: blur(8px);
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-#ops-sidebar.hover-open {
-  left: calc(20px + 25vw + 12px);
-  opacity: 1;
-  pointer-events: auto;
 }
 
 .ops-btn {
@@ -1374,11 +1414,13 @@ Type 'help' for available commands.
     <div class="atk-grid">
       <!-- 1 -->
       <div class="atk-preset" onclick="executeAttackPreset(1)">
-        <div>
-          <h3>BLITZKRIEG</h3>
-          <div class="atk-badge">OFFENSIVE MANEUVER</div>
+        <div class="atk-img-banner" style="background-image: url('https://images.unsplash.com/photo-1590497746401-496a77cbab2f?auto=format&fit=crop&q=80&w=400');">
+          <div class="atk-img-overlay"></div>
+          <h3><i class="fa-solid fa-jet-fighter"></i> BLITZKRIEG</h3>
         </div>
-        <div class="atk-summary">Overwhelming multi-front push to fracture enemy defensive lines and seize key logistics hubs.</div>
+        <div class="atk-content">
+          <div><div class="atk-badge">OFFENSIVE MANEUVER</div></div>
+          <div class="atk-summary">Overwhelming multi-front push to fracture enemy defensive lines and seize key logistics hubs.</div>
         <div style="flex:1;">
           <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">5 Weakest Raincloud Sectors</div></div>
           <div class="atk-stat-row"><span>ORIGIN</span><div class="atk-stat-val">Strongest Human Fronts</div></div>
@@ -1388,16 +1430,19 @@ Type 'help' for available commands.
           <div class="atk-details">
             Initiates 5 simultaneous strikes originating from highly fortified human populations directly into under-defended Raincloud adjoining territories. Focuses on rapid ground acquisition and immediate sector dominance before AI reinforces.
           </div>
+          </div>
         </div>
       </div>
 
       <!-- 2 -->
       <div class="atk-preset" onclick="executeAttackPreset(2)">
-        <div>
-          <h3>TACTICAL DEFENSE</h3>
-          <div class="atk-badge">PREEMPTIVE COUNTER</div>
+        <div class="atk-img-banner" style="background-image: url('https://images.unsplash.com/photo-1599839619722-39751421ea63?auto=format&fit=crop&q=80&w=400');">
+          <div class="atk-img-overlay"></div>
+          <h3><i class="fa-solid fa-shield-halved"></i> TACTICAL DEFENSE</h3>
         </div>
-        <div class="atk-summary">Calculated surgical strikes neutralizing imminent Raincloud incursions before they materialize.</div>
+        <div class="atk-content">
+          <div><div class="atk-badge">PREEMPTIVE COUNTER</div></div>
+          <div class="atk-summary">Calculated surgical strikes neutralizing imminent Raincloud incursions before they materialize.</div>
         <div style="flex:1;">
           <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">3 High-Threat Raincloud Hubs</div></div>
           <div class="atk-stat-row"><span>ORIGIN</span><div class="atk-stat-val">Threatened Human Borders</div></div>
@@ -1407,16 +1452,19 @@ Type 'help' for available commands.
           <div class="atk-details">
             Analyzes borders where humanity is out-numbered or at parity, launching 3 preemptive strikes into Raincloud staging grounds. Significantly reduces frontline pressure by breaking enemy buildup and maintaining vital defensive integrity.
           </div>
+          </div>
         </div>
       </div>
 
       <!-- 3 -->
       <div class="atk-preset" onclick="executeAttackPreset(3)">
-        <div>
-          <h3>GUERRILLA RAID</h3>
-          <div class="atk-badge">ASYMMETRIC WARFARE</div>
+        <div class="atk-img-banner" style="background-image: url('https://images.unsplash.com/photo-1563223771-41f236ba85c1?auto=format&fit=crop&q=80&w=400');">
+          <div class="atk-img-overlay"></div>
+          <h3><i class="fa-solid fa-fire"></i> GUERRILLA RAID</h3>
         </div>
-        <div class="atk-summary">Widespread chaos. Random, opportunistic strikes generating systemic strain on the AI grid.</div>
+        <div class="atk-content">
+          <div><div class="atk-badge">ASYMMETRIC WARFARE</div></div>
+          <div class="atk-summary">Widespread chaos. Random, opportunistic strikes generating systemic strain on the AI grid.</div>
         <div style="flex:1;">
           <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">4 Random Global Nodes</div></div>
           <div class="atk-stat-row"><span>ORIGIN</span><div class="atk-stat-val">Scattered Insurgencies</div></div>
@@ -1426,185 +1474,224 @@ Type 'help' for available commands.
           <div class="atk-details">
             Distributes operational capacity across 4 entirely randomized and widely separated vectors. Designed to confuse Raincloud threat assessment algorithms, stretching their logic processors by introducing unpredictable, chaotic variables.
           </div>
+          </div>
         </div>
       </div>
 
       <!-- NEW PERKS BELOW -->
       <div class="atk-preset" onclick="executeAttackPreset(5)">
-        <div>
-          <h3>DEPLOY SUBMARINE</h3>
-          <div class="atk-badge">NAVAL STRIKE</div>
+        <div class="atk-img-banner" style="background-image: url('https://images.unsplash.com/photo-1582218084661-0428d0ee474e?auto=format&fit=crop&q=80&w=400');">
+          <div class="atk-img-overlay"></div>
+          <h3><i class="fa-solid fa-anchor"></i> DEPLOY SUBMARINE</h3>
         </div>
-        <div class="atk-summary">Launch a covert submarine strike against any coastal or accessible Raincloud territory.</div>
+        <div class="atk-content">
+          <div><div class="atk-badge">NAVAL STRIKE</div></div>
+          <div class="atk-summary">Launch a covert submarine strike against any coastal or accessible Raincloud territory.</div>
         <div style="flex:1;">
           <div class="atk-stat-row"><span>COST</span><div class="atk-stat-val">$100B</div></div>
           <div class="atk-stat-row"><span>DAMAGE</span><div class="atk-stat-val">3 - 5 Troops</div></div>
           <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">Select 1 Region</div></div>
           <div class="atk-details">Deploys submarine assets to deal immediate damage to a selected territory.</div>
+          </div>
         </div>
       </div>
 
       <div class="atk-preset" onclick="executeAttackPreset(6)">
-        <div>
-          <h3>DEPLOY PARATROOPERS</h3>
-          <div class="atk-badge">AIRBORNE ASSAULT</div>
+        <div class="atk-img-banner" style="background-image: url('https://images.unsplash.com/photo-1601362840469-51e4d8d58785?auto=format&fit=crop&q=80&w=400');">
+          <div class="atk-img-overlay"></div>
+          <h3><i class="fa-solid fa-parachute-box"></i> DEPLOY PARATROOPERS</h3>
         </div>
-        <div class="atk-summary">Airlift troops directly into an enemy region.</div>
+        <div class="atk-content">
+          <div><div class="atk-badge">AIRBORNE ASSAULT</div></div>
+          <div class="atk-summary">Airlift troops directly into an enemy region.</div>
         <div style="flex:1;">
           <div class="atk-stat-row"><span>COST</span><div class="atk-stat-val">$150B</div></div>
           <div class="atk-stat-row"><span>EFFECT</span><div class="atk-stat-val">Drop 3 Troops & Attack</div></div>
           <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">Select 1 Region</div></div>
           <div class="atk-details">Drops 3 human troops into a selected enemy territory, engaging defenders immediately upon landing.</div>
+          </div>
         </div>
       </div>
 
       <div class="atk-preset" onclick="executeAttackPreset(7)">
-        <div>
-          <h3>SHOCK & AWE</h3>
-          <div class="atk-badge">MORALE DEBUFF</div>
+        <div class="atk-img-banner" style="background-image: url('https://images.unsplash.com/photo-1502014822147-1aedfb0676e0?auto=format&fit=crop&q=80&w=400');">
+          <div class="atk-img-overlay"></div>
+          <h3><i class="fa-solid fa-bolt"></i> SHOCK & AWE</h3>
         </div>
-        <div class="atk-summary">Overwhelming visual and kinetic display that shatters enemy defensive coordination.</div>
+        <div class="atk-content">
+          <div><div class="atk-badge">MORALE DEBUFF</div></div>
+          <div class="atk-summary">Overwhelming visual and kinetic display that shatters enemy defensive coordination.</div>
         <div style="flex:1;">
           <div class="atk-stat-row"><span>COST</span><div class="atk-stat-val">$200B</div></div>
           <div class="atk-stat-row"><span>EFFECT</span><div class="atk-stat-val">Defenders roll 1 die</div></div>
           <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">Select 1 Region</div></div>
           <div class="atk-details">The selected territory is 'shocked' for this turn, heavily limiting its defensive rolling capabilities.</div>
+          </div>
         </div>
       </div>
 
       <div class="atk-preset" onclick="executeAttackPreset(8)">
-        <div>
-          <h3>INSURGENCY</h3>
-          <div class="atk-badge">INTERNAL REBELLION</div>
+        <div class="atk-img-banner" style="background-image: url('https://images.unsplash.com/photo-1529148482759-b35b25c5f217?auto=format&fit=crop&q=80&w=400');">
+          <div class="atk-img-overlay"></div>
+          <h3><i class="fa-solid fa-users"></i> INSURGENCY</h3>
         </div>
-        <div class="atk-summary">Activate sleeper cells to turn enemy forces against their masters.</div>
+        <div class="atk-content">
+          <div><div class="atk-badge">INTERNAL REBELLION</div></div>
+          <div class="atk-summary">Activate sleeper cells to turn enemy forces against their masters.</div>
         <div style="flex:1;">
           <div class="atk-stat-row"><span>COST</span><div class="atk-stat-val">$250B</div></div>
           <div class="atk-stat-row"><span>EFFECT</span><div class="atk-stat-val">Convert 30% Troops</div></div>
           <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">Select 1 Region</div></div>
           <div class="atk-details">Triggers an internal rebellion, instantly converting 30% of the stationed Raincloud forces into Human controlled troops.</div>
+          </div>
         </div>
       </div>
 
       <div class="atk-preset" onclick="executeAttackPreset(9)">
-        <div>
-          <h3>STRATEGIC BOMBING</h3>
-          <div class="atk-badge">INFRASTRUCTURE DAMAGE</div>
+        <div class="atk-img-banner" style="background-image: url('https://images.unsplash.com/photo-1504221507732-5246c045949b?auto=format&fit=crop&q=80&w=400');">
+          <div class="atk-img-overlay"></div>
+          <h3><i class="fa-solid fa-bomb"></i> STRATEGIC BOMBING</h3>
         </div>
-        <div class="atk-summary">Carpet bombing runs targeting both military units and industrial capacities.</div>
+        <div class="atk-content">
+          <div><div class="atk-badge">INFRASTRUCTURE DAMAGE</div></div>
+          <div class="atk-summary">Carpet bombing runs targeting both military units and industrial capacities.</div>
         <div style="flex:1;">
           <div class="atk-stat-row"><span>COST</span><div class="atk-stat-val">$300B</div></div>
           <div class="atk-stat-row"><span>DAMAGE</span><div class="atk-stat-val">3 - 5 Troops</div></div>
           <div class="atk-stat-row"><span>EFFECT</span><div class="atk-stat-val">Drain Raincloud Budget</div></div>
           <div class="atk-details">Strikes the selected territory and severely damages Raincloud's economic output in the region.</div>
+          </div>
         </div>
       </div>
 
       <div class="atk-preset" onclick="executeAttackPreset(10)">
-        <div>
-          <h3>CLOSE AIR SUPPORT</h3>
-          <div class="atk-badge">TACTICAL ADVANTAGE</div>
+        <div class="atk-img-banner" style="background-image: url('https://images.unsplash.com/photo-1557008129-eb39fa90b957?auto=format&fit=crop&q=80&w=400');">
+          <div class="atk-img-overlay"></div>
+          <h3><i class="fa-solid fa-plane-up"></i> CLOSE AIR SUPPORT</h3>
         </div>
-        <div class="atk-summary">Provide dedicated aerial overwatch for ground offensives in a key sector.</div>
+        <div class="atk-content">
+          <div><div class="atk-badge">TACTICAL ADVANTAGE</div></div>
+          <div class="atk-summary">Provide dedicated aerial overwatch for ground offensives in a key sector.</div>
         <div style="flex:1;">
           <div class="atk-stat-row"><span>COST</span><div class="atk-stat-val">$150B</div></div>
           <div class="atk-stat-row"><span>EFFECT</span><div class="atk-stat-val">+1 Attack Die</div></div>
           <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">Select 1 Region</div></div>
           <div class="atk-details">Any human attack into this territory this turn will gain an additional attack die.</div>
+          </div>
         </div>
       </div>
 
       <div class="atk-preset" onclick="executeAttackPreset(11)">
-        <div>
-          <h3>DRONE STRIKE</h3>
-          <div class="atk-badge">PRECISION ELIMINATION</div>
+        <div class="atk-img-banner" style="background-image: url('https://images.unsplash.com/photo-1527977966376-1c8408f9f109?auto=format&fit=crop&q=80&w=400');">
+          <div class="atk-img-overlay"></div>
+          <h3><i class="fa-solid fa-crosshairs"></i> DRONE STRIKE</h3>
         </div>
-        <div class="atk-summary">Deploy a high-altitude asset to quietly remove a single high-value target.</div>
+        <div class="atk-content">
+          <div><div class="atk-badge">PRECISION ELIMINATION</div></div>
+          <div class="atk-summary">Deploy a high-altitude asset to quietly remove a single high-value target.</div>
         <div style="flex:1;">
           <div class="atk-stat-row"><span>COST</span><div class="atk-stat-val">$50B</div></div>
           <div class="atk-stat-row"><span>DAMAGE</span><div class="atk-stat-val">Exactly 1 Troop</div></div>
           <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">Select 1 Region</div></div>
           <div class="atk-details">Surgical elimination of exactly 1 troop unit in the target territory. Cannot capture territories.</div>
+          </div>
         </div>
       </div>
 
       <div class="atk-preset" onclick="executeAttackPreset(12)">
-        <div>
-          <h3>FALSE FLAG OP</h3>
-          <div class="atk-badge">MISINFORMATION</div>
+        <div class="atk-img-banner" style="background-image: url('https://images.unsplash.com/photo-1633265486064-086b219458ce?auto=format&fit=crop&q=80&w=400');">
+          <div class="atk-img-overlay"></div>
+          <h3><i class="fa-solid fa-mask"></i> FALSE FLAG OP</h3>
         </div>
-        <div class="atk-summary">Redirect blame for recent hostilities to confuse the Raincloud logic board.</div>
+        <div class="atk-content">
+          <div><div class="atk-badge">MISINFORMATION</div></div>
+          <div class="atk-summary">Redirect blame for recent hostilities to confuse the Raincloud logic board.</div>
         <div style="flex:1;">
           <div class="atk-stat-row"><span>COST</span><div class="atk-stat-val">$200B</div></div>
           <div class="atk-stat-row"><span>EFFECT</span><div class="atk-stat-val">Threat Tier -1</div></div>
           <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">Immediate Global</div></div>
           <div class="atk-details">Decreases Raincloud's Threat Tier and Aggression variables globally.</div>
+          </div>
         </div>
       </div>
 
       <div class="atk-preset" onclick="executeAttackPreset(13)">
-        <div>
-          <h3>CYBERATTACK INFRA</h3>
-          <div class="atk-badge">SYSTEM OVERLOAD</div>
+        <div class="atk-img-banner" style="background-image: url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&q=80&w=400');">
+          <div class="atk-img-overlay"></div>
+          <h3><i class="fa-solid fa-network-wired"></i> CYBERATTACK INFRA</h3>
         </div>
-        <div class="atk-summary">Unleash dormant viruses into Raincloud's primary energy grid.</div>
+        <div class="atk-content">
+          <div><div class="atk-badge">SYSTEM OVERLOAD</div></div>
+          <div class="atk-summary">Unleash dormant viruses into Raincloud's primary energy grid.</div>
         <div style="flex:1;">
           <div class="atk-stat-row"><span>COST</span><div class="atk-stat-val">$350B</div></div>
           <div class="atk-stat-row"><span>EFFECT</span><div class="atk-stat-val">Raincloud Energy = 0</div></div>
           <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">Immediate Global</div></div>
           <div class="atk-details">Drains Raincloud's Energy core to 0, preventing any catashrophic AI abilities for the turn.</div>
+          </div>
         </div>
       </div>
 
       <div class="atk-preset" onclick="executeAttackPreset(14)">
-        <div>
-          <h3>COMMUNICATION JAM</h3>
-          <div class="atk-badge">ELECTRONIC WARFARE</div>
+        <div class="atk-img-banner" style="background-image: url('https://images.unsplash.com/photo-1620063251786-fb155ddfb83b?auto=format&fit=crop&q=80&w=400');">
+          <div class="atk-img-overlay"></div>
+          <h3><i class="fa-solid fa-tower-broadcast"></i> COMMUNICATION JAM</h3>
         </div>
-        <div class="atk-summary">Flood the AI network with white noise, reducing coordination.</div>
+        <div class="atk-content">
+          <div><div class="atk-badge">ELECTRONIC WARFARE</div></div>
+          <div class="atk-summary">Flood the AI network with white noise, reducing coordination.</div>
         <div style="flex:1;">
           <div class="atk-stat-row"><span>COST</span><div class="atk-stat-val">$150B</div></div>
           <div class="atk-stat-row"><span>EFFECT</span><div class="atk-stat-val">50% AI Attacks</div></div>
           <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">Immediate Global</div></div>
           <div class="atk-details">Reduces the total number of attacks Raincloud can execute on its next turn by 50%.</div>
+          </div>
         </div>
       </div>
 
       <div class="atk-preset" onclick="executeAttackPreset(15)">
-        <div>
-          <h3>SATELLITE HACK</h3>
-          <div class="atk-badge">NETWORK INTRUSION</div>
+        <div class="atk-img-banner" style="background-image: url('https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&q=80&w=400');">
+          <div class="atk-img-overlay"></div>
+          <h3><i class="fa-solid fa-satellite"></i> SATELLITE HACK</h3>
         </div>
-        <div class="atk-summary">Blind the orbital reconnaissance grid of Raincloud.</div>
+        <div class="atk-content">
+          <div><div class="atk-badge">NETWORK INTRUSION</div></div>
+          <div class="atk-summary">Blind the orbital reconnaissance grid of Raincloud.</div>
         <div style="flex:1;">
           <div class="atk-stat-row"><span>COST</span><div class="atk-stat-val">$120B</div></div>
           <div class="atk-stat-row"><span>EFFECT</span><div class="atk-stat-val">Intelligence -1</div></div>
           <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">Immediate Global</div></div>
           <div class="atk-details">Permanently removes 1 level of Intelligence from Raincloud's logic engine.</div>
+          </div>
         </div>
       </div>
 
       <div class="atk-preset" onclick="executeAttackPreset(16)">
-        <div>
-          <h3>SIEGE OPERATION</h3>
-          <div class="atk-badge">WAR OF ATTRITION</div>
+        <div class="atk-img-banner" style="background-image: url('https://images.unsplash.com/photo-1496337589254-4811802dcbe0?auto=format&fit=crop&q=80&w=400');">
+          <div class="atk-img-overlay"></div>
+          <h3><i class="fa-solid fa-tent"></i> SIEGE OPERATION</h3>
         </div>
-        <div class="atk-summary">Encircle a territory, cutting off supply lines for gradual attrition.</div>
+        <div class="atk-content">
+          <div><div class="atk-badge">WAR OF ATTRITION</div></div>
+          <div class="atk-summary">Encircle a territory, cutting off supply lines for gradual attrition.</div>
         <div style="flex:1;">
           <div class="atk-stat-row"><span>COST</span><div class="atk-stat-val">$250B</div></div>
           <div class="atk-stat-row"><span>EFFECT</span><div class="atk-stat-val">-1 Troop / Turn</div></div>
           <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">Select 1 Region</div></div>
           <div class="atk-details">The selected territory loses 1 troop at the start of each of your next 3 turns.</div>
+          </div>
         </div>
       </div>
 
       <!-- 4 -->
       <div class="atk-preset atk-override" onclick="executeAttackPreset(4)">
-        <div>
-          <h3>MANUAL OVERRIDE</h3>
-          <div class="atk-badge">DIRECT COMMAND</div>
+        <div class="atk-img-banner" style="background-image: url('https://images.unsplash.com/photo-1614064641938-3bbee52942c7?auto=format&fit=crop&q=80&w=400');">
+          <div class="atk-img-overlay"></div>
+          <h3><i class="fa-solid fa-terminal"></i> MANUAL OVERRIDE</h3>
         </div>
-        <div class="atk-summary">Bypass autonomous command routing and manually direct specific, localized strikes.</div>
+        <div class="atk-content">
+          <div><div class="atk-badge">DIRECT COMMAND</div></div>
+          <div class="atk-summary">Bypass autonomous command routing and manually direct specific, localized strikes.</div>
         <div style="flex:1;">
           <div class="atk-stat-row"><span>TARGETS</span><div class="atk-stat-val">Commander's Choice</div></div>
           <div class="atk-stat-row"><span>ORIGIN</span><div class="atk-stat-val">Commander's Choice</div></div>
@@ -1613,6 +1700,7 @@ Type 'help' for available commands.
           <div class="atk-stat-row"><span>RANGE THRESHOLD</span><div class="atk-stat-val">Any Accessible</div></div>
           <div class="atk-details">
             Disengages the macro-AI assistance entirely. Returns control to standard HUD interface for granular, piece-by-piece tactical maneuvering. Recommended only for veteran commanders or in highly specific endgame scenarios requiring extreme precision.
+          </div>
           </div>
         </div>
       </div>
@@ -8140,7 +8228,7 @@ document.getElementById('btn-toggle-intel').addEventListener('click', () => {
   }
 });
 
-// Skin Manager: 0 = LIVE (White), 1 = RED, 2 = GREEN, 3 = YELLOW
+// Skin Manager: 0 = LIVE (White), 1 = RED, 2 = GREEN, 3 = YELLOW, 4 = CYBER, 5 = BLK
 window.currentSkinIndex = 0;
 window.isRedSkin = false; // Legacy flag preserved for scripts that might check it directly
 
@@ -8149,7 +8237,8 @@ const SKINS = [
   { name: 'RED',   color: 0xff2222, btnText: '🟢 GREEN SKIN',  btnClass: 'active-normal', showOverlays: true,  cleanGlobe: false, showResources: false, showArms: false, showBoats: true, isPremium: false },
   { name: 'GREEN', color: 0x22ff22, btnText: '🟡 YLW SKIN',   btnClass: 'active-normal', showOverlays: false, cleanGlobe: true,  showResources: true,  showArms: false, showBoats: false, isPremium: false },
   { name: 'YELLOW',color: 0xffff22, btnText: '💠 CYBER SKIN',  btnClass: 'active-normal', showOverlays: false, cleanGlobe: true,  showResources: false, showArms: true,  showBoats: false, isPremium: false },
-  { name: 'CYBER', color: 0x00f0ff, btnText: '🌍 LIVE SKIN',   btnClass: 'active-premium',showOverlays: true,  cleanGlobe: false, showResources: true,  showArms: true,  showBoats: true,  isPremium: false }
+  { name: 'CYBER', color: 0x00f0ff, btnText: '⬛ BLK SKIN',    btnClass: 'active-premium',showOverlays: true,  cleanGlobe: false, showResources: true,  showArms: true,  showBoats: true,  isPremium: false },
+  { name: 'BLK',   color: 0x050505, btnText: '🌍 LIVE SKIN',   btnClass: 'active-normal', showOverlays: false, cleanGlobe: false, showResources: false, showArms: false, showBoats: false, isPremium: false }
 ];
 window.SKINS = SKINS;
 
@@ -8582,17 +8671,7 @@ window.buyOrbitalStrike = function() {
 };
 
 // ========================================================
-// Add hover listeners for ops-sidebar
-const dash0 = document.getElementById('dash-0');
-const opsSidebar = document.getElementById('ops-sidebar');
-if (dash0 && opsSidebar) {
-  const showOps = () => opsSidebar.classList.add('hover-open');
-  const hideOps = () => opsSidebar.classList.remove('hover-open');
-  dash0.addEventListener('mouseenter', showOps);
-  dash0.addEventListener('mouseleave', hideOps);
-  opsSidebar.addEventListener('mouseenter', showOps);
-  opsSidebar.addEventListener('mouseleave', hideOps);
-}
+// Removed hover listeners for ops-sidebar (now permanently displayed)
 
 </script>
 <script src="/dist/improve_earth.js"></script>

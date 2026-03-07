@@ -1978,17 +1978,7 @@ document.getElementById('btn-toggle-intel').addEventListener('click', () => {
   }
 });
 
-// Add hover listeners for ops-sidebar
-const dash0 = document.getElementById('dash-0');
-const opsSidebar = document.getElementById('ops-sidebar');
-if (dash0 && opsSidebar) {
-  const showOps = () => opsSidebar.classList.add('hover-open');
-  const hideOps = () => opsSidebar.classList.remove('hover-open');
-  dash0.addEventListener('mouseenter', showOps);
-  dash0.addEventListener('mouseleave', hideOps);
-  opsSidebar.addEventListener('mouseenter', showOps);
-  opsSidebar.addEventListener('mouseleave', hideOps);
-}
+// Removed hover listeners for ops-sidebar (now permanently displayed)
 
 // ============================================================================
 // WORLD RADIO INTEGRATION
