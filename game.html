@@ -180,7 +180,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 #btn-cmd-toggle {
   position: absolute;
   left: calc(20px + 25vw + 16px);
-  bottom: 111px; /* Just above chat button */
+  bottom: 115px; /* Just above chat button with 14px gap */
   width: 50px;
   height: 50px;
   border-radius: 50%;
@@ -1017,6 +1017,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   <button id="btn-toggle-skin" onclick="toggleRedSkin()">🔴 RED SKIN</button>
   <button id="btn-toggle-radio" onclick="toggleRadio()">📻 ON</button>
   <button id="btn-toggle-radio-lock" onclick="toggleRadioLock()" style="display:none;">🔒 LOCK RADIO</button>
+  <div id="infinite-world-radio-label" style="position:absolute; bottom:34px; left:calc(20px + 25vw + 16px); color:white; font-family:'Share Tech Mono', monospace; font-size:9px; letter-spacing:1px; z-index:20; opacity:0.8; pointer-events:none; display:none;">INFINITE WORLD RADIO</div>
   <button id="btn-toggle-radio-next" onclick="playNextRadio()" style="display:none;">NEXT ➔</button>
 
   <div class="faction-dash" id="dash-1">
@@ -6014,6 +6015,7 @@ function closeOnboarding() {
       radioStarted = true;
       fetchRadios();
       document.getElementById('btn-toggle-radio-lock').style.display = 'block';
+      document.getElementById('infinite-world-radio-label').style.display = 'block';
       document.getElementById('btn-toggle-radio-next').style.display = 'block';
   }
 }
@@ -8326,6 +8328,7 @@ window.toggleRadio = function() {
   const btn = document.getElementById('btn-toggle-radio');
   const lockBtn = document.getElementById('btn-toggle-radio-lock');
   const nextBtn = document.getElementById('btn-toggle-radio-next'); // Added
+  const labelBtn = document.getElementById('infinite-world-radio-label');
   window.isRadioOn = !window.isRadioOn;
   
   if (!window.isRadioOn) {
@@ -8335,11 +8338,13 @@ window.toggleRadio = function() {
     btn.classList.add('radio-off');
     lockBtn.style.display = 'none';
     nextBtn.style.display = 'none'; // Added
+    if (labelBtn) labelBtn.style.display = 'none';
   } else {
     btn.innerHTML = '📻 ON';
     btn.classList.remove('radio-off');
     lockBtn.style.display = 'block';
     nextBtn.style.display = 'block'; // Added
+    if (labelBtn) labelBtn.style.display = 'block';
     if (!radioStarted) {
       radioStarted = true;
       fetchRadios();
