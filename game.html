@@ -2195,51 +2195,25 @@ function initGlobalTradeNetwork() {
     let color = 0xffffff;
     let speed = 0;
     let meshGroup = new THREE.Group();
-    
     if (type === 'plane') {
       elevation = dist * 0.2 + 0.1; // Arch high
-      color = 0x00ffff;
       speed = 0.0004 + Math.random() * 0.0003;
-      
-      const planeGeo = new THREE.ConeGeometry(0.012, 0.035, 3);
-      planeGeo.rotateX(Math.PI/2);
-      const planeMat = new THREE.MeshBasicMaterial({color: 0x00ffff, depthTest: true});
-      const planeMesh = new THREE.Mesh(planeGeo, planeMat);
-      meshGroup.add(planeMesh);
-      
     } else if (type === 'ship') {
       elevation = 0.01; // Surface skim
-      color = 0xffaa00;
       speed = 0.0001 + Math.random() * 0.00008;
-      
-      // Ship Hull
-      const shipGeo = new THREE.BoxGeometry(0.018, 0.01, 0.04);
-      const shipMat = new THREE.MeshBasicMaterial({color: 0xaa6600, depthTest: true});
-      const shipMesh = new THREE.Mesh(shipGeo, shipMat);
-      
-      // Cargo blocks
-      const cgeo = new THREE.BoxGeometry(0.012, 0.01, 0.025);
-      const cmat = new THREE.MeshBasicMaterial({color: 0xff4444, depthTest: true});
-      const cmesh = new THREE.Mesh(cgeo, cmat);
-      cmesh.position.y = 0.01;
-      
-      meshGroup.add(shipMesh);
-      meshGroup.add(cmesh);
-      
     } else if (type === 'train') {
       elevation = 0.005; // Tight to ground
-      color = 0x55ff55;
       speed = 0.0002 + Math.random() * 0.0001;
-      
-      // Multiple cargo cars
-      for(let i=0; i<4; i++) {
-         const carGeo = new THREE.BoxGeometry(0.01, 0.01, 0.018);
-         const carMat = new THREE.MeshBasicMaterial({color: 0x55ff55, depthTest: true});
-         const carMesh = new THREE.Mesh(carGeo, carMat);
-         carMesh.position.z = -i * 0.022; // Trail behind
-         meshGroup.add(carMesh);
-      }
     }
+    
+    color = 0x00ffff; // Enforce Light Blue / Cyan network color globally per user request
+    
+    // Cyan Diamond/Arrow mesh matching reference picture
+    const arrowGeo = new THREE.ConeGeometry(0.012, 0.035, 4);
+    arrowGeo.rotateX(-Math.PI/2); // Point forward along travel path (-Z is forward for lookAt)
+    const arrowMat = new THREE.MeshBasicMaterial({color: 0x00ffff, depthTest: false, transparent: true, opacity: 0.9});
+    const arrowMesh = new THREE.Mesh(arrowGeo, arrowMat);
+    meshGroup.add(arrowMesh);
 
     mid.normalize().multiplyScalar(R + elevation);
     
@@ -2249,9 +2223,9 @@ function initGlobalTradeNetwork() {
     const points = curve.getPoints(40);
     const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
     const lineMat = new THREE.LineBasicMaterial({
-      color: color, 
+      color: 0x00ffff, // Use pure cyan for trailing faint path
       transparent: true, 
-      opacity: 0.12, 
+      opacity: 0.25, 
       blending: THREE.AdditiveBlending 
     });
     const curveLine = new THREE.Line(lineGeo, lineMat);
@@ -2311,9 +2285,22 @@ function initGlobalTradeNetwork() {
     {from: [35.7, 51.4], to: [41.0, 29.0], type: 'train'} // Tehran -> Istanbul
   ];
 
+  // Multiply exact routes array volume by 6x parametrically
+  const citiesList = Object.values(countryData).filter(c => c.lat !== undefined);
+  if (citiesList.length > 5) {
+     const typesStr = ['plane', 'ship', 'train'];
+     for(let j=0; j < 160; j++) {
+        const c1 = citiesList[Math.floor(Math.random() * citiesList.length)];
+        const c2 = citiesList[Math.floor(Math.random() * citiesList.length)];
+        if(c1 !== c2) {
+           routes.push({from: [c1.lat, c1.lon], to: [c2.lat, c2.lon], type: typesStr[j % 3]});
+        }
+     }
+  }
+
   routes.forEach(rt => {
-    // Inject 6 vehicles traversing each global route back-to-back
-    for(let i=0; i<6; i++) {
+    // Inject 4 vehicles traversing each global route (we added 160 routes, 4x bidirectional = massive density)
+    for(let i=0; i<4; i++) {
        createTradeRoute(rt.from[0], rt.from[1], rt.to[0], rt.to[1], rt.type);
        createTradeRoute(rt.to[0], rt.to[1], rt.from[0], rt.from[1], rt.type);
     }
