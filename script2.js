@@ -324,9 +324,11 @@ const GLOBE_R = 1.0, RAD = Math.PI/180;
 let WS_URL = 'ws://localhost:8888';
 if (window.location.protocol !== 'file:') {
   const WS_PROTOCOL = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  WS_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-    ? `ws://${window.location.hostname}:8888` 
-    : `${WS_PROTOCOL}//${window.location.hostname}`;
+  if (window.location.hostname.includes('onrender.com') || window.location.hostname.includes('dexmond.com')) {
+    WS_URL = `${WS_PROTOCOL}//${window.location.host}`;
+  } else {
+    WS_URL = `${WS_PROTOCOL}//${window.location.hostname}:8888`;
+  }
 }
 
 const PLAYER_COLORS = [
