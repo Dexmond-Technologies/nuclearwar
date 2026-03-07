@@ -8244,6 +8244,113 @@ if (dash0 && opsSidebar) {
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
   }
+
+// =====================================================================
+// MOCK GLOBAL TRADE ECONOMY (GREEN & YELLOW SKINS)
+// =====================================================================
+const MockTradeEconomy = (function() {
+  const cnames = ["USA", "China", "Russia", "Brazil", "Germany", "India", "Canada", "Australia", 
+    "Japan", "South Africa", "UK", "France", "Mexico", "Indonesia", "Saudi Arabia",
+    "Argentina", "Turkey", "Nigeria", "South Korea", "Italy", "Spain", "Poland",
+    "Iran", "Egypt", "Thailand", "Vietnam", "Malaysia", "Chile", "Peru", "Colombia"];
+  
+  const countries = cnames.map(name => ({
+    name,
+    gProd: 40 + Math.random() * 80,
+    yProd: 30 + Math.random() * 80,
+    gStock: 100 + Math.random() * 200,
+    yStock: 100 + Math.random() * 200,
+    gDem: 50 + Math.random() * 50,
+    yDem: 50 + Math.random() * 50
+  }));
+  
+  let turn = 0;
+
+  function runTurn() {
+    const skin = window.SKINS && window.SKINS[window.currentSkinIndex] ? window.SKINS[window.currentSkinIndex].name : null;
+    if (skin !== 'GREEN' && skin !== 'YELLOW') return;
+
+    turn++;
+    let log = `\n--- TURN ${turn} (SKIN: ${skin}) ---\n\nPRODUCTION:\n`;
+    const gExp = [], gImp = [], yExp = [], yImp = [];
+    
+    // Step 1, 2, 3: Production, Fluctuation, Pressure
+    countries.forEach(c => {
+      c.gProd *= 0.9 + Math.random() * 0.2;
+      c.yProd *= 0.9 + Math.random() * 0.2;
+      c.gStock += c.gProd;
+      c.yStock += c.yProd;
+      
+      if (Math.random() < 0.1) log += `${c.name} +${Math.round(c.gProd)} GreenSkin, +${Math.round(c.yProd)} YellowSkin\n`;
+      
+      const gPres = c.gStock - c.gDem;
+      const yPres = c.yStock - c.yDem;
+      if (gPres > 40) gExp.push(c);
+      if (gPres < -20) gImp.push(c);
+      if (yPres > 40) yExp.push(c);
+      if (yPres < -20) yImp.push(c);
+    });
+
+    log += '\nTRADE:\n';
+    
+    // Step 4: Trade Matching Algorithm
+    // Green trades return Yellow
+    gExp.forEach(exp => {
+      // Find importer that isn't the exporter
+      const imp = gImp.find(i => i.name !== exp.name);
+      if (imp) {
+         // Calculate amount constraint
+         const amt = Math.floor(Math.min(exp.gStock * 0.2, (imp.gDem - imp.gStock > 0 ? imp.gDem - imp.gStock : 50) * 0.5, 10 + Math.random() * 30));
+         if (amt > 0) {
+            exp.gStock -= amt; imp.gStock += amt;
+            exp.yStock += amt * 0.6; imp.yStock -= amt * 0.6;
+            log += `${exp.name} -> ${imp.name} : ${amt} GreenSkin\n`;
+            log += `${imp.name} -> ${exp.name} : ${Math.floor(amt * 0.6)} YellowSkin\n\n`;
+         }
+      }
+    });
+
+    // Yellow trades return Green
+    yExp.forEach(exp => {
+      const imp = yImp.find(i => i.name !== exp.name);
+      if (imp) {
+         const amt = Math.floor(Math.min(exp.yStock * 0.2, (imp.yDem - imp.yStock > 0 ? imp.yDem - imp.yStock : 50) * 0.5, 10 + Math.random() * 30));
+         if (amt > 0) {
+            exp.yStock -= amt; imp.yStock += amt;
+            exp.gStock += amt * 1.5; imp.gStock -= amt * 1.5;
+            log += `${exp.name} -> ${imp.name} : ${amt} YellowSkin\n`;
+            log += `${imp.name} -> ${exp.name} : ${Math.floor(amt * 1.5)} GreenSkin\n\n`;
+         }
+      }
+    });
+
+    log += 'EVENT:\n';
+    // Step 5: Event Layer (7% vol. trigger)
+    countries.forEach(c => {
+       if (Math.random() < 0.07) {
+          const ev = Math.random();
+          if (ev < 0.3) { c.gProd *= 1.25; log += `${c.name} harvest boom (+25% Green prod)\n`; }
+          else if (ev < 0.6) { c.yProd *= 0.7; log += `${c.name} mining strike (-30% Yellow prod)\n`; }
+          else if (ev < 0.8) { c.gProd *= 1.1; c.yProd *= 1.1; log += `${c.name} infra upgrade (+10% both)\n`; }
+          else { c.yStock += 80; log += `${c.name} resource discovery (+80 Yellow stock)\n`; }
+       }
+    });
+
+    log += '\nSUMMARY:\n';
+    // Summarize sample to console to emulate background stream
+    for(let i=0; i<4; i++) {
+        log += `${countries[i].name} G=${Math.max(0,Math.round(countries[i].gStock))} Y=${Math.max(0,Math.round(countries[i].yStock))}\n`;
+    }
+    
+    console.log(log);
+  }
+
+  // Hook background simulation pulse every 10 seconds
+  setInterval(runTurn, 10000); 
+  
+  return { countries, runTurn };
+})();
+
 </script>
 
 </body>
