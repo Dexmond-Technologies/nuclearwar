@@ -2563,6 +2563,28 @@ issGroup.add(createRadiator(0.05, 0.05));
 issGroup.add(createRadiator(-0.05, -0.05));
 issGroup.add(createRadiator(0.05, -0.05));
 
+// 6. "LIVE FEED!" UI Label Sprite attached directly to the ISS
+const issLabelCanvas = document.createElement('canvas');
+issLabelCanvas.width = 512;
+issLabelCanvas.height = 128;
+const issCtx = issLabelCanvas.getContext('2d');
+issCtx.fillStyle = '#ff2222';
+issCtx.shadowColor = '#ff0000';
+issCtx.shadowBlur = 15;
+issCtx.font = "bold 60px 'Share Tech Mono', monospace";
+issCtx.textAlign = "center";
+issCtx.textBaseline = "middle";
+issCtx.fillText("🔴 LIVE FEED!", 256, 64);
+
+const issLabelTex = new THREE.CanvasTexture(issLabelCanvas);
+const issLabelMat = new THREE.SpriteMaterial({ map: issLabelTex, color: 0xffffff, transparent: true });
+const issLabelSprite = new THREE.Sprite(issLabelMat);
+// Scale appropriately relative to the ISS group
+issLabelSprite.scale.set(0.6, 0.15, 1);
+// Position it hovering slightly above the station
+issLabelSprite.position.set(0, 0.35, 0);
+issGroup.add(issLabelSprite);
+
 // Position the ISS in low earth orbit (shifted further out and scaled smaller)
 issGroup.scale.setScalar(0.25);
 issGroup.position.set(GLOBE_R + 1.4, 0, 0);
