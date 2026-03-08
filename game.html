@@ -92,7 +92,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 #topbar{position:absolute;top:0;left:0;right:0;height:90px;
   background:linear-gradient(#000a,transparent);display:flex;align-items:center;
   justify-content:space-between;padding:0 30px;border-bottom:1px solid rgba(0,180,255,.1);}
-#game-title{font-family:'Orbitron',sans-serif;font-weight:700;font-size:36px;letter-spacing:12px;color:#ace;text-shadow:0 0 15px #0af4;}
+#game-title{font-family:'Orbitron',sans-serif;font-weight:700;font-size:36px;letter-spacing:12px;color:#ace;text-shadow:0 0 15px #0af4;margin-top:7px;}
 #phase-label{font-family:'Share Tech Mono',monospace;font-size:20px;letter-spacing:5px;text-align:center;margin-top:6px;}
 .player-badges{display:flex;gap:8px;}
 .pb{padding:4px 10px;border-radius:3px;font-size:10px;letter-spacing:1px;border:1px solid;}
@@ -157,9 +157,9 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 #green-skin-info {
   display: none;
   position: absolute;
-  bottom: 60px;
+  bottom: 56px;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(calc(-50% + 10px));
   background: rgba(0, 30, 0, 0.85);
   border: 1px solid #22ff22;
   color: #22ff22;
@@ -1141,23 +1141,12 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   </div>
 
   <!-- AI FUZZ WARNING OVERLAY -->
-  <div id="ai-fuzz-warning" style="display:none; position:absolute; bottom:calc(15% - 110px); left:50%; transform:translate(-50%, -50%); padding:20px 40px; background:rgba(255, 0, 0, 0.85); color:#fff; font-family:'Courier New', monospace; font-size:24px; font-weight:bold; letter-spacing:4px; text-align:center; box-shadow:0 0 40px rgba(255, 0, 0, 0.8); border:2px solid #ff4444; z-index:99999; text-shadow:2px 2px 0px #000; pointer-events:none;">
+  <div id="ai-fuzz-warning" style="display:none; position:absolute; bottom:calc(15% - 110px); left:50%; transform:translate(-50%, -50%); padding:20px 40px; background:rgba(255, 0, 0, 0.80); color:#fff; font-family:'Courier New', monospace; font-size:24px; font-weight:bold; letter-spacing:4px; text-align:center; box-shadow:0 0 40px rgba(255, 0, 0, 0.8); border:2px solid #ff4444; z-index:99999; text-shadow:2px 2px 0px #000; pointer-events:none;">
     ⚠️ HUMAN AI FUZZED COMS - STANDBY
   </div>
 
   <!-- DATACENTER CO-OP UI (CYBER SKIN ONLY) -->
   <div id="datacenter-coop-ui" style="display:none; pointer-events:none; position:absolute; top:0; left:0; width:100%; height:100%; z-index:90;">
-    <!-- Left Panel: Gemini Advisor -->
-    <div id="gemini-advisor-panel" style="position:absolute; bottom:240px; left:370px; width:280px; background:rgba(0,15,30,0.85); border:1px solid #00dcff; border-radius:4px; box-shadow:0 0 15px rgba(0,220,255,0.2); padding:15px; pointer-events:auto; backdrop-filter:blur(5px);">
-      <div style="font-family:'Share Tech Mono', monospace; color:#00dcff; font-size:16px; border-bottom:1px solid rgba(0,220,255,0.3); padding-bottom:5px; margin-bottom:10px; font-weight:bold; letter-spacing:2px; display:flex; justify-content:space-between; align-items:center;">
-        <span>GEMINI ADVISOR</span>
-        <button onclick="showStakingHelpModal()" style="background:none; border:1px solid #00dcff; border-radius:50%; color:#00dcff; width:22px; height:22px; font-size:12px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 0 5px rgba(0,220,255,0.5); padding:0; line-height:1;">?</button>
-      </div>
-      <div id="gemini-feed" style="font-family:'Courier New', monospace; font-size:11px; color:#fff; height:112px; overflow-y:auto; margin-bottom:10px; display:flex; flex-direction:column; gap:5px; padding-right:5px;">
-        <div style="color:#0af;">[SYSTEM] Uplink established. Awaiting directives.</div>
-      </div>
-      <button class="sp-btn" id="btn-gemini-sync" style="background:linear-gradient(135deg,rgba(0,100,200,0.5),rgba(0,220,255,0.5)); border:1px solid #00dcff; color:#fff; width:100%;" onclick="toggleGeminiSync()">SYNC WITH GEMINI (AUTO)</button>
-    </div>
 
 
     <!-- Right Panel: Datacenter Action Menu -->
@@ -2446,6 +2435,11 @@ webcamGroup.visible = false;
 let webcamSprites = [];
 scene.add(webcamGroup);
 
+let boatGroup = new THREE.Group();
+boatGroup.visible = false;
+let boatMeshes = [];
+scene.add(boatGroup);
+
 let redSatGroup = new THREE.Group();
 redSatGroup.visible = false;
 let redSats = [];
@@ -2744,6 +2738,17 @@ function showCompanyInfo(compData) {
   const domain = guessCompanyDomain(compData.name);
   const logoUrl = `https://logo.clearbit.com/${domain}`;
   
+  // Tactical asset descriptions for Cyber Skin
+  const cyberAssets = [
+    "TIER 3 SERVER FARM",
+    "LOGISTICS MAINFRAME",
+    "REGIONAL DNS RELAY",
+    "G-MARKET NODE",
+    "FIBER BACKBONE HUB"
+  ];
+  const charSum = compData.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const assetLabel = cyberAssets[charSum % cyberAssets.length];
+  
   modal.innerHTML = `
     <div style="position:absolute;top:10px;right:15px;cursor:pointer;color:#f24;font-weight:bold;" onclick="document.getElementById('company-info-modal').style.display='none'">X</div>
     <div style="margin-bottom:15px;">
@@ -2756,7 +2761,7 @@ function showCompanyInfo(compData) {
         <div><span style="color:#0f8">LAT:</span> ${compData.lat !== undefined ? compData.lat.toFixed(4) : '---'}</div>
         <div><span style="color:#0f8">LON:</span> ${compData.lon !== undefined ? compData.lon.toFixed(4) : '---'}</div>
     </div>
-    <div style="margin-top:15px;font-size:12px;color:#ffff00;">STRATEGIC ASSET DETECTED</div>
+    <div style="margin-top:15px;font-size:12px;color:#ffff00;letter-spacing:1px;font-weight:bold;">${window.currentSkinIndex === 3 ? 'ASSET: ' + assetLabel : 'STRATEGIC ASSET DETECTED'}</div>
   `;
   modal.style.display = 'block';
 }
@@ -4680,6 +4685,126 @@ async function playWebcamFeed(slug, title) {
 }
 
 initWebcams();
+initBoats();
+
+async function initBoats() {
+  try {
+    const res = await fetch('/api/boats');
+    const data = await res.json();
+    if (!data || data.length === 0) return;
+
+    // Create a 2D boat shape
+    const shape = new THREE.Shape();
+    shape.moveTo(0, 0.4);
+    shape.lineTo(0.15, 0.1);
+    shape.lineTo(0.15, -0.3);
+    shape.lineTo(-0.15, -0.3);
+    shape.lineTo(-0.15, 0.1);
+    shape.lineTo(0, 0.4);
+
+    const geo = new THREE.ShapeGeometry(shape);
+    geo.center(); // Center the geometry
+    geo.scale(0.06, 0.06, 0.06);
+    const mat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+
+    const rainclaudeCount = Math.floor(data.length * 0.3);
+
+    data.forEach((boat, index) => {
+      const isRainclaude = index < rainclaudeCount;
+      const dotColor = isRainclaude ? 0xff2222 : 0x00aaff;
+      
+      const mesh = new THREE.Mesh(geo, mat.clone());
+      const pos = ll2v(parseFloat(boat.lat), parseFloat(boat.lon), GLOBE_R + 0.05);
+      mesh.position.copy(pos);
+      
+      mesh.lookAt(new THREE.Vector3(0,0,0)); 
+      
+      const dotGeo = new THREE.CircleGeometry(0.0075, 16);
+      const dotMat = new THREE.MeshBasicMaterial({ color: dotColor, side: THREE.DoubleSide });
+      const dotMesh = new THREE.Mesh(dotGeo, dotMat);
+      dotMesh.position.set(0, -0.009, -0.002);
+      mesh.add(dotMesh);
+      
+      mesh.userData = {
+        isBoat: true,
+        mmsi: boat.mmsi,
+        name: boat.name,
+        isRainclaude: isRainclaude,
+        lat: boat.lat,
+        lon: boat.lon,
+        cog: boat.cog,
+        sog: boat.sog
+      };
+      
+      boatGroup.add(mesh);
+      boatMeshes.push(mesh);
+    });
+    console.log("Loaded " + boatMeshes.length + " Red Skin AIS boats");
+  } catch(e) { console.error("Boat load error", e); }
+}
+
+function showBoatInfo(boatData, boatMesh) {
+  const modal = document.createElement('div');
+  modal.style.position = 'fixed'; modal.style.top='50%'; modal.style.left='50%'; 
+  modal.style.transform='translate(-50%,-50%)'; modal.style.width='400px'; 
+  modal.style.backgroundColor='#000'; modal.style.border='2px solid #ff2222';
+  modal.style.boxShadow='0 0 20px rgba(255,0,0,0.5)'; modal.style.zIndex='99999';
+  modal.style.display='flex'; modal.style.flexDirection='column';
+  
+  const header = document.createElement('div');
+  header.style.padding='10px'; header.style.color='#fff'; header.style.backgroundColor='#200';
+  header.style.fontFamily='monospace'; header.style.display='flex'; header.style.justifyContent='space-between';
+  header.innerHTML = `<span>🚢 AIS DATA: ${boatData.name}</span><span style="cursor:pointer;color:#f24;" onclick="this.parentElement.parentElement.remove(); if(typeof _sfxClick !== 'undefined') _sfxClick();">[CLOSE]</span>`;
+  
+  const factionText = boatData.isRainclaude ? 'RAINCLAUDE AI' : 'HUMANITY';
+  const factionColor = boatData.isRainclaude ? '#ff2222' : '#00aaff';
+
+  const contentBox = document.createElement('div');
+  contentBox.style.padding='20px'; contentBox.style.color='#ffdddd';
+  contentBox.style.fontFamily="'Courier New', monospace";
+  contentBox.style.fontSize='14px'; contentBox.style.lineHeight='1.6';
+  contentBox.innerHTML = `
+    <strong style="color:${factionColor}">FACTION:</strong> <span style="color:${factionColor}; font-weight:bold">${factionText}</span><br>
+    <strong style="color:#ff2222">VESSEL NAME:</strong> ${boatData.name}<br>
+    <strong style="color:#ff2222">MMSI:</strong> ${boatData.mmsi}<br>
+    <hr style="border:0; border-top:1px dashed #ff2222; margin:15px 0;">
+    <strong style="color:#ff2222">LOCATION LAT:</strong> ${boatData.lat}°<br>
+    <strong style="color:#ff2222">LOCATION LON:</strong> ${boatData.lon}°<br>
+    <strong style="color:#ff2222">SPEED (SOG):</strong> ${boatData.sog} KTS<br>
+    <strong style="color:#ff2222">COURSE (COG):</strong> ${boatData.cog}°
+  `;
+
+  modal.appendChild(header);
+  modal.appendChild(contentBox);
+  
+  if (boatData.isRainclaude) {
+    const attackBtn = document.createElement('button');
+    attackBtn.style.width = '100%';
+    attackBtn.style.padding = '12px';
+    attackBtn.style.backgroundColor = '#200';
+    attackBtn.style.color = '#f22';
+    attackBtn.style.border = 'none';
+    attackBtn.style.borderTop = '1px solid #ff2222';
+    attackBtn.style.fontWeight = 'bold';
+    attackBtn.style.cursor = 'pointer';
+    attackBtn.style.fontSize = '16px';
+    attackBtn.style.fontFamily = 'monospace';
+    attackBtn.style.letterSpacing = '2px';
+    attackBtn.textContent = 'ATTACK';
+    attackBtn.onmouseover = () => { attackBtn.style.backgroundColor = '#f22'; attackBtn.style.color = '#000'; };
+    attackBtn.onmouseout = () => { attackBtn.style.backgroundColor = '#200'; attackBtn.style.color = '#f22'; };
+    attackBtn.onclick = () => {
+      modal.remove();
+      if(typeof _sfxClick !== 'undefined') _sfxClick();
+      if (typeof window.openNavalWar === 'function') {
+        window.openNavalWar(boatMesh);
+      }
+    };
+    modal.appendChild(attackBtn);
+  }
+  
+  document.body.appendChild(modal);
+}
 
 // =====================================================================
 window.showCmdHelpModal = function() {
@@ -4771,6 +4896,33 @@ window.showCmdHelpModal = function() {
       </div>
     `;
   } else {
+    let stakingHtml = '';
+    if (idx === 3) {
+        stakingHtml = `
+          <div style="margin-top:30px; background:rgba(0,100,200,0.05); padding:30px; border-radius:10px; border:1px solid rgba(0,220,255,0.3);">
+            <div style="font-size:24px; color:#fa0; margin-bottom:15px; letter-spacing:3px; font-weight:bold; text-align:center;">[ ACTIVE STAKING OFFERS ]</div>
+            <div style="text-align:center; color:#aaa; margin-bottom:20px;">Stake 100 D3X via the Datacenter Action Panel to activate nodes and earn yield.</div>
+            <div style="display:flex; gap:20px; flex-wrap:wrap;">
+              <div style="flex:1; min-width:250px; padding:20px; border:1px solid rgba(0,150,255,0.5); background:rgba(0,150,255,0.1); border-radius:8px;">
+                <strong style="color:#0af; font-size:18px;">QUICK COOLANT (6% APY)</strong><br><br>
+                <span style="color:#0f8;">LOCK:</span> 1 Day &nbsp;|&nbsp; <span style="color:#0f8;">EST. REWARD:</span> +0.016 D3X<br><br>
+                <span style="color:#aaa;">BENEFIT: Efficiency (10% faster data sends)</span>
+              </div>
+              <div style="flex:1; min-width:250px; padding:20px; border:1px solid rgba(212,0,255,0.5); background:rgba(212,0,255,0.1); border-radius:8px;">
+                <strong style="color:#e0aaff; font-size:18px;">POWER SURGE (9% APY)</strong><br><br>
+                <span style="color:#0f8;">LOCK:</span> 1 Month &nbsp;|&nbsp; <span style="color:#0f8;">EST. REWARD:</span> +0.75 D3X<br><br>
+                <span style="color:#aaa;">BENEFIT: Offense (+15% unit damage)</span>
+              </div>
+              <div style="flex:1; min-width:250px; padding:20px; border:1px solid rgba(0,255,136,0.5); background:rgba(0,255,136,0.1); border-radius:8px;">
+                <strong style="color:#0f8; font-size:18px;">GEN FORTRESS (12% APY)</strong><br><br>
+                <span style="color:#0f8;">LOCK:</span> 1 Year &nbsp;|&nbsp; <span style="color:#0f8;">EST. REWARD:</span> +12.0 D3X<br><br>
+                <span style="color:#aaa;">BENEFIT: Defense (+25% health/recovery)</span>
+              </div>
+            </div>
+          </div>
+        `;
+    }
+
     contentBox.innerHTML = `
       <div style="font-size:32px; color:#00dcff; font-weight:bold; margin-bottom:20px; text-transform:uppercase; border-bottom:1px dashed rgba(0,220,255,0.4); padding-bottom:10px; letter-spacing:2px;">` + skinSpecificTitle + `</div>
       
@@ -4791,6 +4943,7 @@ window.showCmdHelpModal = function() {
            ` + skinSpecificOversight + `
          </div>
       </div>
+      ` + stakingHtml + `
     `;
   }
 
@@ -4813,61 +4966,7 @@ window.showCmdHelpModal = function() {
   document.body.appendChild(modal);
 }
 
-window.showStakingHelpModal = function() {
-  if (typeof _sfxClick !== 'undefined') _sfxClick();
-  const modal = document.createElement('div');
-  modal.style.position = 'fixed'; modal.style.top='50%'; modal.style.left='50%'; 
-  modal.style.transform='translate(-50%,-50%)'; modal.style.width='500px';
-  modal.style.backgroundColor='rgba(0,15,30,0.95)'; modal.style.border='2px solid #00dcff';
-  modal.style.boxShadow='0 0 40px rgba(0,220,255,0.5)'; modal.style.zIndex='99999';
-  modal.style.display='flex'; modal.style.flexDirection='column';
-  modal.style.backdropFilter='blur(10px)';
-  
-  const header = document.createElement('div');
-  header.style.padding='15px'; header.style.color='#00dcff'; header.style.backgroundColor='rgba(0,100,200,0.2)';
-  header.style.fontFamily="'Share Tech Mono', monospace"; header.style.display='flex'; header.style.justifyContent='space-between';
-  header.style.borderBottom='1px solid #00dcff';
-  header.innerHTML = `<span style="letter-spacing:2px;font-weight:bold;font-size:18px;">DATACENTER STAKING EXPLAINED</span><span style="cursor:pointer;color:#f24;font-family:monospace;font-size:16px;" onclick="this.parentElement.parentElement.remove(); if(typeof _sfxClick !== 'undefined') _sfxClick();">✕</span>`;
-  
-  const contentBox = document.createElement('div');
-  contentBox.style.padding='20px'; contentBox.style.color='#fff';
-  contentBox.style.fontFamily="'Courier New', monospace";
-  contentBox.style.fontSize='13px'; contentBox.style.lineHeight='1.5';
-  
-  contentBox.innerHTML = `
-    <div style="margin-bottom:15px;">
-      <strong style="color:#00dcff; font-size:14px;">[ GLOBAL DATACENTERS ]</strong><br>
-      Datacenters are critical infrastructure nodes powering the Gemini AI. Securing them provides strategic advantages and raw compute power to dominate Cyber Warfare.
-    </div>
-    
-    <div style="margin-bottom:10px;">
-      <strong style="color:#fa0; font-size:14px;">[ ACTIVE STAKING OFFERS ]</strong><br>
-      <span style="color:#aaa; font-size:11px;">Stake 100 D3X via the Datacenter Action Panel to activate nodes and earn yield.</span>
-    </div>
 
-    <div style="display:flex; flex-direction:column; gap:8px;">
-      <div style="padding:10px; border:1px solid rgba(0,150,255,0.5); background:rgba(0,150,255,0.1); border-radius:4px;">
-        <strong style="color:#0af;">QUICK COOLANT (15% APY)</strong><br>
-        <span style="color:#0f8;">LOCK:</span> 1 Day &nbsp;|&nbsp; <span style="color:#0f8;">EST. REWARD:</span> +0.04 D3X<br>
-        <span style="color:#aaa;">BENEFIT: Efficiency (10% faster data sends)</span>
-      </div>
-      <div style="padding:10px; border:1px solid rgba(212,0,255,0.5); background:rgba(212,0,255,0.1); border-radius:4px;">
-        <strong style="color:#e0aaff;">POWER SURGE (25% APY)</strong><br>
-        <span style="color:#0f8;">LOCK:</span> 1 Month &nbsp;|&nbsp; <span style="color:#0f8;">EST. REWARD:</span> +2.1 D3X<br>
-        <span style="color:#aaa;">BENEFIT: Offense (+15% unit damage)</span>
-      </div>
-      <div style="padding:10px; border:1px solid rgba(0,255,136,0.5); background:rgba(0,255,136,0.1); border-radius:4px;">
-        <strong style="color:#0f8;">GEN FORTRESS (45% APY)</strong><br>
-        <span style="color:#0f8;">LOCK:</span> 1 Year &nbsp;|&nbsp; <span style="color:#0f8;">EST. REWARD:</span> +45.0 D3X<br>
-        <span style="color:#aaa;">BENEFIT: Defense (+25% health/recovery)</span>
-      </div>
-    </div>
-  `;
-  
-  modal.appendChild(header);
-  modal.appendChild(contentBox);
-  document.body.appendChild(modal);
-}
 
 // =====================================================================
 window.viewDatacenterFeed = function() {
@@ -5671,17 +5770,22 @@ function handleGlobeClick(e) {
   if (document.getElementById('attack-modal').classList.contains('show')) return; // Block clicks if attack modal is open
   if (document.getElementById('onboarding-modal').style.display === 'flex') return;
 
-  // 1. Check Webcams first if Red Skin is active
-  if (window.isRedSkin && webcamSprites.length > 0) {
+  // 1. Check Webcams and Boats first if Red Skin is active
+  if (window.isRedSkin && (webcamSprites.length > 0 || boatMeshes.length > 0)) {
     mouse.x = (e.clientX/innerWidth)*2-1;
     mouse.y = -(e.clientY/innerHeight)*2+1;
     ray.setFromCamera(mouse, camera);
-    const intersects = ray.intersectObjects(webcamSprites);
+    const intersects = ray.intersectObjects([...webcamSprites, ...boatMeshes]);
     if(intersects.length > 0) {
-      const camData = intersects[0].object.userData;
-      if (camData.isWebcam) {
+      const objData = intersects[0].object.userData;
+      if (objData.isWebcam) {
         if(typeof _sfxClick !== 'undefined') _sfxClick();
-        playWebcamFeed(camData.webcamId, camData.title);
+        playWebcamFeed(objData.webcamId, objData.title);
+        return; // Consume click
+      }
+      if (objData.isBoat) {
+        if(typeof _sfxClick !== 'undefined') _sfxClick();
+        showBoatInfo(objData, intersects[0].object);
         return; // Consume click
       }
     }
@@ -6008,7 +6112,8 @@ function initGreenMarketUI() {
   if (document.getElementById('green-market-overlay')) return;
   const container = document.createElement('div');
   container.id = 'green-market-overlay';
-  container.style.cssText = 'position:absolute; bottom:55px; left:calc(37px + 25vw + 60px); width:136px; background:rgba(0,20,10,0.85); border:1px solid #0f8; border-radius:6px; padding:6px; color:#0f8; font-family:"Orbitron", sans-serif; display:none; pointer-events:none; z-index:1000; box-shadow: 0 0 10px rgba(0,255,136,0.2); backdrop-filter: blur(5px); transition: opacity 0.3s;';
+  container.style.cssText = 'position:absolute; bottom:55px; left:calc(43px + 25vw + 60px); width:136px; background:rgba(0,20,10,0.85); border:1px solid #0f8; border-radius:6px; padding:6px; color:#0f8; font-family:"Orbitron", sans-serif; display:none; pointer-events:auto; cursor:pointer; z-index:1000; box-shadow: 0 0 10px rgba(0,255,136,0.2); backdrop-filter: blur(5px); transition: opacity 0.3s;';
+  container.setAttribute("onclick", "if(typeof window.showGMarketWallet === 'function') window.showGMarketWallet();");
   container.innerHTML = `
     <div style="font-size:10px; font-weight:bold; margin-bottom:6px; border-bottom:1px solid #0f8; padding-bottom:3px; letter-spacing:1px;">G-MARKET PORTFOLIO</div>
     <div style="font-size:8px; color:#aaa; margin-bottom:2px;">TOTAL NET WORTH (MIL)</div>
@@ -6110,6 +6215,87 @@ window.tradeGreenMetal = function(metalName, amount) {
 };
 
 setInterval(updateGreenMarket, 3000);
+
+window.showGMarketWallet = function() {
+  if (typeof _sfxClick !== 'undefined') _sfxClick();
+  const modal = document.createElement('div');
+  modal.style.position = 'fixed';
+  modal.style.top = '50%';
+  modal.style.left = '50%';
+  modal.style.transform = 'translate(-50%,-50%)';
+  modal.style.width = '1200px';
+  modal.style.backgroundColor = 'rgba(0,18,8,0.95)';
+  modal.style.border = '2px solid #0f8';
+  modal.style.boxShadow = '0 0 25px rgba(0,255,136,0.4)';
+  modal.style.zIndex = '99999';
+  modal.style.display = 'flex';
+  modal.style.flexDirection = 'column';
+  modal.style.fontFamily = '"Orbitron", sans-serif';
+  modal.style.backdropFilter = 'blur(10px)';
+  
+  const header = document.createElement('div');
+  header.style.padding = '15px';
+  header.style.color = '#fff';
+  header.style.backgroundColor = 'rgba(0,100,50,0.5)';
+  header.style.display = 'flex';
+  header.style.justifyContent = 'space-between';
+  header.style.alignItems = 'center';
+  header.style.borderBottom = '1px solid #0f8';
+  header.innerHTML = `
+    <span style="font-size:16px; font-weight:bold; letter-spacing:2px; color:#0f8;">💼 G-MARKET ASSET LEDGER</span>
+    <span style="cursor:pointer; color:#f22; font-size:12px; border:1px solid #f22; padding:4px 8px; border-radius:3px; background:rgba(255,0,0,0.1);" onmouseover="this.style.background='rgba(255,0,0,0.3)';" onmouseout="this.style.background='rgba(255,0,0,0.1)';" onclick="this.parentElement.parentElement.remove(); if(typeof _sfxClick !== 'undefined') _sfxClick();">[CLOSE]</span>
+  `;
+  
+  const contentBox = document.createElement('div');
+  contentBox.style.padding = '20px';
+  contentBox.style.color = '#ddd';
+  contentBox.style.maxHeight = '800px';
+  contentBox.style.overflowY = 'hidden';
+
+  let listHtml = `<table style="width:100%; border-collapse:collapse; font-size:13px;">
+    <tr style="border-bottom:1px dashed #0f8; color:#0f8;">
+      <th style="padding:10px 8px; text-align:left;">RESOURCE</th>
+      <th style="padding:10px 8px; text-align:right;">PRICE / SHARE</th>
+      <th style="padding:10px 8px; text-align:right;">OWNED</th>
+      <th style="padding:10px 8px; text-align:right;">TOTAL VALUE</th>
+    </tr>`;
+
+  let totalVal = 0;
+
+  Object.keys(window.greenMarket.commodities).forEach(k => {
+    let c = window.greenMarket.commodities[k];
+    let shareVal = c.price / 100;
+    let holdVal = c.shares * Math.max(0, shareVal);
+    totalVal += holdVal;
+    
+    let trend = '';
+    if (c.history.length >= 2) {
+       trend = c.history[c.history.length-1] >= c.history[c.history.length-2] ? '<span style="color:#0f0">▲</span>' : '<span style="color:#f00">▼</span>';
+    }
+
+    listHtml += `
+      <tr style="border-bottom:1px solid rgba(0,255,136,0.15);">
+        <td style="padding:10px 8px; color:#fff; font-weight:bold;">${parseInt(c.shares) > 0 ? '▶ ' : ''}${k}</td>
+        <td style="padding:10px 8px; text-align:right; font-family:'Courier New', monospace; font-weight:bold;">${trend} $${shareVal.toFixed(2)}M</td>
+        <td style="padding:10px 8px; text-align:right; font-weight:bold; color:${c.shares > 0 ? '#0f8' : '#aaa'};">${c.shares}</td>
+        <td style="padding:10px 8px; text-align:right; font-family:'Courier New', monospace; color:${c.shares > 0 ? '#0f8' : '#aaa'};">$${holdVal.toFixed(2)}M</td>
+      </tr>
+    `;
+  });
+
+  listHtml += `</table>`;
+  
+  listHtml += `<div style="margin-top:20px; text-align:right; font-size:16px; font-weight:bold; color:#fff; padding-top:15px; border-top:1px dashed #0f8;">
+    NET WORTH (HOLDINGS): <span style="color:#0f8; font-family:'Courier New', monospace;">$${totalVal.toFixed(2)} M</span>
+  </div>`;
+  
+  contentBox.innerHTML = listHtml;
+  
+  modal.appendChild(header);
+  modal.appendChild(contentBox);
+  document.body.appendChild(modal);
+};
+
 // ------------------------------
 
 function showGreenSkinResourceModal(iso) {
@@ -9069,6 +9255,7 @@ function animate() {
   }
 
   // --- CYBER WARFARE ANIMATION LOOP (BLK SKIN) ---
+  if (!window.cyberWarfareStats) window.cyberWarfareStats = { fundsStolen: 0, companiesBreached: 0, companyLog: [] };
   if (window.activeAttacks && Object.keys(window.activeAttacks).length > 0) {
       const now = Date.now();
       const termBox = document.getElementById('d0-reasoning');
@@ -9113,6 +9300,12 @@ function animate() {
                           if (termBox.childElementCount > 30) termBox.removeChild(termBox.firstChild);
                           termBox.scrollTop = termBox.scrollHeight;
                       }
+                      
+                      // Cyber Warfare Stats tracking
+                      const stolenAmnt = (Math.random() * 5 + 1); // 1-6M stolen per breach
+                      window.cyberWarfareStats.companiesBreached++;
+                      window.cyberWarfareStats.fundsStolen += stolenAmnt; 
+                      window.cyberWarfareStats.companyLog.push({ name: mesh.userData.name, amount: stolenAmnt });
                       
                       if (typeof _sfxError !== 'undefined' && Math.random() < 0.3) _sfxError();
                   }
@@ -10516,8 +10709,8 @@ window.spawnRedPlanes = function() {
        Math.random() * Math.PI * 2
     );
 
-    // Huge invisible hitbox for easy clicking
-    const hitBoxGeo = new THREE.BoxGeometry(0.4, 0.4, 0.4);
+    // Generous but appropriately-sized invisible hitbox for clicking (0.12x0.12x0.12)
+    const hitBoxGeo = new THREE.BoxGeometry(0.12, 0.12, 0.12);
     const hitBoxMat = new THREE.MeshBasicMaterial({visible: false});
     const hitBox = new THREE.Mesh(hitBoxGeo, hitBoxMat);
     planeGroup.add(hitBox);
@@ -10808,6 +11001,7 @@ window.toggleRedSkin = function() {
   
   // Toggle visibility of overlays (Webcams, Sats)
   if (typeof webcamGroup !== 'undefined') webcamGroup.visible = skin.showOverlays;
+  if (typeof boatGroup !== 'undefined') boatGroup.visible = skin.showOverlays;
   if (typeof redSatGroup !== 'undefined') redSatGroup.visible = skin.showOverlays;
   
   // Exclusively render ISS on the Live skin
@@ -11728,6 +11922,93 @@ window.launchCyberAttack = function() {
     
     if (typeof _sfxError !== 'undefined' && Math.random() < 0.3) _sfxError();
 };
+
+// =====================================================================
+// BLACK SKIN 45-SECOND CYBER WARFARE POPUP
+// =====================================================================
+setInterval(() => {
+    if (window.SKINS[window.currentSkinIndex].name !== 'BLK') return;
+    if (!window.cyberWarfareStats || window.cyberWarfareStats.companiesBreached === 0) return;
+
+    // Create the popup
+    const popup = document.createElement('div');
+    popup.style.position = 'fixed';
+    popup.style.top = '50%';
+    popup.style.left = '50%';
+    popup.style.transform = 'translate(-50%, -50%)';
+    popup.style.width = '800px';
+    popup.style.maxHeight = '70vh';
+    popup.style.overflowY = 'auto';
+    popup.style.padding = '20px 30px';
+    popup.style.background = 'rgba(20,5,0,0.96)';
+    popup.style.border = '2px solid #f24';
+    popup.style.borderRadius = '8px';
+    popup.style.boxShadow = '0 0 50px rgba(255,50,50,0.4), inset 0 0 20px rgba(255,0,0,0.2)';
+    popup.style.fontFamily = '"Share Tech Mono", monospace';
+    popup.style.color = '#fff';
+    popup.style.transition = 'opacity 0.5s ease-in-out';
+    popup.style.pointerEvents = 'auto'; // Re-enable pointer so they can scroll
+    popup.style.opacity = '0';
+    popup.style.zIndex = '999999';
+
+    // Generate Company Log Table
+    let tableHtml = `<table style="width:100%; border-collapse:collapse; margin-top:15px; font-size:14px; text-align:left;">`;
+    tableHtml += `<tr style="color:#f24; border-bottom:1px solid rgba(255,50,50,0.5);">
+                    <th style="padding:8px;">TIME</th>
+                    <th style="padding:8px;">COMPROMISED ASSET</th>
+                    <th style="padding:8px; text-align:right;">SIPHONED CAPITAL</th>
+                  </tr>`;
+    
+    // Sort log by highest amount stolen
+    const sortedLog = window.cyberWarfareStats.companyLog.sort((a, b) => b.amount - a.amount);
+    
+    sortedLog.forEach((entry, i) => {
+        const tString = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'}) + "." + Math.floor(Math.random()*999).toString().padStart(3,'0');
+        tableHtml += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05); background:${i % 2 === 0 ? 'rgba(255,50,50,0.02)' : 'transparent'};">
+                        <td style="padding:8px; color:#aaa;">[${tString}]</td>
+                        <td style="padding:8px; color:#ffb; font-weight:bold;">${entry.name}</td>
+                        <td style="padding:8px; color:#f24; text-align:right; font-family:'Courier New', monospace;">$${entry.amount.toFixed(2)} M</td>
+                      </tr>`;
+    });
+    tableHtml += `</table>`;
+
+    popup.innerHTML = `
+        <div style="font-size:24px; color:#f24; font-weight:bold; letter-spacing:2px; margin-bottom:10px; border-bottom:2px dashed #f24; padding-bottom:10px; text-transform:uppercase; text-shadow:0 0 10px #f00;">
+            ⚠️ HIGH-PRIORITY CYBER INTELLIGENCE REPORT
+            <span style="float:right; cursor:pointer; font-size:18px; color:#fff;" onclick="this.parentElement.parentElement.style.opacity='0'; setTimeout(()=>this.parentElement.parentElement.remove(), 500);">✕</span>
+        </div>
+        <div style="font-size:16px; opacity:0.9; margin-bottom:15px; color:#ccc;">Rainclaude AI Aggregated Intercepts — Last 45 Seconds Window:</div>
+        
+        <div style="display:flex; justify-content:space-between; background:rgba(255,50,50,0.1); padding:15px; border-radius:4px; font-size:18px; margin-bottom:15px; border:1px solid rgba(255,50,50,0.3);">
+            <span>TOTAL CORPORATE BREACHES: <b style="color:#fff; margin-left:10px;">${window.cyberWarfareStats.companiesBreached}</b></span>
+            <span>TOTAL CAPITAL EXTRACTED: <b style="color:#f24; font-family:'Courier New', monospace;">$${window.cyberWarfareStats.fundsStolen.toFixed(2)} M</b></span>
+        </div>
+        
+        <div style="font-size:14px; color:#f24; font-weight:bold; letter-spacing:1px; margin-top:20px;">DETAILED INCIDENT LOG:</div>
+        <div style="max-height: 40vh; overflow-y:auto; padding-right:10px; margin-bottom:20px; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.5);">
+          ${tableHtml}
+        </div>
+        
+        <button style="width:100%; padding:15px; background:linear-gradient(135deg,rgba(255,50,50,0.2),rgba(255,50,50,0.4)); border:1px solid #f24; color:#fff; font-family:'Share Tech Mono', monospace; font-size:18px; font-weight:bold; letter-spacing:3px; cursor:pointer; transition:0.2s; text-shadow:0 0 5px #000;" onclick="this.parentElement.style.opacity='0'; setTimeout(()=>this.parentElement.remove(), 500);" onmouseover="this.style.filter='brightness(1.5)';" onmouseout="this.style.filter='brightness(1)';">ACKNOWLEDGE WARNING</button>
+    `;
+
+    document.body.appendChild(popup);
+    
+    // Trigger fade in 
+    setTimeout(() => {
+        if (popup) popup.style.opacity = '1';
+    }, 50);
+
+    // Reset stats for the next 45 seconds
+    window.cyberWarfareStats = { fundsStolen: 0, companiesBreached: 0, companyLog: [] };
+
+    // Auto-remove after 8 seconds (giving player more time to read the detailed list)
+    setTimeout(() => {
+        if (popup) popup.style.opacity = '0';
+        setTimeout(() => { if (popup && popup.parentElement) popup.remove(); }, 500);
+    }, 8000);
+
+}, 45000);
 
 // =====================================================================
 // HACKER TERMINAL LOGIC (RAINCLAUDE EASTER EGG)
