@@ -1164,7 +1164,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       <button onclick="document.getElementById('datacenter-action-panel').style.display='none'; window.selectedDatacenter=null;" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#f55;font-size:16px;cursor:pointer;line-height:1;padding:4px;">✕</button>
       <div id="da-name" style="font-family:'Share Tech Mono', monospace; color:#fff; font-size:16px; font-weight:bold; letter-spacing:1px; margin-bottom:5px; text-transform:uppercase;">DATACENTER</div>
       <div style="display:flex; justify-content:space-between; font-family:'Courier New', monospace; font-size:11px; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;">
-        <span style="color:#aaa;">FACTION:</span> <span id="da-faction" style="font-weight:bold; color:#0af;">GEMINI</span>
+        <span style="color:#aaa;">FACTION:</span> <span id="da-faction" style="font-weight:bold; color:#0af;">D3X CORE</span>
       </div>
       
       <div id="da-stats" style="font-family:'Courier New', monospace; font-size:11px; color:#ccc; display:flex; flex-direction:column; gap:6px; margin-bottom:15px;">
@@ -5882,7 +5882,7 @@ window.openDatacenterCoopPanel = function(dcData) {
   const isGemini = (dcData.owner === 'GEMINI');
   
   if (isGemini) {
-    document.getElementById('da-faction').innerText = 'GEMINI NETWORK';
+    document.getElementById('da-faction').innerText = 'D3X CORE';
     document.getElementById('da-faction').style.color = '#0af';
     document.getElementById('da-actions-gemini').style.display = 'flex';
     document.getElementById('da-actions-rainclaude').style.display = 'none';
