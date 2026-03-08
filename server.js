@@ -1383,7 +1383,7 @@ startServer();
 // --- KEEP ALIVE PING ---
 // Ping the World Monitor app every 30 seconds to prevent Render from sleeping
 setInterval(() => {
-  fetch('https://worldmonitor.onrender.com')
+  fetch('https://worldmonitor-qt6l.onrender.com')
     .then(res => {
       // Keep alive successful
     })
