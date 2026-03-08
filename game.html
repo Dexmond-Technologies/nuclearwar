@@ -1071,7 +1071,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   </div>
 
   <!-- AI FUZZ WARNING OVERLAY -->
-  <div id="ai-fuzz-warning" style="display:none; position:absolute; bottom:calc(15% - 50px); left:50%; transform:translate(-50%, -50%); padding:20px 40px; background:rgba(255, 0, 0, 0.85); color:#fff; font-family:'Courier New', monospace; font-size:24px; font-weight:bold; letter-spacing:4px; text-align:center; box-shadow:0 0 40px rgba(255, 0, 0, 0.8); border:2px solid #ff4444; z-index:99999; text-shadow:2px 2px 0px #000; pointer-events:none;">
+  <div id="ai-fuzz-warning" style="display:none; position:absolute; bottom:calc(15% - 110px); left:50%; transform:translate(-50%, -50%); padding:20px 40px; background:rgba(255, 0, 0, 0.85); color:#fff; font-family:'Courier New', monospace; font-size:24px; font-weight:bold; letter-spacing:4px; text-align:center; box-shadow:0 0 40px rgba(255, 0, 0, 0.8); border:2px solid #ff4444; z-index:99999; text-shadow:2px 2px 0px #000; pointer-events:none;">
     ⚠️ HUMAN AI FUZZED COMS - STANDBY
   </div>
 
@@ -4767,7 +4767,7 @@ function handleGlobeClick(e) {
   }
 
   // Intercept clicks on Company Markers (Black Skin only)
-  if (window.currentSkinIndex === 5) {
+  if (window.currentSkinIndex === 4) {
     let allCompanies = [];
     if (window.companiesGroup && window.companiesGroup.visible) allCompanies = allCompanies.concat(window.companiesGroup.children);
     if (window.mediumCompaniesGroup && window.mediumCompaniesGroup.visible) allCompanies = allCompanies.concat(window.mediumCompaniesGroup.children);
@@ -4792,7 +4792,7 @@ function handleGlobeClick(e) {
   }
 
   // Intercept clicks on Datacenters (Cyber Skin)
-  if (window.currentSkinIndex === 4 && window.datacentersGroup && window.datacentersGroup.visible && window.datacentersGroup.children.length > 0) {
+  if (window.currentSkinIndex === 3 && window.datacentersGroup && window.datacentersGroup.visible && window.datacentersGroup.children.length > 0) {
     const dcHits = ray.intersectObjects(window.datacentersGroup.children, false);
     if (dcHits.length > 0) {
       if (typeof _sfxClick !== 'undefined') _sfxClick();
@@ -5117,10 +5117,6 @@ function selectCountry(iso) {
 
   if (window.currentSkinIndex === 2) { // Green Skin exclusively ignores normal ops
     showGreenSkinResourceModal(iso);
-    return;
-  }
-  if (window.currentSkinIndex === 3) { // Yellow Skin exclusively ignores normal ops
-    showYellowSkinArmsModal(iso);
     return;
   }
 
