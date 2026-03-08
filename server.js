@@ -829,7 +829,7 @@ function initWebSockets() {
 }
 
 // --- Solana On-Chain Logic ---
-async function processDailyTokenDrop(callsign, userWalletAddress) {
+async function processDailyTokenDrop(callsign, userWalletAddress, amountToDrop = 5) {
   if (!authorityKeypair) {
     console.warn(`[SOLANA] simulated drop to ${userWalletAddress} (No auth config)`);
     return;
@@ -839,7 +839,7 @@ async function processDailyTokenDrop(callsign, userWalletAddress) {
     return;
   }
   
-  console.log(`[SOLANA] Initiating daily token drop of 5 D3X to Commander ${callsign} @ wallet ${userWalletAddress}`);
+  console.log(`[SOLANA] Initiating token drop of ${amountToDrop} D3X to Commander ${callsign} @ wallet ${userWalletAddress}`);
   try {
     const toPublicKey = new web3.PublicKey(userWalletAddress);
     
@@ -862,7 +862,7 @@ async function processDailyTokenDrop(callsign, userWalletAddress) {
     
     // Query the mint directly to dynamically fetch the decimals
     const mintInfo = await splToken.getMint(solanaConnection, D3X_MINT_ADDRESS);
-    const transferAmount = 5 * Math.pow(10, mintInfo.decimals); // Exact 5.0 tokens
+    const transferAmount = amountToDrop * Math.pow(10, mintInfo.decimals);
     
     // Execute the Token Transfer!
     const signature = await splToken.transfer(
@@ -874,61 +874,71 @@ async function processDailyTokenDrop(callsign, userWalletAddress) {
         transferAmount
     );
     
-    console.log(`✅ [SOLANA] Successfully Dropped 5 D3X to ${callsign} (${userWalletAddress}). Tx Signature: ${signature}`);
+    console.log(`✅ [SOLANA] Successfully Dropped ${amountToDrop} D3X to ${callsign} (${userWalletAddress}). Tx Signature: ${signature}`);
   } catch (err) {
     console.error(`❌ [SOLANA] Token Drop to ${callsign} FAILED:`, err.message);
   }
 }
 
 async function checkD3XRewards() {
-  if (!pgPool) return; // Requires DB to track 24h limits confidently
+  if (!pgPool) return; // Requires DB to track safely
 
   const now = Date.now();
   for (const client of connectedClients) {
-    // 10 minute logic: (now - connectedAt >= 600,000ms)
-    // Changing to 1 minute (60,000ms) for testing as requested by Implementation Plan
-    if (client.wallet && client.connectedAt && !client.d3xClaimedSession) {
+    if (client.wallet && client.connectedAt) {
+      
+      // Every 10 mins: add 5 D3X to pending_d3x
       if ((now - client.connectedAt) >= 600000 /* 10 mins */) {
         try {
-          // Check DB if last claim was > 24 hours ago
-          const res = await pgPool.query(`SELECT last_d3x_claim FROM commanders WHERE callsign = $1`, [client.name]);
-          if (res.rows.length > 0) {
-             const lastClaim = res.rows[0].last_d3x_claim;
-             
-             // If null or Date difference is > 12h (43200000 ms)
-             let canClaim = false;
-             if (!lastClaim) canClaim = true;
-             else {
-                const msSinceClaim = now - new Date(lastClaim).getTime();
-                if (msSinceClaim >= 43200000) canClaim = true;
-             }
-
-             if (canClaim) {
-                console.log(`[REWARD] Commader ${client.name} reached 10m connection threshold. Triggering D3X Daily Drop + updating DB.`);
-                client.d3xClaimedSession = true; // Prevents claim spam during the same session
-                
-                await pgPool.query(`UPDATE commanders SET last_d3x_claim = NOW() WHERE callsign = $1`, [client.name]);
-                
-                // If Solana Authority Wallet is loaded, do real crypto drop, else mock drop
-                if (authorityKeypair) {
-                    await processDailyTokenDrop(client.name, client.wallet);
-                } else {
-                    console.log(`ℹ [SOLANA OFF] Mock-Dropped 5 D3X to ${client.name}. Provide valid SOLANA_WALLET_PRIVATE_KEY for real token transfer.`);
-                }
-                
-                client.ws.send(JSON.stringify({ 
-                  type: 'd3x_reward', 
-                  amount: 5,
-                  message: '5 D3X Coins Airdropped! (12-Hour Reward Claimed)'
-                }));
-
-             } else {
-               client.d3xClaimedSession = true; 
-             }
-          }
+           client.connectedAt = now; // reset session timer for next 10 mins
+           await pgPool.query(`UPDATE commanders SET pending_d3x = pending_d3x + 5 WHERE callsign = $1`, [client.name]);
+           console.log(`[REWARD] Commander ${client.name} played 10 mins. +5 D3X pending.`);
+           client.ws.send(JSON.stringify({ 
+               type: 'd3x_reward', 
+               amount: 5,
+               message: '5 D3X Accumulated (10 min session)'
+           }));
         } catch(e) {
-            console.error('⚠ Error checking D3X db record:', e.message);
+           console.error('⚠ Error updating pending D3X:', e.message);
         }
+      }
+
+      // Check 12-hour auto-claim logic:
+      try {
+        const res = await pgPool.query(`SELECT last_d3x_claim, pending_d3x FROM commanders WHERE callsign = $1`, [client.name]);
+        if (res.rows.length > 0) {
+           const lastClaim = res.rows[0].last_d3x_claim;
+           const pending = res.rows[0].pending_d3x;
+           
+           if (pending > 0) {
+              let canClaim = false;
+              if (!lastClaim) canClaim = true;
+              else {
+                 const msSinceClaim = now - new Date(lastClaim).getTime();
+                 if (msSinceClaim >= 43200000 /* 12 hours */) canClaim = true;
+              }
+
+              if (canClaim) {
+                 console.log(`[REWARD] Commander ${client.name} reached 12h threshold. Auto-claiming ${pending} D3X.`);
+                 await pgPool.query(`UPDATE commanders SET last_d3x_claim = NOW(), pending_d3x = 0 WHERE callsign = $1`, [client.name]);
+                 
+                 // If Solana Authority Wallet is loaded, do real crypto drop, else mock drop
+                 if (authorityKeypair) {
+                     await processDailyTokenDrop(client.name, client.wallet, pending);
+                 } else {
+                     console.log(`ℹ [SOLANA OFF] Mock-Dropped ${pending} D3X to ${client.name}. Provide valid SOLANA_WALLET_PRIVATE_KEY for real token transfer.`);
+                 }
+                 
+                 client.ws.send(JSON.stringify({ 
+                   type: 'd3x_reward', 
+                   amount: pending,
+                   message: `${pending} D3X Coins Airdropped! (12-Hour Batch Claimed)`
+                 }));
+              }
+           }
+        }
+      } catch(e) {
+          console.error('⚠ Error checking D3X db record:', e.message);
       }
     }
   }
@@ -1219,13 +1229,15 @@ async function startServer() {
           damage BIGINT DEFAULT 0,
           created_at TIMESTAMPTZ DEFAULT NOW(),
           last_seen TIMESTAMPTZ DEFAULT NOW(),
-          last_d3x_claim TIMESTAMPTZ
+          last_d3x_claim TIMESTAMPTZ,
+          pending_d3x INTEGER DEFAULT 0
         )
       `);
       
       // Auto-migrate if the column doesn't exist
       try {
         await pgPool.query(`ALTER TABLE commanders ADD COLUMN IF NOT EXISTS last_d3x_claim TIMESTAMPTZ`);
+        await pgPool.query(`ALTER TABLE commanders ADD COLUMN IF NOT EXISTS pending_d3x INTEGER DEFAULT 0`);
         console.log('☢ D3X Schema Migration successful');
       } catch(e) { /* Col exists */ }
 
