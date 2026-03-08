@@ -169,7 +169,8 @@ const server = http.createServer((req, res) => {
     });
     res.end(JSON.stringify({ 
       btcWallet: process.env.BTC_WALLET || "NOT_SET",
-      ethWallet: process.env.ETH_WALLET || "NOT_SET"
+      ethWallet: process.env.ETH_WALLET || "NOT_SET",
+      xlmWallet: process.env.XLM_WALLET || "NOT_SET"
     }));
   } else if (req.url === '/api/soundtrack') {
     res.writeHead(200, {
