@@ -1,0 +1,142 @@
+[
+  {
+    "name": "China Telecom Inner Mongolia Information Park",
+    "operator": "China Telecom",
+    "location": "China (Hohhot, Inner Mongolia)",
+    "lat": 40.84,
+    "lon": 111.75
+  },
+  {
+    "name": "China Mobile Data Center",
+    "operator": "China Mobile",
+    "location": "China (Hohhot, Inner Mongolia)",
+    "lat": 40.84,
+    "lon": 111.75
+  },
+  {
+    "name": "The Citadel Campus",
+    "operator": "Switch",
+    "location": "USA (Tahoe Reno, Nevada)",
+    "lat": 39.53,
+    "lon": -119.81
+  },
+  {
+    "name": "Harbin Data Center",
+    "operator": "China Mobile",
+    "location": "China (Harbin, Heilongjiang)",
+    "lat": 45.8,
+    "lon": 126.53
+  },
+  {
+    "name": "Alibaba Cloud Zhangbei Data Center",
+    "operator": "Alibaba Cloud",
+    "location": "China (Zhangbei County, Hebei)",
+    "lat": 41.15,
+    "lon": 114.71
+  },
+  {
+    "name": "Range International Information Hub",
+    "operator": "Range International (IBM partner)",
+    "location": "China (Langfang, Hebei)",
+    "lat": 39.53,
+    "lon": 116.7
+  },
+  {
+    "name": "Switch SuperNAP Campus",
+    "operator": "Switch",
+    "location": "USA (Las Vegas, Nevada)",
+    "lat": 36.17,
+    "lon": -115.13
+  },
+  {
+    "name": "Google Council Bluffs",
+    "operator": "Google",
+    "location": "USA (Council Bluffs, Iowa)",
+    "lat": 41.26,
+    "lon": -95.86
+  },
+  {
+    "name": "CWL1 Data Centre",
+    "operator": "Vantage Data Centers",
+    "location": "UK (Newport, Wales)",
+    "lat": 51.58,
+    "lon": -2.99
+  },
+  {
+    "name": "Utah Data Center (Bumblehive)",
+    "operator": "NSA",
+    "location": "USA (Bluffdale, Utah)",
+    "lat": 40.45,
+    "lon": -111.93
+  },
+  {
+    "name": "Apple Mesa Data Center",
+    "operator": "Apple",
+    "location": "USA (Mesa, Arizona)",
+    "lat": 33.41,
+    "lon": -111.83
+  },
+  {
+    "name": "Lakeside Technology Center",
+    "operator": "Digital Realty",
+    "location": "USA (Chicago, Illinois)",
+    "lat": 41.87,
+    "lon": -87.62
+  },
+  {
+    "name": "QTS Atlanta Metro",
+    "operator": "QTS Realty Trust",
+    "location": "USA (Atlanta, Georgia)",
+    "lat": 33.74,
+    "lon": -84.38
+  },
+  {
+    "name": "CoreSite Reston VA3",
+    "operator": "American Tower (CoreSite)",
+    "location": "USA (Northern Virginia)",
+    "lat": 38.84,
+    "lon": -77.42
+  },
+  {
+    "name": "Yotta NM1",
+    "operator": "Yotta Infrastructure",
+    "location": "India (Panvel, Maharashtra)",
+    "lat": 18.98,
+    "lon": 73.11
+  },
+  {
+    "name": "Covilh\u00e3 Data Center",
+    "operator": "Altice Portugal",
+    "location": "Portugal (Covilh\u00e3)",
+    "lat": 40.28,
+    "lon": -7.5
+  },
+  {
+    "name": "Portugal Telecom Complex",
+    "operator": "Portugal Telecom",
+    "location": "Portugal (Covilh\u00e3)",
+    "lat": 40.28,
+    "lon": -7.5
+  },
+  {
+    "name": "Microsoft Quincy",
+    "operator": "Microsoft",
+    "location": "USA (Quincy, Washington)",
+    "lat": 47.23,
+    "lon": -119.85
+  },
+  {
+    "name": "FRA 1",
+    "operator": "NTT Global Data Centers",
+    "location": "Germany (Frankfurt)",
+    "lat": 50.11,
+    "lon": 8.68
+  },
+  {
+    "name": "DuPont Fabros ACC7",
+    "operator": "Digital Realty",
+    "location": "USA (Ashburn, Virginia)",
+    "lat": 39.04,
+    "lon": -77.48
+  }
+]

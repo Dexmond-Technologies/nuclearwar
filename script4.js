@@ -7,7 +7,7 @@ function setLog(msg){
   if (!msg) return;
 
   const isExcluded = msg.startsWith('⟳') || msg.startsWith('✓ ') || msg.startsWith('⚙') || msg.startsWith('LOADING');
-  const isAI = msg.includes('RAINCLAUDE') || msg.includes('RAINCLOUD') || msg.includes('SATELLITE RECONNAISSANCE SCAN');
+  const isAI = msg.includes('RAINCLAUDE') || msg.includes('SATELLITE RECONNAISSANCE SCAN');
 
   if (!isExcluded) {
     if (isAI) {
@@ -188,12 +188,16 @@ function spawnExplosion3D(lat,lon,col){
 // =====================================================================
 // VISUAL EFFECTS FOR AI
 // =====================================================================
-function triggerRedAlert(msg) {
+let lastRedAlertTime = 0;
+function triggerRedAlert(msg, force=false) {
+  const now = Date.now();
+  if (!force && now - lastRedAlertTime < 20000) return;
+  lastRedAlertTime = now;
   const el = document.getElementById('news-alert');
   const txt = document.getElementById('na-text');
   const label = document.getElementById('na-label');
-  label.style.color = '#ff0000';
-  txt.style.color = '#ff4444';
+  label.style.color = '#000000';
+  txt.style.color = '#000000';
   txt.textContent = msg;
   el.classList.add('show');
   setTimeout(() => {

@@ -122,6 +122,27 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   padding:0 20px;border-top:1px solid rgba(0,180,255,.1);}
 #log{font-size:11px;color:#9cf;flex:1;letter-spacing:1px;text-align:center;}
 
+#cybercrime-map-label {
+  position: absolute;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 16px;
+  font-weight: bold;
+  color: #0f8;
+  letter-spacing: 6px;
+  text-shadow: 0 0 10px #0f8, 0 0 20px #0f8;
+  animation: cyberPulse 1s infinite alternate;
+  pointer-events: none;
+  z-index: 100;
+  display: none;
+}
+@keyframes cyberPulse {
+  0% { opacity: 0.3; text-shadow: 0 0 5px #0f8; }
+  100% { opacity: 1; text-shadow: 0 0 15px #0f8, 0 0 30px #0f8; }
+}
+
 #phase-btns{display:flex; justify-content:space-between; gap:12px; pointer-events:auto; box-sizing:border-box; margin-top:8px;}
 .phase-btn{flex:1; padding:10px 0; background:rgba(0,20,40,.8);border:1px solid rgba(0,180,255,.5);
   color:#0af;font:11px 'Courier New',monospace;letter-spacing:1.5px;cursor:pointer;
@@ -344,6 +365,17 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 .rep-item{margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid rgba(0,255,136,.1);}
 .rep-item.won{color:#0f8;}
 .rep-item.lost{color:#f55;}
+
+/* --- SATELLITE HACK MODAL --- */
+#sat-hack-modal { display: none; position: fixed; inset: 0; z-index: 100000; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; backdrop-filter: blur(5px); flex-direction: column; }
+#sat-hack-modal.show { display: flex; animation: fadeInModal 0.4s cubic-bezier(0.1, 0.9, 0.2, 1); }
+.sat-hack-content { background: rgba(10,10,10,0.9); border: 1px solid #ff3232; padding: 30px; border-radius: 10px; width: 400px; text-align: center; color: #ff3232; font-family: monospace; box-shadow: 0 0 20px rgba(255, 50, 50, 0.4); }
+.sat-hack-content h2 { margin-top: 0; font-size: 24px; color: #ff3232; text-shadow: 0 0 10px #ff3232; margin-bottom: 5px; }
+.sat-hack-content p { font-size: 14px; margin-bottom: 20px; color: #fff; }
+.sat-hack-bar-container { width: 100%; height: 20px; background: #222; border: 1px solid #ff3232; margin-bottom: 20px; position: relative; }
+#sat-hack-bar { height: 100%; width: 0%; background: #ff3232; transition: width 0.1s; }
+.sat-hack-btn { background: transparent; color: #ff3232; border: 1px solid #ff3232; padding: 10px 20px; font-family: monospace; font-size: 16px; cursor: pointer; transition: all 0.2s; margin: 5px; }
+.sat-hack-btn:hover { background: #ff3232; color: #000; box-shadow: 0 0 10px #ff3232; }
 
 /* ── ONBOARDING / BRIEFING (CYBER-CRYSTAL PREMIUM FINISH) ── */
 #onboarding-modal {
@@ -620,14 +652,14 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 }
 #ta-nukes{font-size:12px;letter-spacing:2px;margin-top:14px;opacity:.7;}
 /* Cinematic News Alert */
-#news-alert{position:absolute;top:15%;left:0;width:100%;background:rgba(200,0,0,0.85);color:#fff;
-  z-index:999;text-align:center;padding:6px 0;border-top:2px solid #f00;border-bottom:2px solid #f00;
+#news-alert{position:absolute;top:90px;left:0;width:100%;background:rgba(200,0,0,0.85);color:#fff;
+  z-index:999;text-align:center;padding:16px 0;border-top:2px solid #f00;border-bottom:2px solid #f00;
   display:none;align-items:center;justify-content:center;box-shadow:0 0 50px rgba(255,0,0,0.8);
   backdrop-filter:blur(10px);overflow:hidden;}
 #news-alert.show{display:flex !important; z-index:9999 !important; animation:slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, alertFlash 1s infinite alternate;}
 #news-alert.hide{animation:slideOut 0.4s ease-in forwards;}
 #na-label{position:absolute;top:2px;left:20px;font-size:6px;font-family:'Share Tech Mono',monospace;letter-spacing:4px;color:#ffb8b8;}
-#na-text{font-size:12px;font-family:'Orbitron',sans-serif;font-weight:900;letter-spacing:6px;text-transform:uppercase;text-shadow:0 0 20px #fff;}
+#na-text{font-size:14px;font-family:'Orbitron',sans-serif;font-weight:900;letter-spacing:6px;text-transform:uppercase;text-shadow:0 0 10px rgba(255,255,255,0.8);}
 .na-stripe{position:absolute;width:100%;height:100%;background:repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(0,0,0,0.15) 20px, rgba(0,0,0,0.15) 40px);pointer-events:none;}
 @keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
 @keyframes slideOut{from{transform:translateX(0);opacity:1;}to{transform:translateX(-100%);opacity:0;}}
@@ -957,6 +989,20 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   </div>
 </div>
 
+<!-- SATELLITE HACK MODAL -->
+<div id="sat-hack-modal">
+  <div class="sat-hack-content">
+    <h2>SATELLITE DOWNLINK INTERCEPT</h2>
+    <p>Mash the HACK button to bypass the firewall encryption before the time runs out!</p>
+    <div class="sat-hack-bar-container">
+      <div id="sat-hack-bar"></div>
+    </div>
+    <div id="sat-hack-time" style="margin-bottom:15px; color:#fff;">Time remaining: 10.0s</div>
+    <button class="sat-hack-btn" id="btn-do-hack" onclick="doSatHack()">HACK</button>
+    <button class="sat-hack-btn" onclick="closeSatHack()">ABORT</button>
+  </div>
+</div>
+
 <!-- ONBOARDING MODAL -->
 <div id="onboarding-modal">
   <div class="ob-card">
@@ -999,7 +1045,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     <div style="display:flex;gap:15px;pointer-events:auto;align-items:center; margin-left:auto;">
       <div style="display:flex;gap:12px;align-items:center;">
         <div id="connected-wallet-display" style="display:none; color:#0af; font-family:'Courier New', monospace; font-size:11px; font-weight:bold; letter-spacing:1px; text-shadow:0 0 8px rgba(0,170,255,0.6); border:1px solid rgba(0,170,255,0.3); padding:6px 10px; background:rgba(0,10,20,0.6);"></div>
-        <button class="phase-btn" id="btn-end-turn" style="padding:10px 15px;">END TURN ▶</button>
+        <button class="phase-btn" id="btn-end-turn" style="padding:10px 15px; display:none !important;">END TURN ▶</button>
       </div>
     </div>
   </div>
@@ -1016,7 +1062,8 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   </div>
   
   <div id="botbar">
-    <div id="log">LOADING WORLD DATA...</div>
+    <div id="cybercrime-map-label">CYBERCRIME MAP</div>
+    <div id="log">SYSTEM INITIALIZED // AWAITING COMMAND // AURAL UPLINK SECURED</div>
     <div style="position:absolute; right:20px; display:flex; align-items:center; gap:10px; pointer-events:auto; z-index:100;">
       <span style="font-size:9px; color:rgba(255,255,255,0.5); font-family:'Courier New', monospace; letter-spacing:1px; max-width: 280px; text-align: right; line-height: 1.2;">Servers are provided for free so everyone can have fun.<br>Any support helps keep them running!</span>
       <a href="https://buy.stripe.com/5kQcN4dP35lO19J7wo2wU00" target="_blank" style="background:linear-gradient(135deg, #fa0, #d80); color:#000; padding:6px 12px; font-size:11px; font-weight:bold; border-radius:4px; text-decoration:none; font-family:'Courier New', monospace; letter-spacing:1px; border:1px solid #c80; transition:all 0.2s; box-shadow:0 0 10px rgba(255,170,0,0.2);" onmouseover="this.style.filter='brightness(1.2)';" onmouseout="this.style.filter='brightness(1)';">☕ SUPPORT</a>
@@ -1024,7 +1071,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   </div>
 
   <!-- AI FUZZ WARNING OVERLAY -->
-  <div id="ai-fuzz-warning" style="display:none; position:absolute; top:20%; left:50%; transform:translate(-50%, -50%); padding:20px 40px; background:rgba(255, 0, 0, 0.85); color:#fff; font-family:'Courier New', monospace; font-size:24px; font-weight:bold; letter-spacing:4px; text-align:center; box-shadow:0 0 40px rgba(255, 0, 0, 0.8); border:2px solid #ff4444; z-index:99999; text-shadow:2px 2px 0px #000; pointer-events:none;">
+  <div id="ai-fuzz-warning" style="display:none; position:absolute; bottom:calc(15% - 50px); left:50%; transform:translate(-50%, -50%); padding:20px 40px; background:rgba(255, 0, 0, 0.85); color:#fff; font-family:'Courier New', monospace; font-size:24px; font-weight:bold; letter-spacing:4px; text-align:center; box-shadow:0 0 40px rgba(255, 0, 0, 0.8); border:2px solid #ff4444; z-index:99999; text-shadow:2px 2px 0px #000; pointer-events:none;">
     ⚠️ HUMAN AI FUZZED COMS - STANDBY
   </div>
 
@@ -1048,7 +1095,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     <div class="dash-nukes" id="d0-nukes"><span class="dash-nuke-label">NUKES</span></div>
     <div class="dash-players" id="d0-players">⚡ 1 COMMANDER ACTIVE</div>
     <div class="dash-status" id="d0-status">REINFORCING</div>
-    <div id="d0-reasoning" style="margin-top:12px; padding:10px; background:rgba(0,220,255,0.05); border:1px solid rgba(0,220,255,0.2); border-radius:4px; font-family:'Courier New', monospace; font-size:20px; color:#0af; flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom: 4px;">
+    <div id="d0-reasoning" style="margin-top:12px; padding:10px; background:rgba(0,220,255,0.05); border:1px solid rgba(0,220,255,0.2); border-radius:4px; font-family:'Courier New', monospace; font-size:14px; color:#0af; flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom: 4px;">
       <div style="opacity:0.5">> AWAITING COMMAND INPUT...</div>
     </div>
     <div id="phase-btns" style="display:flex; gap:10px; align-items:center; margin-bottom: 15px;">
@@ -1092,7 +1139,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     <div class="dash-nukes" id="d1-nukes"><span class="dash-nuke-label">NUKES</span></div>
     <div class="dash-players" style="color:rgba(255,80,80,.7)">🤖 AUTONOMOUS SYSTEM ONLINE</div>
     <div class="dash-status" id="d1-status">CALCULATING...</div>
-    <div id="d1-reasoning" style="margin-top:12px; padding:6px; background:rgba(255,0,0,0.05); border:1px solid rgba(255,50,50,0.2); border-radius:4px; font-family:'Courier New', monospace; font-size:18px; color:#f55; flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:2px; margin-bottom: 5px;">
+    <div id="d1-reasoning" style="margin-top:12px; padding:6px; background:rgba(255,0,0,0.05); border:1px solid rgba(255,50,50,0.2); border-radius:4px; font-family:'Courier New', monospace; font-size:14px; color:#f55; flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:2px; margin-bottom: 5px;">
       <div style="opacity:0.5">> AWAITING COMBAT DATA...</div>
     </div>
   </div>
@@ -1720,7 +1767,7 @@ Type 'help' for available commands.
     <div class="rep-title">TACTICAL OPERATION REPORT</div>
     <div class="rep-desc" id="rep-summary">Operation complete. Awaiting commander review.</div>
     <div class="rep-list" id="rep-list"></div>
-    <button class="sp-btn" style="background:#0f8;color:#000;width:100%;padding:12px;font-size:14px;" onclick="closeReportAndEndTurn()">END TURN</button>
+    <button class="sp-btn" style="background:#0f8;color:#000;width:100%;padding:12px;font-size:14px; display:none !important;" onclick="closeReportAndEndTurn()">END TURN</button>
   </div>
 </div>
 
@@ -2436,6 +2483,533 @@ initMetalsTrade();
 }
 initArmsIndustry();
 
+window.companiesGroup = new THREE.Group();
+window.companiesGroup.visible = false;
+scene.add(window.companiesGroup);
+
+function initCompanies() {
+  const companiesData = [{"name":"NVIDIA","city":"Santa Clara CA","lat":37.3541,"lon":-121.9552},{"name":"Apple","city":"Cupertino CA","lat":37.3229,"lon":-122.0322},{"name":"Alphabet (Google)","city":"Mountain View CA","lat":37.3861,"lon":-122.0839},{"name":"Microsoft","city":"Redmond WA","lat":47.674,"lon":-122.1215},{"name":"Amazon","city":"Seattle WA","lat":47.6062,"lon":-122.3321},{"name":"TSMC","city":"Hsinchu","lat":24.8086,"lon":120.9705},{"name":"Saudi Aramco","city":"Dhahran","lat":26.2994,"lon":50.1133},{"name":"Meta Platforms","city":"Menlo Park CA","lat":37.4532,"lon":-122.1817},{"name":"Broadcom","city":"San Jose CA","lat":37.3382,"lon":-121.8863},{"name":"Tesla","city":"Austin TX","lat":30.2672,"lon":-97.7431},{"name":"Berkshire Hathaway","city":"Omaha NE","lat":41.2565,"lon":-95.9345},{"name":"Walmart","city":"Bentonville AR","lat":36.3729,"lon":-94.2088},{"name":"Eli Lilly","city":"Indianapolis IN","lat":39.7684,"lon":-86.1581},{"name":"Samsung","city":"Seoul","lat":37.5665,"lon":126.978},{"name":"JPMorgan Chase","city":"New York NY","lat":40.7128,"lon":-74.006},{"name":"Exxon Mobil","city":"Irving TX","lat":32.814,"lon":-96.9489},{"name":"Visa","city":"San Francisco CA","lat":37.7749,"lon":-122.4194},{"name":"Tencent","city":"Shenzhen","lat":22.5431,"lon":114.0579},{"name":"Johnson & Johnson","city":"New Brunswick NJ","lat":40.4862,"lon":-74.4518},{"name":"ASML","city":"Veldhoven","lat":51.4077,"lon":5.3933},{"name":"Mastercard","city":"Purchase NY","lat":41.0334,"lon":-73.7045},{"name":"Costco","city":"Issaquah WA","lat":47.5301,"lon":-122.0326},{"name":"Oracle","city":"Austin TX","lat":30.2672,"lon":-97.7431},{"name":"SK Hynix","city":"Icheon","lat":37.2723,"lon":127.4348},{"name":"Netflix","city":"Los Gatos CA","lat":37.2266,"lon":-121.9747},{"name":"Micron Technology","city":"Boise ID","lat":43.615,"lon":-116.2023},{"name":"AbbVie","city":"North Chicago IL","lat":42.3256,"lon":-87.8412},{"name":"Chevron","city":"San Ramon CA","lat":37.78,"lon":-121.978},{"name":"Palantir","city":"Denver CO","lat":39.7392,"lon":-104.9903},{"name":"ICBC","city":"Beijing","lat":39.9042,"lon":116.4074},{"name":"Procter & Gamble","city":"Cincinnati OH","lat":39.1031,"lon":-84.512},{"name":"Home Depot","city":"Atlanta GA","lat":33.749,"lon":-84.388},{"name":"Bank of America","city":"Charlotte NC","lat":35.2271,"lon":-80.8431},{"name":"Roche","city":"Basel","lat":47.5596,"lon":7.5886},{"name":"General Electric","city":"Boston MA","lat":42.3601,"lon":-71.0589},{"name":"China Construction Bank","city":"Beijing","lat":39.9042,"lon":116.4074},{"name":"Agricultural Bank of China","city":"Beijing","lat":39.9042,"lon":116.4074},{"name":"Coca-Cola","city":"Atlanta GA","lat":33.749,"lon":-84.388},{"name":"PetroChina","city":"Beijing","lat":39.9042,"lon":116.4074},{"name":"Caterpillar","city":"Peoria IL","lat":40.6936,"lon":-89.589},{"name":"AMD","city":"Santa Clara CA","lat":37.3541,"lon":-121.9552},{"name":"Alibaba","city":"Hangzhou","lat":30.2741,"lon":120.1551},{"name":"Cisco","city":"San Jose CA","lat":37.3382,"lon":-121.8863},{"name":"Novartis","city":"Basel","lat":47.5596,"lon":7.5886},{"name":"AstraZeneca","city":"Cambridge","lat":52.2053,"lon":0.1218},{"name":"LVMH","city":"Paris","lat":48.8566,"lon":2.3522},{"name":"HSBC","city":"London","lat":51.5074,"lon":-0.1278},{"name":"Merck","city":"Rahway NJ","lat":40.5695,"lon":-74.3308},{"name":"Toyota","city":"Toyota City","lat":35.0824,"lon":137.1563},{"name":"RTX","city":"Arlington VA","lat":38.879,"lon":-77.1068},{"name":"Nestl\u00e9","city":"Vevey","lat":46.4628,"lon":6.8419},{"name":"Philip Morris International","city":"Stamford CT","lat":41.0534,"lon":-73.5387},{"name":"UnitedHealth","city":"Minnetonka MN","lat":44.9212,"lon":-93.4687},{"name":"Applied Materials","city":"Santa Clara CA","lat":37.3541,"lon":-121.9552},{"name":"Kweichow Moutai","city":"Maotai Guizhou","lat":27.8192,"lon":106.4164},{"name":"Morgan Stanley","city":"New York NY","lat":40.7128,"lon":-74.006},{"name":"Wells Fargo","city":"San Francisco CA","lat":37.7749,"lon":-122.4194},{"name":"Bank of China","city":"Beijing","lat":39.9042,"lon":116.4074},{"name":"Lam Research","city":"Fremont CA","lat":37.5485,"lon":-121.9886},{"name":"T-Mobile US","city":"Bellevue WA","lat":47.6101,"lon":-122.2015},{"name":"Goldman Sachs","city":"New York NY","lat":40.7128,"lon":-74.006},{"name":"IBM","city":"Armonk NY","lat":41.1265,"lon":-73.7141},{"name":"Shell","city":"London","lat":51.5074,"lon":-0.1278},{"name":"CATL","city":"Ningde","lat":26.6657,"lon":119.5272},{"name":"SAP","city":"Walldorf","lat":49.3044,"lon":8.6419},{"name":"McDonald's","city":"Chicago IL","lat":41.8781,"lon":-87.6298},{"name":"International Holding Company","city":"Abu Dhabi","lat":24.4539,"lon":54.3773},{"name":"Herm\u00e8s","city":"Paris","lat":48.8566,"lon":2.3522},{"name":"L'Or\u00e9al","city":"Paris","lat":48.8566,"lon":2.3522},{"name":"Royal Bank of Canada","city":"Toronto","lat":43.6532,"lon":-79.3832},{"name":"Linde","city":"Guildford","lat":51.2362,"lon":-0.5704},{"name":"China Mobile","city":"Beijing","lat":39.9042,"lon":116.4074},{"name":"Pepsico","city":"Purchase NY","lat":41.0334,"lon":-73.7045},{"name":"Intel","city":"Santa Clara CA","lat":37.3541,"lon":-121.9552},{"name":"Verizon","city":"New York NY","lat":40.7128,"lon":-74.006},{"name":"GE Vernova","city":"Cambridge MA","lat":42.3736,"lon":-71.1097},{"name":"Prosus","city":"Amsterdam","lat":52.3676,"lon":4.9041},{"name":"American Express","city":"New York NY","lat":40.7128,"lon":-74.006},{"name":"Reliance Industries","city":"Mumbai","lat":19.076,"lon":72.8777},{"name":"Siemens","city":"Munich","lat":48.1351,"lon":11.582},{"name":"AT&T","city":"Dallas TX","lat":32.7767,"lon":-96.797},{"name":"Commonwealth Bank","city":"Sydney","lat":-33.8688,"lon":151.2093},{"name":"Amgen","city":"Thousand Oaks CA","lat":34.1706,"lon":-118.8376},{"name":"Mitsubishi UFJ Financial","city":"Tokyo","lat":35.6762,"lon":139.6503},{"name":"Abbott Laboratories","city":"Abbott Park IL","lat":42.3036,"lon":-87.8995},{"name":"NextEra Energy","city":"Juno Beach FL","lat":26.8841,"lon":-80.0731},{"name":"Salesforce","city":"San Francisco CA","lat":37.7749,"lon":-122.4194},{"name":"Thermo Fisher Scientific","city":"Waltham MA","lat":42.3765,"lon":-71.2356},{"name":"Inditex","city":"Arteixo","lat":43.3073,"lon":-8.4075},{"name":"Citigroup","city":"New York NY","lat":40.7128,"lon":-74.006},{"name":"BHP Group","city":"Melbourne","lat":-37.8136,"lon":144.9631},{"name":"Deutsche Telekom","city":"Bonn","lat":50.7374,"lon":7.0982},{"name":"Boeing","city":"Arlington VA","lat":38.879,"lon":-77.1068},{"name":"Walt Disney","city":"Burbank CA","lat":34.1808,"lon":-118.3089},{"name":"Gilead Sciences","city":"Foster City CA","lat":37.5585,"lon":-122.2711},{"name":"TJX Companies","city":"Framingham MA","lat":42.2973,"lon":-71.428},{"name":"KLA","city":"Milpitas CA","lat":37.4323,"lon":-121.8996},{"name":"Texas Instruments","city":"Dallas TX","lat":32.7767,"lon":-96.797},{"name":"China Life Insurance","city":"Beijing","lat":39.9042,"lon":116.4074},{"name":"Intuitive Surgical","city":"Sunnyvale CA","lat":37.3688,"lon":-122.0363},{"name":"Union Pacific","city":"Omaha NE","lat":41.2565,"lon":-95.9345},{"name":"United Parcel Service (UPS)","city":"Atlanta GA","lat":33.749,"lon":-84.388},{"name":"RTX Corp","city":"Arlington VA","lat":38.879,"lon":-77.1068},{"name":"Honeywell","city":"Charlotte NC","lat":35.2271,"lon":-80.8431},{"name":"Deere & Company","city":"Moline IL","lat":41.5067,"lon":-90.5151},{"name":"Elevance Health","city":"Indianapolis IN","lat":39.7684,"lon":-86.1581},{"name":"CVS Health","city":"Woonsocket RI","lat":42.0009,"lon":-71.5148},{"name":"Cigna","city":"Bloomfield CT","lat":41.8262,"lon":-72.8371},{"name":"Centene","city":"St. Louis MO","lat":38.627,"lon":-90.1994},{"name":"Humana","city":"Louisville KY","lat":38.2527,"lon":-85.7585},{"name":"McKesson","city":"Irving TX","lat":32.814,"lon":-96.9489},{"name":"Cardinal Health","city":"Dublin OH","lat":40.0992,"lon":-83.1141},{"name":"Cencora","city":"Conshohocken PA","lat":40.0793,"lon":-75.309},{"name":"Target","city":"Minneapolis MN","lat":44.9778,"lon":-93.265},{"name":"Lowe's","city":"Mooresville NC","lat":35.5832,"lon":-80.8089},{"name":"Dollar General","city":"Goodlettsville TN","lat":36.3895,"lon":-86.7017},{"name":"O'Reilly Automotive","city":"Springfield MO","lat":37.2089,"lon":-93.2922},{"name":"AutoZone","city":"Memphis TN","lat":35.1495,"lon":-90.0489},{"name":"Chipotle","city":"Newport Beach CA","lat":33.6283,"lon":-117.9275},{"name":"Yum! Brands","city":"Louisville KY","lat":38.2527,"lon":-85.7585},{"name":"Darden Restaurants","city":"Orlando FL","lat":28.5383,"lon":-81.3792},{"name":"Hilton Worldwide","city":"McLean VA","lat":38.9338,"lon":-77.1772},{"name":"Marriott International","city":"Bethesda MD","lat":38.9847,"lon":-77.0947},{"name":"Las Vegas Sands","city":"Las Vegas NV","lat":36.1699,"lon":-115.1398},{"name":"MGM Resorts","city":"Las Vegas NV","lat":36.1699,"lon":-115.1398},{"name":"Airbnb","city":"San Francisco CA","lat":37.7749,"lon":-122.4194},{"name":"Booking Holdings","city":"Norwalk CT","lat":41.1177,"lon":-73.4082},{"name":"Sony Group","city":"Tokyo","lat":35.6762,"lon":139.6503},{"name":"Nintendo","city":"Kyoto","lat":34.9754,"lon":135.761},{"name":"Electronic Arts (EA)","city":"Redwood City CA","lat":37.4852,"lon":-122.2363},{"name":"Take-Two Interactive","city":"New York NY","lat":40.7128,"lon":-74.006},{"name":"Ametek","city":"Berwyn PA","lat":40.0442,"lon":-75.4411},{"name":"Eaton","city":"Dublin","lat":53.3498,"lon":-6.2603},{"name":"Parker-Hannifin","city":"Cleveland OH","lat":41.4993,"lon":-81.6943},{"name":"Trane Technologies","city":"Swords","lat":53.4597,"lon":-6.2185},{"name":"Carrier Global","city":"Palm Beach Gardens FL","lat":26.8233,"lon":-80.1386},{"name":"Johnson Controls","city":"Cork","lat":51.8985,"lon":-8.4756},{"name":"Waste Management","city":"Houston TX","lat":29.7604,"lon":-95.3698},{"name":"Republic Services","city":"Phoenix AZ","lat":33.4484,"lon":-112.074},{"name":"Air Products and Chemicals","city":"Allentown PA","lat":40.6084,"lon":-75.4901},{"name":"Ecolab","city":"St. Paul MN","lat":44.9537,"lon":-93.09},{"name":"Sherwin-Williams","city":"Cleveland OH","lat":41.4993,"lon":-81.6943},{"name":"PPG Industries","city":"Pittsburgh PA","lat":40.4406,"lon":-79.9958},{"name":"Dow","city":"Midland MI","lat":43.6155,"lon":-84.2472},{"name":"LyondellBasell","city":"Houston TX","lat":29.7604,"lon":-95.3698},{"name":"DuPont","city":"Wilmington DE","lat":39.739,"lon":-75.5397},{"name":"Nucor","city":"Charlotte NC","lat":35.2271,"lon":-80.8431},{"name":"Freeport-McMoRan","city":"Phoenix AZ","lat":33.4484,"lon":-112.074},{"name":"Newmont","city":"Denver CO","lat":39.7392,"lon":-104.9903},{"name":"Barrick Gold","city":"Toronto","lat":43.6532,"lon":-79.3832},{"name":"Prologis","city":"San Francisco CA","lat":37.7749,"lon":-122.4194},{"name":"American Tower","city":"Boston MA","lat":42.3601,"lon":-71.0589},{"name":"Equinix","city":"Redwood City CA","lat":37.4852,"lon":-122.2363},{"name":"Crown Castle","city":"Houston TX","lat":29.7604,"lon":-95.3698},{"name":"Public Storage","city":"Glendale CA","lat":34.1425,"lon":-118.2551},{"name":"Simon Property Group","city":"Indianapolis IN","lat":39.7684,"lon":-86.1581},{"name":"Realty Income","city":"San Diego CA","lat":32.7157,"lon":-117.1611},{"name":"Welltower","city":"Toledo OH","lat":41.6528,"lon":-83.5378},{"name":"AvalonBay Communities","city":"Arlington VA","lat":38.879,"lon":-77.1068},{"name":"Equity Residential","city":"Chicago IL","lat":41.8781,"lon":-87.6298},{"name":"Constellation Energy","city":"Baltimore MD","lat":39.2903,"lon":-76.6121},{"name":"Dominion Energy","city":"Richmond VA","lat":37.5407,"lon":-77.436},{"name":"Sempra Energy","city":"San Diego CA","lat":32.7157,"lon":-117.1611},{"name":"American Electric Power","city":"Columbus OH","lat":39.9611,"lon":-82.9987},{"name":"Exelon","city":"Chicago IL","lat":41.8781,"lon":-87.6298},{"name":"Xcel Energy","city":"Minneapolis MN","lat":44.9778,"lon":-93.265},{"name":"Consolidated Edison","city":"New York NY","lat":40.7128,"lon":-74.006},{"name":"WEC Energy Group","city":"Milwaukee WI","lat":43.0389,"lon":-87.9064},{"name":"Edison International","city":"Rosemead CA","lat":34.0805,"lon":-118.0728},{"name":"DTE Energy","city":"Detroit MI","lat":42.3314,"lon":-83.0458},{"name":"Entergy","city":"New Orleans LA","lat":29.951,"lon":-90.0715},{"name":"FirstEnergy","city":"Akron OH","lat":41.0814,"lon":-81.519},{"name":"PPL Corporation","city":"Allentown PA","lat":40.6084,"lon":-75.4901},{"name":"Ameren","city":"St. Louis MO","lat":38.627,"lon":-90.1994},{"name":"Eversource Energy","city":"Springfield MA","lat":42.1014,"lon":-72.5898},{"name":"CenterPoint Energy","city":"Houston TX","lat":29.7604,"lon":-95.3698},{"name":"CMS Energy","city":"Jackson MI","lat":42.2458,"lon":-84.4013},{"name":"Alliant Energy","city":"Madison WI","lat":43.073,"lon":-89.4012},{"name":"Evergy","city":"Kansas City MO","lat":39.0997,"lon":-94.5785},{"name":"NiSource","city":"Merrillville IN","lat":41.4828,"lon":-87.3328},{"name":"Pinnacle West","city":"Phoenix AZ","lat":33.4484,"lon":-112.074},{"name":"Vistra Corp","city":"Irving TX","lat":32.814,"lon":-96.9489},{"name":"NRG Energy","city":"Houston TX","lat":29.7604,"lon":-95.3698},{"name":"AES Corporation","city":"Arlington VA","lat":38.879,"lon":-77.1068},{"name":"Atmos Energy","city":"Dallas TX","lat":32.7767,"lon":-96.797},{"name":"UGI Corporation","city":"King of Prussia PA","lat":40.0881,"lon":-75.3813},{"name":"National Grid","city":"London","lat":51.5074,"lon":-0.1278},{"name":"E.ON","city":"Essen","lat":51.4556,"lon":7.0115},{"name":"RWE","city":"Essen","lat":51.4556,"lon":7.0115},{"name":"Engie","city":"Courbevoie","lat":48.897,"lon":2.269},{"name":"SSE","city":"Perth","lat":56.3949,"lon":-3.4308},{"name":"Iberdrola","city":"Bilbao","lat":43.2627,"lon":-2.9252},{"name":"Enel","city":"Rome","lat":41.9027,"lon":12.4963},{"name":"Orsted","city":"Fredericia","lat":55.5651,"lon":9.754},{"name":"EDF","city":"Paris","lat":48.8566,"lon":2.3522},{"name":"Terna","city":"Rome","lat":41.9027,"lon":12.4963},{"name":"Red Electrica","city":"Alcobendas","lat":40.5474,"lon":-3.642},{"name":"Duke Energy","city":"Charlotte NC","lat":35.2271,"lon":-80.8431},{"name":"Southern Company","city":"Atlanta GA","lat":33.749,"lon":-84.388},{"name":"NextEra Energy","city":"Juno Beach FL","lat":26.8841,"lon":-80.0731},{"name":"ServiceNow","city":"Santa Clara, California","lat":37.3541,"lon":-121.9552},{"name":"Booking Holdings","city":"Norwalk, Connecticut","lat":41.1177,"lon":-73.4082},{"name":"Schneider Electric","city":"Rueil-Malmaison","lat":48.8769,"lon":2.1789},{"name":"Airbus","city":"Blagnac","lat":43.636,"lon":1.3862},{"name":"Siemens","city":"Munich","lat":48.1351,"lon":11.582},{"name":"HSBC Holdings","city":"London","lat":51.5074,"lon":-0.1278},{"name":"L'Or\u00e9al","city":"Clichy","lat":48.9045,"lon":2.3093},{"name":"Toyota Motor","city":"Toyota City","lat":35.0824,"lon":137.1563},{"name":"Novartis","city":"Basel","lat":47.5596,"lon":7.5886},{"name":"Alibaba Group","city":"Hangzhou","lat":30.2741,"lon":120.1551},{"name":"Sony Group","city":"Tokyo","lat":35.6762,"lon":139.6503},{"name":"Nestl\u00e9","city":"Vevey","lat":46.4628,"lon":6.8419},{"name":"Novo Nordisk","city":"Bagsv\u00e6rd","lat":55.7622,"lon":12.4605},{"name":"SAP","city":"Walldorf","lat":49.3044,"lon":8.6419},{"name":"Reliance Industries","city":"Mumbai","lat":19.076,"lon":72.8777},{"name":"TotalEnergies","city":"Courbevoie","lat":48.897,"lon":2.269},{"name":"Deutsche Telekom","city":"Bonn","lat":50.7374,"lon":7.0982},{"name":"BHP Group","city":"Melbourne","lat":-37.8136,"lon":144.9631},{"name":"Rio TintoUK/","city":"London","lat":51.5074,"lon":-0.1278},{"name":"Enel","city":"Rome","lat":41.9028,"lon":12.4964},{"name":"Petrobras","city":"Rio de Janeiro","lat":-22.9068,"lon":-43.1729},{"name":"Vale","city":"Rio de Janeiro","lat":-22.9068,"lon":-43.1729},{"name":"Infosys","city":"Bengaluru","lat":12.9716,"lon":77.5946},{"name":"Tata Consultancy Services","city":"Mumbai","lat":19.076,"lon":72.8777},{"name":"China Mobile","city":"Beijing","lat":39.9042,"lon":116.4074},{"name":"Ping An Insurance","city":"Shenzhen","lat":22.5431,"lon":114.0579},{"name":"Banco Santander","city":"Madrid","lat":40.4168,"lon":-3.7038},{"name":"BNP Paribas","city":"Paris","lat":48.8566,"lon":2.3522},{"name":"Mitsubishi UFJ Financial","city":"Tokyo","lat":35.6762,"lon":139.6503},{"name":"Ita\u00fa Unibanco","city":"S\u00e3o Paulo","lat":-23.5505,"lon":-46.6333},{"name":"Uber Technologies","city":"San Francisco, California","lat":37.7749,"lon":-122.4194},{"name":"Accenture","city":"Dublin","lat":53.3498,"lon":-6.2603},{"name":"Caterpillar","city":"Irving, Texas","lat":32.814,"lon":-96.9489},{"name":"International Business Machines (IBM)","city":"Armonk, New York","lat":41.1265,"lon":-73.7141},{"name":"American Express","city":"New York, New York","lat":40.7128,"lon":-74.006},{"name":"Morgan Stanley","city":"New York, New York","lat":40.7128,"lon":-74.006},{"name":"Goldman Sachs","city":"New York, New York","lat":40.7128,"lon":-74.006},{"name":"Lockheed Martin","city":"Bethesda, Maryland","lat":38.9847,"lon":-77.0947},{"name":"RTX (Raytheon Technologies)","city":"Arlington, Virginia","lat":38.879,"lon":-77.1068},{"name":"Honeywell","city":"Charlotte, North Carolina","lat":35.2271,"lon":-80.8431},{"name":"Deere & Company","city":"Moline, Illinois","lat":41.5067,"lon":-90.5151},{"name":"Union Pacific","city":"Omaha, Nebraska","lat":41.2565,"lon":-95.9345},{"name":"BlackRock","city":"New York, New York","lat":40.7128,"lon":-74.006},{"name":"Chubb","city":"Zurich","lat":47.3769,"lon":8.5417},{"name":"Zoetis","city":"Parsippany, New Jersey","lat":40.8573,"lon":-74.4259},{"name":"Regeneron Pharmaceuticals","city":"Tarrytown, New York","lat":41.0762,"lon":-73.8587},{"name":"Gilead Sciences","city":"Foster City, California","lat":37.5585,"lon":-122.2711},{"name":"Vertex Pharmaceuticals","city":"Boston, Massachusetts","lat":42.3601,"lon":-71.0589},{"name":"Amgen","city":"Thousand Oaks, California","lat":34.1706,"lon":-118.8376},{"name":"Intuitive Surgical","city":"Sunnyvale, California","lat":37.3688,"lon":-122.0363},{"name":"Stryker","city":"Kalamazoo, Michigan","lat":42.2917,"lon":-85.5872},{"name":"Medtronic","city":"Dublin","lat":53.3498,"lon":-6.2603},{"name":"Boston Scientific","city":"Marlborough, Massachusetts","lat":42.3459,"lon":-71.5523},{"name":"Edwards Lifesciences","city":"Irvine, California","lat":33.6695,"lon":-117.8231},{"name":"Elevance Health","city":"Indianapolis, Indiana","lat":39.7684,"lon":-86.1581},{"name":"Cigna","city":"Bloomfield, Connecticut","lat":41.8262,"lon":-72.8371},{"name":"Humana","city":"Louisville, Kentucky","lat":38.2527,"lon":-85.7585},{"name":"Centene","city":"St. Louis, Missouri","lat":38.627,"lon":-90.1994},{"name":"CVS Health","city":"Woonsocket, Rhode Island","lat":42.0009,"lon":-71.5148},{"name":"McKesson","city":"Irving, Texas","lat":32.814,"lon":-96.9489},{"name":"Cardinal Health","city":"Dublin, Ohio","lat":40.0992,"lon":-83.1141},{"name":"AmerisourceBergen (Cencora)","city":"Conshohocken, Pennsylvania","lat":40.0793,"lon":-75.309},{"name":"Starbucks","city":"Seattle, Washington","lat":47.6062,"lon":-122.3321},{"name":"McDonald's","city":"Chicago, Illinois","lat":41.8781,"lon":-87.6298},{"name":"Chipotle Mexican Grill","city":"Newport Beach, California","lat":33.6283,"lon":-117.9275},{"name":"Yum! Brands","city":"Louisville, Kentucky","lat":38.2527,"lon":-85.7585},{"name":"Restaurant Brands International","city":"Toronto","lat":43.6532,"lon":-79.3832},{"name":"Nike","city":"Beaverton, Oregon","lat":45.4871,"lon":-122.8037},{"name":"Adidas","city":"Herzogenaurach","lat":49.568,"lon":10.8825},{"name":"Puma","city":"Herzogenaurach","lat":49.568,"lon":10.8825},{"name":"LVMH","city":"Paris","lat":48.8566,"lon":2.3522},{"name":"Herm\u00e8s","city":"Paris","lat":48.8566,"lon":2.3522},{"name":"Kering","city":"Paris","lat":48.8566,"lon":2.3522},{"name":"Richemont","city":"Bellevue","lat":46.4585,"lon":6.154},{"name":"EssilorLuxottica","city":"Charenton-le-Pont","lat":48.822,"lon":2.412},{"name":"Ferrari","city":"Maranello","lat":44.525,"lon":10.864},{"name":"Stellantis","city":"Hoogoorddreef","lat":52.338,"lon":4.87},{"name":"Volkswagen","city":"Wolfsburg","lat":52.4227,"lon":10.7865},{"name":"BMW","city":"Munich","lat":48.1351,"lon":11.582},{"name":"Mercedes-Benz Group","city":"Stuttgart","lat":48.7758,"lon":9.1829},{"name":"Honda Motor","city":"Tokyo","lat":35.6762,"lon":139.6503},{"name":"Hyundai Motor","city":"Seoul","lat":37.5665,"lon":126.978},{"name":"BYD","city":"Shenzhen","lat":22.5431,"lon":114.0579},{"name":"Li Auto","city":"Beijing","lat":39.9042,"lon":116.4074},{"name":"NIO","city":"Shanghai","lat":31.2304,"lon":121.4737},{"name":"XPeng","city":"Guangzhou","lat":23.1291,"lon":113.2644},{"name":"Zeekr","city":"Ningbo","lat":29.8683,"lon":121.5439},{"name":"Rivian","city":"Irvine, California","lat":33.6695,"lon":-117.827},{"name":"Lucid Group","city":"Newark, California","lat":37.5297,"lon":-122.0402},{"name":"General Motors","city":"Detroit, Michigan","lat":42.3314,"lon":-83.0458},{"name":"Ford Motor","city":"Dearborn, Michigan","lat":42.3223,"lon":-83.1763},{"name":"Volkswagen Group","city":"Wolfsburg","lat":52.4227,"lon":10.7865},{"name":"Porsche","city":"Stuttgart","lat":48.7758,"lon":9.1829},{"name":"Volvo Cars","city":"Gothenburg","lat":57.7089,"lon":11.9746},{"name":"Geely","city":"Hangzhou","lat":30.2741,"lon":120.1551},{"name":"JD.com","city":"Beijing","lat":39.9042,"lon":116.4074},{"name":"PDD Holdings (Pinduoduo)","city":"Shanghai","lat":31.2304,"lon":121.4737},{"name":"Meituan","city":"Beijing","lat":39.9042,"lon":116.4074},{"name":"Baidu","city":"Beijing","lat":39.9042,"lon":116.4074},{"name":"NetEase","city":"Hangzhou","lat":30.2741,"lon":120.1551},{"name":"Sea Limited","city":"Singapore","lat":1.3521,"lon":103.8198},{"name":"MercadoLibre","city":"Montevideo (ops)","lat":-34.9011,"lon":-56.1645},{"name":"Coupang","city":"Seoul","lat":37.5665,"lon":126.978},{"name":"Adyen","city":"Amsterdam","lat":52.3676,"lon":4.9041},{"name":"Shopify","city":"Ottawa","lat":45.4215,"lon":-75.6972},{"name":"Snowflake","city":"Bozeman, Montana","lat":45.677,"lon":-111.0429},{"name":"CrowdStrike","city":"Austin, Texas","lat":30.2672,"lon":-97.7431},{"name":"Datadog","city":"New York, New York","lat":40.7128,"lon":-74.006},{"name":"Palantir Technologies","city":"Denver, Colorado","lat":39.7392,"lon":-104.9903},{"name":"The Trade Desk","city":"Ventura, California","lat":34.2784,"lon":-119.2922},{"name":"Roblox","city":"San Mateo, California","lat":37.5625,"lon":-122.3255},{"name":"DoorDash","city":"San Francisco, California","lat":37.7749,"lon":-122.4194},{"name":"Fortinet","city":"Sunnyvale, California","lat":37.3688,"lon":-122.0363},{"name":"Monolithic Power Systems","city":"Kirkland, Washington","lat":47.6769,"lon":-122.206},{"name":"Axon Enterprise","city":"Scottsdale, Arizona","lat":33.4942,"lon":-111.9261},{"name":"Copart","city":"Dallas, Texas","lat":32.7767,"lon":-96.797},{"name":"MicroStrategy","city":"Tysons, Virginia","lat":38.9187,"lon":-77.2311},{"name":"Arista Networks","city":"Santa Clara, California","lat":37.3541,"lon":-121.9552},{"name":"KLA Corporation","city":"Milpitas, California","lat":37.4323,"lon":-121.8996},{"name":"Lam Research","city":"Fremont, California","lat":37.5485,"lon":-121.9886},{"name":"Applied Materials","city":"Santa Clara, California","lat":37.3541,"lon":-121.9552},{"name":"ASML Holding","city":"Veldhoven","lat":51.4077,"lon":5.3933},{"name":"Tokyo Electron","city":"Tokyo","lat":35.6762,"lon":139.6503},{"name":"Advantest","city":"Tokyo","lat":35.6762,"lon":139.6503},{"name":"Teradyne","city":"North Reading, Massachusetts","lat":42.5751,"lon":-71.0787},{"name":"Analog Devices","city":"Norwood, Massachusetts","lat":42.1945,"lon":-71.1995},{"name":"Texas Instruments","city":"Dallas, Texas","lat":32.7767,"lon":-96.797},{"name":"Qualcomm","city":"San Diego, California","lat":32.7157,"lon":-117.1611},{"name":"Broadcom","city":"San Jose, California","lat":37.3382,"lon":-121.8863},{"name":"AMD","city":"Santa Clara, California","lat":37.3541,"lon":-121.9552},{"name":"Intel","city":"Santa Clara, California","lat":37.3541,"lon":-121.9552},{"name":"Micron Technology","city":"Boise, Idaho","lat":43.615,"lon":-116.2023},{"name":"SK Hynix","city":"Icheon","lat":37.2723,"lon":127.4348},{"name":"Samsung Electronics","city":"Suwon","lat":37.2636,"lon":127.0286},{"name":"TSMC","city":"Hsinchu","lat":24.8086,"lon":120.9705},{"name":"MediaTek","city":"Hsinchu","lat":24.8086,"lon":120.9705},{"name":"Arm Holdings","city":"Cambridge","lat":52.2053,"lon":0.1218},{"name":"Super Micro Computer","city":"San Jose, California","lat":37.3382,"lon":-121.8863},{"name":"Dell Technologies","city":"Round Rock, Texas","lat":30.5083,"lon":-97.6789},{"name":"HP Inc.","city":"Palo Alto, California","lat":37.4419,"lon":-122.143},{"name":"Lenovo","city":"Beijing","lat":39.9042,"lon":116.4074},{"name":"Cisco Systems","city":"San Jose, California","lat":37.3382,"lon":-121.8863},{"name":"Juniper Networks","city":"Sunnyvale, California","lat":37.3688,"lon":-122.0363},{"name":"F5","city":"Seattle, Washington","lat":47.6062,"lon":-122.3321},{"name":"Palo Alto Networks","city":"Santa Clara, California","lat":37.3541,"lon":-121.9552},{"name":"Zscaler","city":"San Jose, California","lat":37.3382,"lon":-121.8863},{"name":"Cloudflare","city":"San Francisco, California","lat":37.7749,"lon":-122.4194},{"name":"Okta","city":"San Francisco, California","lat":37.7749,"lon":-122.4194},{"name":"Splunk (now Cisco)","city":"San Francisco, California","lat":37.7749,"lon":-122.4194},{"name":"Adobe","city":"San Jose, California","lat":37.3382,"lon":-121.8863},{"name":"Autodesk","city":"San Rafael, California","lat":37.9735,"lon":-122.5311},{"name":"Intuit","city":"Mountain View, California","lat":37.3861,"lon":-122.0839},{"name":"PayPal","city":"San Jose, California","lat":37.3382,"lon":-121.8863},{"name":"Block (Square)","city":"Oakland, California","lat":37.8044,"lon":-122.2711},{"name":"Visa","city":"San Francisco, California","lat":37.7749,"lon":-122.4194},{"name":"Mastercard","city":"Purchase, New York","lat":41.0334,"lon":-73.7045},{"name":"Paychex","city":"Rochester, New York","lat":43.1566,"lon":-77.6088},{"name":"ADP","city":"Roseland, New Jersey","lat":40.8201,"lon":-74.2938},{"name":"S&P Global","city":"New York, New York","lat":40.7128,"lon":-74.006},{"name":"Moody's","city":"New York, New York","lat":40.7128,"lon":-74.006},{"name":"CME Group","city":"Chicago, Illinois","lat":41.8781,"lon":-87.6298},{"name":"Intercontinental Exchange","city":"Atlanta, Georgia","lat":33.749,"lon":-84.388},{"name":"Charles Schwab","city":"Westlake, Texas","lat":33.016,"lon":-97.1895},{"name":"Interactive Brokers","city":"Greenwich, Connecticut","lat":41.0262,"lon":-73.6282},{"name":"Robinhood","city":"Menlo Park, California","lat":37.4532,"lon":-122.1817},{"name":"Coinbase","city":"Remote (HQ Denver ops)","lat":39.7392,"lon":-104.9903},{"name":"Marathon Digital","city":"Fort Lauderdale, Florida","lat":26.1224,"lon":-80.1373},{"name":"Riot Platforms","city":"Castle Rock, Colorado","lat":39.3722,"lon":-104.8561},{"name":"CleanSpark","city":"Henderson, Nevada","lat":36.0395,"lon":-114.9817},{"name":"Core Scientific","city":"Austin, Texas","lat":30.2672,"lon":-97.7431},{"name":"ConocoPhillips","city":"Houston, Texas","lat":29.7604,"lon":-95.3698},{"name":"ExxonMobil","city":"Irving, Texas","lat":32.814,"lon":-96.9489},{"name":"Chevron","city":"San Ramon, California","lat":37.78,"lon":-121.978},{"name":"Occidental Petroleum","city":"Houston, Texas","lat":29.7604,"lon":-95.3698},{"name":"EOG Resources","city":"Houston, Texas","lat":29.7604,"lon":-95.3698},{"name":"Devon Energy","city":"Oklahoma City, Oklahoma","lat":35.4676,"lon":-97.5164},{"name":"Pioneer Natural Resources","city":"Irving, Texas","lat":32.814,"lon":-96.9489},{"name":"Schlumberger","city":"Houston, Texas","lat":29.7604,"lon":-95.3698},{"name":"Halliburton","city":"Houston, Texas","lat":29.7604,"lon":-95.3698},{"name":"Baker Hughes","city":"Houston, Texas","lat":29.7604,"lon":-95.3698},{"name":"Saudi Aramco","city":"Dhahran","lat":26.2994,"lon":50.1133},{"name":"PetroChina","city":"Beijing","lat":39.9042,"lon":116.4074},{"name":"Sinopec","city":"Beijing","lat":39.9042,"lon":116.4074},{"name":"CNOOC","city":"Beijing","lat":39.9042,"lon":116.4074},{"name":"Equinor","city":"Stavanger","lat":58.97,"lon":5.7333},{"name":"Shell","city":"London","lat":51.5074,"lon":-0.1278},{"name":"BP","city":"London","lat":51.5074,"lon":-0.1278},{"name":"Eni","city":"Rome","lat":41.9028,"lon":12.4964},{"name":"Woodside Energy","city":"Perth","lat":-31.9505,"lon":115.8605},{"name":"Santos","city":"Adelaide","lat":-34.9285,"lon":138.6007},{"name":"Newmont","city":"Denver, Colorado","lat":39.7392,"lon":-104.9903},{"name":"Barrick Gold","city":"Toronto","lat":43.6532,"lon":-79.3832},{"name":"Agnico Eagle Mines","city":"Toronto","lat":43.6532,"lon":-79.3832},{"name":"Zijin Mining","city":"Longyan","lat":25.0746,"lon":117.0177},{"name":"Southern Copper","city":"Phoenix, Arizona","lat":33.4484,"lon":-112.074},{"name":"Freeport-McMoRan","city":"Phoenix, Arizona","lat":33.4484,"lon":-112.074},{"name":"Glencore","city":"Baar","lat":47.195,"lon":8.5333},{"name":"Anglo American","city":"London","lat":51.5074,"lon":-0.1278},{"name":"Fortescue","city":"Perth","lat":-31.9505,"lon":115.8605},{"name":"Vale","city":"Rio de Janeiro","lat":-22.9068,"lon":-43.1729},{"name":"Procter & Gamble","city":"Cincinnati, Ohio","lat":39.1031,"lon":-84.512},{"name":"Unilever","city":"London","lat":51.5074,"lon":-0.1278},{"name":"Colgate-Palmolive","city":"New York, New York","lat":40.7128,"lon":-74.006},{"name":"Kimberly-Clark","city":"Irving, Texas","lat":32.814,"lon":-96.9489},{"name":"Est\u00e9e Lauder","city":"New York, New York","lat":40.7128,"lon":-74.006},{"name":"Coca-Cola","city":"Atlanta, Georgia","lat":33.749,"lon":-84.388},{"name":"PepsiCo","city":"Purchase, New York","lat":41.0334,"lon":-73.7045},{"name":"Monster Beverage","city":"Corona, California","lat":33.8753,"lon":-117.5664},{"name":"Keurig Dr Pepper","city":"Burlington, Massachusetts","lat":42.5043,"lon":-71.1956},{"name":"Diageo","city":"London","lat":51.5074,"lon":-0.1278},{"name":"Anheuser-Busch InBev","city":"Leuven","lat":50.8792,"lon":4.7005},{"name":"Heineken","city":"Amsterdam","lat":52.3676,"lon":4.9041},{"name":"Constellation Brands","city":"Victor, New York","lat":42.9825,"lon":-77.4089},{"name":"Philip Morris International","city":"Stamford, Connecticut","lat":41.0534,"lon":-73.5387},{"name":"Altria Group","city":"Richmond, Virginia","lat":37.5407,"lon":-77.436},{"name":"British American Tobacco","city":"London","lat":51.5074,"lon":-0.1278},{"name":"Imperial Brands","city":"Bristol","lat":51.4545,"lon":-2.5879},{"name":"Johnson & Johnson","city":"New Brunswick, New Jersey","lat":40.4862,"lon":-74.4518},{"name":"Merck & Co.","city":"Rahway, New Jersey","lat":40.5695,"lon":-74.3308},{"name":"Pfizer","city":"New York, New York","lat":40.7128,"lon":-74.006},{"name":"AbbVie","city":"North Chicago, Illinois","lat":42.3256,"lon":-87.8412},{"name":"Bristol-Myers Squibb","city":"New York, New York","lat":40.7128,"lon":-74.006},{"name":"Eli Lilly","city":"Indianapolis, Indiana","lat":39.7684,"lon":-86.1581},{"name":"AstraZeneca","city":"Cambridge","lat":52.2053,"lon":0.1218},{"name":"Sanofi","city":"Paris","lat":48.8566,"lon":2.3522},{"name":"Roche","city":"Basel","lat":47.5596,"lon":7.5886},{"name":"GlaxoSmithKline (GSK)","city":"Brentford","lat":51.4874,"lon":-0.3086},{"name":"Takeda Pharmaceutical","city":"Tokyo","lat":35.6762,"lon":139.6503},{"name":"Daiichi Sankyo","city":"Tokyo","lat":35.6762,"lon":139.6503},{"name":"Walmart","city":"Bentonville, Arkansas","lat":36.3729,"lon":-94.2088},{"name":"Costco Wholesale","city":"Issaquah, Washington","lat":47.5301,"lon":-122.0326},{"name":"Target","city":"Minneapolis, Minnesota","lat":44.9778,"lon":-93.265},{"name":"Home Depot","city":"Atlanta, Georgia","lat":33.749,"lon":-84.388},{"name":"Lowe's","city":"Mooresville, North Carolina","lat":35.5832,"lon":-80.8089},{"name":"TJX Companies","city":"Framingham, Massachusetts","lat":42.2973,"lon":-71.428},{"name":"Ross Stores","city":"Dublin, California","lat":37.7022,"lon":-121.936},{"name":"Dollar General","city":"Goodlettsville, Tennessee","lat":36.3895,"lon":-86.7017},{"name":"Dollar Tree","city":"Chesapeake, Virginia","lat":36.7682,"lon":-76.2875},{"name":"Alibaba","city":"Hangzhou","lat":30.2741,"lon":120.1551},{"name":"Tencent","city":"Shenzhen","lat":22.5431,"lon":114.0579},{"name":"ICBC","city":"Beijing","lat":39.9042,"lon":116.4074},{"name":"China Construction Bank","city":"Beijing","lat":39.9042,"lon":116.4074},{"name":"Agricultural Bank of China","city":"Beijing","lat":39.9042,"lon":116.4074},{"name":"Bank of China","city":"Beijing","lat":39.9042,"lon":116.4074},{"name":"JPMorgan Chase","city":"New York, New York","lat":40.7128,"lon":-74.006},{"name":"Bank of America","city":"Charlotte, North Carolina","lat":35.2271,"lon":-80.8431},{"name":"Wells Fargo","city":"San Francisco, California","lat":37.7749,"lon":-122.4194},{"name":"Citigroup","city":"New York, New York","lat":40.7128,"lon":-74.006},{"name":"Royal Bank of Canada","city":"Toronto","lat":43.6532,"lon":-79.3832},{"name":"Toronto-Dominion Bank","city":"Toronto","lat":43.6532,"lon":-79.3832},{"name":"HDFC Bank","city":"Mumbai","lat":19.076,"lon":72.8777},{"name":"State Bank of India","city":"Mumbai","lat":19.076,"lon":72.8777},{"name":"DBS Group","city":"Singapore","lat":1.3521,"lon":103.8198},{"name":"Commonwealth Bank of Australia","city":"Sydney","lat":-33.8688,"lon":151.2093},{"name":"UBS Group","city":"Zurich","lat":47.3769,"lon":8.5417},{"name":"Allianz","city":"Munich","lat":48.1351,"lon":11.582},{"name":"AXA","city":"Paris","lat":48.8566,"lon":2.3522},{"name":"Zurich Insurance","city":"Zurich","lat":47.3769,"lon":8.5417},{"name":"Berkshire Hathaway","city":"Omaha, Nebraska","lat":41.2565,"lon":-95.9345},{"name":"Meta Platforms","city":"Menlo Park, California","lat":37.4532,"lon":-122.1817},{"name":"Tesla","city":"Austin, Texas","lat":30.2672,"lon":-97.7431},{"name":"Netflix","city":"Los Gatos, California","lat":37.2266,"lon":-121.9747},{"name":"Walt Disney","city":"Burbank, California","lat":34.1808,"lon":-118.3089},{"name":"Comcast","city":"Philadelphia, Pennsylvania","lat":39.9526,"lon":-75.1652},{"name":"Warner Bros. Discovery","city":"New York, New York","lat":40.7128,"lon":-74.006},{"name":"Paramount Global","city":"New York, New York","lat":40.7128,"lon":-74.006},{"name":"Verizon Communications","city":"New York, New York","lat":40.7128,"lon":-74.006},{"name":"AT&T","city":"Dallas, Texas","lat":32.7767,"lon":-96.797},{"name":"T-Mobile US","city":"Bellevue, Washington","lat":47.6101,"lon":-122.2015},{"name":"Orange","city":"Paris","lat":48.8566,"lon":2.3522},{"name":"Vodafone","city":"Newbury","lat":51.405,"lon":-1.3233},{"name":"Am\u00e9rica M\u00f3vilMexico","city":"City","lat":19.4326,"lon":-99.1332},{"name":"Bharti Airtel","city":"New Delhi","lat":28.6139,"lon":77.209},{"name":"Saudi Telecom","city":"Riyadh","lat":24.7136,"lon":46.6753},{"name":"NVIDIA","city":"Santa Clara, California","lat":37.3541,"lon":-121.9552},{"name":"Apple","city":"Cupertino, California","lat":37.3229,"lon":-122.0322},{"name":"Alphabet","city":"Mountain View, California","lat":37.3861,"lon":-122.0839},{"name":"Microsoft","city":"Redmond, Washington","lat":47.674,"lon":-122.1215},{"name":"Amazon","city":"Seattle, Washington","lat":47.6062,"lon":-122.3321},{"name":"Broadcom","city":"San Jose, California","lat":37.3382,"lon":-121.8863},{"name":"Eli Lilly","city":"Indianapolis, Indiana","lat":39.7684,"lon":-86.1581},{"name":"Oracle","city":"Austin, Texas","lat":30.2672,"lon":-97.7431},{"name":"Salesforce","city":"San Francisco, California","lat":37.7749,"lon":-122.4194},{"name":"Thermo Fisher Scientific","city":"Waltham, Massachusetts","lat":42.3765,"lon":-71.2356},{"name":"Danaher","city":"Washington, D.C.","lat":38.9072,"lon":-77.0369},{"name":"Abbott Laboratories","city":"Abbott Park, Illinois","lat":42.3036,"lon":-87.8995},{"name":"NextEra Energy","city":"Juno Beach, Florida","lat":26.8841,"lon":-80.0731},{"name":"Southern Company","city":"Atlanta, Georgia","lat":33.749,"lon":-84.388},{"name":"Duke Energy","city":"Charlotte, North Carolina","lat":35.2271,"lon":-80.8431},{"name":"Iberdrola","city":"Bilbao","lat":43.263,"lon":-2.935},{"name":"Enbridge","city":"Calgary","lat":51.0447,"lon":-114.0719},{"name":"TransCanada (TC Energy)","city":"Calgary","lat":51.0447,"lon":-114.0719},{"name":"Kinder Morgan","city":"Houston, Texas","lat":29.7604,"lon":-95.3698},{"name":"Williams Companies","city":"Tulsa, Oklahoma","lat":36.154,"lon":-95.9928},{"name":"ONEOK","city":"Tulsa, Oklahoma","lat":36.154,"lon":-95.9928},{"name":"Enterprise Products Partners","city":"Houston, Texas","lat":29.7604,"lon":-95.3698},{"name":"Energy Transfer","city":"Dallas, Texas","lat":32.7767,"lon":-96.797},{"name":"Plains All American Pipeline","city":"Houston, Texas","lat":29.7604,"lon":-95.3698},{"name":"Cheniere Energy","city":"Houston, Texas","lat":29.7604,"lon":-95.3698},{"name":"Sempra Energy","city":"San Diego, California","lat":32.7157,"lon":-117.1611}];
+  
+  companiesData.forEach(company => {
+    // Determine pseudo-logo colors based on tech/random vibe for BLK skin
+    const color = '#00f0ff'; // Cyber cyan
+    
+    // Create text label sprite
+    const c = document.createElement('canvas');
+    c.width = 256;
+    c.height = 64;
+    const ctx = c.getContext('2d');
+    
+    // Stylized high-tech background
+    ctx.fillStyle = 'rgba(5, 10, 15, 0.85)';
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(20, 10);
+    ctx.lineTo(240, 10);
+    ctx.lineTo(240, 40);
+    ctx.lineTo(220, 54);
+    ctx.lineTo(10, 54);
+    ctx.lineTo(10, 20);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Text label
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 20px "Courier New", monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    
+    let displayName = company.name;
+    if (displayName.length > 15) displayName = displayName.substring(0, 14) + '.';
+    ctx.fillText(displayName.toUpperCase(), 64, 32);
+
+    const tex = new THREE.CanvasTexture(c);
+    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: true, opacity: 1.0 });
+    const sprite = new THREE.Sprite(mat);
+    sprite.scale.set(0.24, 0.06, 1); // Twice as big
+    
+    // Position further above ground to be clearly visible
+    const pos = ll2v(company.lat, company.lon, GLOBE_R + 0.055);
+    sprite.position.copy(pos);
+    window.companiesGroup.add(sprite);
+
+    // Store data for raycaster
+    sprite.userData = company;
+
+    // Draw Logo (Stylized Square with First Letter)
+    ctx.fillStyle = color;
+    ctx.fillRect(18, 14, 36, 36);
+    ctx.fillStyle = '#000000';
+    ctx.font = 'bold 24px "Courier New", monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(displayName.charAt(0).toUpperCase(), 36, 34);
+    
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 20px "Courier New", monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(displayName.toUpperCase(), 64, 32);
+    
+    tex.needsUpdate = true;
+
+    // Also add a glowing pinpoint dot
+    const dotC = document.createElement('canvas'); dotC.width=64; dotC.height=64;
+    const dotCtx = dotC.getContext('2d');
+    dotCtx.fillStyle = color;
+    dotCtx.shadowBlur = 20;
+    dotCtx.shadowColor = color;
+    dotCtx.beginPath(); dotCtx.arc(32,32,16,0,Math.PI*2); dotCtx.fill();
+    const dotTex = new THREE.CanvasTexture(dotC);
+    const dotMat = new THREE.SpriteMaterial({ map: dotTex, transparent: true, depthTest: true, blending: THREE.AdditiveBlending });
+    const dotSprite = new THREE.Sprite(dotMat);
+    dotSprite.scale.set(0.08, 0.08, 1); // Twice as big
+    dotSprite.position.copy(ll2v(company.lat, company.lon, GLOBE_R + 0.05));
+    dotSprite.userData = company;
+    window.companiesGroup.add(dotSprite);
+  });
+  console.log("Global Companies Overlay Initialized.");
+}
+
+function guessCompanyDomain(name) {
+  let d = name.toLowerCase();
+  if (d.includes('google') || d.includes('alphabet')) return 'google.com';
+  if (d.includes('aramco')) return 'aramco.com';
+  if (d.includes('meta')) return 'meta.com';
+  if (d.includes('tsmc')) return 'tsmc.com';
+  if (d.includes('berkshire')) return 'berkshirehathaway.com';
+  if (d.includes('jpmorgan')) return 'jpmorganchase.com';
+  if (d.includes('johnson & johnson')) return 'jnj.com';
+  if (d.includes('procter & gamble')) return 'pg.com';
+  if (d.includes('bank of america')) return 'bankofamerica.com';
+  if (d.includes('coca-cola')) return 'coca-colacompany.com';
+  if (d.includes('home depot')) return 'homedepot.com';
+  if (d.includes('walt disney')) return 'thewaltdisneycompany.com';
+  if (d.includes('t-mobile')) return 't-mobile.com';
+  if (d.includes('rtx')) return 'rtx.com';
+  return d.replace(/[^a-z0-9]/g, '') + '.com';
+}
+
+function showCompanyInfo(compData) {
+  let modal = document.getElementById('company-info-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'company-info-modal';
+    modal.style.position = 'absolute';
+    modal.style.top = '20%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -20%)';
+    modal.style.background = 'rgba(10, 20, 30, 0.95)';
+    modal.style.border = '2px solid #00f0ff';
+    modal.style.borderRadius = '8px';
+    modal.style.padding = '20px';
+    modal.style.color = '#fff';
+    modal.style.fontFamily = '"Courier New", monospace';
+    modal.style.zIndex = '9999';
+    modal.style.minWidth = '300px';
+    modal.style.boxShadow = '0 0 20px #00f0ff';
+    modal.style.textAlign = 'center';
+    
+    // Close button
+    const closeBtn = document.createElement('div');
+    closeBtn.innerText = 'X';
+    closeBtn.style.position = 'absolute';
+    closeBtn.style.top = '10px';
+    closeBtn.style.right = '15px';
+    closeBtn.style.cursor = 'pointer';
+    closeBtn.style.color = '#f24';
+    closeBtn.style.fontWeight = 'bold';
+    closeBtn.onclick = () => modal.style.display = 'none';
+    modal.appendChild(closeBtn);
+    
+    document.body.appendChild(modal);
+  }
+  
+  const domain = guessCompanyDomain(compData.name);
+  const logoUrl = `https://logo.clearbit.com/${domain}`;
+  
+  modal.innerHTML = `
+    <div style="position:absolute;top:10px;right:15px;cursor:pointer;color:#f24;font-weight:bold;" onclick="document.getElementById('company-info-modal').style.display='none'">X</div>
+    <div style="margin-bottom:15px;">
+      <img src="${logoUrl}" onerror="this.style.display='none'" style="width:64px;height:64px;border-radius:8px;background:#fff;padding:4px;" />
+    </div>
+    <h2 style="margin:0 0 10px 0;color:#00f0ff;font-size:24px;text-transform:uppercase;">${compData.name}</h2>
+    <div style="font-size:14px;color:#aaa;margin-bottom:5px;">HQ LOCATION</div>
+    <div style="font-size:18px;margin-bottom:15px;">${compData.city}</div>
+    <div style="display:flex;justify-content:space-between;border-top:1px solid #333;padding-top:10px;">
+        <div><span style="color:#0f8">LAT:</span> ${compData.lat.toFixed(4)}</div>
+        <div><span style="color:#0f8">LON:</span> ${compData.lon.toFixed(4)}</div>
+    </div>
+    <div style="margin-top:15px;font-size:12px;color:#ffff00;">STRATEGIC ASSET DETECTED</div>
+  `;
+  modal.style.display = 'block';
+}
+initCompanies();
+
+window.mediumCompaniesGroup = new THREE.Group();
+window.mediumCompaniesGroup.visible = false;
+scene.add(window.mediumCompaniesGroup);
+
+function initMediumCompanies() {
+  const mediumCompaniesData = [{"name":"Ajegroup","city":"Peru","lat":-11.9117,"lon":-77.0299},{"name":"Grupo Boticario","city":"Brazil","lat":-23.4704,"lon":-46.5861},{"name":"Natura &Co LatAm Division","city":"Brazil","lat":-23.6353,"lon":-46.591},{"name":"PetroRio","city":"Brazil","lat":-23.6504,"lon":-46.5159},{"name":"Totvs","city":"Brazil","lat":-23.6224,"lon":-46.5348},{"name":"Magazine Luiza","city":"Brazil","lat":-23.5564,"lon":-46.7111},{"name":"Rappi","city":"Colombia","lat":4.5738,"lon":-73.9745},{"name":"Grupo Nutresa","city":"Colombia","lat":4.7101,"lon":-74.0292},{"name":"Bancolombia Tech Unit","city":"Colombia","lat":4.809,"lon":-74.0102},{"name":"Falabella Retail","city":"Chile","lat":-33.4904,"lon":-70.6315},{"name":"Cencosud Tech","city":"Chile","lat":-33.5963,"lon":-70.5225},{"name":"LATAM Cargo","city":"Chile","lat":-33.4839,"lon":-70.8},{"name":"Grupo Sura","city":"Colombia","lat":4.7884,"lon":-74.0208},{"name":"Grupo Argos","city":"Colombia","lat":4.8025,"lon":-74.15},{"name":"Arcor","city":"Argentina","lat":-34.722,"lon":-58.4143},{"name":"MercadoLibre Logistics","city":"Argentina","lat":-34.5684,"lon":-58.3307},{"name":"Despegar","city":"Argentina","lat":-34.7039,"lon":-58.2705},{"name":"YPF Luz","city":"Argentina","lat":-34.5625,"lon":-58.2751},{"name":"Globant","city":"Argentina","lat":-34.4796,"lon":-58.2322},{"name":"Banco Macro Tech","city":"Argentina","lat":-34.4846,"lon":-58.4016},{"name":"Olist","city":"Brazil","lat":-23.6167,"lon":-46.7306},{"name":"StoneCo","city":"Brazil","lat":-23.6996,"lon":-46.7432},{"name":"QuintoAndar","city":"Brazil","lat":-23.4772,"lon":-46.7498},{"name":"VTEX","city":"Brazil","lat":-23.4488,"lon":-46.5552},{"name":"Kavak","city":"Mexico","lat":19.333,"lon":-99.2734},{"name":"Clip","city":"Mexico","lat":19.581,"lon":-99.1319},{"name":"Konfio","city":"Mexico","lat":19.5526,"lon":-99.1051},{"name":"R2","city":"Mexico","lat":19.3549,"lon":-99.1801},{"name":"Bitso","city":"Mexico","lat":19.5565,"lon":-99.0914},{"name":"Justo","city":"Mexico","lat":19.3977,"lon":-99.2012},{"name":"Softtek","city":"Mexico","lat":19.3986,"lon":-99.1925},{"name":"Kueski","city":"Mexico","lat":19.5356,"lon":-99.1377},{"name":"Creditas","city":"Brazil","lat":-23.5452,"lon":-46.6733},{"name":"Wildlife Studios","city":"Brazil","lat":-23.6413,"lon":-46.5741},{"name":"Nubank LatAm Unit","city":"Brazil","lat":-23.5523,"lon":-46.7406},{"name":"99 Tecnologia","city":"Brazil","lat":-23.6396,"lon":-46.7555},{"name":"Loggi","city":"Brazil","lat":-23.505,"lon":-46.5805},{"name":"Gympass","city":"Brazil","lat":-23.4259,"lon":-46.6983},{"name":"Sinqia","city":"Brazil","lat":-23.6353,"lon":-46.7695},{"name":"PagSeguro","city":"Brazil","lat":-23.6576,"lon":-46.7584},{"name":"Yoco","city":"South Africa","lat":-26.2869,"lon":28.0974},{"name":"Takealot","city":"South Africa","lat":-26.2776,"lon":27.935},{"name":"SweepSouth","city":"South Africa","lat":-26.3111,"lon":28.0323},{"name":"Aerobotics","city":"South Africa","lat":-26.0882,"lon":28.0992},{"name":"Paystack","city":"Nigeria","lat":6.633,"lon":3.2586},{"name":"Flutterwave","city":"Nigeria","lat":6.5198,"lon":3.3744},{"name":"Interswitch","city":"Nigeria","lat":6.4499,"lon":3.2987},{"name":"Andela","city":"Nigeria","lat":6.4696,"lon":3.5092},{"name":"Kobo360","city":"Nigeria","lat":6.6002,"lon":3.3338},{"name":"Twiga Foods","city":"Kenya","lat":-1.3388,"lon":36.8399},{"name":"Sendy","city":"Kenya","lat":-1.3611,"lon":36.9553},{"name":"Cellulant","city":"Kenya","lat":-1.1752,"lon":36.9012},{"name":"Selina Wamucii","city":"Kenya","lat":-1.3783,"lon":36.8554},{"name":"Wasoko","city":"Kenya","lat":-1.3205,"lon":36.8909},{"name":"Chipper Cash","city":"Uganda","lat":0.4818,"lon":32.5204},{"name":"SafeBoda","city":"Uganda","lat":0.3482,"lon":32.6461},{"name":"Jumia Logistics","city":"Egypt","lat":29.9868,"lon":31.1758},{"name":"Swvl","city":"Egypt","lat":30.1861,"lon":31.1228},{"name":"Fawry","city":"Egypt","lat":30.0698,"lon":31.3644},{"name":"MaxAB","city":"Egypt","lat":30.0961,"lon":31.2555},{"name":"MNT-Halan","city":"Egypt","lat":30.1729,"lon":31.2255},{"name":"Yassir","city":"Algeria","lat":36.6643,"lon":3.0247},{"name":"Inwi Tech","city":"Morocco","lat":33.6567,"lon":-7.7334},{"name":"HPS","city":"Morocco","lat":33.5653,"lon":-7.6359},{"name":"Chari","city":"Morocco","lat":33.6712,"lon":-7.7261},{"name":"Gozem","city":"Togo","lat":6.2637,"lon":1.3462},{"name":"Wave","city":"Senegal","lat":14.567,"lon":-17.3867},{"name":"TradeDepot","city":"Nigeria","lat":6.4861,"lon":3.3199},{"name":"Moove","city":"Nigeria","lat":6.503,"lon":3.2797},{"name":"Alerzo","city":"Nigeria","lat":6.5745,"lon":3.4869},{"name":"OnePipe","city":"Nigeria","lat":6.6056,"lon":3.4379},{"name":"TymeBank","city":"South Africa","lat":-26.2855,"lon":28.0864},{"name":"Rain","city":"South Africa","lat":-26.34,"lon":27.8982},{"name":"Luno","city":"South Africa","lat":-26.1241,"lon":27.9668},{"name":"Jumo","city":"South Africa","lat":-26.3524,"lon":28.137},{"name":"MeTL Group","city":"Tanzania","lat":-6.8936,"lon":39.2566},{"name":"Bakhresa Group","city":"Tanzania","lat":-6.9314,"lon":39.3495},{"name":"Dangote Sugar","city":"Nigeria","lat":6.4295,"lon":3.3981},{"name":"Olam Nigeria","city":"Nigeria","lat":6.4505,"lon":3.4556},{"name":"Seplat Energy","city":"Nigeria","lat":6.536,"lon":3.2436},{"name":"Kuda Bank","city":"Nigeria","lat":6.6515,"lon":3.407},{"name":"Zenvus","city":"Nigeria","lat":6.464,"lon":3.498},{"name":"Zola Electric","city":"Tanzania","lat":-6.7655,"lon":39.0811},{"name":"M-Kopa","city":"Kenya","lat":-1.435,"lon":36.9436},{"name":"SolarNow","city":"Uganda","lat":0.2191,"lon":32.5568},{"name":"Grab Holdings","city":"Singapore","lat":1.2503,"lon":103.7359},{"name":"Sea Group","city":"Singapore","lat":1.4049,"lon":103.7808},{"name":"Razer","city":"Singapore","lat":1.2502,"lon":103.6765},{"name":"Trax","city":"Singapore","lat":1.4536,"lon":103.8187},{"name":"Ninja Van","city":"Singapore","lat":1.3516,"lon":103.8458},{"name":"Carousell","city":"Singapore","lat":1.2648,"lon":103.9267},{"name":"PatSnap","city":"Singapore","lat":1.396,"lon":103.9226},{"name":"Zilingo","city":"Singapore","lat":1.3953,"lon":103.9453},{"name":"ShopBack","city":"Singapore","lat":1.2688,"lon":103.9251},{"name":"PropertyGuru","city":"Singapore","lat":1.3761,"lon":103.7458},{"name":"GoTo Group","city":"Indonesia","lat":-6.2861,"lon":106.7437},{"name":"Traveloka","city":"Indonesia","lat":-6.1539,"lon":106.7615},{"name":"Bukalapak","city":"Indonesia","lat":-6.1324,"lon":106.902},{"name":"Ruangguru","city":"Indonesia","lat":-6.3495,"lon":106.8796},{"name":"Kopi Kenangan","city":"Indonesia","lat":-6.1999,"lon":106.9786},{"name":"Xendit","city":"Indonesia","lat":-6.1623,"lon":106.9709},{"name":"Akulaku","city":"Indonesia","lat":-6.1807,"lon":106.9181},{"name":"Halodoc","city":"Indonesia","lat":-6.0637,"lon":106.8544},{"name":"Alodokter","city":"Indonesia","lat":-6.2663,"lon":106.9953},{"name":"Kredivo","city":"Indonesia","lat":-6.261,"lon":106.8219},{"name":"Carsome","city":"Malaysia","lat":3.2596,"lon":101.666},{"name":"Aerodyne Group","city":"Malaysia","lat":3.0882,"lon":101.8325},{"name":"StoreHub","city":"Malaysia","lat":3.0245,"lon":101.7454},{"name":"iPrice Group","city":"Malaysia","lat":3.1054,"lon":101.6088},{"name":"PolicyStreet","city":"Malaysia","lat":3.1069,"lon":101.6228},{"name":"BigPay","city":"Malaysia","lat":3.2215,"lon":101.5865},{"name":"Cars24 Asia","city":"Malaysia","lat":3.2688,"lon":101.7547},{"name":"Boost","city":"Malaysia","lat":3.1459,"lon":101.7768},{"name":"Teleme","city":"Mongolia","lat":47.8183,"lon":106.8512},{"name":"Unitel Laos","city":"Laos","lat":17.9336,"lon":102.5073},{"name":"VNPay","city":"Vietnam","lat":10.6846,"lon":106.6045},{"name":"MoMo","city":"Vietnam","lat":10.7602,"lon":106.6445},{"name":"Tiki","city":"Vietnam","lat":10.8442,"lon":106.6171},{"name":"VNG","city":"Vietnam","lat":10.7629,"lon":106.7237},{"name":"Sky Mavis","city":"Vietnam","lat":10.7651,"lon":106.5182},{"name":"Base.vn","city":"Vietnam","lat":10.882,"lon":106.5509},{"name":"Haravan","city":"Vietnam","lat":10.7557,"lon":106.6507},{"name":"Sendo","city":"Vietnam","lat":10.8122,"lon":106.6311},{"name":"Abivin","city":"Vietnam","lat":10.7177,"lon":106.5881},{"name":"Lendbox","city":"India","lat":28.6374,"lon":77.1167},{"name":"Zerodha","city":"India","lat":28.5726,"lon":77.3071},{"name":"Freshworks","city":"India","lat":28.7119,"lon":77.1498},{"name":"Udaan","city":"India","lat":28.621,"lon":77.1932},{"name":"Razorpay","city":"India","lat":28.5235,"lon":77.146},{"name":"CRED","city":"India","lat":28.4646,"lon":77.3196},{"name":"Meesho","city":"India","lat":28.7229,"lon":77.1195},{"name":"Unacademy","city":"India","lat":28.4853,"lon":77.1352},{"name":"Byju’s India Ops","city":"India","lat":28.7599,"lon":77.3261},{"name":"Delhivery","city":"India","lat":28.5749,"lon":77.3326},{"name":"OYO India Unit","city":"India","lat":28.4851,"lon":77.2632},{"name":"PhonePe","city":"India","lat":28.6665,"lon":77.2077},{"name":"Swiggy","city":"India","lat":28.6131,"lon":77.1118},{"name":"Zomato Hyperpure","city":"India","lat":28.6753,"lon":77.2018},{"name":"Nykaa Beauty","city":"India","lat":28.5097,"lon":77.0906},{"name":"Urban Company","city":"India","lat":28.4995,"lon":77.1269},{"name":"ShareChat","city":"India","lat":28.5499,"lon":77.3294},{"name":"DailyHunt","city":"India","lat":28.7447,"lon":77.065},{"name":"PolicyBazaar","city":"India","lat":28.7073,"lon":77.172},{"name":"Lenskart","city":"India","lat":28.7587,"lon":77.2324},{"name":"Daraz","city":"Pakistan","lat":24.7296,"lon":67.1389},{"name":"Bykea","city":"Pakistan","lat":24.9073,"lon":66.928},{"name":"Bazaar Technologies","city":"Pakistan","lat":24.7704,"lon":66.857},{"name":"Finja","city":"Pakistan","lat":24.8381,"lon":66.9417},{"name":"Truck It In","city":"Pakistan","lat":24.8676,"lon":67.0606},{"name":"Careem","city":"UAE","lat":25.1489,"lon":55.379},{"name":"Kitopi","city":"UAE","lat":25.1799,"lon":55.4033},{"name":"Property Finder","city":"UAE","lat":25.1884,"lon":55.1898},{"name":"Fetchr","city":"UAE","lat":25.2757,"lon":55.2798},{"name":"Tabby","city":"UAE","lat":25.1378,"lon":55.2246},{"name":"Yalla Group","city":"UAE","lat":25.2673,"lon":55.41},{"name":"Anghami","city":"UAE","lat":25.1792,"lon":55.4062},{"name":"Network International","city":"UAE","lat":25.1254,"lon":55.2072},{"name":"Group42","city":"UAE","lat":25.3339,"lon":55.4188},{"name":"Bayzat","city":"UAE","lat":25.2056,"lon":55.4107},{"name":"STC Pay","city":"Saudi Arabia","lat":24.8091,"lon":46.8026},{"name":"Jahez","city":"Saudi Arabia","lat":24.6143,"lon":46.5639},{"name":"Foodics","city":"Saudi Arabia","lat":24.6454,"lon":46.5457},{"name":"Tamara","city":"Saudi Arabia","lat":24.6659,"lon":46.7888},{"name":"Sary","city":"Saudi Arabia","lat":24.753,"lon":46.8084},{"name":"Unifonic","city":"Saudi Arabia","lat":24.6077,"lon":46.6394},{"name":"Halan","city":"Saudi Arabia","lat":24.6694,"lon":46.6218},{"name":"HungerStation","city":"Saudi Arabia","lat":24.6714,"lon":46.6517},{"name":"Elm Company","city":"Saudi Arabia","lat":24.628,"lon":46.7057},{"name":"Rasan","city":"Saudi Arabia","lat":24.6889,"lon":46.535},{"name":"Trendyol","city":"Turkey","lat":40.9684,"lon":28.8385},{"name":"Hepsiburada","city":"Turkey","lat":40.9277,"lon":29.1243},{"name":"Getir","city":"Turkey","lat":40.8664,"lon":29.0449},{"name":"Peak Games","city":"Turkey","lat":41.1127,"lon":28.9581},{"name":"Insider","city":"Turkey","lat":40.9898,"lon":28.9502},{"name":"Dream Games","city":"Turkey","lat":41.1196,"lon":28.9505},{"name":"Marti","city":"Turkey","lat":41.0736,"lon":28.9435},{"name":"Papara","city":"Turkey","lat":41.1278,"lon":29.1224},{"name":"Paraşüt","city":"Turkey","lat":40.9298,"lon":29.0327},{"name":"Modanisa","city":"Turkey","lat":40.8723,"lon":29.1268},{"name":"Canva","city":"Australia","lat":-33.7233,"lon":151.1567},{"name":"Atlassian Asia Ops","city":"Australia","lat":-33.8326,"lon":151.3155},{"name":"Afterpay","city":"Australia","lat":-33.8048,"lon":151.2165},{"name":"SafetyCulture","city":"Australia","lat":-33.9659,"lon":151.1661},{"name":"Envato","city":"Australia","lat":-33.8722,"lon":151.3081},{"name":"SiteMinder","city":"Australia","lat":-33.759,"lon":151.3193},{"name":"Culture Amp","city":"Australia","lat":-33.8212,"lon":151.3576},{"name":"Airtasker","city":"Australia","lat":-33.7723,"lon":151.2964},{"name":"Deputy","city":"Australia","lat":-33.9446,"lon":151.1696},{"name":"Campaign Monitor","city":"Australia","lat":-33.8085,"lon":151.2497},{"name":"Xero Asia-Pacific","city":"New Zealand","lat":-36.9173,"lon":174.6716},{"name":"Rocket Lab","city":"New Zealand","lat":-36.7644,"lon":174.8827},{"name":"TradeMe","city":"NZ","lat":-36.8712,"lon":174.6894},{"name":"Vend POS","city":"New Zealand","lat":-36.7641,"lon":174.7008},{"name":"Pushpay","city":"New Zealand","lat":-36.9121,"lon":174.8695}];
+  
+  mediumCompaniesData.forEach(company => {
+    const color = '#ffff00'; // Yellow
+    
+    // Create text label sprite
+    const c = document.createElement('canvas');
+    c.width = 256;
+    c.height = 64;
+    const ctx = c.getContext('2d');
+    
+    // Stylized high-tech background
+    ctx.fillStyle = 'rgba(15, 10, 5, 0.85)';
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(20, 10);
+    ctx.lineTo(240, 10);
+    ctx.lineTo(240, 40);
+    ctx.lineTo(220, 54);
+    ctx.lineTo(10, 54);
+    ctx.lineTo(10, 20);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Text label
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 20px "Courier New", monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    
+    let displayName = company.name;
+    if (displayName.length > 15) displayName = displayName.substring(0, 14) + '.';
+    ctx.fillText(displayName.toUpperCase(), 64, 32);
+
+    // YELLOW SQUARE representation
+    ctx.fillStyle = color;
+    ctx.fillRect(18, 14, 36, 36);
+
+    const tex = new THREE.CanvasTexture(c);
+    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: true, opacity: 1.0 });
+    const sprite = new THREE.Sprite(mat);
+    sprite.scale.set(0.24, 0.06, 1);
+    
+    const pos = ll2v(company.lat, company.lon, GLOBE_R + 0.055);
+    sprite.position.copy(pos);
+    window.mediumCompaniesGroup.add(sprite);
+    sprite.userData = company;
+
+    // Glowing pinpoint YELLOW SQUARE (instead of dot)
+    const dotC = document.createElement('canvas'); dotC.width=64; dotC.height=64;
+    const dotCtx = dotC.getContext('2d');
+    dotCtx.fillStyle = color;
+    dotCtx.shadowBlur = 20;
+    dotCtx.shadowColor = color;
+    dotCtx.fillRect(16, 16, 32, 32); 
+    
+    const dotTex = new THREE.CanvasTexture(dotC);
+    const dotMat = new THREE.SpriteMaterial({ map: dotTex, transparent: true, depthTest: true, blending: THREE.AdditiveBlending });
+    const dotSprite = new THREE.Sprite(dotMat);
+    dotSprite.scale.set(0.08, 0.08, 1);
+    dotSprite.position.copy(ll2v(company.lat, company.lon, GLOBE_R + 0.05));
+    dotSprite.userData = company;
+    window.mediumCompaniesGroup.add(dotSprite);
+  });
+  console.log("Medium Companies Overlay Initialized.");
+}
+initMediumCompanies();
+
+window.africaCompaniesGroup = new THREE.Group();
+window.africaCompaniesGroup.visible = false;
+scene.add(window.africaCompaniesGroup);
+
+function initAfricaCompanies() {
+  const africaCompaniesData = [{"name":"Naspers","city":"Cape Town","lat":-33.9249,"lon":18.4241},{"name":"FirstRand","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Standard Bank Group","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Gold Fields","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Capitec Bank","city":"Stellenbosch","lat":-33.9321,"lon":18.8602},{"name":"Anglogold Ashanti","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Attijariwafa Bank","city":"Casablanca","lat":33.5731,"lon":-7.5898},{"name":"Vodacom Group","city":"Midrand","lat":-25.9965,"lon":28.1269},{"name":"MTN Group","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Maroc Telecom","city":"Rabat","lat":34.0209,"lon":-6.8416},{"name":"Anglo American Platinum","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Sanlam","city":"Bellville","lat":-33.8963,"lon":18.6294},{"name":"Harmony Gold Mining","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Shoprite","city":"Cape Town","lat":-33.9249,"lon":18.4241},{"name":"Absa Group","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Bid Corporation","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Airtel Africa","city":"Lagos","lat":6.5244,"lon":3.3792},{"name":"Discovery","city":"Sandton","lat":-26.1076,"lon":28.0567},{"name":"Nedbank Group","city":"Sandton","lat":-26.1076,"lon":28.0567},{"name":"Impala Platinum","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Managem","city":"Casablanca","lat":33.5731,"lon":-7.5898},{"name":"Banque Centrale Populaire","city":"Casablanca","lat":33.5731,"lon":-7.5898},{"name":"OUTsurance Group","city":"Centurion","lat":-25.8603,"lon":28.1894},{"name":"Marsa Maroc","city":"Casablanca","lat":33.5731,"lon":-7.5898},{"name":"Safaricom","city":"Nairobi","lat":-1.2921,"lon":36.8219},{"name":"TAQA Morocco","city":"Casablanca","lat":33.5731,"lon":-7.5898},{"name":"Kumba Iron Ore","city":"Centurion","lat":-25.8603,"lon":28.1894},{"name":"Dangote Cement","city":"Lagos","lat":6.5244,"lon":3.3792},{"name":"Pepkor","city":"Cape Town","lat":-33.9249,"lon":18.4241},{"name":"Com. Inter. Bank – Egypt (CIB)","city":"Cairo","lat":30.0444,"lon":31.2357},{"name":"BUA Foods","city":"Lagos","lat":6.5244,"lon":3.3792},{"name":"Reinet Investments","city":"Stellenbosch","lat":-33.9321,"lon":18.8602},{"name":"LafargeHolcim Maroc","city":"Casablanca","lat":33.5731,"lon":-7.5898},{"name":"Remgro","city":"Stellenbosch","lat":-33.9321,"lon":18.8602}];
+  
+  africaCompaniesData.forEach(company => {
+    const color = '#a020f0'; // Purple
+    
+    // Create text label sprite
+    const c = document.createElement('canvas');
+    c.width = 256;
+    c.height = 64;
+    const ctx = c.getContext('2d');
+    
+    // Stylized high-tech background
+    ctx.fillStyle = 'rgba(10, 5, 15, 0.85)';
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(20, 10);
+    ctx.lineTo(240, 10);
+    ctx.lineTo(240, 40);
+    ctx.lineTo(220, 54);
+    ctx.lineTo(10, 54);
+    ctx.lineTo(10, 20);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Text label
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 20px "Courier New", monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    
+    let displayName = company.name;
+    if (displayName.length > 15) displayName = displayName.substring(0, 14) + '.';
+    ctx.fillText(displayName.toUpperCase(), 64, 32);
+
+    // PURPLE SQUARE representation
+    ctx.fillStyle = color;
+    ctx.fillRect(18, 14, 36, 36);
+
+    const tex = new THREE.CanvasTexture(c);
+    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: true, opacity: 1.0 });
+    const sprite = new THREE.Sprite(mat);
+    sprite.scale.set(0.24, 0.06, 1);
+    
+    const pos = ll2v(company.lat, company.lon, GLOBE_R + 0.055);
+    sprite.position.copy(pos);
+    window.africaCompaniesGroup.add(sprite);
+    sprite.userData = company;
+
+    // Glowing pinpoint PURPLE SQUARE
+    const dotC = document.createElement('canvas'); dotC.width=64; dotC.height=64;
+    const dotCtx = dotC.getContext('2d');
+    dotCtx.fillStyle = color;
+    dotCtx.shadowBlur = 20;
+    dotCtx.shadowColor = color;
+    dotCtx.fillRect(16, 16, 32, 32); 
+    
+    const dotTex = new THREE.CanvasTexture(dotC);
+    const dotMat = new THREE.SpriteMaterial({ map: dotTex, transparent: true, depthTest: true, blending: THREE.AdditiveBlending });
+    const dotSprite = new THREE.Sprite(dotMat);
+    dotSprite.scale.set(0.08, 0.08, 1);
+    dotSprite.position.copy(ll2v(company.lat, company.lon, GLOBE_R + 0.05));
+    dotSprite.userData = company;
+    window.africaCompaniesGroup.add(dotSprite);
+  });
+  console.log("Africa Companies Overlay Initialized.");
+}
+initAfricaCompanies();
+
+window.microCompaniesGroup = new THREE.Group();
+window.microCompaniesGroup.visible = false;
+scene.add(window.microCompaniesGroup);
+
+function initMicroCompanies() {
+  const microCompaniesData = [{"name":"Majoo","city":"Indonesia","lat":-6.1116,"lon":106.9484},{"name":"GoComet","city":"Singapore","lat":1.4328,"lon":103.7195},{"name":"Manatal","city":"Thailand","lat":13.8939,"lon":100.3835},{"name":"Taxumo","city":"Philippines","lat":14.4718,"lon":120.8946},{"name":"Momos","city":"Singapore","lat":1.2939,"lon":103.7179},{"name":"GrowSari","city":"Philippines","lat":14.6786,"lon":121.0051},{"name":"Mekari","city":"Indonesia","lat":-6.1203,"lon":106.8357},{"name":"GudangAda","city":"Indonesia","lat":-6.2952,"lon":106.978},{"name":"Telio","city":"Vietnam","lat":10.9149,"lon":106.7347},{"name":"Dropee","city":"Malaysia","lat":3.08,"lon":101.5404},{"name":"Tinvio","city":"Singapore","lat":1.3339,"lon":103.8123},{"name":"JobHop","city":"Vietnam","lat":10.9352,"lon":106.7535},{"name":"Jet Commerce","city":"Indonesia","lat":-6.2233,"lon":106.731},{"name":"Nektar.ai","city":"Singapore","lat":1.4286,"lon":103.8601},{"name":"KiotViet","city":"Vietnam","lat":10.827,"lon":106.7334},{"name":"Moladin","city":"Indonesia","lat":-6.3576,"lon":106.7424},{"name":"TNG Digital","city":"Malaysia","lat":3.0699,"lon":101.6078}];
+  
+  microCompaniesData.forEach(company => {
+    const color = '#ff8800'; // Orange
+    
+    // Create text label sprite
+    const c = document.createElement('canvas');
+    c.width = 256;
+    c.height = 64;
+    const ctx = c.getContext('2d');
+    
+    // Stylized high-tech background
+    ctx.fillStyle = 'rgba(15, 8, 0, 0.85)';
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(20, 10);
+    ctx.lineTo(240, 10);
+    ctx.lineTo(240, 40);
+    ctx.lineTo(220, 54);
+    ctx.lineTo(10, 54);
+    ctx.lineTo(10, 20);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Text label
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 20px "Courier New", monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    
+    let displayName = company.name;
+    if (displayName.length > 15) displayName = displayName.substring(0, 14) + '.';
+    ctx.fillText(displayName.toUpperCase(), 64, 32);
+
+    // ORANGE SQUARE representation
+    ctx.fillStyle = color;
+    ctx.fillRect(18, 14, 36, 36);
+
+    const tex = new THREE.CanvasTexture(c);
+    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: true, opacity: 1.0 });
+    const sprite = new THREE.Sprite(mat);
+    sprite.scale.set(0.24, 0.06, 1);
+    
+    const pos = ll2v(company.lat, company.lon, GLOBE_R + 0.055);
+    sprite.position.copy(pos);
+    window.microCompaniesGroup.add(sprite);
+    sprite.userData = company;
+
+    // Glowing pinpoint ORANGE SQUARE
+    const dotC = document.createElement('canvas'); dotC.width=64; dotC.height=64;
+    const dotCtx = dotC.getContext('2d');
+    dotCtx.fillStyle = color;
+    dotCtx.shadowBlur = 20;
+    dotCtx.shadowColor = color;
+    dotCtx.fillRect(16, 16, 32, 32); 
+    
+    const dotTex = new THREE.CanvasTexture(dotC);
+    const dotMat = new THREE.SpriteMaterial({ map: dotTex, transparent: true, depthTest: true, blending: THREE.AdditiveBlending });
+    const dotSprite = new THREE.Sprite(dotMat);
+    dotSprite.scale.set(0.08, 0.08, 1);
+    dotSprite.position.copy(ll2v(company.lat, company.lon, GLOBE_R + 0.05));
+    dotSprite.userData = company;
+    window.microCompaniesGroup.add(dotSprite);
+  });
+  console.log("Micro Companies Overlay Initialized.");
+}
+initMicroCompanies();
+
+window.russiaAsiaCompaniesGroup = new THREE.Group();
+window.russiaAsiaCompaniesGroup.visible = false;
+scene.add(window.russiaAsiaCompaniesGroup);
+
+function initRussiaAsiaCompanies() {
+  const russiaAsiaCompaniesData = [{"name":"Gazprom","city":"Russia","lat":55.7558,"lon":37.6173},{"name":"Sberbank","city":"Russia","lat":55.7333,"lon":37.5888},{"name":"Rosneft","city":"Russia","lat":55.75,"lon":37.6167},{"name":"Lukoil","city":"Russia","lat":55.76,"lon":37.62},{"name":"Norilsk Nickel","city":"Russia","lat":69.3333,"lon":88.2167},{"name":"Surgutneftegas","city":"Russia","lat":61.25,"lon":73.4167},{"name":"Novatek","city":"Russia","lat":64.9167,"lon":77.7833},{"name":"Transneft","city":"Russia","lat":55.76,"lon":37.6},{"name":"X5 Retail Group","city":"Russia","lat":55.75,"lon":37.61},{"name":"VTB Bank","city":"Russia","lat":59.9311,"lon":30.3609},{"name":"Rostec","city":"Russia","lat":55.7512,"lon":37.6184},{"name":"Tatneft","city":"Russia","lat":54.9,"lon":52.3},{"name":"Magnit","city":"Russia","lat":45.0393,"lon":38.9872},{"name":"Severstal","city":"Russia","lat":59.1333,"lon":37.9},{"name":"Evraz","city":"Russia","lat":55.75,"lon":37.55},{"name":"NLMK","city":"Russia","lat":52.6167,"lon":39.6},{"name":"Yandex","city":"Russia","lat":55.7335,"lon":37.5888},{"name":"VK","city":"Russia","lat":55.7963,"lon":37.5386},{"name":"Rosatom","city":"Russia","lat":55.7512,"lon":37.6184},{"name":"Alrosa","city":"Russia","lat":62.5333,"lon":113.9667},{"name":"Rusal","city":"Russia","lat":55.75,"lon":37.6167},{"name":"Mechel","city":"Russia","lat":55.75,"lon":37.6},{"name":"MMK","city":"Russia","lat":53.4167,"lon":59.0333},{"name":"PhosAgro","city":"Russia","lat":55.75,"lon":37.6},{"name":"Rosseti","city":"Russia","lat":55.75,"lon":37.6},{"name":"Inter RAO","city":"Russia","lat":55.75,"lon":37.6},{"name":"Aeroflot","city":"Russia","lat":55.9726,"lon":37.4126},{"name":"Sistema","city":"Russia","lat":55.75,"lon":37.61},{"name":"RusHydro","city":"Russia","lat":56.0153,"lon":92.8932},{"name":"Polymetal","city":"Russia","lat":59.9311,"lon":30.3609},{"name":"Polyus","city":"Russia","lat":55.75,"lon":37.6167},{"name":"Uralkali","city":"Russia","lat":59.4,"lon":56.8},{"name":"PIK Group","city":"Russia","lat":55.75,"lon":37.6},{"name":"M.video","city":"Russia","lat":55.75,"lon":37.6},{"name":"Tinkoff","city":"Russia","lat":55.75,"lon":37.6},{"name":"EuroChem","city":"Russia","lat":55.75,"lon":37.6},{"name":"Sibur","city":"Russia","lat":55.75,"lon":37.6},{"name":"SUEK","city":"Russia","lat":55.75,"lon":37.6},{"name":"AvtoVAZ","city":"Russia","lat":53.5,"lon":49.4167},{"name":"Kamaz","city":"Russia","lat":55.7333,"lon":52.3333},{"name":"UAC","city":"Russia","lat":55.75,"lon":37.6167},{"name":"KazMunayGas","city":"Kazakhstan","lat":51.1694,"lon":71.4491},{"name":"Tengizchevroil","city":"Kazakhstan","lat":47.1167,"lon":51.8833},{"name":"Kazatomprom","city":"Kazakhstan","lat":51.1694,"lon":71.4491},{"name":"Kaspi.kz","city":"Kazakhstan","lat":43.222,"lon":76.8512},{"name":"Eurasian Resources Group","city":"Kazakhstan","lat":51.1694,"lon":71.4491},{"name":"KAZ Minerals","city":"Kazakhstan","lat":43.222,"lon":76.8512},{"name":"Halyk Bank","city":"Kazakhstan","lat":43.222,"lon":76.8512},{"name":"KazTransOil","city":"Kazakhstan","lat":51.1694,"lon":71.4491},{"name":"Kazakhstan Temir Zholy","city":"Kazakhstan","lat":51.1694,"lon":71.4491}];
+  
+  russiaAsiaCompaniesData.forEach(company => {
+    const color = '#ffffff'; // White
+    
+    // Create text label sprite
+    const c = document.createElement('canvas');
+    c.width = 256;
+    c.height = 64;
+    const ctx = c.getContext('2d');
+    
+    // Stylized high-tech background
+    ctx.fillStyle = 'rgba(15, 15, 15, 0.85)';
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(20, 10);
+    ctx.lineTo(240, 10);
+    ctx.lineTo(240, 40);
+    ctx.lineTo(220, 54);
+    ctx.lineTo(10, 54);
+    ctx.lineTo(10, 20);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Text label
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 20px "Courier New", monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    
+    let displayName = company.name;
+    if (displayName.length > 15) displayName = displayName.substring(0, 14) + '.';
+    ctx.fillText(displayName.toUpperCase(), 64, 32);
+
+    // WHITE SQUARE representation
+    ctx.fillStyle = color;
+    ctx.fillRect(18, 14, 36, 36);
+
+    const tex = new THREE.CanvasTexture(c);
+    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: true, opacity: 1.0 });
+    const sprite = new THREE.Sprite(mat);
+    sprite.scale.set(0.24, 0.06, 1);
+    
+    const pos = ll2v(company.lat, company.lon, GLOBE_R + 0.055);
+    sprite.position.copy(pos);
+    window.russiaAsiaCompaniesGroup.add(sprite);
+    sprite.userData = company;
+
+    // Glowing pinpoint WHITE SQUARE
+    const dotC = document.createElement('canvas'); dotC.width=64; dotC.height=64;
+    const dotCtx = dotC.getContext('2d');
+    dotCtx.fillStyle = color;
+    dotCtx.shadowBlur = 20;
+    dotCtx.shadowColor = color;
+    dotCtx.fillRect(16, 16, 32, 32); 
+    
+    const dotTex = new THREE.CanvasTexture(dotC);
+    const dotMat = new THREE.SpriteMaterial({ map: dotTex, transparent: true, depthTest: true, blending: THREE.AdditiveBlending });
+    const dotSprite = new THREE.Sprite(dotMat);
+    dotSprite.scale.set(0.08, 0.08, 1);
+    dotSprite.position.copy(ll2v(company.lat, company.lon, GLOBE_R + 0.05));
+    dotSprite.userData = company;
+    window.russiaAsiaCompaniesGroup.add(dotSprite);
+  });
+  console.log("Russia & Asia Companies Overlay Initialized.");
+}
+initRussiaAsiaCompanies();
+
+window.datacentersGroup = new THREE.Group();
+window.datacentersGroup.visible = false;
+scene.add(window.datacentersGroup);
+
+function initDatacenters() {
+    const dcData = [
+      { "name": "China Telecom Inner Mongolia Information Park", "operator": "China Telecom", "location": "China (Hohhot, Inner Mongolia)", "lat": 40.84, "lon": 111.75 },
+      { "name": "China Mobile Data Center", "operator": "China Mobile", "location": "China (Hohhot, Inner Mongolia)", "lat": 40.84, "lon": 111.75 },
+      { "name": "The Citadel Campus", "operator": "Switch", "location": "USA (Tahoe Reno, Nevada)", "lat": 39.53, "lon": -119.81 },
+      { "name": "Harbin Data Center", "operator": "China Mobile", "location": "China (Harbin, Heilongjiang)", "lat": 45.8, "lon": 126.53 },
+      { "name": "Alibaba Cloud Zhangbei Data Center", "operator": "Alibaba Cloud", "location": "China (Zhangbei County, Hebei)", "lat": 41.15, "lon": 114.71 },
+      { "name": "Range International Information Hub", "operator": "Range International (IBM partner)", "location": "China (Langfang, Hebei)", "lat": 39.53, "lon": 116.7 },
+      { "name": "Switch SuperNAP Campus", "operator": "Switch", "location": "USA (Las Vegas, Nevada)", "lat": 36.17, "lon": -115.13 },
+      { "name": "Google Council Bluffs", "operator": "Google", "location": "USA (Council Bluffs, Iowa)", "lat": 41.26, "lon": -95.86 },
+      { "name": "CWL1 Data Centre", "operator": "Vantage Data Centers", "location": "UK (Newport, Wales)", "lat": 51.58, "lon": -2.99 },
+      { "name": "Utah Data Center (Bumblehive)", "operator": "NSA", "location": "USA (Bluffdale, Utah)", "lat": 40.45, "lon": -111.93 },
+      { "name": "Apple Mesa Data Center", "operator": "Apple", "location": "USA (Mesa, Arizona)", "lat": 33.41, "lon": -111.83 },
+      { "name": "Lakeside Technology Center", "operator": "Digital Realty", "location": "USA (Chicago, Illinois)", "lat": 41.87, "lon": -87.62 },
+      { "name": "QTS Atlanta Metro", "operator": "QTS Realty Trust", "location": "USA (Atlanta, Georgia)", "lat": 33.74, "lon": -84.38 },
+      { "name": "CoreSite Reston VA3", "operator": "American Tower (CoreSite)", "location": "USA (Northern Virginia)", "lat": 38.84, "lon": -77.42 },
+      { "name": "Yotta NM1", "operator": "Yotta Infrastructure", "location": "India (Panvel, Maharashtra)", "lat": 18.98, "lon": 73.11 },
+      { "name": "Covilhã Data Center", "operator": "Altice Portugal", "location": "Portugal (Covilhã)", "lat": 40.28, "lon": -7.5 },
+      { "name": "Portugal Telecom Complex", "operator": "Portugal Telecom", "location": "Portugal (Covilhã)", "lat": 40.28, "lon": -7.5 },
+      { "name": "Microsoft Quincy", "operator": "Microsoft", "location": "USA (Quincy, Washington)", "lat": 47.23, "lon": -119.85 },
+      { "name": "FRA 1", "operator": "NTT Global Data Centers", "location": "Germany (Frankfurt)", "lat": 50.11, "lon": 8.68 },
+      { "name": "DuPont Fabros ACC7", "operator": "Digital Realty", "location": "USA (Ashburn, Virginia)", "lat": 39.04, "lon": -77.48 }
+    ];
+
+    const dcGeo = new THREE.SphereGeometry(0.025, 32, 32); 
+    const dcMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff }); // Using bright cyan matching CYBER aesthetic
+
+    dcData.forEach(dc => {
+        const mesh = new THREE.Mesh(dcGeo, dcMat);
+        const latRad = dc.lat * Math.PI / 180;
+        const lonRad = -dc.lon * Math.PI / 180;
+        const r = typeof GLOBE_R !== 'undefined' ? GLOBE_R + 0.005 : 1.005;
+        mesh.position.set(
+            r * Math.cos(latRad) * Math.cos(lonRad),
+            r * Math.sin(latRad),
+            r * Math.cos(latRad) * Math.sin(lonRad)
+        );
+        mesh.lookAt(new THREE.Vector3(0,0,0));
+        
+        mesh.userData = { 
+            name: "DATACENTER: " + dc.name.toUpperCase(), 
+            val: dc.operator.toUpperCase(), 
+            ind: 'DATA', 
+            hq: dc.location.toUpperCase(), 
+            rev: 'ACTIVE' 
+        };
+        window.datacentersGroup.add(mesh);
+    });
+}
+initDatacenters();
+
+
+
+// --- CYBER WARFARE STATE ---
+window.cyberWarfareInterval = null;
+window.activeAttacks = {}; // Track which meshes are under attack { uuid: { mesh, startTime, type } }
+// ---------------------------
+
 window.globalTradeGroup = new THREE.Group();
 window.globalTradeGroup.visible = false;
 scene.add(window.globalTradeGroup);
@@ -2600,10 +3174,56 @@ scene.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:0.01
 const globeGeo = new THREE.SphereGeometry(GLOBE_R,64,64);
 const texLoader = new THREE.TextureLoader();
 const earthTex  = texLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/land_ocean_ice_cloud_2048.jpg');
-const globeMat  = new THREE.MeshPhongMaterial({map:earthTex,specular:new THREE.Color(0x003355),shininess:15});
+
+// Set up clipping planes to cut out a front-right quarter
+const clipPlanes = [
+  new THREE.Plane(new THREE.Vector3(1,  0, 0), 0),
+  new THREE.Plane(new THREE.Vector3(0, -1, 0), 0),
+  new THREE.Plane(new THREE.Vector3(0,  0, 1), 0)
+];
+
+const globeMat  = new THREE.MeshPhongMaterial({
+  map:earthTex,
+  specular:new THREE.Color(0x003355),
+  shininess:15,
+  side: THREE.FrontSide,
+  clipIntersection: true,
+  clippingPlanes: [] // active only on FIRE skin
+});
 const globeMesh = new THREE.Mesh(globeGeo, globeMat);
 window.globeMesh = globeMesh;
 scene.add(globeMesh);
+
+renderer.localClippingEnabled = true;
+
+// Inner core layers for FIRE cutaway
+window.earthCutawayGroup = new THREE.Group();
+window.earthCutawayGroup.visible = false;
+scene.add(window.earthCutawayGroup);
+
+function createCutawayLayer(radius, color, specular, shininess) {
+  const geo = new THREE.SphereGeometry(radius, 64, 64);
+  const mat = new THREE.MeshPhongMaterial({
+    color: color, 
+    specular: specular, 
+    shininess: shininess,
+    side: THREE.FrontSide,
+    clipIntersection: true,
+    clippingPlanes: clipPlanes
+  });
+  return new THREE.Mesh(geo, mat);
+}
+
+// Mantle (Red/Orange)
+const mantleMesh = createCutawayLayer(GLOBE_R * 0.98, 0xff2200, 0x551100, 10);
+// Outer Core (Orange/Yellow)
+const outerCoreMesh = createCutawayLayer(GLOBE_R * 0.55, 0xff8800, 0xaa5500, 30);
+// Inner Core (Bright Yellow/White)
+const innerCoreMesh = createCutawayLayer(GLOBE_R * 0.2, 0xffffaa, 0xffffff, 100);
+
+window.earthCutawayGroup.add(mantleMesh);
+window.earthCutawayGroup.add(outerCoreMesh);
+window.earthCutawayGroup.add(innerCoreMesh);
 
 // =====================================================================
 // INTERNATIONAL SPACE STATION (ISS)
@@ -3564,8 +4184,8 @@ function buildTroopSprites() {
     sprite.position.copy(pos);
     sprite.scale.set(.12,.06,1);
     
-    // Hide if currently on a clean skin
-    sprite.visible = !(window.SKINS && window.SKINS[window.currentSkinIndex] && window.SKINS[window.currentSkinIndex].cleanGlobe);
+    // Hide if currently on a clean skin, BLK skin, or CYBER skin (which is the UI "Black Skin")
+    sprite.visible = !(window.SKINS && window.SKINS[window.currentSkinIndex] && (window.SKINS[window.currentSkinIndex].cleanGlobe || window.SKINS[window.currentSkinIndex].hideTroops));
     
     sprite.userData = {iso};
     scene.add(sprite);
@@ -3609,8 +4229,8 @@ function updateTroopSprite(iso) {
   sprite.position.copy(ll2v(cd.lat, cd.lon, GLOBE_R+.04));
   sprite.scale.set(.12,.06,1);
   
-  // Hide if currently on a clean skin
-  sprite.visible = !(window.SKINS && window.SKINS[window.currentSkinIndex] && window.SKINS[window.currentSkinIndex].cleanGlobe);
+  // Hide if currently on a clean skin, BLK skin, or CYBER skin (which is the UI "Black Skin")
+  sprite.visible = !(window.SKINS && window.SKINS[window.currentSkinIndex] && (window.SKINS[window.currentSkinIndex].cleanGlobe || window.SKINS[window.currentSkinIndex].hideTroops));
   
   sprite.userData={iso};
   scene.add(sprite);
@@ -3955,6 +4575,59 @@ function updatePhaseUI() {
 }
 
 // =====================================================================
+// SATELLITE HACKING MINIGAME
+// =====================================================================
+let satHackTimer = null;
+let satHackProgress = 0;
+let satHackTimeLeft = 10.0;
+
+function openSatelliteHackMinigame() {
+  document.getElementById('sat-hack-modal').classList.add('show');
+  satHackProgress = 0;
+  satHackTimeLeft = 10.0;
+  document.getElementById('sat-hack-bar').style.width = '0%';
+  document.getElementById('sat-hack-time').innerText = `Time remaining: ${satHackTimeLeft.toFixed(1)}s`;
+  document.getElementById('btn-do-hack').style.display = 'inline-block';
+  
+  if (satHackTimer) clearInterval(satHackTimer);
+  satHackTimer = setInterval(() => {
+    satHackTimeLeft -= 0.1;
+    if (satHackTimeLeft <= 0) {
+      satHackTimeLeft = 0;
+      clearInterval(satHackTimer);
+      document.getElementById('sat-hack-time').innerText = "HACK FAILED. ACCESS DENIED.";
+      document.getElementById('sat-hack-time').style.color = '#ff0000';
+      document.getElementById('btn-do-hack').style.display = 'none';
+      setTimeout(closeSatHack, 2000);
+    } else {
+      document.getElementById('sat-hack-time').innerText = `Time remaining: ${satHackTimeLeft.toFixed(1)}s`;
+      document.getElementById('sat-hack-time').style.color = '#fff';
+    }
+  }, 100);
+}
+
+function doSatHack() {
+  satHackProgress += 15; // Requires ~7 clicks
+  if (satHackProgress > 100) satHackProgress = 100;
+  document.getElementById('sat-hack-bar').style.width = satHackProgress + '%';
+  if (satHackProgress >= 100) {
+    clearInterval(satHackTimer);
+    document.getElementById('sat-hack-time').innerText = "HACK SUCCESSFUL. INTEL OBTAINED.";
+    document.getElementById('sat-hack-time').style.color = '#00ff00';
+    document.getElementById('btn-do-hack').style.display = 'none';
+    if(typeof triggerNewsEvent !== 'undefined') {
+       triggerNewsEvent("SATELLITE COMPROMISED: CYBER INTEL GATHERED");
+    }
+    setTimeout(closeSatHack, 2000);
+  }
+}
+
+function closeSatHack() {
+  document.getElementById('sat-hack-modal').classList.remove('show');
+  if (satHackTimer) clearInterval(satHackTimer);
+}
+
+// =====================================================================
 // CLICK HANDLING — single unified handler
 // =====================================================================
 const ray = new THREE.Raycaster();
@@ -3979,6 +4652,39 @@ function handleGlobeClick(e) {
         if(typeof _sfxClick !== 'undefined') _sfxClick();
         playWebcamFeed(camData.webcamId, camData.title);
         return; // Consume click
+      }
+    }
+  }
+
+  // 1.5 Intercept clicks on Satellites for Hacking Minigame
+  if (window.currentSkinIndex === 1 || window.currentSkinIndex === 2) {
+    mouse.x = (e.clientX/innerWidth)*2-1;
+    mouse.y = -(e.clientY/innerHeight)*2+1;
+    ray.setFromCamera(mouse, camera);
+    
+    const satSprites = [];
+    if (typeof redSats !== 'undefined') {
+      redSats.forEach(s => {
+        if(s.pivot && s.pivot.children && s.pivot.children.length > 0) {
+          // Verify it's a Sprite and not a Cylinder (laser)
+          if (s.pivot.children[0].type === "Sprite") {
+            satSprites.push(s.pivot.children[0]);
+          }
+        }
+      });
+    }
+    if (typeof ambients !== 'undefined') {
+      ambients.forEach(a => {
+        if (a.type === 3 && a.sprite) satSprites.push(a.sprite);
+      });
+    }
+    
+    if (satSprites.length > 0) {
+      const satHits = ray.intersectObjects(satSprites, false);
+      if (satHits.length > 0) {
+        if(typeof _sfxClick !== 'undefined') _sfxClick();
+        openSatelliteHackMinigame();
+        return; 
       }
     }
   }
@@ -4059,6 +4765,45 @@ function handleGlobeClick(e) {
       return; // Intercept and stop further map propagation
     }
   }
+
+  // Intercept clicks on Company Markers (Black Skin only)
+  if (window.currentSkinIndex === 5) {
+    let allCompanies = [];
+    if (window.companiesGroup && window.companiesGroup.visible) allCompanies = allCompanies.concat(window.companiesGroup.children);
+    if (window.mediumCompaniesGroup && window.mediumCompaniesGroup.visible) allCompanies = allCompanies.concat(window.mediumCompaniesGroup.children);
+    if (window.africaCompaniesGroup && window.africaCompaniesGroup.visible) allCompanies = allCompanies.concat(window.africaCompaniesGroup.children);
+    if (window.microCompaniesGroup && window.microCompaniesGroup.visible) allCompanies = allCompanies.concat(window.microCompaniesGroup.children);
+    if (window.russiaAsiaCompaniesGroup && window.russiaAsiaCompaniesGroup.visible) allCompanies = allCompanies.concat(window.russiaAsiaCompaniesGroup.children);
+
+    if (allCompanies.length > 0) {
+      const compHits = ray.intersectObjects(allCompanies, false);
+      if (compHits.length > 0) {
+        if (typeof _sfxClick !== 'undefined') _sfxClick();
+        const compData = compHits[0].object.userData;
+        if (compData && compData.name) {
+          showCompanyInfo(compData);
+          return; // Intercept click
+        }
+      }
+    }
+    
+    // Disable any interaction with countries/borders on the Black Skin
+    return;
+  }
+
+  // Intercept clicks on Datacenters (Cyber Skin)
+  if (window.currentSkinIndex === 4 && window.datacentersGroup && window.datacentersGroup.visible && window.datacentersGroup.children.length > 0) {
+    const dcHits = ray.intersectObjects(window.datacentersGroup.children, false);
+    if (dcHits.length > 0) {
+      if (typeof _sfxClick !== 'undefined') _sfxClick();
+      const dcData = dcHits[0].object.userData;
+      if (dcData && dcData.name) {
+        showCompanyInfo(dcData);
+        return; // Intercept click
+      }
+    }
+  }
+
 
   // Prioritize clicking exactly on a Troop Box
   let iso = null;
@@ -4863,7 +5608,7 @@ function setLog(msg){
   if (!msg) return;
 
   const isExcluded = msg.startsWith('⟳') || msg.startsWith('✓ ') || msg.startsWith('⚙') || msg.startsWith('LOADING');
-  const isAI = msg.includes('RAINCLAUDE') || msg.includes('RAINCLOUD') || msg.includes('SATELLITE RECONNAISSANCE SCAN');
+  const isAI = msg.includes('RAINCLAUDE') || msg.includes('SATELLITE RECONNAISSANCE SCAN');
 
   if (!isExcluded) {
     if (isAI) {
@@ -5371,7 +6116,7 @@ function spawnSonarSweep3D(lat, lon) {
 }
 
 function scheduleRandomSonarSweep() {
-  const delay = 5 * 1000; // Exact 5 seconds (was 15s)
+  const delay = 60 * 1000; // Exact 60 seconds
   
   setTimeout(() => {
     const isos = Object.keys(countryData);
@@ -5380,7 +6125,12 @@ function scheduleRandomSonarSweep() {
       const cd = countryData[targetIso];
       if (cd && cd.lat !== undefined && cd.lon !== undefined) {
         spawnSonarSweep3D(cd.lat, cd.lon);
-        triggerRedAlert(`SATELLITE RECON DETECTED [ LAT: ${cd.lat.toFixed(2)}, LON: ${cd.lon.toFixed(2)} ]`);
+        
+        const now = Date.now();
+        if (!window.lastSatReconAlert || now - window.lastSatReconAlert > 60000) {
+          window.lastSatReconAlert = now;
+          triggerRedAlert(`SATELLITE RECON DETECTED [ LAT: ${cd.lat.toFixed(2)}, LON: ${cd.lon.toFixed(2)} ]`);
+        }
         setLog(`📡 SATELLITE RECONNAISSANCE SCAN over ${cd.name}`);
       }
     }
@@ -5617,7 +6367,11 @@ function scheduleRandomSpaceRocket() {
 // =====================================================================
 // VISUAL EFFECTS FOR AI
 // =====================================================================
-function triggerRedAlert(msg) {
+let lastRedAlertTime = 0;
+function triggerRedAlert(msg, force=false) {
+  const now = Date.now();
+  if (!force && now - lastRedAlertTime < 20000) return;
+  lastRedAlertTime = now;
   const el = document.getElementById('news-alert');
   const txt = document.getElementById('na-text');
   const label = document.getElementById('na-label');
@@ -5628,8 +6382,8 @@ function triggerRedAlert(msg) {
   el.classList.remove('show');
   void el.offsetWidth; // trigger reflow to reset animation
   
-  label.style.color = '#ff0000';
-  txt.style.color = '#ff4444';
+  label.style.color = '#000000';
+  txt.style.color = '#000000';
   txt.textContent = msg;
   el.classList.add('show');
   
@@ -5649,6 +6403,66 @@ function pulseRedCountry(iso) {
     if(t > 4) { clearInterval(iv); refreshBorder(iso); }
   }, 100);
 }
+
+function pulseGreenCountry(iso) {
+  const g=countryBorders[iso]; if(!g) return;
+  let t = 0;
+  const iv = setInterval(()=>{
+    t += 0.2;
+    g.traverse(obj=>{ if(obj.isLine) obj.material.color.set(t%1 < 0.5 ? 0x00ff00 : 0x005500); });
+    if(t > 4) { clearInterval(iv); refreshBorder(iso); }
+  }, 100);
+}
+
+function cyberFlashingEffect() {
+  if (window.currentSkinIndex !== 5 || typeof countryBorders === 'undefined') return;
+  const isos = Object.keys(countryBorders);
+  if (isos.length === 0) return;
+  
+  const count = Math.floor(Math.random() * 4) + 2; // 2 to 5 random countries
+  const flashColor = 0x00ff00; // Cyber Green
+  
+  for (let i = 0; i < count; i++) {
+    const randomIso = isos[Math.floor(Math.random() * isos.length)];
+    const g = countryBorders[randomIso];
+    if (!g) continue;
+    const c = GS.countries[randomIso];
+    if (!c) continue;
+    
+    let col = getOwnerColor(c.owner);
+    // If neutral or invalid, default to generic grey
+    const origColor = col ? col.int : 0x444444; 
+    
+    let ticks = 0;
+    const iv = setInterval(() => {
+      ticks++;
+      // Stop flashing if we switch away from black skin
+      if (window.currentSkinIndex !== 5) {
+        clearInterval(iv);
+        refreshBorder(randomIso);
+        return;
+      }
+      
+      // Toggle between original color and flash color
+      g.traverse(obj => { 
+        if (obj.isLine) {
+          obj.material.color.set(ticks % 2 === 0 ? flashColor : origColor); 
+        }
+      });
+      
+      // 120 ticks * 250ms = 30 seconds duration
+      if (ticks >= 120) { 
+        clearInterval(iv); 
+        refreshBorder(randomIso); 
+      }
+    }, 250);
+  }
+}
+
+// Flash 2-5 random country borders every 30 seconds on black skin for cyber effect
+setInterval(() => {
+  cyberFlashingEffect();
+}, 30000);
 
 function globeFlickerEffect() {
   const origColor = globeMesh.material.color.getHex();
@@ -6498,6 +7312,9 @@ function animate() {
     m.glow.material.opacity=pulse;
     m.plume.material.opacity=0.5+0.4*Math.sin(m.time*30);
 
+    const _s = window.SKINS && window.SKINS[window.currentSkinIndex];
+    m.group.visible = !(_s && _s.name === 'BLK');
+
     if(m.progress>=1){
       scene.remove(m.group);
       spawnExplosion3D(countryData[m.toIso]?.lat,countryData[m.toIso]?.lon,m.col);
@@ -6516,6 +7333,9 @@ function animate() {
     const pos = currentDir.multiplyScalar(currentH);
     
     ft.sprite.position.copy(pos);
+    
+    const _s = window.SKINS && window.SKINS[window.currentSkinIndex];
+    ft.sprite.visible = !(_s && (_s.cleanGlobe || _s.hideTroops));
     
     if(ft.progress>=1){
       scene.remove(ft.group);
@@ -6635,6 +7455,9 @@ function animate() {
       fj.body.material.rotation = angle - Math.PI/2;
     }
 
+    const _skin = window.SKINS && window.SKINS[window.currentSkinIndex];
+    fj.group.visible = !(_skin && _skin.name === 'BLK');
+
     if(fj.progress>=1){
       scene.remove(fj.group);
       fakeJets3D.splice(i,1);
@@ -6740,7 +7563,8 @@ function animate() {
   }
 
   // Cull troop sprites that are behind the globe
-  const isCleanGlobe = window.SKINS && window.SKINS[window.currentSkinIndex] && window.SKINS[window.currentSkinIndex].cleanGlobe;
+  const _currSkin = window.SKINS && window.SKINS[window.currentSkinIndex];
+  const isCleanGlobe = _currSkin && (_currSkin.cleanGlobe || _currSkin.hideTroops);
   const camDir = camera.position.clone().normalize();
   for (const [, sprite] of Object.entries(troopSprites)) {
     if (!sprite.position) continue;
@@ -6805,6 +7629,67 @@ function animate() {
       sprite.scale.set(s, s, 1);
       sprite.material.opacity = 0.5 + 0.5 * Math.sin(sprite.userData.phase * 0.5);
     });
+  }
+
+  // --- CYBER WARFARE ANIMATION LOOP (BLK SKIN) ---
+  if (window.activeAttacks && Object.keys(window.activeAttacks).length > 0) {
+      const now = Date.now();
+      const termBox = document.getElementById('d0-reasoning');
+      
+      for (const uuid in window.activeAttacks) {
+          const attack = window.activeAttacks[uuid];
+          const mesh = attack.mesh;
+          
+          if (now < attack.startTime) continue; // Staggered start delay wait
+          
+          const elapsed = now - attack.startTime;
+          
+          if (attack.state === 'attack') {
+              // Pulse Red
+              const pulse = (Math.sin(elapsed * 0.01) + 1) / 2; // 0 to 1
+              mesh.material.color.setHex(attack.mesh.userData.baseColor);
+              mesh.material.color.lerp(new THREE.Color(0xff0000), pulse);
+              
+              if (elapsed > attack.defenseTime) {
+                  // Resolve Attack
+                  const isDefended = Math.random() < 0.75; // 75% chance Gemini intercepts
+                  
+                  if (isDefended) {
+                      attack.state = 'defend';
+                      mesh.material.color.setHex(0x00ff00); // Flashes Green
+                      
+                      if (termBox && Math.random() < 0.2) { // 20% log rate
+                          const div = document.createElement('div');
+                          div.innerHTML = `> [NET] <span style="color:#0f8">Gemini intercepted</span> intrusion at <span style="color:#fff">${mesh.userData.name}</span>!`;
+                          termBox.appendChild(div);
+                          if (termBox.childElementCount > 30) termBox.removeChild(termBox.firstChild);
+                          termBox.scrollTop = termBox.scrollHeight;
+                      }
+                  } else {
+                      attack.state = 'breach';
+                      mesh.material.color.setHex(0x880000); // Dark Red
+                      
+                      if (termBox && Math.random() < 0.2) {
+                          const div = document.createElement('div');
+                          div.innerHTML = `> [ERR] <span style="color:#f24">BREACH DETECTED</span> at <span style="color:#fff">${mesh.userData.name}</span>! Data compromised.`;
+                          termBox.appendChild(div);
+                          if (termBox.childElementCount > 30) termBox.removeChild(termBox.firstChild);
+                          termBox.scrollTop = termBox.scrollHeight;
+                      }
+                      
+                      if (typeof _sfxError !== 'undefined' && Math.random() < 0.3) _sfxError();
+                  }
+                  
+                  attack.resolveTime = now;
+              }
+          } else if (attack.state === 'defend' || attack.state === 'breach') {
+              // Wait 1.5 seconds then clear
+              if (now - attack.resolveTime > 1500) {
+                  mesh.material.color.setHex(attack.mesh.userData.baseColor);
+                  delete window.activeAttacks[uuid];
+              }
+          }
+      }
   }
 
   renderer.render(scene,camera);
@@ -8270,17 +9155,16 @@ document.getElementById('btn-toggle-intel').addEventListener('click', () => {
   }
 });
 
-// Skin Manager: 0 = LIVE (White), 1 = RED, 2 = GREEN, 3 = YELLOW, 4 = CYBER, 5 = BLK
+// Skin Manager: 0 = LIVE (White), 1 = RED, 2 = GREEN, 3 = YELLOW, 4 = CYBER, 5 = BLK, 6 = FIRE, 7 = HST
 window.currentSkinIndex = 0;
 window.isRedSkin = false; // Legacy flag preserved for scripts that might check it directly
 
 const SKINS = [
-  { name: 'LIVE',  color: 0xffffff, btnText: '🔴 RED SKIN',    btnClass: '',              showOverlays: false, cleanGlobe: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
-  { name: 'RED',   color: 0xff2222, btnText: '🟢 GRN SKIN',  btnClass: 'active-normal', showOverlays: true,  cleanGlobe: false, showResources: false, showArms: false, showBoats: true, isPremium: false },
-  { name: 'GREEN', color: 0x22ff22, btnText: '🟡 YLW SKIN',   btnClass: 'active-normal', showOverlays: false, cleanGlobe: true,  showResources: true,  showArms: false, showBoats: false, isPremium: false },
-  { name: 'YELLOW',color: 0xffff22, btnText: '💠 CYBR SKIN',  btnClass: 'active-normal', showOverlays: false, cleanGlobe: true,  showResources: false, showArms: true,  showBoats: false, isPremium: false },
-  { name: 'CYBER', color: 0x00f0ff, btnText: '⬛ BLK SKIN',    btnClass: 'active-premium',showOverlays: true,  cleanGlobe: false, showResources: true,  showArms: true,  showBoats: true,  isPremium: false },
-  { name: 'BLK',   color: 0x050505, btnText: '🌍 LIVE SKIN',   btnClass: 'active-normal', showOverlays: false, cleanGlobe: false, showResources: false, showArms: false, showBoats: false, isPremium: false }
+  { name: 'LIVE',  color: 0xffffff, btnText: '🔴 RED SKIN',    btnClass: '',              showOverlays: false, cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
+  { name: 'RED',   color: 0xff2222, btnText: '🟢 GRN SKIN',  btnClass: 'active-normal', showOverlays: true,  cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: true, isPremium: false },
+  { name: 'GREEN', color: 0x22ff22, btnText: '💠 CYBR SKIN',   btnClass: 'active-normal', showOverlays: false, cleanGlobe: true,  hideTroops: true,  showResources: true,  showArms: true, showBoats: false, isPremium: false },
+  { name: 'CYBER', color: 0x00f0ff, btnText: '⬛ BLK SKIN',    btnClass: 'active-premium',showOverlays: false,  cleanGlobe: true, hideTroops: true,  showResources: false,  showArms: false,  showBoats: false,  isPremium: false },
+  { name: 'BLK',   color: 0x050505, btnText: '🌍 LIVE SKIN',   btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true,  showResources: false, showArms: false, showBoats: false, isPremium: false }
 ];
 window.SKINS = SKINS;
 
@@ -8302,13 +9186,21 @@ window.toggleRedSkin = function() {
   }
 
   // Apply Globe Color
-  if (typeof globeMat !== 'undefined') globeMat.color.setHex(skin.color);
-  if (skin.name === 'CYBER') {
-      globeMat.emissive.setHex(0x0055ff);
-      globeMat.wireframe = true;
-  } else {
-      globeMat.emissive.setHex(skin.name === 'LIVE' ? 0x222222 : 0x000000);
-      globeMat.wireframe = false;
+  if (typeof globeMat !== 'undefined') {
+      globeMat.color.setHex(skin.color);
+      if (skin.name === 'CYBER') {
+          globeMat.emissive.setHex(0x0055ff);
+          globeMat.wireframe = true;
+          globeMat.opacity = 1.0;
+      } else {
+          globeMat.emissive.setHex(skin.name === 'LIVE' ? 0x222222 : 0x000000);
+          globeMat.wireframe = false;
+          globeMat.transparent = true;
+          globeMat.opacity = 0.9;
+      }
+
+      globeMat.clippingPlanes = [];
+      if (window.earthCutawayGroup) window.earthCutawayGroup.visible = false;
   }
   
   // Update UI Button
@@ -8341,16 +9233,56 @@ window.toggleRedSkin = function() {
   
   // Toggle Global Trade Network
   if (typeof window.globalTradeGroup !== 'undefined') {
-     window.globalTradeGroup.visible = (skin.name === 'GREEN' || skin.name === 'YELLOW');
+     window.globalTradeGroup.visible = (skin.name === 'GREEN');
   }
   
-  // Toggle Metals Trade map layer (YELLOW Skin specific)
+  // Toggle Metals Trade  // Elements normally toggled by specific skins
   if (typeof window.metalsTradeGroup !== 'undefined') {
-     window.metalsTradeGroup.visible = (skin.name === 'YELLOW');
+     window.metalsTradeGroup.visible = (skin.name === 'GREEN');
+  }
+
+  // Toggle Companies Overlay (BLK Skin specific)
+  if (typeof window.companiesGroup !== 'undefined') {
+     window.companiesGroup.visible = (skin.name === 'BLK');
+     window.mediumCompaniesGroup.visible = (skin.name === 'BLK');
+     window.africaCompaniesGroup.visible = (skin.name === 'BLK');
+     window.microCompaniesGroup.visible = (skin.name === 'BLK');
+     window.russiaAsiaCompaniesGroup.visible = (skin.name === 'BLK');
+  }
+
+  // Toggle Datacenters (CYBER Skin specific)
+  if (typeof window.datacentersGroup !== 'undefined') {
+      window.datacentersGroup.visible = (skin.name === 'CYBER');
+  }
+
+  // Handle Cyber Warfare mechanics on BLK skin
+  if (skin.name === 'BLK') {
+      if (!window.cyberWarfareInterval) {
+          window.cyberWarfareInterval = setInterval(window.launchCyberAttack, 1000 + Math.random() * 3000); // 1-4 seconds
+      }
+  } else {
+      if (window.cyberWarfareInterval) {
+          clearInterval(window.cyberWarfareInterval);
+          window.cyberWarfareInterval = null;
+      }
+      // Reset any active flashing
+      for (const uuid in window.activeAttacks) {
+          const atk = window.activeAttacks[uuid];
+          if (atk && atk.mesh && atk.mesh.material && atk.mesh.userData.baseColor) {
+              atk.mesh.material.color.setHex(atk.mesh.userData.baseColor);
+          }
+      }
+      window.activeAttacks = {};
+  }
+
+  // Toggle Cybercrime Map Label
+  const cyberLabel = document.getElementById('cybercrime-map-label');
+  if (cyberLabel) {
+      cyberLabel.style.display = (skin.name === 'BLK') ? 'block' : 'none';
   }
   
   // Toggle base map elements (Troops and Borders)
-  const isClean = skin.cleanGlobe;
+  const isClean = skin.cleanGlobe || skin.hideTroops;
   if (typeof troopSprites !== 'undefined') {
     Object.values(troopSprites).forEach(sprite => {
       sprite.visible = !isClean;
@@ -8361,7 +9293,7 @@ window.toggleRedSkin = function() {
   }
   if (typeof countryBorders !== 'undefined') {
     Object.values(countryBorders).forEach(group => {
-      group.visible = true; // Always show red/blue borders on all skins
+      group.visible = true;
     });
   }
 
@@ -8898,7 +9830,7 @@ const MockTradeEconomy = (function() {
       if (countries.length === 0) return;
 
       const skin = window.SKINS && window.SKINS[window.currentSkinIndex] ? window.SKINS[window.currentSkinIndex].name : null;
-      if (skin !== 'GREEN' && skin !== 'YELLOW') return;
+      if (skin !== 'GREEN') return;
 
       turn++;
       let log = `\n--- TURN ${turn} (SKIN: ${skin}) ---\n\nPRODUCTION:\n`;
@@ -9040,6 +9972,79 @@ const MockTradeEconomy = (function() {
 
   return { countries, runTurn };
 })();
+
+// =====================================================================
+// CYBER WARFARE LOGIC (RAINCLAUDE VS GEMINI)
+// =====================================================================
+window.launchCyberAttack = function() {
+    if (window.SKINS[window.currentSkinIndex].name !== 'BLK') return;
+
+    // Aggregate all active company groups on BLK skin
+    const potentialTargets = [];
+    const groups = [window.companiesGroup, window.mediumCompaniesGroup, window.africaCompaniesGroup, window.microCompaniesGroup, window.russiaAsiaCompaniesGroup];
+    
+    groups.forEach(group => {
+        if (group && group.children) {
+            potentialTargets.push(...group.children.filter(mesh => mesh.visible && mesh.userData));
+        }
+    });
+
+    if (potentialTargets.length === 0) return;
+
+    const termBox = document.getElementById('d1-reasoning');
+
+    // Launch up to 300 simultaneous attacks (Massive 5x multiplier per user request)
+    const attacksToLaunch = Math.min(300, potentialTargets.length);
+    for (let i = 0; i < attacksToLaunch; i++) {
+        // Pick a random company
+        const targetMesh = potentialTargets[Math.floor(Math.random() * potentialTargets.length)];
+        if (!targetMesh) continue;
+
+        // Ensure it's not already under attack
+        if (window.activeAttacks[targetMesh.uuid]) continue;
+
+        // Cache the base color if we haven't already
+        if (!targetMesh.userData.baseColor) {
+            if (targetMesh.material && targetMesh.material.color) {
+                targetMesh.userData.baseColor = targetMesh.material.color.getHex();
+            } else {
+                targetMesh.userData.baseColor = 0xffffff;
+            }
+        }
+
+        // Register attack
+        window.activeAttacks[targetMesh.uuid] = {
+            mesh: targetMesh,
+            startTime: Date.now() + (Math.random() * 500), // Slight stagger
+            state: 'attack',
+            defenseTime: 2500 + Math.random() * 2000 // Lasts 2.5 - 4.5 seconds before resolution
+        };
+
+        // Log to Rainclaude Terminal
+        if (termBox && Math.random() < 0.2) { // Only log 20% to avoid spamming the DOM too hard
+            const attackTypes = [
+                "brute-force attack",
+                "SQL injection",
+                "zero-day exploit",
+                "DDoS saturation",
+                "ransomware payload",
+                "DNS spoofing",
+                "phishing vector",
+                "buffer overflow",
+                "man-in-the-middle",
+                "rootkit insertion"
+            ];
+            const randAttack = attackTypes[Math.floor(Math.random() * attackTypes.length)];
+            const div = document.createElement('div');
+            div.innerHTML = `> [CYBER] Rainclaude initiating ${randAttack} on <span style="color:#fff">${targetMesh.userData.name}</span>...`;
+            termBox.appendChild(div);
+            if (termBox.childElementCount > 30) termBox.removeChild(termBox.firstChild);
+            termBox.scrollTop = termBox.scrollHeight;
+        }
+    }
+    
+    if (typeof _sfxError !== 'undefined' && Math.random() < 0.3) _sfxError();
+};
 
 // =====================================================================
 // HACKER TERMINAL LOGIC (RAINCLAUDE EASTER EGG)

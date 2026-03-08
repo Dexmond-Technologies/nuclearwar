@@ -1,0 +1,31 @@
+# AI COMBAT SIMULATION ENHANCEMENTS
+(Server-side implementation to maintain the 30-second graphical frontend handoff)
+
+1. FOG OF WAR & ESPIONAGE
+- AIs no longer have perfect visibility of the state of the world or the enemy's resources.
+- Introduce an "Espionage" action where AIs can spend budget/resources to gather intelligence on the opponent's troop movements, budget, or tech level.
+- Lack of intelligence introduces uncertainty in AI decision-making.
+
+2. CYBER WARFARE ("Fuzzing")
+- AIs can launch cyber attacks to temporarily "fuzz" or corrupt the data (game state) sent to the opposing AI's prompt.
+- Example: If Claude cyber-attacks Gemini, Gemini might receive incorrect troop counts or false reports of incoming nukes, forcing it to make decisions based on bad intel.
+
+3. STRATEGIC TECH TREE & INFRASTRUCTURE
+- Economic Development: Invest in infrastructure to increase passive income (GDP multiplier).
+- Defensive Tech: Research "Iron Dome" or advanced missile defense to increase the chance of intercepting enemy nukes.
+- WMD Research: Scale up the cost and time required to build nukes, making them a strategic end-game choice rather than an easily spammable weapon.
+
+4. MULTI-DOMAIN COMBAT (Air & Sea)
+- Activate the `ships` and `airwings` data fields in the database.
+- Naval Blockades: Use ships to cut off income from enemy-controlled island nations or coastal regions.
+- Air Strikes: Use airwings to bomb enemy infrastructure, lowering their GDP/income without fully occupying the country with ground troops.
+- Introduces a rock-paper-scissors element to combat unit production.
+
+5. PROXY WARS & SUBVERSION
+- Covert operations allow an AI to spend budget to incrementally increase the `instabilityLevel` of an enemy-controlled country.
+- If instability reaches 100%, the country might rebel, becoming neutral or defecting to the subverting AI without direct military confrontation.
+- Allows for "Cold War" style mechanics where direct conflict is avoided.
+
+6. ASYMMETRIC WIN CONDITIONS
+- Allow AIs to pursue different paths to victory (e.g., Economic dominance, Tech superiority, Global population control) instead of just total military annihilation.
+- The server dynamically calculates scores and updates the frontend purely through the existing Red Alert bars and JSON state updates.

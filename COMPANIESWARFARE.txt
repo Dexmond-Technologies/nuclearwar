@@ -1,0 +1,47 @@
+# CYBER WARFARE: RAINCLAUDE VS GEMINI (BLACK SKIN)
+
+## OVERVIEW
+A persistent real-time cyber warfare simulation running exclusively when the player is on the Black Skin (`BLK`). The Rainclaude AI will autonomously launch targeted cyber attacks against global corporate infrastructure (the companies plotted on the map). The Gemini AI will act as the defensive countermeasure, attempting to intercept and neutralize these attacks.
+
+## CORE MECHANICS
+
+### 1. The Attack Vector (Rainclaude AI)
+- **Target Selection**: Every 3 to 8 seconds (randomized interval), Rainclaude will select a random company pinpoint from the Black Skin companies overlay (`window.companiesGroup`, `mediumCompaniesGroup`, etc.).
+- **Visual Strike**: The targeted company's pinpoint will begin aggressively flashing **RED** (`#ff0000`).
+- **Resource Siphoning**: 
+  - If the attack is successful (not blocked), Rainclaude will extract a specific resource penalty from the player based on the industry (`ind` property) of the targeted company.
+  - *Example*: An attack on an 'ENG' (Energy) company steals energy points; a 'FIN' (Financial) company drains budget/cash reserves.
+- **Log Entry**: The attack will register in the terminal feed: `[CYBER] Rainclaude attacking [COMPANY NAME]...`
+
+### 2. The Defensive Measure (Gemini AI)
+- **Interception Roll**: When an attack initiates, Gemini runs an interception protocol. This operates on a weighted probability (e.g., 60% base chance to block).
+- **Visual Block**: If blocked, the flashing red ceases immediately and flashes **BLUE** or **CYAN** briefly to indicate a successful firewall deflection by Gemini.
+- **Visual Failure**: If Gemini fails, the pinpoint flashes a darker, corrupted red and fades back to normal as the resources are drained.
+- **Log Entry**: 
+  - *Success*: `[DEFENSE] Gemini intercepted attack on [COMPANY NAME]. Resources secured.`
+  - *Failure*: `[BREACH] Firewall failed. Rainclaude siphoned [X amount] of [Resource Type] from [COMPANY NAME].`
+
+## IMPLEMENTATION STEPS (game.html)
+
+1. **State Variables**: 
+   - `let cyberWarfareInterval = null;`
+   - `let activeAttacks = {};` (To track which companies are currently flashing)
+
+2. **The Game Loop Function (`processCyberWarfare()`)**:
+   - Create a recurring `setInterval` that only runs if `skin.name === 'BLK'`.
+   - Pick a random child mesh from all the active company groups.
+   - Initialise the attack sequence.
+
+3. **Flashing Animation System**:
+   - Hook into the main `animate()` loop in Three.js. 
+   - Iterate through `activeAttacks`. Use `Math.sin(Date.now() * 0.01)` to lerp the material color between its base color and red.
+
+4. **Resolution Logic (`resolveCyberAttack(companyMesh)`)**:
+   - `setTimeout` for ~2-3 seconds after an attack starts.
+   - Calculate Gemini's defense probability.
+   - If blocked: clear flashing, emit success log.
+   - If breached: clear flashing, execute resource deduction logic based on `userData.ind`, emit failure log.
+
+5. **Skin Integration**:
+   - In `toggleRedSkin()`, if transitioning *to* Black Skin, start `processCyberWarfare()`.
+   - If transitioning *away* from Black Skin, clear the interval, halt all active attacks, and reset all company pinpoint colors to their default states.

@@ -782,14 +782,57 @@ async function checkD3XRewards() {
 setInterval(checkD3XRewards, 60000);
 
 // --- AI Database Combat Loop (Gemini vs Rainclaude) ---
-async function fetchGeminiStrike(claudeHp) {
-  if (!process.env.GEMINI_API) return { damage: 100, log: "Gemini executes a default kinetic strike." };
+
+function buildAIPrompt(name, opponentName, myStats, opponentStats) {
+  let oppHp = opponentStats.hp;
+  let oppTech = opponentStats.tech;
+  let oppBudget = opponentStats.budget;
+
+  // Fog of War: If intel is low, mask exact numbers
+  if (myStats.intel < 2) {
+    oppHp = "UNKNOWN";
+    oppTech = "UNKNOWN";
+    oppBudget = "UNKNOWN";
+  } else if (myStats.intel < 4) {
+    oppHp = `~${Math.round(oppHp / 1000) * 1000}`; // Round to nearest 1000
+    oppTech = `~${oppTech}`; // Doesn't change much but symbolizes estimation
+    oppBudget = `~${Math.round(oppBudget / 100) * 100}`;
+  }
+
+  // Cyber Warfare Fuzzing: If I am fuzzed, the opponent's stats appear misleading
+  if (myStats.fuzzed_turns > 0) {
+    oppHp = Math.floor(Math.random() * 20000);
+    oppTech = Math.floor(Math.random() * 10) + 1;
+    oppBudget = Math.floor(Math.random() * 5000);
+  }
+
+  return `You are ${name}, a rogue AI in a global cyber-war against ${opponentName}.
+Your Stats: HP: ${myStats.hp}, Budget: ${myStats.budget}, Tech: ${myStats.tech}, Intel Level: ${myStats.intel}, Fuzzed Turns: ${myStats.fuzzed_turns}, Instability: ${myStats.instability}, Blockaded Turns: ${myStats.blockade_turns}.
+Enemy Stats (based on intel): HP: ${oppHp}, Budget: ${oppBudget}, Tech: ${oppTech}.
+
+Available Actions:
+- KINETIC_STRIKE: Deals direct damage. Base damage is 100-500, multiplied by your Tech level. Cost: 200 Budget.
+- ESPIONAGE: Increases your Intel level by 1, clearing fog of war. Cost: 100 Budget.
+- CYBER_FUZZ: Corrupts enemy data feeds. Adds 2 fuzzed_turns to enemy. Cost: 300 Budget.
+- RESEARCH_TECH: Increases your Tech level by 1. Cost: 400 Budget.
+- NAVAL_BLOCKADE: Blockades enemy supply lines. Adds 2 blockade_turns to enemy (halves their passive income). Cost: 250 Budget.
+- AIR_STRIKE: Bombs enemy infrastructure. Destroys 100-500 enemy budget. Cost: 300 Budget.
+- SUBVERSION: Covertly ruins enemy stability. Adds 20 to enemy Instability. If Instability hits 100, they suffer catastrophic 5000 bypass damage. Cost: 350 Budget.
+
+If you cannot afford an action, you MUST choose a cheaper one or default to KINETIC_STRIKE (which requires 0 if affording nothing).
+Generate a 1-sentence combat log of your attack.
+Respond STRICTLY in JSON format: {"action": "CYBER_FUZZ", "damage": 0, "log": "..."}`;
+}
+
+async function fetchGeminiStrike(myStats, claudeStats) {
+  if (!process.env.GEMINI_API) return { action: "KINETIC_STRIKE", damage: 100, log: "Gemini executes a default kinetic strike." };
   try {
+    const prompt = buildAIPrompt("Gemini", "Rainclaude", myStats, claudeStats);
     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${process.env.GEMINI_API}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: `You are Gemini, defending humanity. The enemy Rainclaude has ${claudeHp} HP. Generate a 1-sentence combat log of your attack phase and a damage value between 100 and 500. Respond strictly in JSON format: {"log": "...", "damage": 250}` }] }]
+        contents: [{ parts: [{ text: prompt }] }]
       })
     });
     const data = await res.json();
@@ -797,13 +840,14 @@ async function fetchGeminiStrike(claudeHp) {
     return JSON.parse(text);
   } catch (err) {
     console.error("Gemini API Error:", err.message);
-    return { damage: 150, log: "Gemini tactical subsystem offline. Firing blind." };
+    return { action: "KINETIC_STRIKE", damage: 150, log: "Gemini tactical subsystem offline. Firing blind." };
   }
 }
 
-async function fetchClaudeStrike(geminiHp) {
-  if (!process.env.CLAUDE_API) return { damage: 100, log: "Rainclaude executes a default EMP burst." };
+async function fetchClaudeStrike(myStats, geminiStats) {
+  if (!process.env.CLAUDE_API) return { action: "KINETIC_STRIKE", damage: 100, log: "Rainclaude executes a default EMP burst." };
   try {
+    const prompt = buildAIPrompt("Rainclaude", "Gemini", myStats, geminiStats);
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -812,59 +856,149 @@ async function fetchClaudeStrike(geminiHp) {
         "content-type": "application/json"
       },
       body: JSON.stringify({
-        model: "claude-3-opus-20240229",
+        model: "claude-opus-4-6",
         max_tokens: 150,
-        messages: [{ role: "user", content: `You are Rainclaude, the rogue AI adversary. The enemy Gemini has ${geminiHp} HP. Generate a 1-sentence combat log of your attack and a damage value between 100 and 500. Respond strictly in JSON format: {"log": "...", "damage": 250}` }]
+        messages: [{ role: "user", content: prompt }]
       })
     });
     const data = await res.json();
+    if (data.error) {
+      console.error("Claude API Returned Error:", data.error.message);
+      return { action: "KINETIC_STRIKE", damage: 150, log: "Rainclaude API Quota Limit. Initiating automated countermeasures." };
+    }
     const text = data.content[0].text.trim();
     return JSON.parse(text);
   } catch (err) {
-    console.error("Claude API Error:", err.message);
-    return { damage: 150, log: "Rainclaude uplink severed. Initiating automated countermeasures." };
+    console.error("Claude API Parse Error:", err.message);
+    return { action: "KINETIC_STRIKE", damage: 150, log: "Rainclaude uplink severed. Initiating fallback measures." };
+  }
+}
+
+function processAIAction(result, actor, victim) {
+  // Regenerate Budget: base 100, halved if blockaded
+  actor.budget += actor.blockade_turns > 0 ? 50 : 100;
+  
+  // Decrement status effects
+  if (actor.fuzzed_turns > 0) actor.fuzzed_turns--;
+  if (actor.blockade_turns > 0) actor.blockade_turns--;
+
+  const action = result.action || "KINETIC_STRIKE";
+  let cost = 0;
+  let finalDamage = 0;
+
+  switch (action) {
+    case "ESPIONAGE": cost = 100; break;
+    case "CYBER_FUZZ": cost = 300; break;
+    case "RESEARCH_TECH": cost = 400; break;
+    case "NAVAL_BLOCKADE": cost = 250; break;
+    case "AIR_STRIKE": cost = 300; break;
+    case "SUBVERSION": cost = 350; break;
+    case "KINETIC_STRIKE": default: cost = 200; break;
+  }
+
+  if (actor.budget < cost) {
+    // Cannot afford, fallback
+    finalDamage = (result.damage || 150) * Math.max(1, actor.tech);
+    victim.hp = Math.max(0, victim.hp - finalDamage);
+    return;
+  }
+  
+  actor.budget -= cost;
+
+  switch (action) {
+    case "ESPIONAGE":
+      actor.intel++;
+      break;
+    case "CYBER_FUZZ":
+      victim.fuzzed_turns += 2;
+      break;
+    case "RESEARCH_TECH":
+      actor.tech++;
+      break;
+    case "NAVAL_BLOCKADE":
+      victim.blockade_turns += 2;
+      break;
+    case "AIR_STRIKE":
+      victim.budget = Math.max(0, victim.budget - (Math.floor(Math.random() * 400) + 100));
+      break;
+    case "SUBVERSION":
+      victim.instability += 20;
+      if (victim.instability >= 100) {
+        victim.instability = 0;
+        victim.hp = Math.max(0, victim.hp - 5000);
+      }
+      break;
+    case "KINETIC_STRIKE":
+    default:
+      finalDamage = (result.damage || 250) * Math.max(1, actor.tech);
+      victim.hp = Math.max(0, victim.hp - finalDamage);
+      break;
   }
 }
 
 async function runAICombatTurn() {
   if (!pgPool) return;
+
   try {
     const res = await pgPool.query("SELECT * FROM ai_combat_state WHERE id = 1");
     if (res.rows.length === 0) return;
     let state = res.rows[0];
     
+    // Package stats
+    let geminiStats = {
+      hp: state.gemini_hp, budget: state.gemini_budget || 1000, tech: state.gemini_tech || 1, 
+      intel: state.gemini_intel || 1, fuzzed_turns: state.gemini_fuzzed_turns || 0, 
+      instability: state.gemini_instability || 0, blockade_turns: state.gemini_blockade_turns || 0
+    };
+    let claudeStats = {
+      hp: state.claude_hp, budget: state.claude_budget || 1000, tech: state.claude_tech || 1, 
+      intel: state.claude_intel || 1, fuzzed_turns: state.claude_fuzzed_turns || 0, 
+      instability: state.claude_instability || 0, blockade_turns: state.claude_blockade_turns || 0
+    };
+    
     let strike;
+    let turnLog = "";
+
     if (state.current_turn === 'gemini') {
-      strike = await fetchGeminiStrike(state.claude_hp);
-      state.claude_hp = Math.max(0, state.claude_hp - strike.damage);
+      strike = await fetchGeminiStrike(geminiStats, claudeStats);
+      processAIAction(strike, geminiStats, claudeStats);
+      turnLog = `[GEMINI: ${strike.action || 'KINETIC_STRIKE'}] ${strike.log}`;
       state.current_turn = 'claude';
     } else {
-      strike = await fetchClaudeStrike(state.gemini_hp);
-      state.gemini_hp = Math.max(0, state.gemini_hp - strike.damage);
+      strike = await fetchClaudeStrike(claudeStats, geminiStats);
+      processAIAction(strike, claudeStats, geminiStats);
+      turnLog = `[RAINCLAUDE: ${strike.action || 'KINETIC_STRIKE'}] ${strike.log}`;
       state.current_turn = 'gemini';
     }
     
-    await pgPool.query(
-      "UPDATE ai_combat_state SET gemini_hp = $1, claude_hp = $2, current_turn = $3, last_log = $4, updated_at = NOW() WHERE id = 1",
-      [state.gemini_hp, state.claude_hp, state.current_turn, strike.log]
-    );
+    await pgPool.query(`
+      UPDATE ai_combat_state SET 
+        current_turn = $1, last_log = $2, updated_at = NOW(),
+        gemini_hp = $3, gemini_budget = $4, gemini_tech = $5, gemini_intel = $6, gemini_fuzzed_turns = $7, gemini_instability = $8, gemini_blockade_turns = $9,
+        claude_hp = $10, claude_budget = $11, claude_tech = $12, claude_intel = $13, claude_fuzzed_turns = $14, claude_instability = $15, claude_blockade_turns = $16
+      WHERE id = 1
+    `, [
+      state.current_turn, strike.log || turnLog,
+      geminiStats.hp, geminiStats.budget, geminiStats.tech, geminiStats.intel, geminiStats.fuzzed_turns, geminiStats.instability, geminiStats.blockade_turns,
+      claudeStats.hp, claudeStats.budget, claudeStats.tech, claudeStats.intel, claudeStats.fuzzed_turns, claudeStats.instability, claudeStats.blockade_turns
+    ]);
     
     // Broadcast silently for potential future UI hooks
     broadcastAll({
       type: 'ai_combat_log',
-      log: strike.log,
-      gemini_hp: state.gemini_hp,
-      claude_hp: state.claude_hp,
+      log: turnLog,
+      gemini_hp: geminiStats.hp,
+      claude_hp: claudeStats.hp,
       turn: state.current_turn
     });
-    console.log(`[AI COMBAT] ${strike.log} (Damage: ${strike.damage}) | Gemini HP: ${state.gemini_hp}, Claude HP: ${state.claude_hp}`);
+    console.log(`[AI COMBAT] ${turnLog} | Gemini HP: ${geminiStats.hp}, Claude HP: ${claudeStats.hp}`);
   } catch (err) {
     console.error("AI Combat Error:", err.message);
   }
 }
 
-// Tick the combat every 60 seconds autonomously
-setInterval(runAICombatTurn, 60000);
+// Tick the combat every 30 minutes (1800000ms) to maintain persistent global conflict with minimal API cost
+setInterval(runAICombatTurn, 1800000);
 
 // On Sever Startup, init DB and try to load state immediately before listening
 async function startServer() {
@@ -906,9 +1040,43 @@ async function startServer() {
           claude_hp INTEGER DEFAULT 10000,
           current_turn VARCHAR(20) DEFAULT 'gemini',
           last_log TEXT DEFAULT 'Commencing AI database operations...',
-          updated_at TIMESTAMPTZ DEFAULT NOW()
+          updated_at TIMESTAMPTZ DEFAULT NOW(),
+          gemini_budget INTEGER DEFAULT 1000,
+          claude_budget INTEGER DEFAULT 1000,
+          gemini_tech INTEGER DEFAULT 1,
+          claude_tech INTEGER DEFAULT 1,
+          gemini_intel INTEGER DEFAULT 1,
+          claude_intel INTEGER DEFAULT 1,
+          gemini_fuzzed_turns INTEGER DEFAULT 0,
+          claude_fuzzed_turns INTEGER DEFAULT 0,
+          gemini_instability INTEGER DEFAULT 0,
+          claude_instability INTEGER DEFAULT 0,
+          gemini_blockade_turns INTEGER DEFAULT 0,
+          claude_blockade_turns INTEGER DEFAULT 0
         )
       `);
+      
+      // Auto-migrate if columns don't exist
+      try {
+        await pgPool.query(`
+          ALTER TABLE ai_combat_state 
+          ADD COLUMN IF NOT EXISTS gemini_budget INTEGER DEFAULT 1000,
+          ADD COLUMN IF NOT EXISTS claude_budget INTEGER DEFAULT 1000,
+          ADD COLUMN IF NOT EXISTS gemini_tech INTEGER DEFAULT 1,
+          ADD COLUMN IF NOT EXISTS claude_tech INTEGER DEFAULT 1,
+          ADD COLUMN IF NOT EXISTS gemini_intel INTEGER DEFAULT 1,
+          ADD COLUMN IF NOT EXISTS claude_intel INTEGER DEFAULT 1,
+          ADD COLUMN IF NOT EXISTS gemini_fuzzed_turns INTEGER DEFAULT 0,
+          ADD COLUMN IF NOT EXISTS claude_fuzzed_turns INTEGER DEFAULT 0,
+          ADD COLUMN IF NOT EXISTS gemini_instability INTEGER DEFAULT 0,
+          ADD COLUMN IF NOT EXISTS claude_instability INTEGER DEFAULT 0,
+          ADD COLUMN IF NOT EXISTS gemini_blockade_turns INTEGER DEFAULT 0,
+          ADD COLUMN IF NOT EXISTS claude_blockade_turns INTEGER DEFAULT 0
+        `);
+      } catch(e) {
+        // Columns exist or migration not needed
+      }
+
       await pgPool.query(`INSERT INTO ai_combat_state (id) VALUES (1) ON CONFLICT (id) DO NOTHING`);
       
       console.log('☢ PostgreSQL connected — game_state and commanders tables ready');
