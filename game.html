@@ -2643,6 +2643,7 @@ function initCompanies() {
     sprite.position.copy(pos);
     window.companiesGroup.add(sprite);
 
+    company.color = color;
     // Store data for raycaster
     sprite.userData = company;
 
@@ -2749,6 +2750,24 @@ function showCompanyInfo(compData) {
   const charSum = compData.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   const assetLabel = cyberAssets[charSum % cyberAssets.length];
   
+    // Multi-Tier Strategic Asset labeling based on Company Color
+    let assetClassStr = "STRATEGIC ASSET DETECTED";
+    if (window.currentSkinIndex === 3) {
+      assetClassStr = 'ASSET: ' + assetLabel;
+    } else if (window.currentSkinIndex === 4) {
+      if (compData.color === '#00f0ff') {
+        assetClassStr = "GLOBAL TECH HUB DETECTED"; 
+      } else if (compData.color === '#ffff00') {
+        assetClassStr = "FINANCE & LOGISTICS NODE DETECTED";
+      } else if (compData.color === '#00ff00') {
+        assetClassStr = "NATURAL RESOURCE ASSET DETECTED"; 
+      } else if (compData.color === '#ff8800') {
+        assetClassStr = "EMERGING MARKET HUB DETECTED"; 
+      } else if (compData.color === '#4488ff') {
+        assetClassStr = "HEAVY INDUSTRY & ENERGY DETECTED"; 
+      }
+    }
+
   modal.innerHTML = `
     <div style="position:absolute;top:10px;right:15px;cursor:pointer;color:#f24;font-weight:bold;" onclick="document.getElementById('company-info-modal').style.display='none'">X</div>
     <div style="margin-bottom:15px;">
@@ -2761,7 +2780,7 @@ function showCompanyInfo(compData) {
         <div><span style="color:#0f8">LAT:</span> ${compData.lat !== undefined ? compData.lat.toFixed(4) : '---'}</div>
         <div><span style="color:#0f8">LON:</span> ${compData.lon !== undefined ? compData.lon.toFixed(4) : '---'}</div>
     </div>
-    <div style="margin-top:15px;font-size:12px;color:#ffff00;letter-spacing:1px;font-weight:bold;">${window.currentSkinIndex === 3 ? 'ASSET: ' + assetLabel : 'STRATEGIC ASSET DETECTED'}</div>
+    <div style="margin-top:15px;font-size:12px;color:${compData.color || '#ffff00'};letter-spacing:1px;font-weight:bold;">${assetClassStr}</div>
   `;
   modal.style.display = 'block';
 }
@@ -2807,6 +2826,8 @@ function initMediumCompanies() {
     let displayName = company.name;
     if (displayName.length > 15) displayName = displayName.substring(0, 14) + '.';
     ctx.fillText(displayName.toUpperCase(), 64, 32);
+
+    company.color = color;
 
     // YELLOW SQUARE representation
     ctx.fillStyle = color;
@@ -2895,6 +2916,7 @@ function initAfricaCompanies() {
     const pos = ll2v(company.lat, company.lon, GLOBE_R + 0.055);
     sprite.position.copy(pos);
     window.africaCompaniesGroup.add(sprite);
+    company.color = color;
     sprite.userData = company;
 
     // Glowing pinpoint PURPLE SQUARE
@@ -2970,6 +2992,7 @@ function initMicroCompanies() {
     const pos = ll2v(company.lat, company.lon, GLOBE_R + 0.055);
     sprite.position.copy(pos);
     window.microCompaniesGroup.add(sprite);
+    company.color = color;
     sprite.userData = company;
 
     // Glowing pinpoint ORANGE SQUARE
@@ -3045,6 +3068,7 @@ function initRussiaAsiaCompanies() {
     const pos = ll2v(company.lat, company.lon, GLOBE_R + 0.055);
     sprite.position.copy(pos);
     window.russiaAsiaCompaniesGroup.add(sprite);
+    company.color = color;
     sprite.userData = company;
 
     // Glowing pinpoint WHITE SQUARE
@@ -3568,6 +3592,13 @@ function initDatacenters() {
         "location": "Israel (Petah Tikva)",
         "lat": 52.27,
         "lon": 77.84
+    },
+    {
+        "name": "D3X Exchange Center",
+        "operator": "DeFi",
+        "location": "Global",
+        "lat": 0,
+        "lon": -150
     }
 ];
 
@@ -3575,7 +3606,11 @@ function initDatacenters() {
 
     dcData.forEach(dc => {
         let isMaster = false;
-        if (dc.name === "The Citadel Campus" || 
+        let isD3XExchange = false;
+
+        if (dc.name === "D3X Exchange Center") {
+            isD3XExchange = true;
+        } else if (dc.name === "The Citadel Campus" || 
             dc.name === "Equinix Frankfurt Campus" || 
             dc.name === "Equinix Singapore Campus") {
             isMaster = true;
@@ -3585,13 +3620,15 @@ function initDatacenters() {
         const isRainclaude = Math.random() < 0.25;
         let colorHex = isRainclaude ? 0xff2244 : 0x00f0ff; // Red for Rainclaude, Cyan for Gemini
         
-        if (isMaster) {
+        if (isD3XExchange) {
+            colorHex = 0x39ff14; // Neon Green
+        } else if (isMaster) {
             colorHex = 0xaa00ff; // Purple base for Master Node
         }
 
         const owner = isRainclaude ? 'RAINCLAUDE' : 'GEMINI';
 
-        const dcMat = isMaster 
+        const dcMat = (isMaster || isD3XExchange) 
             ? new THREE.MeshPhongMaterial({ color: colorHex, shininess: 100, specular: 0xffffff }) 
             : new THREE.MeshBasicMaterial({ color: colorHex });
         
@@ -3608,7 +3645,15 @@ function initDatacenters() {
         
         let iconUrl = null;
         let protocolName = null;
-        if (isMaster) {
+        if (isD3XExchange) {
+            mesh.scale.set(10, 10, 10); // 10x bigger (Twice the size of Master)
+            const auraGeo = new THREE.SphereGeometry(0.045, 32, 32);
+            const auraMat = new THREE.MeshBasicMaterial({ color: 0x39ff14, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
+            const aura = new THREE.Mesh(auraGeo, auraMat);
+            mesh.add(aura);
+            const light = new THREE.PointLight(0x39ff14, 3, 3);
+            mesh.add(light);
+        } else if (isMaster) {
             mesh.scale.set(5, 5, 5); // 5x bigger
             
             if (dc.name === "The Citadel Campus") { iconUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAAC91BMVEUAAAD//0LkfRb7oyrymSz7qUf5p0b6q0v9rkn9sUz9sEz9sEr8rkz8rUj4qUn2mjf6okP8rkj8rkn+skn9s0z/sEz/tE3/t0/9rEr5qUr9skr9r0r4qEjxiCr7q0b4p0j5qUn+sUr5W1v5qEf/s0n4pkX6qUjphyz5qEb5p0b7pjz5p0X/tkn4p0T1kyz4pEL5p0T5pkT5pkP7qkD5pkL5ojr4nzT4ozv5pUH6qED6uWv7xYT6rlT4ozz5njL/skX4pUH5nzL94b//////9+7+69P81qn7wHr6pkD5pD/5pD/+7dn//vz//fv8zJP4nzX5oTj8q0D6tF7//Pf//v3//f37vXL6tWL3ojz/+fL927H6sVn5pUD/r0L4pUD5njD6uGf/+vT+8N/5njT/rkH7pT3///78z5j5rFD8pTf4nTD5oDb//v74oDX948T2mjD9qT34pD/4oTj7wn74oTn4nTH6p0b+9Of80Z34nC7+6M781KP4njL93LT4ojr4oz34pD73oDb3nC3/9uz4ojn6qD/4nzP958v3oj34pD34nS78yY34nCz93rn3liH4oDb/qz34njH3mCT/rz7+8uP4myr3oTj3mij4oTf4ojr4mir4myz8pzn9pzn1njT95sj3mCX8pTT4min8pDj9pDj4mSf1kiD3oDb4nC35oDD3mSb7ozT/qjn4mSb4liP4mCX2lSL5mir4mij3njP3lyP8ozP/pDP7oDP7oTH6oDL4nzL4lyH4nS/3lh/3jxH4lyT4lBr4lyP3nC73lR36oC7/qDL3lR/4lBz3lyL8oDL9oS33lB34lR33miv/pi38nyn8nir4khj3kRX6mSL/oyv7nyv4mSj6miL3mCf7nSf4khb6mCD8nSH7mSD/pif3lyP9nSD3mCb8nSD/oSX9niH8mR79nB/9oSP7nCX2khv5mB//oyL3lR/5lx72kxz9mx//nh/2lBz9nB3/oB7/nR3/mhz7mBv8lxr5lBv8lhv8mxz5lRr+mxuhENzjAAAA/XRSTlMAAQUCFjBMaoOdudDe7vwRIVSL1+///////8L1/g5G/f+rAf///f8L//9Z///+Gfz///+s//////+K///////////////////8/P/////////R/////////f/////8//////9B//////+F//////8r8///////////////////////////wP/////////////////////9///+//+c20r//8f/9v//If3/iv+4//8x/0xr//3/zf/g7//4//////////3/nf//////1////v/2////Rv7e/YT9q/+6v1T//Kv/zv/Uisft/v5b//z//P///vP///+d3///2O+eXA7/KwAADvFJREFUeNq0k0WCpTAQhgNp3CUCBKfa/f6Hm0q/5Rj67aK/BMgWDJMSzZ1lO67nB2EUI1EY+J7r2FZCNNQ0yCUYVKubaZb7Rcm4EJwxKatKSqZHgpWFn2epqT3Q8z38qCd2XjcclWUVI6q6oVSMVBJ98KbO7eS2/+zwbeeFTHDZ9yitqt/QNvpecsFCr0tOrUGHsdwArx7iXg3/RPXxgDYD19IHz5Kn3VgKpnqlhhUoNMFEOXb65EQOonvMfCakjr4e1UvO62wixrEW9PHO51yh/EbwCFqwdYRD7Vsj+5GfNzPMaGEZLbxmf/zWbbiCeTegeJMnO0vQ7QfiHtR8AAX3IrB3lWCSh5wxgPkgAIzlLV63jYkSqxaP8HgCoERgbXwG/e+VCzw9ngMs5TNeuuX5zXyR8HIacL/kJqHr9dvxFVD/POCNj+1aB5Tc1a/w9nIqb/Bav69zQEkaLB+fp/OxBCmhq/SLBc7X1w4KdLBGH/N/XcAqB5S8Y//fF4Gv8J/vwCAP9Tb9X5SSQ4P0QBBAg09YH1fXkZKOaowa9tg21vr/l7UUvFuzXsHlcIlWDHZtDKsTn+ckt0+2gKioGjhcApHN4XNLHM/qNMBvLb6gBIKhcEQNy7JpA//3TeAYZ9QXsyQQT2Aylc6EnpbGlYhlo06G+y7/n+v2HFiBQr6AdxRLZQIA5QolAgFdcsL6z69rwPK2atRafFKp1bHRaDQxGBEBaKtNI5EKNTCIVm08+2UBdtwdsIQYCWIBsYHdUIVA2N7FfC/YpxQGugZfjwHPHA6zo4ElyLiHjXuBlDYAok6KeMd0VqvIAx1G2eH8swHLb1YXuYERsvDmb6DLGa7uBdJjYSCMj7DQKBSwe6zIAz1yi+omz34qwEk0R42AymmFggxPq7N+8V7gHDNjoPQigQXEwupSpQbkon8Y/mP8q+vBDTVgcEt5Wb03bkRxVIuvbR/LzEz2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'; protocolName = 'BTC'; }
@@ -3639,7 +3684,7 @@ function initDatacenters() {
         }
         
         mesh.userData = { 
-            name: (isMaster ? "MASTER DATACENTER: " : "DATACENTER: ") + dc.name.toUpperCase(), 
+            name: isD3XExchange ? "EXCHANGE: " + dc.name.toUpperCase() : (isMaster ? "MASTER DATACENTER: " : "DATACENTER: ") + dc.name.toUpperCase(), 
             val: dc.operator.toUpperCase(), 
             ind: 'DATA', 
             hq: dc.location.toUpperCase(), 
@@ -3647,15 +3692,16 @@ function initDatacenters() {
             lat: dc.lat,
             lon: dc.lon,
             rev: 'ACTIVE',
-            owner: isMaster ? 'GEMINI' : owner, // Ensure Master is Gemini for safe keeping maybe, or random? Leaving random owner logic intact but overriding visual. Let's make it Gemini.
+            owner: (isMaster || isD3XExchange) ? 'GEMINI' : owner, // Ensure Master is Gemini for safe keeping maybe, or random? Leaving random owner logic intact but overriding visual. Let's make it Gemini.
             baseColor: colorHex,
             isMasterNode: isMaster,
-            aura: isMaster ? mesh.children.find(c => c.type === 'Mesh') : null,
-            light: isMaster ? mesh.children.find(c => c.type === 'PointLight') : null,
+            isD3XExchange: isD3XExchange,
+            aura: (isMaster || isD3XExchange) ? mesh.children.find(c => c.type === 'Mesh') : null,
+            light: (isMaster || isD3XExchange) ? mesh.children.find(c => c.type === 'PointLight') : null,
             iconUrl: iconUrl,
             protocolName: protocolName
         };
-        if(isMaster) mesh.userData.owner = 'GEMINI'; // Forcing Master Node to Gemini for now as the core
+        if(isMaster || isD3XExchange) mesh.userData.owner = 'GEMINI'; // Forcing Master Node to Gemini for now as the core
         
         window.datacentersGroup.add(mesh);
     });
@@ -5945,6 +5991,80 @@ function handleGlobeClick(e) {
     return;
   }
 
+window.openD3XExchangePanel = function(dcData) {
+  if (document.getElementById('master-node-overlay')) return;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'master-node-overlay'; // Reuse same overlay ID so it closes correctly
+  overlay.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(10, 20, 10, 0.85); backdrop-filter: blur(8px);
+    z-index: 10000; display: flex; align-items: center; justify-content: center;
+    font-family: 'Orbitron', sans-serif;
+  `;
+
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    width: 60%; max-width: 900px; height: 70vh; max-height: 800px;
+    background: linear-gradient(135deg, rgba(20,80,20,0.6) 0%, rgba(0,40,0,0.8) 100%);
+    border: 3px solid #39ff14; border-radius: 12px;
+    box-shadow: 0 0 50px rgba(57,255,20,0.5), inset 0 0 20px rgba(57,255,20,0.3);
+    padding: 30px; display: flex; flex-direction: column; position: relative;
+    overflow: hidden;
+  `;
+
+  modal.innerHTML = `
+    <!-- Decorative glowing corner elements -->
+    <div style="position:absolute; top:0; left:0; width:50px; height:50px; border-top:3px solid #39ff14; border-left:3px solid #39ff14; box-shadow: -5px -5px 15px rgba(57,255,20,0.5);"></div>
+    <div style="position:absolute; bottom:0; right:0; width:50px; height:50px; border-bottom:3px solid #39ff14; border-right:3px solid #39ff14; box-shadow: 5px 5px 15px rgba(57,255,20,0.5);"></div>
+
+    <button id="close-master-node" style="
+      position:absolute; top:20px; right:20px; background:none; border:none; 
+      color:#39ff14; font-size:24px; cursor:pointer; font-weight:bold;
+    ">×</button>
+
+    <h1 style="color:#39ff14; font-size:36px; text-align:center; text-shadow: 0 0 15px #39ff14; margin-top:0; border-bottom:1px solid rgba(57,255,20,0.5); padding-bottom:15px; text-transform:uppercase;">
+      ❖ D3X EXCHANGE HUB ❖
+    </h1>
+    
+    <div style="display:flex; justify-content:center; margin-bottom: 30px; border-bottom:1px solid rgba(57,255,20,0.3); padding-bottom:20px;">
+      <div style="color:#39ff14; font-size:18px; letter-spacing: 2px;">
+        <span style="opacity:0.7">STATUS:</span> <b style="text-shadow: 0 0 5px #39ff14">DECENTRALIZED AGGREGATION ONLINE</b>
+      </div>
+    </div>
+
+    <div style="flex-grow:1; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); border:1px dashed rgba(57,255,20,0.4); border-radius:8px; padding:20px; text-align:center;">
+        <h2 style="color:#ffffff; letter-spacing:2px; margin-bottom:30px; text-shadow:0 0 10px #39ff14;">ACQUIRE D3X TOKENS</h2>
+        
+        <a href="https://raydium.io/swap/?position_tab=staked+RAY&inputMint=sol&outputMint=AGN8SrMCMEgiP1ghvPHa5VRf5rPFDSYVrGFyBGE1Cqpa" target="_blank" style="
+            display:block; width: 80%; max-width: 400px; padding: 15px; margin-bottom: 20px;
+            background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
+            font-size: 20px; font-weight: bold; text-decoration: none; border-radius: 8px;
+            box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s;
+        " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
+            ► PROCEED TO RAYDIUM
+        </a>
+        
+        <a href="http://jup.ag/tokens/AGN8SrMCMEgiP1ghvPHa5VRf5rPFDSYVrGFyBGE1Cqpa" target="_blank" style="
+            display:block; width: 80%; max-width: 400px; padding: 15px; margin-bottom: 20px;
+            background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
+            font-size: 20px; font-weight: bold; text-decoration: none; border-radius: 8px;
+            box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s;
+        " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
+            ► PROCEED TO JUPITER
+        </a>
+    </div>
+  `;
+
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+
+  document.getElementById('close-master-node').onclick = () => {
+    overlay.remove();
+    if(typeof _sfxClick !== 'undefined') _sfxClick();
+  };
+};
+
 // =====================================================================
 // MASTER NODE CUSTOM UI
 // =====================================================================
@@ -6004,6 +6124,14 @@ window.openMasterNodePanel = function(dcData) {
             <br><br>
             <span style="color:#aa00ff; font-style:italic;">[ FUTURE EXPANSION SLOT FOR BLOCKCHAIN PROTOCOL INTEGRATION ]</span>`}
         </p>
+        <div id="btc-deposit-container" style="display:none; margin-top: 20px; padding: 15px; background: rgba(255,170,0,0.1); border: 1px solid #ffaa00; border-radius: 8px; text-align: center; width: 80%; max-width: 500px;">
+            <div style="color: #ffaa00; font-size: 14px; margin-bottom: 5px; font-weight: bold; letter-spacing: 1px;">SUPPORT THE ECOSYSTEM</div>
+            <div style="color: #fff; font-size: 11px; margin-bottom: 10px; opacity: 0.8;">Send BTC deposits to fuel the Citadel Campus.</div>
+            <div style="display: flex; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,170,0,0.3); border-radius: 4px; overflow: hidden;">
+                <input type="text" id="btc-wallet-address" readonly style="flex-grow: 1; background: transparent; border: none; color: #ffaa00; font-family: monospace; padding: 10px; outline: none; text-align: center; font-size: 14px;" value="LOADING ADDRESS..."/>
+                <button id="copy-btc-btn" style="background: rgba(255,170,0,0.2); border: none; border-left: 1px solid rgba(255,170,0,0.3); color: #ffaa00; padding: 0 15px; cursor: pointer; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: bold; transition: background 0.2s;">COPY</button>
+            </div>
+        </div>
     </div>
   `;
 
@@ -6014,6 +6142,45 @@ window.openMasterNodePanel = function(dcData) {
     overlay.remove();
     if(typeof _sfxClick !== 'undefined') _sfxClick();
   };
+
+  // If this is the BTC master node, fetch and display the wallet address
+  if (dcData.protocolName === 'BTC') {
+      const depositContainer = document.getElementById('btc-deposit-container');
+      const addressInput = document.getElementById('btc-wallet-address');
+      const copyBtn = document.getElementById('copy-btc-btn');
+      
+      depositContainer.style.display = 'block';
+
+      fetch('/api/wallet')
+          .then(res => res.json())
+          .then(data => {
+              if (data.btcWallet && data.btcWallet !== 'NOT_SET') {
+                  addressInput.value = data.btcWallet;
+              } else {
+                  addressInput.value = "PROTOCOL OFFLINE";
+                  copyBtn.disabled = true;
+                  copyBtn.style.opacity = '0.5';
+              }
+          })
+          .catch(err => {
+              console.error('Failed to fetch BTC wallet:', err);
+              addressInput.value = "CONNECTION FAILED";
+          });
+
+      copyBtn.onclick = () => {
+          navigator.clipboard.writeText(addressInput.value).then(() => {
+              const prevText = copyBtn.innerText;
+              copyBtn.innerText = "COPIED!";
+              copyBtn.style.background = 'rgba(57,255,20,0.3)';
+              copyBtn.style.color = '#39ff14';
+              setTimeout(() => {
+                  copyBtn.innerText = prevText;
+                  copyBtn.style.background = 'rgba(255,170,0,0.2)';
+                  copyBtn.style.color = '#ffaa00';
+              }, 2000);
+          });
+      };
+  }
 };
 
   // Intercept clicks on Datacenters (Cyber Skin)
@@ -6023,6 +6190,10 @@ window.openMasterNodePanel = function(dcData) {
       if (typeof _sfxClick !== 'undefined') _sfxClick();
       const dcData = dcHits[0].object.userData;
       if (dcData && dcData.name) {
+        if (dcData.isD3XExchange) {
+            window.openD3XExchangePanel(dcData);
+            return;
+        }
         if (dcData.isMasterNode) {
             window.openMasterNodePanel(dcData);
             return;
@@ -8842,7 +9013,17 @@ function animate() {
   // Animate Cyber Skin Master Datacenter Aura & Color Pulse
   if (window.currentSkinIndex === 3 && window.datacentersGroup && window.datacentersGroup.visible) {
       window.datacentersGroup.children.forEach(dc => {
-          if (dc.userData && dc.userData.isMasterNode) {
+          if (dc.userData && dc.userData.isD3XExchange) {
+              const pulseScale = 10 + Math.sin(time3 * 4) * 1.5; // Pulsate size larger
+              dc.scale.set(pulseScale, pulseScale, pulseScale);
+              if (dc.userData.aura) {
+                  const auraPulse = 0.5 + Math.sin(time3 * 10) * 0.4; // Very fast aura blink
+                  dc.userData.aura.material.opacity = auraPulse;
+                  if (dc.userData.light) {
+                      dc.userData.light.intensity = 3 + Math.sin(time3 * 10) * 1.5;
+                  }
+              }
+          } else if (dc.userData && dc.userData.isMasterNode) {
               const pulseScale = 5 + Math.sin(time3 * 4) * 0.5; // Pulsate size slightly
               dc.scale.set(pulseScale, pulseScale, pulseScale);
                             if (dc.userData.aura) {

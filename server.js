@@ -162,6 +162,14 @@ const server = http.createServer((req, res) => {
       console.error('Radio API error:', err);
       res.end(JSON.stringify({ error: 'Failed to fetch radio stations' }));
     });
+  } else if (req.url === '/api/wallet') {
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    });
+    res.end(JSON.stringify({ 
+      btcWallet: process.env.BTC_WALLET || "NOT_SET"
+    }));
   } else if (req.url === '/api/boats') {
     res.writeHead(200, {
       'Content-Type': 'application/json',
