@@ -22,8 +22,13 @@ if (process.env.SOLANA_WALLET_PRIVATE_KEY) {
     // Decode base58
     const bs58 = require('bs58');
     const decode = bs58.decode || (bs58.default && bs58.default.decode);
-    authorityKeypair = web3.Keypair.fromSecretKey(decode(secretKeyString));
-    console.log('✅ Solana Authority Wallet Loaded:', authorityKeypair.publicKey.toBase58());
+    const decodedKey = decode(secretKeyString);
+    if (decodedKey.length === 64) {
+      authorityKeypair = web3.Keypair.fromSecretKey(decodedKey);
+    } else {
+      console.error('⚠ Solana Wallet Private Key has incorrect length:', decodedKey.length);
+    }
+    if (authorityKeypair) console.log('✅ Solana Authority Wallet Loaded:', authorityKeypair.publicKey.toBase58());
   } catch(e) {
     console.error('⚠ Failed to load Solana Wallet Private Key:', e.message);
   }
@@ -900,20 +905,24 @@ async function checkD3XRewards() {
 
              if (canClaim) {
                 console.log(`[REWARD] Commader ${client.name} reached 10m connection threshold. Triggering D3X Daily Drop + updating DB.`);
-                client.d3xClaimedSession = true;
+                client.d3xClaimedSession = true; // Prevents claim spam during the same session
                 
                 await pgPool.query(`UPDATE commanders SET last_d3x_claim = NOW() WHERE callsign = $1`, [client.name]);
                 
-                await processDailyTokenDrop(client.name, client.wallet);
+                // If Solana Authority Wallet is loaded, do real crypto drop, else mock drop
+                if (authorityKeypair) {
+                    await processDailyTokenDrop(client.name, client.wallet);
+                } else {
+                    console.log(`ℹ [SOLANA OFF] Mock-Dropped 5 D3X to ${client.name}. Provide valid SOLANA_WALLET_PRIVATE_KEY for real token transfer.`);
+                }
                 
                 client.ws.send(JSON.stringify({ 
                   type: 'd3x_reward', 
                   amount: 5,
-                  message: '5 D3X Coins Airdropped! (Daily Reward Claimed)'
+                  message: '5 D3X Coins Airdropped! (12-Hour Reward Claimed)'
                 }));
 
              } else {
-               // Mark session as claimed so we don't spam DB checks for the rest of their session
                client.d3xClaimedSession = true; 
              }
           }
