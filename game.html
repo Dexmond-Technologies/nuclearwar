@@ -1231,6 +1231,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   </div>
   <div style="position:absolute; bottom:12px; left:20px; font-family:'Share Tech Mono', monospace; font-size:10px; font-weight:normal; letter-spacing:3px; color:#0af; text-transform:uppercase; z-index:15; pointer-events:none; text-shadow:0 0 5px rgba(0,170,255,0.8);">DEXMOND TECHNOLOGIES Ltd</div>
   <button id="btn-toggle-skin" onclick="toggleRedSkin()">🔴 RED SKIN</button>
+  <button id="btn-toggle-soundtrack" onclick="toggleSoundtrack()">🎵 SOUNDTRACK</button>
   <button id="btn-toggle-radio" onclick="toggleRadio()">📻 ON</button>
   <button id="btn-toggle-radio-lock" onclick="toggleRadioLock()" style="display:none;">🔒 LOCK RADIO</button>
   <div id="infinite-world-radio-label" style="position:absolute; bottom:28px; left:calc(20px + 25vw - 34px); transform:translateX(-50%); width:max-content; color:white; font-family:'Share Tech Mono', monospace; font-size:9px; letter-spacing:1px; z-index:20; opacity:0.8; pointer-events:none; display:none;">INFINITE WORLD RADIO</div>
@@ -1320,6 +1321,37 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 #btn-toggle-skin.active-normal:hover {
   background: rgba(0,170,255,0.3);
   border-color: #0af;
+}
+
+#btn-toggle-soundtrack {
+  position: absolute;
+  bottom: 3px;
+  left: calc(20px + 25vw - 235px);
+  padding: 4px 8px;
+  border: 1px solid rgba(255,50,50,0.5);
+  background: rgba(255,50,50,0.1);
+  color: #f55;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  z-index: 20;
+  pointer-events: auto;
+  transition: 0.2s;
+  outline: none;
+}
+#btn-toggle-soundtrack:hover {
+  background: rgba(255,50,50,0.3);
+  border-color: #f55;
+}
+#btn-toggle-soundtrack.soundtrack-on {
+  border: 1px solid rgba(0,255,136,0.5);
+  background: rgba(0,255,136,0.1);
+  color: #0f8;
+}
+#btn-toggle-soundtrack.soundtrack-on:hover {
+  background: rgba(0,255,136,0.3);
+  border-color: #0f8;
 }
 
 #btn-toggle-radio {
@@ -3676,6 +3708,40 @@ function initDatacenters() {
             // Exchange arrows SVG
             iconUrl = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjZjJmMmYyIiBkPSJNMzQyLjYgNTRMNDkyLjUgMjA0TDM0Mi42IDM1NFYzMDBIMTcwVjEwOEgzNDIuNlY1NHpNMTY5LjQgNDU4TDE5LjUgMzA4TDE2OS40IDE1OHY1NGgxNzIuNnYxOTJIMTY5LjR2NTR6Ii8+PC9zdmc+';
             protocolName = 'D3X';
+            
+            // Add 3D Circulating Arrows specific to Cyber Skin
+            const arrowGroup = new THREE.Group();
+            const arrowMat = new THREE.MeshBasicMaterial({ color: 0x39ff14, side: THREE.DoubleSide, transparent:true, opacity:0.8 });
+            
+            // Ring 1
+            const ringGeo1 = new THREE.RingGeometry(0.1, 0.12, 32, 1, 0, Math.PI);
+            const ring1 = new THREE.Mesh(ringGeo1, arrowMat);
+            const headGeo1 = new THREE.ConeGeometry(0.04, 0.08, 8);
+            const head1 = new THREE.Mesh(headGeo1, arrowMat);
+            head1.position.set(0.11, 0, 0);
+            head1.rotation.z = -Math.PI / 2;
+            ring1.add(head1);
+            ring1.position.y = 0.08;
+            ring1.rotation.x = -Math.PI / 2;
+            arrowGroup.add(ring1);
+            
+            // Ring 2
+            const ringGeo2 = new THREE.RingGeometry(0.1, 0.12, 32, 1, Math.PI, Math.PI);
+            const ring2 = new THREE.Mesh(ringGeo2, arrowMat);
+            const headGeo2 = new THREE.ConeGeometry(0.04, 0.08, 8);
+            const head2 = new THREE.Mesh(headGeo2, arrowMat);
+            head2.position.set(-0.11, 0, 0);
+            head2.rotation.z = Math.PI / 2;
+            ring2.add(head2);
+            ring2.position.y = 0.08;
+            ring2.rotation.x = -Math.PI / 2;
+            arrowGroup.add(ring2);
+            
+            arrowGroup.scale.set(0.5, 0.5, 0.5); // 50% smaller
+            
+            mesh.add(arrowGroup);
+            mesh.userData.arrowGroup = arrowGroup;
+            
         } else if (isMaster) {
             mesh.scale.set(5, 5, 5); // 5x bigger
             
@@ -8862,6 +8928,11 @@ function closeOnboarding() {
       document.getElementById('infinite-world-radio-label').style.display = 'block';
       document.getElementById('btn-toggle-radio-next').style.display = 'block';
   }
+  
+  // Auto-play the cinematic soundtrack upon entering the globe
+  if (typeof window.toggleSoundtrack === 'function' && typeof isSoundtrackOn !== 'undefined' && !isSoundtrackOn) {
+      window.toggleSoundtrack();
+  }
 }
 
 // Ensure the AI turn only triggers if the socket determines we are the "Host"
@@ -9570,6 +9641,15 @@ function animate() {
       const s = sprite.userData.baseScale * (1 + 0.3 * Math.sin(sprite.userData.phase));
       sprite.scale.set(s, s, 1);
       sprite.material.opacity = 0.5 + 0.5 * Math.sin(sprite.userData.phase * 0.5);
+    });
+  }
+
+  // Animate D3X Exchange Arrows (Cyber Skin)
+  if (window.currentSkinIndex === 3 && window.datacentersGroup && window.datacentersGroup.visible) {
+    window.datacentersGroup.children.forEach(mesh => {
+      if (mesh.userData.isD3XExchange && mesh.userData.arrowGroup) {
+        mesh.userData.arrowGroup.rotation.y += 0.02; // Rotate the arrows continuously
+      }
     });
   }
 
@@ -11578,6 +11658,7 @@ let customSoundtrack = new Audio();
 let soundtrackPlaylist = [];
 let soundtrackCurrentIdx = 0;
 let soundtrackWelcomed = false;
+let isSoundtrackOn = false;
 
 function playCustomSoundtrack() {
   if (soundtrackPlaylist.length === 0) {
@@ -11659,6 +11740,32 @@ function playNextRadio() {
 
 // Global click listener removed; radio now starts explicitly inside closeOnboarding()
 
+window.toggleSoundtrack = function() {
+  if (typeof _sfxClick !== 'undefined') _sfxClick();
+  const btn = document.getElementById('btn-toggle-soundtrack');
+  const radioBtn = document.getElementById('btn-toggle-radio');
+  isSoundtrackOn = !isSoundtrackOn;
+
+  if (isSoundtrackOn) {
+    btn.classList.add('soundtrack-on');
+    
+    // Pause radio if it's playing
+    if (window.isRadioOn) {
+      window.toggleRadio(); 
+    }
+
+    if (!soundtrackWelcomed) {
+      soundtrackWelcomed = true;
+      soundtrackWarningOverlay.style.opacity = '1';
+      setTimeout(() => { soundtrackWarningOverlay.style.opacity = '0'; }, 4000);
+    }
+    playCustomSoundtrack();
+  } else {
+    btn.classList.remove('soundtrack-on');
+    customSoundtrack.pause();
+  }
+};
+
 window.toggleRadio = function() {
   if (typeof _sfxClick !== 'undefined') _sfxClick();
   const btn = document.getElementById('btn-toggle-radio');
@@ -11675,17 +11782,12 @@ window.toggleRadio = function() {
     lockBtn.style.display = 'none';
     nextBtn.style.display = 'none'; // Added
     if (labelBtn) labelBtn.style.display = 'none';
-    
-    // START CUSTOM SOUNDTRACK
-    if (!soundtrackWelcomed) {
-      soundtrackWelcomed = true;
-      soundtrackWarningOverlay.style.opacity = '1';
-      setTimeout(() => { soundtrackWarningOverlay.style.opacity = '0'; }, 4000);
-    }
-    playCustomSoundtrack();
-    
   } else {
-    customSoundtrack.pause(); // STOP CUSTOM SOUNDTRACK
+    // Pause soundtrack if it's playing
+    if (isSoundtrackOn) {
+      window.toggleSoundtrack();
+    }
+    
     btn.innerHTML = '📻 ON';
     btn.classList.remove('radio-off');
     lockBtn.style.display = 'block';
@@ -12290,7 +12392,7 @@ window.launchCyberAttack = function() {
 };
 
 // =====================================================================
-// BLACK SKIN 45-SECOND CYBER WARFARE POPUP
+// BLACK SKIN 5-MINUTE CYBER WARFARE POPUP
 // =====================================================================
 setInterval(() => {
     if (window.SKINS[window.currentSkinIndex].name !== 'BLK') return;
@@ -12343,7 +12445,7 @@ setInterval(() => {
             ⚠️ HIGH-PRIORITY CYBER INTELLIGENCE REPORT
             <span style="float:right; cursor:pointer; font-size:18px; color:#fff;" onclick="this.parentElement.parentElement.style.opacity='0'; setTimeout(()=>this.parentElement.parentElement.remove(), 500);">✕</span>
         </div>
-        <div style="font-size:16px; opacity:0.9; margin-bottom:15px; color:#ccc;">Rainclaude AI Aggregated Intercepts — Last 45 Seconds Window:</div>
+        <div style="font-size:16px; opacity:0.9; margin-bottom:15px; color:#ccc;">Rainclaude AI Aggregated Intercepts — Last 5 Minutes Window:</div>
         
         <div style="display:flex; justify-content:space-between; background:rgba(255,50,50,0.1); padding:15px; border-radius:4px; font-size:18px; margin-bottom:15px; border:1px solid rgba(255,50,50,0.3);">
             <span>TOTAL CORPORATE BREACHES: <b style="color:#fff; margin-left:10px;">${window.cyberWarfareStats.companiesBreached}</b></span>
@@ -12365,7 +12467,7 @@ setInterval(() => {
         if (popup) popup.style.opacity = '1';
     }, 50);
 
-    // Reset stats for the next 45 seconds
+    // Reset stats for the next 5 minutes
     window.cyberWarfareStats = { fundsStolen: 0, companiesBreached: 0, companyLog: [] };
 
     // Auto-remove after 8 seconds (giving player more time to read the detailed list)
@@ -12374,7 +12476,7 @@ setInterval(() => {
         setTimeout(() => { if (popup && popup.parentElement) popup.remove(); }, 500);
     }, 8000);
 
-}, 45000);
+}, 300000); // 5 minutes
 
 // =====================================================================
 // HACKER TERMINAL LOGIC (RAINCLAUDE EASTER EGG)
