@@ -1004,7 +1004,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     </div>
 
     <!-- Authentication Section: Google | Wallet | Override Code -->
-    <div id="auth-container-flex" style="display:flex; flex-direction:column; justify-content:center; align-items:center; gap:16px; margin:240px auto 0; min-height:50px; position:relative; z-index:1;">
+    <div id="auth-container-flex" style="display:flex; flex-direction:column; justify-content:center; align-items:center; gap:16px; margin:140px auto 0; min-height:50px; position:relative; z-index:1; opacity: 0; transition: opacity 0.5s ease-out;">
       
       <!-- Row 1: Google | Override Code -->
       <div style="display:flex; justify-content:center; align-items:center; gap:40px;">
@@ -1042,6 +1042,26 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
           <input type="text" id="dev-unlock-in" placeholder="ENTER OVERRIDE CODE" style="background:rgba(0,10,20,0.8); border:1px solid rgba(0,170,255,0.4); color:#0f8; padding:8px 15px; text-align:center; font-family:'Courier New', monospace; width:220px; height: 40px; border-radius:4px; outline:none;"
                  onkeyup="if(this.value.toLowerCase()==='unlock'){ document.getElementById('lobby-auth-status').innerHTML='✓ OVERRIDE ACCEPTED'; document.querySelector('.g_id_signin').style.display='none'; this.style.display='none'; document.getElementById('auth-container-flex').style.display='none'; joinGlobalWar(); }">
         </div>
+    
+    <script>
+      // Wait for Google Sign-In iframe to render before revealing the container
+      const syncInterval = setInterval(() => {
+        const gsiContainer = document.querySelector('.g_id_signin');
+        if (gsiContainer && gsiContainer.innerHTML.trim() !== '' && gsiContainer.querySelector('iframe')) {
+          document.getElementById('auth-container-flex').style.opacity = '1';
+          clearInterval(syncInterval);
+        }
+      }, 100);
+      
+      // Fallback in case Google script fails or is blocked
+      setTimeout(() => {
+        const authFlex = document.getElementById('auth-container-flex');
+        if (authFlex && authFlex.style.opacity === '0') {
+          authFlex.style.opacity = '1';
+          clearInterval(syncInterval);
+        }
+      }, 3000);
+    </script>
       </div>
 
     </div>
@@ -3707,6 +3727,70 @@ function initDatacenters() {
     });
 }
 initDatacenters();
+
+window.dcNetworkGroup = new THREE.Group();
+window.dcNetworkGroup.visible = false;
+scene.add(window.dcNetworkGroup);
+window.dcPulses = [];
+
+function initDatacenterNetwork() {
+    const nodes = window.datacentersGroup.children;
+    if (!nodes || nodes.length < 2) return;
+    
+    // Yellow tint for the lines, fully visible
+    const material = new THREE.LineBasicMaterial({ color: 0xffff00, transparent: true, opacity: 0.6, linewidth: 3 });
+    
+    // Create a blurred yellow dot texture for the pulse
+    const c = document.createElement('canvas');
+    c.width = 128; c.height = 128; // Larger canvas to prevent clipping
+    const ctx = c.getContext('2d');
+    const radGrad = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+    radGrad.addColorStop(0, 'rgba(255, 255, 255, 1.0)'); // Bright white core
+    radGrad.addColorStop(0.2, 'rgba(255, 255, 0, 0.9)'); // Strong yellow glow
+    radGrad.addColorStop(1, 'rgba(255, 255, 0, 0)');     // Transparent edge
+    ctx.fillStyle = radGrad;
+    ctx.fillRect(0, 0, 128, 128);
+    
+    const pulseTex = new THREE.CanvasTexture(c);
+    const pulseMat = new THREE.SpriteMaterial({ map: pulseTex, color: 0xffffff, transparent: true, blending: THREE.AdditiveBlending });
+    
+    nodes.forEach((node, i) => {
+        const numConnections = Math.floor(Math.random() * 3) + 1; // 1 to 3 connections
+        for (let j = 0; j < numConnections; j++) {
+            const targetIdx = Math.floor(Math.random() * nodes.length);
+            if (targetIdx === i) continue;
+            
+            const targetNode = nodes[targetIdx];
+            
+            const p1 = node.position;
+            const p2 = targetNode.position;
+            
+            const dist = p1.distanceTo(p2);
+            if (dist > 1.8) continue; // Don't connect opposite sides of the earth
+            
+            // Raise the line slightly depending on distance
+            const midPoint = p1.clone().lerp(p2, 0.5).normalize().multiplyScalar(GLOBE_R + dist * 0.15);
+            const curve = new THREE.QuadraticBezierCurve3(p1, midPoint, p2);
+            
+            const points = curve.getPoints(20);
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const line = new THREE.Line(geometry, material);
+            window.dcNetworkGroup.add(line);
+            
+            const pulse = new THREE.Sprite(pulseMat);
+            pulse.scale.set(0.02, 0.02, 1); // Reduced scale by half per user request
+            window.dcNetworkGroup.add(pulse);
+            
+            window.dcPulses.push({
+                mesh: pulse,
+                curve: curve,
+                progress: Math.random(),
+                speed: 0.1 + Math.random() * 0.2
+            });
+        }
+    });
+}
+initDatacenterNetwork();
 
 
 
@@ -9014,13 +9098,13 @@ function animate() {
   if (window.currentSkinIndex === 3 && window.datacentersGroup && window.datacentersGroup.visible) {
       window.datacentersGroup.children.forEach(dc => {
           if (dc.userData && dc.userData.isD3XExchange) {
-              const pulseScale = 10 + Math.sin(time3 * 4) * 1.5; // Pulsate size larger
+              const pulseScale = 5 + Math.sin(time3 * 4) * 0.75; // Reduced pulsar size by half
               dc.scale.set(pulseScale, pulseScale, pulseScale);
               if (dc.userData.aura) {
-                  const auraPulse = 0.5 + Math.sin(time3 * 10) * 0.4; // Very fast aura blink
+                  const auraPulse = 0.25 + Math.sin(time3 * 10) * 0.2; // Opacity halved
                   dc.userData.aura.material.opacity = auraPulse;
                   if (dc.userData.light) {
-                      dc.userData.light.intensity = 3 + Math.sin(time3 * 10) * 1.5;
+                      dc.userData.light.intensity = 1.5 + Math.sin(time3 * 10) * 0.75; // Intensity halved
                   }
               }
           } else if (dc.userData && dc.userData.isMasterNode) {
@@ -9044,6 +9128,14 @@ function animate() {
               }
           }
       });
+      // Animate the Interconnection Pulses
+      if (window.dcNetworkGroup && window.dcNetworkGroup.visible) {
+          window.dcPulses.forEach(p => {
+              p.progress += p.speed * dt;
+              if (p.progress > 1.0) p.progress -= 1.0;
+              p.mesh.position.copy(p.curve.getPoint(p.progress));
+          });
+      }
   }
 
   // Update missiles
@@ -9248,8 +9340,22 @@ function animate() {
     // Position sprite
     let pos, currentDir;
     if (fj.straight) {
-      pos = fj.sd.clone().lerp(fj.ed, fj.progress);
-      currentDir = fj.ed.clone().sub(fj.sd).normalize(); // Fixed collinear direction
+      // Calculate straight radial position
+      let rawPos = fj.sd.clone().lerp(fj.ed, fj.progress);
+      
+      // Apply a curve to the straight line based on progress
+      const upAxis = fj.sd.clone().normalize();
+      const arbitrary = new THREE.Vector3(0, 1, 0);
+      if(Math.abs(upAxis.y) > 0.99) arbitrary.set(1, 0, 0); // Handle poles
+      
+      const rightAxis = new THREE.Vector3().crossVectors(upAxis, arbitrary).normalize();
+      const bendAngle = fj.progress * (Math.PI / 10); // Adjust divisor for more/less curve
+      
+      // Rotate the position to make it curve sideways
+      rawPos.applyAxisAngle(rightAxis, bendAngle);
+      pos = rawPos;
+      
+      currentDir = pos.clone().sub(fj.sd).normalize(); // Update direction to match the curve
     } else {
       currentDir=slerp3D(fj.sd,fj.ed,fj.progress).normalize();
       const arcH = GLOBE_R + 0.04 + Math.sin(fj.progress * Math.PI) * 0.15;
@@ -9275,12 +9381,12 @@ function animate() {
     }
     
     if (fj.straight) {
-      // Space rockets should always point OUTWARD radially on the 2D screen view
+      // Space rockets orient along their flight path
       const screenPos = pos.clone().project(camera);
-      const centerPos = new THREE.Vector3(0,0,0).project(camera); // Globe center
-      const dx = screenPos.x - centerPos.x;
-      const dy = screenPos.y - centerPos.y;
-      fj.body.material.rotation = Math.atan2(dy, dx) - Math.PI/2;
+      const prevScreenPos = fj.sd.clone().project(camera); // Use launch site for orientation baseline
+      const dx = screenPos.x - prevScreenPos.x;
+      const dy = screenPos.y - prevScreenPos.y;
+      fj.body.material.rotation = Math.atan2(dy, dx) - Math.PI/2 - (Math.PI / 6); // Add slight tilt for visuals
     } else {
       let right=new THREE.Vector3().crossVectors(forward,up).normalize();
       const flatFwd=new THREE.Vector3().crossVectors(up,right).normalize();
@@ -11245,6 +11351,7 @@ window.toggleRedSkin = function() {
   // Toggle Datacenters (CYBER Skin specific)
   if (typeof window.datacentersGroup !== 'undefined') {
       window.datacentersGroup.visible = (skin.name === 'CYBER');
+      if (window.dcNetworkGroup) window.dcNetworkGroup.visible = (skin.name === 'CYBER');
   }
   
   // Ensure CMD Help indicator is always shown
