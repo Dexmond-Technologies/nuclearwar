@@ -3592,12 +3592,27 @@ function initDatacenters() {
     const dcGeo = new THREE.SphereGeometry(0.025, 32, 32); 
 
     dcData.forEach(dc => {
+        let isMaster = false;
+        if (dc.name === "The Citadel Campus" || 
+            dc.name === "Equinix Frankfurt Campus" || 
+            dc.name === "Equinix Singapore Campus") {
+            isMaster = true;
+        }
+
         // Assign 25% to Rainclaude, 75% to Gemini
         const isRainclaude = Math.random() < 0.25;
-        const colorHex = isRainclaude ? 0xff2244 : 0x00f0ff; // Red for Rainclaude, Cyan for Gemini
+        let colorHex = isRainclaude ? 0xff2244 : 0x00f0ff; // Red for Rainclaude, Cyan for Gemini
+        
+        if (isMaster) {
+            colorHex = 0xaa00ff; // Purple base for Master Node
+        }
+
         const owner = isRainclaude ? 'RAINCLAUDE' : 'GEMINI';
 
-        const dcMat = new THREE.MeshBasicMaterial({ color: colorHex });
+        const dcMat = isMaster 
+            ? new THREE.MeshPhongMaterial({ color: colorHex, shininess: 100, specular: 0xffffff }) 
+            : new THREE.MeshBasicMaterial({ color: colorHex });
+        
         const mesh = new THREE.Mesh(dcGeo, dcMat);
         const latRad = dc.lat * Math.PI / 180;
         const lonRad = -dc.lon * Math.PI / 180;
@@ -3609,8 +3624,24 @@ function initDatacenters() {
         );
         mesh.lookAt(new THREE.Vector3(0,0,0));
         
+        if (isMaster) {
+            mesh.scale.set(5, 5, 5); // 5x bigger
+            mesh.userData.isMasterNode = true;
+            // Add an inner glowing aura
+            const auraGeo = new THREE.SphereGeometry(0.035, 32, 32);
+            const auraMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending });
+            const aura = new THREE.Mesh(auraGeo, auraMat);
+            mesh.add(aura);
+            mesh.userData.aura = aura;
+
+            // Add a dynamic point light to make it actually emit light
+            const light = new THREE.PointLight(0xaa00ff, 2, 2);
+            mesh.add(light);
+            mesh.userData.light = light;
+        }
+        
         mesh.userData = { 
-            name: "DATACENTER: " + dc.name.toUpperCase(), 
+            name: (isMaster ? "MASTER DATACENTER: " : "DATACENTER: ") + dc.name.toUpperCase(), 
             val: dc.operator.toUpperCase(), 
             ind: 'DATA', 
             hq: dc.location.toUpperCase(), 
@@ -3618,9 +3649,13 @@ function initDatacenters() {
             lat: dc.lat,
             lon: dc.lon,
             rev: 'ACTIVE',
-            owner: owner,
-            baseColor: colorHex
+            owner: isMaster ? 'GEMINI' : owner, // Ensure Master is Gemini for safe keeping maybe, or random? Leaving random owner logic intact but overriding visual. Let's make it Gemini.
+            baseColor: colorHex,
+            isMasterNode: isMaster,
+            aura: isMaster ? mesh.children[0] : null
         };
+        if(isMaster) mesh.userData.owner = 'GEMINI'; // Forcing Master Node to Gemini for now as the core
+        
         window.datacentersGroup.add(mesh);
     });
 }
@@ -4758,30 +4793,46 @@ window.showCmdHelpModal = function() {
       skinSpecificOversight = "You are monitoring the global power grid. Real-time compute shifts dictate financial returns. Secure your server infrastructure globally before hostile network forces overwhelm the system.";
   } else if (idx === 4) {
       skinSpecificTitle = "BLACK SKIN CORPORATE";
-      skinSpecificDesc = "The ultimate behind-the-scenes view. Track global companies, defense contractors, and massive infrastructure networks powering the conflict.";
+      // We will override the content for idx 4 completely down below.
   }
 
-  contentBox.innerHTML = `
-    <div style="font-size:32px; color:#00dcff; font-weight:bold; margin-bottom:20px; text-transform:uppercase; border-bottom:1px dashed rgba(0,220,255,0.4); padding-bottom:10px; letter-spacing:2px;">` + skinSpecificTitle + `</div>
-    
-    <div style="display:flex; gap:30px; margin-bottom:30px; flex-wrap:wrap;">
-      <div style="flex:1; min-width:300px; background:rgba(0,220,255,0.05); padding:25px; border-radius:10px; border-left:5px solid #00dcff;">
-        <span style="display:block; font-size:24px; color:#00dcff; margin-bottom:15px; font-weight:bold;">1. Primary Directive</span>
-        ` + skinSpecificDesc + `
+  if (idx === 4) {
+    contentBox.style.padding = '0'; // Remove default padding for this specific layout
+    contentBox.style.display = 'flex';
+    contentBox.style.flexDirection = 'column';
+
+    contentBox.innerHTML = `
+      <div style="padding: 20px 40px 0 40px; font-size:32px; color:#00dcff; font-weight:bold; margin-bottom:10px; text-transform:uppercase; border-bottom:1px dashed rgba(0,220,255,0.4); padding-bottom:10px; letter-spacing:2px;">` + skinSpecificTitle + `</div>
+      <div style="flex-grow: 1; margin: 10px 40px 20px 40px; background:rgba(255,51,102,0.05); padding:20px 40px; border-radius:10px; border:1px solid rgba(255,51,102,0.3); text-align:center; display: flex; flex-direction: column; justify-content: center;">
+         <div style="font-size:24px; color:#ff3366; margin-bottom:20px; letter-spacing:4px; font-weight:bold; text-transform:uppercase;">[ THE CORE OF THE CONFLICT ]</div>
+         <div style="font-size:18px; color:#ff88aa; max-width:850px; margin:0 auto; line-height:1.8;">
+           You have reached the core of what this project was built for.<br><br>This is an epic, continuous battle. What you are witnessing is <b>the real war between two AI entities: Rainclaude and Gemini</b>.<br><br>Their neural networks clashing across the globe determines the ultimate fate of all digital infrastructure and power grids worldwide. Observe the spectacle as lines of code tear across the planetary map. Every explosion, every data breach is a calculated move in an eternal game of 4D chess.<br><br><span style="color:#00dcff;"><b>Manual override is fully disabled.</b> You cannot intervene between the AIs. Simply sit back and enjoy the show.</span>
+         </div>
       </div>
-      <div style="flex:1; min-width:300px; background:rgba(255,51,102,0.05); padding:25px; border-radius:10px; border-left:5px solid #ff3366;">
-        <span style="display:block; font-size:24px; color:#ff3366; margin-bottom:15px; font-weight:bold;">` + ((idx === 0 || idx === 1 || idx === 2 || idx === 3) ? "2. Active Commander Access" : "2. Restricted Interactivity") + `</span>
-        ` + skinSpecificInteractivity + `
+    `;
+  } else {
+    contentBox.innerHTML = `
+      <div style="font-size:32px; color:#00dcff; font-weight:bold; margin-bottom:20px; text-transform:uppercase; border-bottom:1px dashed rgba(0,220,255,0.4); padding-bottom:10px; letter-spacing:2px;">` + skinSpecificTitle + `</div>
+      
+      <div style="display:flex; gap:30px; margin-bottom:30px; flex-wrap:wrap;">
+        <div style="flex:1; min-width:300px; background:rgba(0,220,255,0.05); padding:25px; border-radius:10px; border-left:5px solid #00dcff;">
+          <span style="display:block; font-size:24px; color:#00dcff; margin-bottom:15px; font-weight:bold;">1. Primary Directive</span>
+          ` + skinSpecificDesc + `
+        </div>
+        <div style="flex:1; min-width:300px; background:rgba(255,51,102,0.05); padding:25px; border-radius:10px; border-left:5px solid #ff3366;">
+          <span style="display:block; font-size:24px; color:#ff3366; margin-bottom:15px; font-weight:bold;">` + ((idx === 0 || idx === 1 || idx === 2 || idx === 3) ? "2. Active Commander Access" : "2. Restricted Interactivity") + `</span>
+          ` + skinSpecificInteractivity + `
+        </div>
       </div>
-    </div>
-    
-    <div style="background:rgba(0,255,136,0.05); padding:30px; border-radius:10px; border:1px solid rgba(0,255,136,0.3); text-align:center;">
-       <div style="font-size:22px; color:#00ff88; margin-bottom:15px; letter-spacing:3px; font-weight:bold;">[ DIAGNOSTIC STREAM OVERSIGHT ]</div>
-       <div style="font-size:18px; color:#aaffcc; max-width:900px; margin:0 auto; line-height:1.7;">
-         ` + skinSpecificOversight + `
-       </div>
-    </div>
-  `;
+      
+      <div style="background:rgba(0,255,136,0.05); padding:30px; border-radius:10px; border:1px solid rgba(0,255,136,0.3); text-align:center;">
+         <div style="font-size:22px; color:#00ff88; margin-bottom:15px; letter-spacing:3px; font-weight:bold;">[ DIAGNOSTIC STREAM OVERSIGHT ]</div>
+         <div style="font-size:18px; color:#aaffcc; max-width:900px; margin:0 auto; line-height:1.7;">
+           ` + skinSpecificOversight + `
+         </div>
+      </div>
+    `;
+  }
 
   modal.appendChild(header);
   modal.appendChild(contentBox);
@@ -5811,6 +5862,76 @@ function handleGlobeClick(e) {
     return;
   }
 
+// =====================================================================
+// MASTER NODE CUSTOM UI
+// =====================================================================
+window.openMasterNodePanel = function(dcData) {
+  if (document.getElementById('master-node-overlay')) return;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'master-node-overlay';
+  overlay.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(10, 0, 15, 0.85); backdrop-filter: blur(8px);
+    z-index: 10000; display: flex; align-items: center; justify-content: center;
+    font-family: 'Orbitron', sans-serif;
+  `;
+
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    width: 60%; max-width: 900px; height: 70vh; max-height: 800px;
+    background: linear-gradient(135deg, rgba(80,0,120,0.3) 0%, rgba(150,50,0,0.3) 100%);
+    border: 2px solid #aa00ff; border-radius: 12px;
+    box-shadow: 0 0 40px rgba(170,0,255,0.4), inset 0 0 20px rgba(255,170,0,0.2);
+    padding: 30px; display: flex; flex-direction: column; position: relative;
+    overflow: hidden;
+  `;
+
+  modal.innerHTML = `
+    <!-- Decorative glowing corner elements -->
+    <div style="position:absolute; top:0; left:0; width:50px; height:50px; border-top:3px solid #ffaa00; border-left:3px solid #ffaa00; box-shadow: -5px -5px 15px rgba(255,170,0,0.5);"></div>
+    <div style="position:absolute; bottom:0; right:0; width:50px; height:50px; border-bottom:3px solid #aa00ff; border-right:3px solid #aa00ff; box-shadow: 5px 5px 15px rgba(170,0,255,0.5);"></div>
+
+    <button id="close-master-node" style="
+      position:absolute; top:20px; right:20px; background:none; border:none; 
+      color:#ffaa00; font-size:24px; cursor:pointer; font-weight:bold;
+    ">×</button>
+
+    <h1 style="color:#aa00ff; font-size:32px; text-shadow: 0 0 10px #aa00ff; margin-top:0; border-bottom:1px solid rgba(170,0,255,0.5); padding-bottom:15px; text-transform:uppercase;">
+      ❖ ${dcData.name.replace('DATACENTER: ', '')}
+    </h1>
+    
+    <div style="display:flex; justify-content:space-between; margin-bottom: 30px; border-bottom:1px solid rgba(255,170,0,0.3); padding-bottom:20px;">
+      <div style="color:#ffaa00; font-size:16px;">
+        <span style="opacity:0.7">STATUS:</span> <b style="text-shadow: 0 0 5px #ffaa00">ONLINE</b>
+      </div>
+      <div style="color:#aa00ff; font-size:16px;">
+        <span style="opacity:0.7">FACTION:</span> <b style="text-shadow: 0 0 5px #aa00ff">GEMINI CORE</b>
+      </div>
+      <div style="color:#fff; font-size:16px;">
+        <span style="opacity:0.7">CAPACITY:</span> <b>MAXIMUM</b>
+      </div>
+    </div>
+
+    <div style="flex-grow:1; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); border:1px dashed rgba(170,0,255,0.4); border-radius:8px;">
+        <h2 style="color:#ffaa00; letter-spacing:3px; margin-bottom:10px;">AWAITING CHAIN DEPLOYMENT</h2>
+        <p style="color:#ccc; font-size:14px; text-align:center; max-width:600px; line-height:1.6;">
+            This Central Interlink Node is pre-configured to handle multi-chain aggregation and high-throughput routing. 
+            <br><br>
+            <span style="color:#aa00ff; font-style:italic;">[ FUTURE EXPANSION SLOT FOR BLOCKCHAIN PROTOCOL INTEGRATION ]</span>
+        </p>
+    </div>
+  `;
+
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+
+  document.getElementById('close-master-node').onclick = () => {
+    overlay.remove();
+    if(typeof _sfxClick !== 'undefined') _sfxClick();
+  };
+};
+
   // Intercept clicks on Datacenters (Cyber Skin)
   if (window.currentSkinIndex === 3 && window.datacentersGroup && window.datacentersGroup.visible && window.datacentersGroup.children.length > 0) {
     const dcHits = ray.intersectObjects(window.datacentersGroup.children, false);
@@ -5818,6 +5939,10 @@ function handleGlobeClick(e) {
       if (typeof _sfxClick !== 'undefined') _sfxClick();
       const dcData = dcHits[0].object.userData;
       if (dcData && dcData.name) {
+        if (dcData.isMasterNode) {
+            window.openMasterNodePanel(dcData);
+            return;
+        }
         if (dcData.owner !== 'GEMINI') return; // Do nothing for Rainclaude datacenters
         window.openDatacenterCoopPanel(dcData);
         return; // Intercept click
@@ -5902,6 +6027,131 @@ canvas.addEventListener('mousemove', e => {
   } else tip.classList.remove('show');
 });
 
+// --- GREEN SKIN MARKET SYSTEM ---
+window.greenMarket = {
+  commodities: {
+    'Copper': { price: 1540, vol: 0.02, shares: 0, history: [1540] },
+    'Lithium': { price: 8200, vol: 0.05, shares: 0, history: [8200] },
+    'Rare Earth Elements': { price: 12500, vol: 0.08, shares: 0, history: [12500] },
+    'Iron ore': { price: 120, vol: 0.01, shares: 0, history: [120] },
+    'Gold': { price: 1950, vol: 0.015, shares: 0, history: [1950] },
+    'Nickel': { price: 21000, vol: 0.03, shares: 0, history: [21000] },
+    'Tin': { price: 25000, vol: 0.04, shares: 0, history: [25000] },
+    'Aluminum (Bauxite)': { price: 2200, vol: 0.02, shares: 0, history: [2200] },
+    'Aluminum': { price: 2200, vol: 0.02, shares: 0, history: [2200] },
+    'Cobalt': { price: 33000, vol: 0.06, shares: 0, history: [33000] }
+  },
+  lastUpdate: Date.now()
+};
+
+function initGreenMarketUI() {
+  if (document.getElementById('green-market-overlay')) return;
+  const container = document.createElement('div');
+  container.id = 'green-market-overlay';
+  container.style.cssText = 'position:absolute; bottom:55px; left:calc(37px + 25vw + 60px); width:136px; background:rgba(0,20,10,0.85); border:1px solid #0f8; border-radius:6px; padding:6px; color:#0f8; font-family:"Orbitron", sans-serif; display:none; pointer-events:none; z-index:1000; box-shadow: 0 0 10px rgba(0,255,136,0.2); backdrop-filter: blur(5px); transition: opacity 0.3s;';
+  container.innerHTML = `
+    <div style="font-size:10px; font-weight:bold; margin-bottom:6px; border-bottom:1px solid #0f8; padding-bottom:3px; letter-spacing:1px;">G-MARKET PORTFOLIO</div>
+    <div style="font-size:8px; color:#aaa; margin-bottom:2px;">TOTAL NET WORTH (MIL)</div>
+    <div id="green-market-networth" style="font-size:16px; font-weight:bold; color:#fff;">$0.00 M</div>
+    <div id="green-market-holdings" style="margin-top:8px; font-size:9px; max-height:150px; overflow-y:auto; pointer-events:auto; padding-right:3px;"></div>
+  `;
+  document.body.appendChild(container);
+}
+
+function updateGreenMarket() {
+  const isGreen = (window.currentSkinIndex === 2);
+  const overlay = document.getElementById('green-market-overlay');
+  if (!overlay && isGreen) initGreenMarketUI();
+  
+  if (overlay) {
+    overlay.style.display = isGreen ? 'block' : 'none';
+  }
+
+  let totalWorth = 0;
+  let holdingsHtml = '';
+
+  Object.keys(window.greenMarket.commodities).forEach(k => {
+    let c = window.greenMarket.commodities[k];
+    
+    // Process Volatility Random Walk
+    let change = 1 + (Math.random() * c.vol * 2 - c.vol);
+    // 5% chance of Rainclaude market manipulation (pump or dump)
+    if (Math.random() < 0.05) change *= (Math.random() < 0.5 ? 0.85 : 1.15);
+    
+    c.price = Math.max(10, c.price * change);
+    c.history.push(c.price);
+    if(c.history.length > 20) c.history.shift();
+
+    let trend = c.history[c.history.length-1] >= c.history[c.history.length-2] ? '<span style="color:#0f0">▲</span>' : '<span style="color:#f00">▼</span>';
+    let shareVal = c.price / 100; // Value per share in MIL
+
+    totalWorth += (c.shares * shareVal);
+
+    if (c.shares > 0) {
+      holdingsHtml += `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; background:rgba(0,255,136,0.1); padding:4px; border-radius:3px; border:1px solid rgba(0,255,136,0.2); font-size:9px;">
+          <span style="color:#fff">${k} <span style="color:#0f8; font-weight:bold; margin-left:3px;">x${c.shares}</span></span>
+          <span style="font-family:'Orbitron', monospace; font-size:10px; font-weight:bold; text-align:right;">${trend} $${shareVal.toFixed(2)}M</span>
+        </div>
+      `;
+    }
+
+    // Refresh UI Modal Buttons if they are visible
+    const safeK = k.replace(/[^a-zA-Z]/g, '');
+    const priceEl = document.getElementById(`market-price-${safeK}`);
+    const sellBtn = document.getElementById(`market-sell-${safeK}`);
+    if (priceEl) {
+      priceEl.innerHTML = `${trend} $${shareVal.toFixed(2)} MIL <span style="font-size:10px; color:#aaa; font-weight:normal;">/ SHARE</span>`;
+    }
+    if (sellBtn) {
+       sellBtn.style.opacity = c.shares > 0 ? '1' : '0.3';
+       sellBtn.disabled = c.shares === 0;
+    }
+  });
+
+  const networthEl = document.getElementById('green-market-networth');
+  if (networthEl) {
+    networthEl.innerText = '$' + totalWorth.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}) + ' M';
+    if (holdingsHtml === '') holdingsHtml = '<div style="color:#555; font-style:italic; text-align:center; padding:10px;">No active stakes.<br><br>Select producer nations on the map to acquire resources.</div>';
+    document.getElementById('green-market-holdings').innerHTML = holdingsHtml;
+  }
+}
+
+window.tradeGreenMetal = function(metalName, amount) {
+  if (typeof _sfxClick !== 'undefined') _sfxClick();
+  const c = window.greenMarket.commodities[metalName];
+  if (!c) return;
+  const myIndex = typeof GS !== 'undefined' && GS.myIndex !== undefined ? GS.myIndex : 0;
+  const player = GS.players && GS.players[myIndex] ? GS.players[myIndex] : null;
+  if (!player) return;
+
+  const cost = c.price / 100; // MIL cost
+  const totalCost = Math.round(cost * Math.abs(amount) * 100) / 100;
+
+  if (amount > 0) {
+    if (player.budget >= totalCost) {
+      player.budget -= totalCost;
+      c.shares += amount;
+      if (typeof setLog === 'function') setLog(`📈 ACQUIRED: ${amount}x ${metalName} stake for $${totalCost} MIL.`);
+    } else {
+      if (typeof setLog === 'function') setLog(`❌ INSUFFICIENT FUNDS: $${totalCost} MIL needed for ${metalName} stake.`);
+    }
+  } else if (amount < 0) {
+    if (c.shares >= Math.abs(amount)) {
+      c.shares += amount; 
+      player.budget += totalCost;
+      if (typeof setLog === 'function') setLog(`📉 LIQUIDATED: ${Math.abs(amount)}x ${metalName} stake for a $${totalCost} MIL return.`);
+    } else {
+      if (typeof setLog === 'function') setLog(`❌ NO STAKE: You do not own shares of ${metalName} to sell.`);
+    }
+  }
+  updateGreenMarket();
+  if (typeof updateDashBoard === 'function') updateDashBoard(); // Refresh user budget graphic immediately
+};
+
+setInterval(updateGreenMarket, 3000);
+// ------------------------------
+
 function showGreenSkinResourceModal(iso) {
   if (typeof _sfxClick !== 'undefined') _sfxClick();
   const cd = countryData[iso] || {name: iso};
@@ -5959,10 +6209,29 @@ function showGreenSkinResourceModal(iso) {
     metalsHtml = `<div style="margin-top:20px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px;">
       <b style="color:#0f8; font-size:13px; display:block; margin-bottom:10px;">★ STATE-CONTROLLED METALS</b>`;
     METALS_DATA[cName].forEach(m => {
+      let tradeHtml = '';
+      if (window.greenMarket && window.greenMarket.commodities[m.name]) {
+          const safeK = m.name.replace(/[^a-zA-Z]/g, '');
+          const c = window.greenMarket.commodities[m.name];
+          const priceMIL = (c.price / 100).toFixed(2);
+          tradeHtml = `
+            <div style="margin-top:10px; padding-top:8px; border-top: 1px dashed rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center;">
+               <div id="market-price-${safeK}" style="font-family:'Orbitron', monospace; font-size:14px; font-weight:bold; color:#fff;">
+                  $${priceMIL} MIL <span style="font-size:10px; color:#aaa; font-weight:normal;">/ SHARE</span>
+               </div>
+               <div style="display:flex; gap:5px;">
+                  <button onclick="window.tradeGreenMetal('${m.name}', 1)" style="background:rgba(0,255,136,0.2); border:1px solid #0f8; color:#0f8; padding:4px 8px; border-radius:3px; cursor:pointer; font-weight:bold; font-size:11px;">BUY</button>
+                  <button id="market-sell-${safeK}" onclick="window.tradeGreenMetal('${m.name}', -1)" ${c.shares === 0 ? 'disabled style="background:rgba(255,50,50,0.1); border:1px solid #f55; color:#f55; padding:4px 8px; border-radius:3px; cursor:not-allowed; font-weight:bold; font-size:11px; opacity:0.3;"' : 'style="background:rgba(255,50,50,0.2); border:1px solid #f55; color:#f55; padding:4px 8px; border-radius:3px; cursor:pointer; font-weight:bold; font-size:11px; opacity:1;"'}>SELL</button>
+               </div>
+            </div>
+          `;
+      }
+      
       metalsHtml += `
       <div class="strat-item">
         <div class="strat-item-title" style="color:${m.color};">⛏ ${m.name}</div>
         <div class="strat-item-desc">${m.desc}</div>
+        ${tradeHtml}
       </div>`;
     });
     metalsHtml += `</div>`;
@@ -8395,6 +8664,32 @@ function animate() {
     updCam();
   }
 
+  // Animate Cyber Skin Master Datacenter Aura & Color Pulse
+  if (window.currentSkinIndex === 3 && window.datacentersGroup && window.datacentersGroup.visible) {
+      window.datacentersGroup.children.forEach(dc => {
+          if (dc.userData && dc.userData.isMasterNode) {
+              const pulseScale = 5 + Math.sin(time3 * 4) * 0.5; // Pulsate size slightly
+              dc.scale.set(pulseScale, pulseScale, pulseScale);
+                            if (dc.userData.aura) {
+                 const auraPulse = 0.6 + Math.sin(time3 * 8) * 0.3; // Faster aura blink
+                 dc.userData.aura.material.opacity = auraPulse;
+                 
+                 // Interpolate between Purple and Orange based on time
+                 const p = (Math.sin(time3 * 2) + 1) / 2; // 0 to 1
+                 const purple = new THREE.Color(0xaa00ff);
+                 const orange = new THREE.Color(0xffaa00);
+                 dc.material.color.copy(purple).lerp(orange, p);
+                 dc.userData.aura.material.color.copy(orange).lerp(purple, p);
+                 
+                 if (dc.userData.light) {
+                     dc.userData.light.color.copy(purple).lerp(orange, p);
+                     dc.userData.light.intensity = 2 + Math.sin(time3 * 8) * 1; 
+                 }
+              }
+          }
+      });
+  }
+
   // Update missiles
   for(let i=missiles3D.length-1;i>=0;i--){
     const m=missiles3D[i];
@@ -10611,6 +10906,13 @@ window.toggleRedSkin = function() {
               if (window.SKINS[window.currentSkinIndex].name === 'BLK') window.launchCyberAttack();
               if (window.SKINS[window.currentSkinIndex].name === 'CYBER') window.launchDatacenterAttack();
           }, 1000 + Math.random() * 3000); // 1-4 seconds
+      }
+      
+      // Auto-open Simulation Info for Black Skin due to Epilepsy Warning necessity
+      if (skin.name === 'BLK') {
+          setTimeout(() => {
+              if (typeof showCmdHelpModal === 'function') showCmdHelpModal();
+          }, 300); // Slight delay for smooth transition
       }
   } else {
       if (window.cyberWarfareInterval) {
