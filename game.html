@@ -6242,6 +6242,7 @@ window.tradeGreenMetal = function(metalName, amount) {
   if (typeof updateDashBoard === 'function') updateDashBoard(); // Refresh user budget graphic immediately
 };
 
+updateGreenMarket(); // Initial render to prevent 2-3s delay on script load
 setInterval(updateGreenMarket, 3000);
 
 window.showGMarketWallet = function() {
@@ -11195,6 +11196,9 @@ window.toggleRedSkin = function() {
       boatInterval = null;
     }
   }
+
+  // Force instant UI render for specific skins (prevents interval delay)
+  if (typeof updateGreenMarket === 'function') updateGreenMarket();
 };
 
 // ================= AMBIENT RADIO FEED & AI FUZZING =================
