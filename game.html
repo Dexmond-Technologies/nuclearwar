@@ -5593,6 +5593,10 @@ function selectCountry(iso) {
     return;
   }
 
+  if (window.currentSkinIndex === 3) { // Cyber Skin exclusively ignores normal ops
+    return;
+  }
+
   const c = GS.countries[iso];
   const cd = countryData[iso];
   const sp = document.getElementById('side-panel');
