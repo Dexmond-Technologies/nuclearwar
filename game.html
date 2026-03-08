@@ -2637,10 +2637,10 @@ function showCompanyInfo(compData) {
     </div>
     <h2 style="margin:0 0 10px 0;color:#00f0ff;font-size:24px;text-transform:uppercase;">${compData.name}</h2>
     <div style="font-size:14px;color:#aaa;margin-bottom:5px;">HQ LOCATION</div>
-    <div style="font-size:18px;margin-bottom:15px;">${compData.city}</div>
+    <div style="font-size:18px;margin-bottom:15px;">${compData.city || compData.hq || 'CLASSIFIED'}</div>
     <div style="display:flex;justify-content:space-between;border-top:1px solid #333;padding-top:10px;">
-        <div><span style="color:#0f8">LAT:</span> ${compData.lat.toFixed(4)}</div>
-        <div><span style="color:#0f8">LON:</span> ${compData.lon.toFixed(4)}</div>
+        <div><span style="color:#0f8">LAT:</span> ${compData.lat !== undefined ? compData.lat.toFixed(4) : '---'}</div>
+        <div><span style="color:#0f8">LON:</span> ${compData.lon !== undefined ? compData.lon.toFixed(4) : '---'}</div>
     </div>
     <div style="margin-top:15px;font-size:12px;color:#ffff00;">STRATEGIC ASSET DETECTED</div>
   `;
@@ -3466,6 +3466,9 @@ function initDatacenters() {
             val: dc.operator.toUpperCase(), 
             ind: 'DATA', 
             hq: dc.location.toUpperCase(), 
+            city: dc.location.toUpperCase(),
+            lat: dc.lat,
+            lon: dc.lon,
             rev: 'ACTIVE' 
         };
         window.datacentersGroup.add(mesh);
