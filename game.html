@@ -92,7 +92,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 #topbar{position:absolute;top:0;left:0;right:0;height:90px;
   background:linear-gradient(#000a,transparent);display:flex;align-items:center;
   justify-content:space-between;padding:0 30px;border-bottom:1px solid rgba(0,180,255,.1);}
-#game-title{font-family:'Orbitron',sans-serif;font-weight:700;font-size:36px;letter-spacing:12px;color:#ace;text-shadow:0 0 15px #0af4;margin-top:7px;}
+#game-title{font-family:'Orbitron',sans-serif;font-weight:700;font-size:36px;letter-spacing:12px;color:#ace;text-shadow:0 0 15px #0af4;margin-top:14px;}
 #phase-label{font-family:'Share Tech Mono',monospace;font-size:20px;letter-spacing:5px;text-align:center;margin-top:6px;}
 .player-badges{display:flex;gap:8px;}
 .pb{padding:4px 10px;border-radius:3px;font-size:10px;letter-spacing:1px;border:1px solid;}
@@ -1004,10 +1004,15 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     </div>
 
     <!-- Authentication Section: Google | Wallet | Override Code -->
-    <div id="auth-container-flex" style="display:flex; flex-direction:column; justify-content:center; align-items:center; gap:16px; margin:140px auto 0; min-height:50px; position:relative; z-index:1; opacity: 0; transition: opacity 0.5s ease-out;">
+    <div id="auth-container-flex" style="display:flex; flex-direction:column; justify-content:center; align-items:center; gap:16px; margin:20px auto 0; min-height:50px; position:relative; z-index:1; opacity: 1; transition: opacity 0.5s ease-out;">
       
-      <!-- Row 1: Google | Override Code -->
-      <div style="display:flex; justify-content:center; align-items:center; gap:40px;">
+      <!-- Connect Wait Timer -->
+      <div id="auth-countdown-container" style="text-align:center; font-family:'Share Tech Mono', monospace; font-size:68px; color:#ffb; letter-spacing:2px; height:75px; line-height:75px; margin-top:-30px; margin-bottom:60px; text-shadow:0 0 10px #ff0000; transition: opacity 0.3s; opacity:1;">
+          <span id="auth-countdown-val">3</span>
+      </div>
+
+      <!-- Row 1: Google | Wallet | Override Code -->
+      <div id="auth-buttons-container" style="display:flex; justify-content:center; align-items:center; gap:40px; pointer-events:none; opacity:0.5; transition:all 0.5s;">
         <!-- Google Sign-In -->
         <div style="margin-top: 15px;">
           <div id="g_id_onload"
@@ -1044,23 +1049,8 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
         </div>
     
     <script>
-      // Wait for Google Sign-In iframe to render before revealing the container
-      const syncInterval = setInterval(() => {
-        const gsiContainer = document.querySelector('.g_id_signin');
-        if (gsiContainer && gsiContainer.innerHTML.trim() !== '' && gsiContainer.querySelector('iframe')) {
-          document.getElementById('auth-container-flex').style.opacity = '1';
-          clearInterval(syncInterval);
-        }
-      }, 100);
-      
-      // Fallback in case Google script fails or is blocked
-      setTimeout(() => {
-        const authFlex = document.getElementById('auth-container-flex');
-        if (authFlex && authFlex.style.opacity === '0') {
-          authFlex.style.opacity = '1';
-          clearInterval(syncInterval);
-        }
-      }, 3000);
+      // Auth container and Countdown timer are now globally synced to HTML load.
+      // Google Sign-In script will auto-inject gracefully within the container bounds.
     </script>
       </div>
 
@@ -1230,6 +1220,8 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 
   </div>
   <div style="position:absolute; bottom:12px; left:20px; font-family:'Share Tech Mono', monospace; font-size:10px; font-weight:normal; letter-spacing:3px; color:#0af; text-transform:uppercase; z-index:15; pointer-events:none; text-shadow:0 0 5px rgba(0,170,255,0.8);">DEXMOND TECHNOLOGIES Ltd</div>
+  
+  <div id="skin-hint-arrow" style="position:absolute; bottom:121px; right:calc(115px + 25vw + 10px); font-size:32px; color:#ff5577; text-shadow:0 0 15px rgba(255,-85,119,0.8); opacity:0; pointer-events:none; z-index:9999; transition:opacity 0.5s; animation:bounceRight 0.5s infinite alternate;">➔</div>
   <button id="btn-toggle-skin" onclick="toggleRedSkin()">🔴 RED SKIN</button>
   <button id="btn-toggle-soundtrack" onclick="toggleSoundtrack()">🎵 SOUNDTRACK</button>
   <button id="btn-toggle-radio" onclick="toggleRadio()">📻 ON</button>
@@ -1321,6 +1313,11 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 #btn-toggle-skin.active-normal:hover {
   background: rgba(0,170,255,0.3);
   border-color: #0af;
+}
+
+@keyframes bounceRight {
+  from { transform: translateX(-15px); }
+  to { transform: translateX(0); }
 }
 
 #btn-toggle-soundtrack {
@@ -1442,7 +1439,31 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   background: rgba(255,170,0,0.3) !important;
   color: #fff !important;
 }
+</style>
 
+<script>
+// Auth Button 3-Second Wait Initialization Hook
+let authWaitVal = 3;
+
+const authWaitInterval = setInterval(() => {
+    authWaitVal--;
+    const elWaitVal = document.getElementById('auth-countdown-val');
+    if(elWaitVal) elWaitVal.innerText = authWaitVal;
+    
+    if (authWaitVal <= 0) {
+        clearInterval(authWaitInterval);
+        const container = document.getElementById('auth-countdown-container');
+        const buttons = document.getElementById('auth-buttons-container');
+        if (container) container.style.opacity = '0';
+        if (buttons) {
+            buttons.style.pointerEvents = 'auto';
+            buttons.style.opacity = '1';
+        }
+    }
+}, 1000);
+</script>
+
+<style>
 #ops-sidebar {
   position: fixed;
   top: 72px;
@@ -6285,6 +6306,14 @@ window.openMasterNodePanel = function(dcData) {
                 <button id="copy-btc-btn" style="background: rgba(255,170,0,0.2); border: none; border-left: 1px solid rgba(255,170,0,0.3); color: #ffaa00; padding: 0 15px; cursor: pointer; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: bold; transition: background 0.2s;">COPY</button>
             </div>
         </div>
+        <div id="eth-deposit-container" style="display:none; margin-top: 20px; padding: 15px; background: rgba(170,0,255,0.1); border: 1px solid #aa00ff; border-radius: 8px; text-align: center; width: 80%; max-width: 500px;">
+            <div style="color: #aa00ff; font-size: 14px; margin-bottom: 5px; font-weight: bold; letter-spacing: 1px;">EVM DEPLOYMENT LAYER</div>
+            <div style="color: #fff; font-size: 11px; margin-bottom: 10px; opacity: 0.8;">Send ETH deposits to initialize the Frankfurt Node.</div>
+            <div style="display: flex; background: rgba(0,0,0,0.5); border: 1px solid rgba(170,0,255,0.3); border-radius: 4px; overflow: hidden;">
+                <input type="text" id="eth-wallet-address" readonly style="flex-grow: 1; background: transparent; border: none; color: #aa00ff; font-family: monospace; padding: 10px; outline: none; text-align: center; font-size: 14px;" value="LOADING ADDRESS..."/>
+                <button id="copy-eth-btn" style="background: rgba(170,0,255,0.2); border: none; border-left: 1px solid rgba(170,0,255,0.3); color: #aa00ff; padding: 0 15px; cursor: pointer; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: bold; transition: background 0.2s;">COPY</button>
+            </div>
+        </div>
     </div>
   `;
 
@@ -6330,6 +6359,42 @@ window.openMasterNodePanel = function(dcData) {
                   copyBtn.innerText = prevText;
                   copyBtn.style.background = 'rgba(255,170,0,0.2)';
                   copyBtn.style.color = '#ffaa00';
+              }, 2000);
+          });
+      };
+  } else if (dcData.protocolName === 'EVM') {
+      const depositContainer = document.getElementById('eth-deposit-container');
+      const addressInput = document.getElementById('eth-wallet-address');
+      const copyBtn = document.getElementById('copy-eth-btn');
+      
+      depositContainer.style.display = 'block';
+
+      fetch('/api/wallet')
+          .then(res => res.json())
+          .then(data => {
+              if (data.ethWallet && data.ethWallet !== 'NOT_SET') {
+                  addressInput.value = data.ethWallet;
+              } else {
+                  addressInput.value = "PROTOCOL OFFLINE";
+                  copyBtn.disabled = true;
+                  copyBtn.style.opacity = '0.5';
+              }
+          })
+          .catch(err => {
+              console.error('Failed to fetch ETH wallet:', err);
+              addressInput.value = "CONNECTION FAILED";
+          });
+
+      copyBtn.onclick = () => {
+          navigator.clipboard.writeText(addressInput.value).then(() => {
+              const prevText = copyBtn.innerText;
+              copyBtn.innerText = "COPIED!";
+              copyBtn.style.background = 'rgba(57,255,20,0.3)';
+              copyBtn.style.color = '#39ff14';
+              setTimeout(() => {
+                  copyBtn.innerText = prevText;
+                  copyBtn.style.background = 'rgba(170,0,255,0.2)';
+                  copyBtn.style.color = '#aa00ff';
               }, 2000);
           });
       };
@@ -11651,7 +11716,7 @@ function scheduleNextFuzz() {
 // ================= CUSTOM SOUNDTRACK AND WARNING OVERLAY =================
 const soundtrackWarningOverlay = document.createElement('div');
 soundtrackWarningOverlay.style.cssText = "position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(20,0,0,0.85); z-index:9999; opacity:0; pointer-events:none; transition:opacity 0.5s;";
-soundtrackWarningOverlay.innerHTML = "<div style='color:#ff0033; font-family:\"Orbitron\", sans-serif; font-size:4vw; font-weight:800; text-align:center; text-shadow:0 0 20px #ff0033, 0 0 40px #ff0033; border:2px solid #ff0033; padding:40px; background:rgba(50,0,0,0.6); box-shadow:0 0 50px rgba(255,0,50,0.4); text-transform:uppercase;'>WELCOME TO NUCLEAR WAR SOUNDTRACK, ENJOY</div>";
+soundtrackWarningOverlay.innerHTML = "<div style='color:#ff0033; font-family:\"Orbitron\", sans-serif; font-size:4vw; font-weight:800; text-align:center; text-shadow:0 0 20px #ff0033, 0 0 40px #ff0033; border:2px solid #ff0033; padding:40px; background:rgba(50,0,0,0.6); box-shadow:0 0 50px rgba(255,0,50,0.4); text-transform:uppercase;'>WELCOME TO NUCLEAR WAR, ENJOY</div>";
 document.body.appendChild(soundtrackWarningOverlay);
 
 let customSoundtrack = new Audio();
@@ -11757,7 +11822,17 @@ window.toggleSoundtrack = function() {
     if (!soundtrackWelcomed) {
       soundtrackWelcomed = true;
       soundtrackWarningOverlay.style.opacity = '1';
-      setTimeout(() => { soundtrackWarningOverlay.style.opacity = '0'; }, 4000);
+      setTimeout(() => { 
+        soundtrackWarningOverlay.style.opacity = '0';
+        
+        // Show the skin hint arrow directly following the banner
+        const skinArrow = document.getElementById('skin-hint-arrow');
+        if (skinArrow) {
+            skinArrow.style.opacity = '1';
+            // Fade out the arrow after another 6 seconds
+            setTimeout(() => { skinArrow.style.opacity = '0'; }, 6000);
+        }
+      }, 4000);
     }
     playCustomSoundtrack();
   } else {

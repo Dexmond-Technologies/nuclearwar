@@ -168,7 +168,8 @@ const server = http.createServer((req, res) => {
       'Access-Control-Allow-Origin': '*'
     });
     res.end(JSON.stringify({ 
-      btcWallet: process.env.BTC_WALLET || "NOT_SET"
+      btcWallet: process.env.BTC_WALLET || "NOT_SET",
+      ethWallet: process.env.ETH_WALLET || "NOT_SET"
     }));
   } else if (req.url === '/api/soundtrack') {
     res.writeHead(200, {
