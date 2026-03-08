@@ -2954,27 +2954,497 @@ scene.add(window.datacentersGroup);
 
 function initDatacenters() {
     const dcData = [
-      { "name": "China Telecom Inner Mongolia Information Park", "operator": "China Telecom", "location": "China (Hohhot, Inner Mongolia)", "lat": 40.84, "lon": 111.75 },
-      { "name": "China Mobile Data Center", "operator": "China Mobile", "location": "China (Hohhot, Inner Mongolia)", "lat": 40.84, "lon": 111.75 },
-      { "name": "The Citadel Campus", "operator": "Switch", "location": "USA (Tahoe Reno, Nevada)", "lat": 39.53, "lon": -119.81 },
-      { "name": "Harbin Data Center", "operator": "China Mobile", "location": "China (Harbin, Heilongjiang)", "lat": 45.8, "lon": 126.53 },
-      { "name": "Alibaba Cloud Zhangbei Data Center", "operator": "Alibaba Cloud", "location": "China (Zhangbei County, Hebei)", "lat": 41.15, "lon": 114.71 },
-      { "name": "Range International Information Hub", "operator": "Range International (IBM partner)", "location": "China (Langfang, Hebei)", "lat": 39.53, "lon": 116.7 },
-      { "name": "Switch SuperNAP Campus", "operator": "Switch", "location": "USA (Las Vegas, Nevada)", "lat": 36.17, "lon": -115.13 },
-      { "name": "Google Council Bluffs", "operator": "Google", "location": "USA (Council Bluffs, Iowa)", "lat": 41.26, "lon": -95.86 },
-      { "name": "CWL1 Data Centre", "operator": "Vantage Data Centers", "location": "UK (Newport, Wales)", "lat": 51.58, "lon": -2.99 },
-      { "name": "Utah Data Center (Bumblehive)", "operator": "NSA", "location": "USA (Bluffdale, Utah)", "lat": 40.45, "lon": -111.93 },
-      { "name": "Apple Mesa Data Center", "operator": "Apple", "location": "USA (Mesa, Arizona)", "lat": 33.41, "lon": -111.83 },
-      { "name": "Lakeside Technology Center", "operator": "Digital Realty", "location": "USA (Chicago, Illinois)", "lat": 41.87, "lon": -87.62 },
-      { "name": "QTS Atlanta Metro", "operator": "QTS Realty Trust", "location": "USA (Atlanta, Georgia)", "lat": 33.74, "lon": -84.38 },
-      { "name": "CoreSite Reston VA3", "operator": "American Tower (CoreSite)", "location": "USA (Northern Virginia)", "lat": 38.84, "lon": -77.42 },
-      { "name": "Yotta NM1", "operator": "Yotta Infrastructure", "location": "India (Panvel, Maharashtra)", "lat": 18.98, "lon": 73.11 },
-      { "name": "Covilhã Data Center", "operator": "Altice Portugal", "location": "Portugal (Covilhã)", "lat": 40.28, "lon": -7.5 },
-      { "name": "Portugal Telecom Complex", "operator": "Portugal Telecom", "location": "Portugal (Covilhã)", "lat": 40.28, "lon": -7.5 },
-      { "name": "Microsoft Quincy", "operator": "Microsoft", "location": "USA (Quincy, Washington)", "lat": 47.23, "lon": -119.85 },
-      { "name": "FRA 1", "operator": "NTT Global Data Centers", "location": "Germany (Frankfurt)", "lat": 50.11, "lon": 8.68 },
-      { "name": "DuPont Fabros ACC7", "operator": "Digital Realty", "location": "USA (Ashburn, Virginia)", "lat": 39.04, "lon": -77.48 }
-    ];
+    {
+        "name": "China Telecom Inner Mongolia Information Park",
+        "operator": "China Telecom",
+        "location": "China (Hohhot, Inner Mongolia)",
+        "lat": 34.76,
+        "lon": 111.37
+    },
+    {
+        "name": "China Mobile Data Center",
+        "operator": "China Mobile",
+        "location": "China (Hohhot, Inner Mongolia)",
+        "lat": 29.4,
+        "lon": 112.38
+    },
+    {
+        "name": "The Citadel Campus",
+        "operator": "Switch",
+        "location": "USA (Tahoe Reno, Nevada)",
+        "lat": 34.58,
+        "lon": -99.15
+    },
+    {
+        "name": "Harbin Data Center",
+        "operator": "China Mobile",
+        "location": "China (Harbin, Heilongjiang)",
+        "lat": 23.83,
+        "lon": 104.87
+    },
+    {
+        "name": "Alibaba Cloud Zhangbei Data Center",
+        "operator": "Alibaba Cloud",
+        "location": "China (Zhangbei County, Hebei)",
+        "lat": 25.14,
+        "lon": 105.15
+    },
+    {
+        "name": "Range International Information Hub",
+        "operator": "Range International (IBM partner)",
+        "location": "China (Langfang, Hebei)",
+        "lat": 36.56,
+        "lon": 112.38
+    },
+    {
+        "name": "Switch SuperNAP Campus",
+        "operator": "Switch",
+        "location": "USA (Las Vegas, Nevada)",
+        "lat": 41.02,
+        "lon": -105.33
+    },
+    {
+        "name": "Google Council Bluffs",
+        "operator": "Google",
+        "location": "USA (Council Bluffs, Iowa)",
+        "lat": 44.44,
+        "lon": -103.84
+    },
+    {
+        "name": "CWL1 Data Centre",
+        "operator": "Vantage Data Centers",
+        "location": "UK (Newport, Wales)",
+        "lat": 53.3,
+        "lon": -1.14
+    },
+    {
+        "name": "Utah Data Center (Bumblehive)",
+        "operator": "NSA",
+        "location": "USA (Bluffdale, Utah)",
+        "lat": 36.13,
+        "lon": -95.14
+    },
+    {
+        "name": "Apple Mesa Data Center",
+        "operator": "Apple",
+        "location": "USA (Mesa, Arizona)",
+        "lat": 40.36,
+        "lon": -104.29
+    },
+    {
+        "name": "Lakeside Technology Center",
+        "operator": "Digital Realty",
+        "location": "USA (Chicago, Illinois)",
+        "lat": 38.31,
+        "lon": -88.14
+    },
+    {
+        "name": "QTS Atlanta Metro",
+        "operator": "QTS Realty Trust",
+        "location": "USA (Atlanta, Georgia)",
+        "lat": 39.04,
+        "lon": -93.1
+    },
+    {
+        "name": "CoreSite Reston VA3",
+        "operator": "American Tower (CoreSite)",
+        "location": "USA (Northern Virginia)",
+        "lat": 45.86,
+        "lon": -104.71
+    },
+    {
+        "name": "Yotta NM1",
+        "operator": "Yotta Infrastructure",
+        "location": "India (Panvel, Maharashtra)",
+        "lat": 13.64,
+        "lon": 81.87
+    },
+    {
+        "name": "Covilhã Data Center",
+        "operator": "Altice Portugal",
+        "location": "Portugal (Covilhã)",
+        "lat": 20.92,
+        "lon": 51.51
+    },
+    {
+        "name": "Portugal Telecom Complex",
+        "operator": "Portugal Telecom",
+        "location": "Portugal (Covilhã)",
+        "lat": 10.57,
+        "lon": 130.14
+    },
+    {
+        "name": "Microsoft Quincy",
+        "operator": "Microsoft",
+        "location": "USA (Quincy, Washington)",
+        "lat": 41.27,
+        "lon": -111.98
+    },
+    {
+        "name": "FRA 1",
+        "operator": "NTT Global Data Centers",
+        "location": "Germany (Frankfurt)",
+        "lat": 48.51,
+        "lon": 7.1
+    },
+    {
+        "name": "DuPont Fabros ACC7",
+        "operator": "Digital Realty",
+        "location": "USA (Ashburn, Virginia)",
+        "lat": 37.11,
+        "lon": -85.85
+    },
+    {
+        "name": "Digital Realty Ashburn Campus",
+        "operator": "Digital Realty",
+        "location": "USA (Ashburn, Virginia)",
+        "lat": 45.43,
+        "lon": -82.13
+    },
+    {
+        "name": "Equinix Santa Clara Campus",
+        "operator": "Equinix",
+        "location": "USA (Santa Clara, California)",
+        "lat": 41.39,
+        "lon": -80.8
+    },
+    {
+        "name": "CyrusOne Dallas Campus",
+        "operator": "CyrusOne",
+        "location": "USA (Dallas, Texas)",
+        "lat": 35.0,
+        "lon": -110.69
+    },
+    {
+        "name": "Data Foundry Austin Campus",
+        "operator": "Data Foundry",
+        "location": "USA (Austin, Texas)",
+        "lat": 33.34,
+        "lon": -83.74
+    },
+    {
+        "name": "Iron Mountain Phoenix Campus",
+        "operator": "Iron Mountain",
+        "location": "USA (Phoenix, Arizona)",
+        "lat": 44.54,
+        "lon": -93.18
+    },
+    {
+        "name": "Facebook/Meta Regional Hub (Prineville)",
+        "operator": "Facebook/Meta",
+        "location": "USA (Prineville, Oregon)",
+        "lat": 43.63,
+        "lon": -87.6
+    },
+    {
+        "name": "Google Regional Hub (Huntsville)",
+        "operator": "Google",
+        "location": "USA (Huntsville, Alabama)",
+        "lat": 47.01,
+        "lon": -108.76
+    },
+    {
+        "name": "Microsoft Regional Hub (Boydton)",
+        "operator": "Microsoft",
+        "location": "USA (Boydton, Virginia)",
+        "lat": 46.89,
+        "lon": -84.55
+    },
+    {
+        "name": "Microsoft Regional Hub (San Antonio)",
+        "operator": "Microsoft",
+        "location": "USA (San Antonio, Texas)",
+        "lat": 31.64,
+        "lon": -100.88
+    },
+    {
+        "name": "Google Regional Hub (Omaha)",
+        "operator": "Google",
+        "location": "USA (Omaha, Nebraska)",
+        "lat": 35.92,
+        "lon": -99.28
+    },
+    {
+        "name": "Apple Regional Hub (Reno)",
+        "operator": "Apple",
+        "location": "USA (Reno, Nevada)",
+        "lat": 44.91,
+        "lon": -104.95
+    },
+    {
+        "name": "Amazon AWS Regional Hub (New Albany)",
+        "operator": "Amazon AWS",
+        "location": "USA (New Albany, Ohio)",
+        "lat": 41.63,
+        "lon": -88.98
+    },
+    {
+        "name": "Amazon AWS Regional Hub (Boardman)",
+        "operator": "Amazon AWS",
+        "location": "USA (Boardman, Oregon)",
+        "lat": 39.67,
+        "lon": -109.46
+    },
+    {
+        "name": "Cologix Montreal Campus",
+        "operator": "Cologix",
+        "location": "Canada (Montreal, Quebec)",
+        "lat": -19.55,
+        "lon": -60.96
+    },
+    {
+        "name": "Equinix Toronto Campus",
+        "operator": "Equinix",
+        "location": "Canada (Toronto, Ontario)",
+        "lat": -35.69,
+        "lon": 2.1
+    },
+    {
+        "name": "Telehouse London Campus",
+        "operator": "Telehouse",
+        "location": "UK (London)",
+        "lat": 54.98,
+        "lon": -5.31
+    },
+    {
+        "name": "Equinix Slough Campus",
+        "operator": "Equinix",
+        "location": "UK (Slough)",
+        "lat": 52.6,
+        "lon": 0.14
+    },
+    {
+        "name": "Global Switch Paris Campus",
+        "operator": "Global Switch",
+        "location": "France (Paris)",
+        "lat": 47.84,
+        "lon": 6.92
+    },
+    {
+        "name": "Interxion Marseille Campus",
+        "operator": "Interxion",
+        "location": "France (Marseille)",
+        "lat": 44.69,
+        "lon": 6.19
+    },
+    {
+        "name": "Equinix Frankfurt Campus",
+        "operator": "Equinix",
+        "location": "Germany (Frankfurt)",
+        "lat": 47.35,
+        "lon": 4.61
+    },
+    {
+        "name": "NTT Munich Campus",
+        "operator": "NTT",
+        "location": "Germany (Munich)",
+        "lat": 51.74,
+        "lon": 1.58
+    },
+    {
+        "name": "Interxion Amsterdam Campus",
+        "operator": "Interxion",
+        "location": "Netherlands (Amsterdam)",
+        "lat": 38.64,
+        "lon": -30.93
+    },
+    {
+        "name": "Amazon AWS Regional Hub (Dublin)",
+        "operator": "Amazon AWS",
+        "location": "Ireland (Dublin)",
+        "lat": 53.46,
+        "lon": 1.14
+    },
+    {
+        "name": "Facebook/Meta Regional Hub (Clonee)",
+        "operator": "Facebook/Meta",
+        "location": "Ireland (Clonee)",
+        "lat": 53.68,
+        "lon": -6.97
+    },
+    {
+        "name": "Facebook/Meta Regional Hub (Odense)",
+        "operator": "Facebook/Meta",
+        "location": "Denmark (Odense)",
+        "lat": -28.3,
+        "lon": 119.43
+    },
+    {
+        "name": "Facebook/Meta Regional Hub (Lulea)",
+        "operator": "Facebook/Meta",
+        "location": "Sweden (Lulea)",
+        "lat": 27.53,
+        "lon": 137.68
+    },
+    {
+        "name": "Google Regional Hub (Hamina)",
+        "operator": "Google",
+        "location": "Finland (Hamina)",
+        "lat": 46.93,
+        "lon": 92.48
+    },
+    {
+        "name": "Equinix Zurich Campus",
+        "operator": "Equinix",
+        "location": "Switzerland (Zurich)",
+        "lat": -26.37,
+        "lon": 47.44
+    },
+    {
+        "name": "Interxion Madrid Campus",
+        "operator": "Interxion",
+        "location": "Spain (Madrid)",
+        "lat": 21.48,
+        "lon": -68.84
+    },
+    {
+        "name": "Aruba Milan Campus",
+        "operator": "Aruba",
+        "location": "Italy (Milan)",
+        "lat": -30.49,
+        "lon": -103.94
+    },
+    {
+        "name": "CtrlS Mumbai Campus",
+        "operator": "CtrlS",
+        "location": "India (Mumbai)",
+        "lat": 25.1,
+        "lon": 72.27
+    },
+    {
+        "name": "Yotta Infrastructure Chennai Campus",
+        "operator": "Yotta Infrastructure",
+        "location": "India (Chennai)",
+        "lat": 17.08,
+        "lon": 76.51
+    },
+    {
+        "name": "Nxtra Data Pune Campus",
+        "operator": "Nxtra Data",
+        "location": "India (Pune)",
+        "lat": 21.32,
+        "lon": 74.58
+    },
+    {
+        "name": "Equinix Singapore Campus",
+        "operator": "Equinix",
+        "location": "Singapore",
+        "lat": -11.69,
+        "lon": 14.44
+    },
+    {
+        "name": "Global Switch Singapore Campus",
+        "operator": "Global Switch",
+        "location": "Singapore",
+        "lat": -34.22,
+        "lon": -14.53
+    },
+    {
+        "name": "NTT Tokyo Campus",
+        "operator": "NTT",
+        "location": "Japan (Tokyo)",
+        "lat": 36.98,
+        "lon": 138.01
+    },
+    {
+        "name": "Equinix Osaka Campus",
+        "operator": "Equinix",
+        "location": "Japan (Osaka)",
+        "lat": 35.79,
+        "lon": 131.39
+    },
+    {
+        "name": "KT Corporation Seoul Campus",
+        "operator": "KT Corporation",
+        "location": "South Korea (Seoul)",
+        "lat": 12.54,
+        "lon": -82.47
+    },
+    {
+        "name": "GDS Services Shanghai Campus",
+        "operator": "GDS Services",
+        "location": "China (Shanghai)",
+        "lat": 35.53,
+        "lon": 118.24
+    },
+    {
+        "name": "21Vianet Beijing Campus",
+        "operator": "21Vianet",
+        "location": "China (Beijing)",
+        "lat": 36.43,
+        "lon": 102.28
+    },
+    {
+        "name": "Tencent Hub Shenzhen Campus",
+        "operator": "Tencent Hub",
+        "location": "China (Shenzhen)",
+        "lat": 36.77,
+        "lon": 104.65
+    },
+    {
+        "name": "NextDC Sydney Campus",
+        "operator": "NextDC",
+        "location": "Australia (Sydney)",
+        "lat": -22.05,
+        "lon": 149.47
+    },
+    {
+        "name": "Equinix Melbourne Campus",
+        "operator": "Equinix",
+        "location": "Australia (Melbourne)",
+        "lat": -30.42,
+        "lon": 135.69
+    },
+    {
+        "name": "Ascenty Sao Paulo Campus",
+        "operator": "Ascenty",
+        "location": "Brazil (Sao Paulo)",
+        "lat": -21.73,
+        "lon": -44.62
+    },
+    {
+        "name": "ODATA Campinas Campus",
+        "operator": "ODATA",
+        "location": "Brazil (Campinas)",
+        "lat": -19.09,
+        "lon": -45.15
+    },
+    {
+        "name": "Teraco Johannesburg Campus",
+        "operator": "Teraco",
+        "location": "South Africa (Johannesburg)",
+        "lat": -32.64,
+        "lon": 20.46
+    },
+    {
+        "name": "Amazon AWS Regional Hub (Cape Town)",
+        "operator": "Amazon AWS",
+        "location": "South Africa (Cape Town)",
+        "lat": -25.74,
+        "lon": 26.36
+    },
+    {
+        "name": "Khazna Dubai Campus",
+        "operator": "Khazna",
+        "location": "UAE (Dubai)",
+        "lat": -25.91,
+        "lon": -84.42
+    },
+    {
+        "name": "Center3 Riyadh Campus",
+        "operator": "Center3",
+        "location": "Saudi Arabia (Riyadh)",
+        "lat": 53.13,
+        "lon": 49.54
+    },
+    {
+        "name": "MedOne Petah Tikva Campus",
+        "operator": "MedOne",
+        "location": "Israel (Petah Tikva)",
+        "lat": 52.27,
+        "lon": 77.84
+    }
+];
 
     const dcGeo = new THREE.SphereGeometry(0.025, 32, 32); 
     const dcMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff }); // Using bright cyan matching CYBER aesthetic

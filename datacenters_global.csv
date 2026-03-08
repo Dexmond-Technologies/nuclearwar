@@ -28,4 +28,53 @@
 19	FRA 1	NTT Global Data Centers	Germany (Frankfurt)	613,500 sq ft / 57,000 sq m	60	Operational
 ​
 20	DuPont Fabros ACC7	Digital Realty	USA (Ashburn, Virginia)	~550,000 sq ft / 51,096 sq m	~80	Operational
-​
+​21	Digital Realty Ashburn Campus	Digital Realty	USA (Ashburn, Virginia)	701,000 sq ft / 65,124 sq m	136	Operational
+22	Equinix Santa Clara Campus	Equinix	USA (Santa Clara, California)	693,000 sq ft / 64,381 sq m	57	Operational
+23	CyrusOne Dallas Campus	CyrusOne	USA (Dallas, Texas)	333,000 sq ft / 30,936 sq m	127	Operational
+24	Data Foundry Austin Campus	Data Foundry	USA (Austin, Texas)	550,000 sq ft / 51,096 sq m	164	Operational
+25	Iron Mountain Phoenix Campus	Iron Mountain	USA (Phoenix, Arizona)	557,000 sq ft / 51,746 sq m	60	Operational
+26	Facebook/Meta Regional Hub (Prineville)	Facebook/Meta	USA (Prineville, Oregon)	608,000 sq ft / 56,484 sq m	50	Operational
+27	Google Regional Hub (Huntsville)	Google	USA (Huntsville, Alabama)	236,000 sq ft / 21,924 sq m	130	Operational
+28	Microsoft Regional Hub (Boydton)	Microsoft	USA (Boydton, Virginia)	715,000 sq ft / 66,425 sq m	88	Operational
+29	Microsoft Regional Hub (San Antonio)	Microsoft	USA (San Antonio, Texas)	368,000 sq ft / 34,188 sq m	139	Operational
+30	Google Regional Hub (Omaha)	Google	USA (Omaha, Nebraska)	599,000 sq ft / 55,648 sq m	42	Operational
+31	Apple Regional Hub (Reno)	Apple	USA (Reno, Nevada)	732,000 sq ft / 68,004 sq m	53	Operational
+32	Amazon AWS Regional Hub (New Albany)	Amazon AWS	USA (New Albany, Ohio)	638,000 sq ft / 59,271 sq m	156	Operational
+33	Amazon AWS Regional Hub (Boardman)	Amazon AWS	USA (Boardman, Oregon)	351,000 sq ft / 32,608 sq m	45	Operational
+34	Cologix Montreal Campus	Cologix	Canada (Montreal, Quebec)	279,000 sq ft / 25,919 sq m	30	Operational
+35	Equinix Toronto Campus	Equinix	Canada (Toronto, Ontario)	379,000 sq ft / 35,209 sq m	108	Operational
+36	Telehouse London Campus	Telehouse	UK (London)	252,000 sq ft / 23,411 sq m	178	Operational
+37	Equinix Slough Campus	Equinix	UK (Slough)	565,000 sq ft / 52,489 sq m	191	Operational
+38	Global Switch Paris Campus	Global Switch	France (Paris)	525,000 sq ft / 48,773 sq m	42	Operational
+39	Interxion Marseille Campus	Interxion	France (Marseille)	711,000 sq ft / 66,053 sq m	35	Operational
+40	Equinix Frankfurt Campus	Equinix	Germany (Frankfurt)	604,000 sq ft / 56,112 sq m	56	Operational
+41	NTT Munich Campus	NTT	Germany (Munich)	629,000 sq ft / 58,435 sq m	158	Operational
+42	Interxion Amsterdam Campus	Interxion	Netherlands (Amsterdam)	725,000 sq ft / 67,354 sq m	184	Operational
+43	Amazon AWS Regional Hub (Dublin)	Amazon AWS	Ireland (Dublin)	502,000 sq ft / 46,636 sq m	58	Operational
+44	Facebook/Meta Regional Hub (Clonee)	Facebook/Meta	Ireland (Clonee)	575,000 sq ft / 53,418 sq m	85	Operational
+45	Facebook/Meta Regional Hub (Odense)	Facebook/Meta	Denmark (Odense)	836,000 sq ft / 77,666 sq m	135	Operational
+46	Facebook/Meta Regional Hub (Lulea)	Facebook/Meta	Sweden (Lulea)	475,000 sq ft / 44,128 sq m	121	Operational
+47	Google Regional Hub (Hamina)	Google	Finland (Hamina)	476,000 sq ft / 44,221 sq m	121	Operational
+48	Equinix Zurich Campus	Equinix	Switzerland (Zurich)	376,000 sq ft / 34,931 sq m	89	Operational
+49	Interxion Madrid Campus	Interxion	Spain (Madrid)	727,000 sq ft / 67,539 sq m	126	Operational
+50	Aruba Milan Campus	Aruba	Italy (Milan)	772,000 sq ft / 71,720 sq m	166	Operational
+51	CtrlS Mumbai Campus	CtrlS	India (Mumbai)	406,000 sq ft / 37,718 sq m	101	Operational
+52	Yotta Infrastructure Chennai Campus	Yotta Infrastructure	India (Chennai)	341,000 sq ft / 31,679 sq m	119	Operational
+53	Nxtra Data Pune Campus	Nxtra Data	India (Pune)	802,000 sq ft / 74,507 sq m	90	Operational
+54	Equinix Singapore Campus	Equinix	Singapore	759,000 sq ft / 70,512 sq m	177	Operational
+55	Global Switch Singapore Campus	Global Switch	Singapore	377,000 sq ft / 35,024 sq m	124	Operational
+56	NTT Tokyo Campus	NTT	Japan (Tokyo)	833,000 sq ft / 77,387 sq m	156	Operational
+57	Equinix Osaka Campus	Equinix	Japan (Osaka)	680,000 sq ft / 63,173 sq m	129	Operational
+58	KT Corporation Seoul Campus	KT Corporation	South Korea (Seoul)	514,000 sq ft / 47,751 sq m	40	Operational
+59	GDS Services Shanghai Campus	GDS Services	China (Shanghai)	413,000 sq ft / 38,368 sq m	61	Operational
+60	21Vianet Beijing Campus	21Vianet	China (Beijing)	793,000 sq ft / 73,671 sq m	139	Operational
+61	Tencent Hub Shenzhen Campus	Tencent Hub	China (Shenzhen)	638,000 sq ft / 59,271 sq m	35	Operational
+62	NextDC Sydney Campus	NextDC	Australia (Sydney)	573,000 sq ft / 53,232 sq m	170	Operational
+63	Equinix Melbourne Campus	Equinix	Australia (Melbourne)	219,000 sq ft / 20,345 sq m	171	Operational
+64	Ascenty Sao Paulo Campus	Ascenty	Brazil (Sao Paulo)	505,000 sq ft / 46,915 sq m	193	Operational
+65	ODATA Campinas Campus	ODATA	Brazil (Campinas)	214,000 sq ft / 19,881 sq m	52	Operational
+66	Teraco Johannesburg Campus	Teraco	South Africa (Johannesburg)	533,000 sq ft / 49,516 sq m	62	Operational
+67	Amazon AWS Regional Hub (Cape Town)	Amazon AWS	South Africa (Cape Town)	408,000 sq ft / 37,904 sq m	164	Operational
+68	Khazna Dubai Campus	Khazna	UAE (Dubai)	895,000 sq ft / 83,147 sq m	145	Operational
+69	Center3 Riyadh Campus	Center3	Saudi Arabia (Riyadh)	898,000 sq ft / 83,426 sq m	58	Operational
+70	MedOne Petah Tikva Campus	MedOne	Israel (Petah Tikva)	430,000 sq ft / 39,947 sq m	172	Operational
