@@ -140,7 +140,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 }
 #datacenter-warfare-label {
   position: absolute;
-  bottom: 43px;
+  bottom: 36px;
   left: 50%;
   transform: translateX(-50%);
   font-family: 'Share Tech Mono', monospace;
@@ -274,7 +274,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   font-family: 'Share Tech Mono', monospace;
   font-size: 14px;
   font-weight: bold;
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -1148,7 +1148,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   <!-- DATACENTER CO-OP UI (CYBER SKIN ONLY) -->
   <div id="datacenter-coop-ui" style="display:none; pointer-events:none; position:absolute; top:0; left:0; width:100%; height:100%; z-index:90;">
     <!-- Left Panel: Gemini Advisor -->
-    <div id="gemini-advisor-panel" style="position:absolute; bottom:180px; left:370px; width:280px; background:rgba(0,15,30,0.85); border:1px solid #00dcff; border-radius:4px; box-shadow:0 0 15px rgba(0,220,255,0.2); padding:15px; pointer-events:auto; backdrop-filter:blur(5px);">
+    <div id="gemini-advisor-panel" style="position:absolute; bottom:240px; left:370px; width:280px; background:rgba(0,15,30,0.85); border:1px solid #00dcff; border-radius:4px; box-shadow:0 0 15px rgba(0,220,255,0.2); padding:15px; pointer-events:auto; backdrop-filter:blur(5px);">
       <div style="font-family:'Share Tech Mono', monospace; color:#00dcff; font-size:16px; border-bottom:1px solid rgba(0,220,255,0.3); padding-bottom:5px; margin-bottom:10px; font-weight:bold; letter-spacing:2px; display:flex; justify-content:space-between; align-items:center;">
         <span>GEMINI ADVISOR</span>
         <button onclick="showStakingHelpModal()" style="background:none; border:1px solid #00dcff; border-radius:50%; color:#00dcff; width:22px; height:22px; font-size:12px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 0 5px rgba(0,220,255,0.5); padding:0; line-height:1;">?</button>
@@ -4691,27 +4691,114 @@ initWebcams();
 window.showCmdHelpModal = function() {
   if (typeof _sfxClick !== 'undefined') _sfxClick();
   const modal = document.createElement('div');
-  modal.style.position = 'fixed'; modal.style.top='50%'; modal.style.left='50%'; 
-  modal.style.transform='translate(-50%,-50%)'; modal.style.width='400px';
-  modal.style.backgroundColor='rgba(0,15,30,0.95)'; modal.style.border='2px solid #00dcff';
-  modal.style.boxShadow='0 0 40px rgba(0,220,255,0.5)'; modal.style.zIndex='99999';
-  modal.style.display='flex'; modal.style.flexDirection='column';
-  modal.style.backdropFilter='blur(10px)';
+  modal.style.position = 'fixed'; 
+  modal.style.top='50%'; 
+  modal.style.left='50%'; 
+  modal.style.transform='translate(-50%,-50%)'; 
+  modal.style.width='1600px';
+  modal.style.maxWidth='90vw';
+  modal.style.height='800px';
+  modal.style.maxHeight='90vh';
+  modal.style.backgroundColor='rgba(0,10,20,0.95)'; 
+  modal.style.border='3px solid #00dcff';
+  modal.style.borderRadius='12px';
+  modal.style.boxShadow='0 0 100px rgba(0,220,255,0.6), inset 0 0 50px rgba(0,220,255,0.3)'; 
+  modal.style.zIndex='99999';
+  modal.style.display='flex'; 
+  modal.style.flexDirection='column';
+  modal.style.backdropFilter='blur(20px)';
+  modal.style.overflow='hidden';
   
   const header = document.createElement('div');
-  header.style.padding='15px'; header.style.color='#00dcff'; header.style.backgroundColor='rgba(0,100,200,0.2)';
-  header.style.fontFamily="'Share Tech Mono', monospace"; header.style.display='flex'; header.style.justifyContent='space-between';
-  header.style.borderBottom='1px solid #00dcff';
-  header.innerHTML = `<span style="letter-spacing:2px;font-weight:bold;font-size:18px;">SIMULATION INFO</span><span style="cursor:pointer;color:#f24;font-family:monospace;font-size:16px;" onclick="this.parentElement.parentElement.remove(); if(typeof _sfxClick !== 'undefined') _sfxClick();">✕</span>`;
+  header.style.padding='25px 40px'; 
+  header.style.color='#fff'; 
+  header.style.background='linear-gradient(90deg, rgba(0,220,255,0.3) 0%, rgba(0,100,200,0.1) 100%)';
+  header.style.fontFamily="'Share Tech Mono', monospace"; 
+  header.style.display='flex'; 
+  header.style.justifyContent='space-between';
+  header.style.alignItems='center';
+  header.style.borderBottom='2px solid #00dcff';
+  header.innerHTML = `<span style="letter-spacing:4px;font-weight:900;font-size:32px;text-shadow:0 0 15px #00dcff;">⎔ SIMULATION CORE INFO</span><span style="cursor:pointer;color:#ff3366;font-family:monospace;font-size:36px;transition:0.3s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'" onclick="this.parentElement.parentElement.remove(); if(typeof _sfxClick !== 'undefined') _sfxClick();">✕</span>`;
   
   const contentBox = document.createElement('div');
-  contentBox.style.padding='20px'; contentBox.style.color='#fff';
+  contentBox.style.padding='30px 50px'; 
+  contentBox.style.color='#e0f7fa';
   contentBox.style.fontFamily="'Courier New', monospace";
-  contentBox.style.fontSize='14px'; contentBox.style.lineHeight='1.6';
-  contentBox.innerHTML = `This simulation is just between the AI. The user cannot interact. Enjoy the show.`;
+  contentBox.style.fontSize='18px'; 
+  contentBox.style.lineHeight='1.6';
+  contentBox.style.flexGrow='1';
+  contentBox.style.overflowY='hidden'; // Remove scrollbar
+
+  // Determine Skin Text
+  let skinSpecificTitle = "Autopilot Sequence Active";
+  let skinSpecificDesc = "This secure simulation layer operates securely under the jurisdiction of the global AI entities <b>Rainclaude</b> and <b>Gemini</b>.";
+  let skinSpecificInteractivity = "Manual override is fully disabled. The system is conducting millions of concurrent war-game scenarios to evaluate global resource allocation and conflict resolution. Sit back, observe the flow of massive datastreams, and enjoy the visual spectacle.";
+  let skinSpecificOversight = "You are currently witnessing live telemetry injected directly from the active Datacenters. The flashing nodes, orbital strikes, and tactical deployments represent neural network decision trees executing in real-time. Do not attempt to intervene until the autopilot cycle concludes.";
+  
+  const idx = window.currentSkinIndex !== undefined ? window.currentSkinIndex : 0;
+  if (idx === 0) {
+      skinSpecificTitle = "LIVE SKIN OP CENTER";
+      skinSpecificDesc = "This is the primary theater of operations. Witness the real war and the real battle unfold with live troops, combat planes, and tactical rockets sweeping across the globe.";
+      skinSpecificInteractivity = "<b>Manual override enabled.</b> This is the real war theatre. As a commander, you can execute manual attacks, deploy spy strategies, run espionage operations, and establish ground superiority on the interactive globe.";
+      skinSpecificOversight = "You are currently engaging in live combat operations. Monitor troop deployments, assess casualty reports, and execute strategic commands to dominate the digital battlefield. Every action has permanent geopolitical consequences.";
+  } else if (idx === 1) {
+      skinSpecificTitle = "RED SKIN INTELLIGENCE";
+      skinSpecificDesc = "Welcome to the real-time reconnaissance matrix. This layer integrates live webcams, naval battle boats, and strategic aerial planes to monitor the theater.";
+      skinSpecificInteractivity = "<b>Manual tracking enabled.</b> You have access to real-time intelligence feeds. Click on deployed webcams to view live camera feeds from around the world, intercept aerial planes, monitor global satellite coverage, and track naval boats engaged in warfare operations.";
+      skinSpecificOversight = "You are overseeing global intelligence operations. Engage with live assets scattered across the world to build superior tactical awareness. Surveillance data is critical for strategic dominance.";
+  } else if (idx === 2) {
+      skinSpecificTitle = "GREEN SKIN ECONOMICS";
+      skinSpecificDesc = "This is the Global Trade Network Metals Market. Every node here represents critical economic infrastructure and active natural resources.";
+      skinSpecificInteractivity = "<b>Market manipulation enabled.</b> There are no wargame scenarios here. This is a pure financial ecosystem. Track dynamic supply chains and execute strategic acquisitions. A comprehensive system of trades must be maintained to establish total financial dominance over global commodities.";
+      skinSpecificOversight = "You are overlooking the world's most critical supply lines. Analyze real-time market fluctuations, assess state-controlled natural resources, and dictate global commerce.";
+  } else if (idx === 3) {
+      skinSpecificTitle = "CYBER SKIN INFRASTRUCTURE";
+      skinSpecificDesc = "Dive into the planetary nervous system. This layer tracks live datacenter power consumption traversing the world, enabling all AI capabilities. <b>This is our primary staking mechanism.</b> Stake your $D3X tokens into active global nodes to earn dynamic APY rewards.";
+      skinSpecificInteractivity = "<b>Datacenter Staking enabled.</b> You can interact with specific datacenter nodes worldwide to allocate $D3X. Protect your stakes from rival network attacks and monitor live server temperatures to maximize your yield.";
+      skinSpecificOversight = "You are monitoring the global power grid. Real-time compute shifts dictate financial returns. Secure your server infrastructure globally before hostile network forces overwhelm the system.";
+  } else if (idx === 4) {
+      skinSpecificTitle = "BLACK SKIN CORPORATE";
+      skinSpecificDesc = "The ultimate behind-the-scenes view. Track global companies, defense contractors, and massive infrastructure networks powering the conflict.";
+  }
+
+  contentBox.innerHTML = `
+    <div style="font-size:32px; color:#00dcff; font-weight:bold; margin-bottom:20px; text-transform:uppercase; border-bottom:1px dashed rgba(0,220,255,0.4); padding-bottom:10px; letter-spacing:2px;">` + skinSpecificTitle + `</div>
+    
+    <div style="display:flex; gap:30px; margin-bottom:30px; flex-wrap:wrap;">
+      <div style="flex:1; min-width:300px; background:rgba(0,220,255,0.05); padding:25px; border-radius:10px; border-left:5px solid #00dcff;">
+        <span style="display:block; font-size:24px; color:#00dcff; margin-bottom:15px; font-weight:bold;">1. Primary Directive</span>
+        ` + skinSpecificDesc + `
+      </div>
+      <div style="flex:1; min-width:300px; background:rgba(255,51,102,0.05); padding:25px; border-radius:10px; border-left:5px solid #ff3366;">
+        <span style="display:block; font-size:24px; color:#ff3366; margin-bottom:15px; font-weight:bold;">` + ((idx === 0 || idx === 1 || idx === 2 || idx === 3) ? "2. Active Commander Access" : "2. Restricted Interactivity") + `</span>
+        ` + skinSpecificInteractivity + `
+      </div>
+    </div>
+    
+    <div style="background:rgba(0,255,136,0.05); padding:30px; border-radius:10px; border:1px solid rgba(0,255,136,0.3); text-align:center;">
+       <div style="font-size:22px; color:#00ff88; margin-bottom:15px; letter-spacing:3px; font-weight:bold;">[ DIAGNOSTIC STREAM OVERSIGHT ]</div>
+       <div style="font-size:18px; color:#aaffcc; max-width:900px; margin:0 auto; line-height:1.7;">
+         ` + skinSpecificOversight + `
+       </div>
+    </div>
+  `;
 
   modal.appendChild(header);
   modal.appendChild(contentBox);
+  
+  // Only append epilepsy footer for Black skin (idx 4)
+  // Specifically removing for Live (0), Red (1), Green (2), and Cyber (3)
+  if (idx !== 0 && idx !== 1 && idx !== 2 && idx !== 3) {
+    const footer = document.createElement('div');
+    footer.style.padding='20px 30px';
+    footer.style.textAlign='center';
+    footer.style.backgroundColor='rgba(0,0,0,0.8)';
+    footer.style.borderTop='2px solid rgba(255,51,102,0.5)';
+    footer.innerHTML = `<div style="color:#ff3366; font-size:18px; font-family:'Share Tech Mono', monospace; font-weight:bold; letter-spacing:1.5px; text-transform:uppercase;">⚠️ WARNING: Epilepsy Notice</div>
+    <div style="color:#ff88aa; font-size:14px; margin-top:5px; font-family:'Courier New', monospace;">This simulation contains rapid flashing lights, intense visual sequences, and high-frequency UI updates that may trigger seizures for people with photosensitive epilepsy. Viewer discretion is advised.</div>`;
+    modal.appendChild(footer);
+  }
+
   document.body.appendChild(modal);
 }
 
@@ -5731,6 +5818,7 @@ function handleGlobeClick(e) {
       if (typeof _sfxClick !== 'undefined') _sfxClick();
       const dcData = dcHits[0].object.userData;
       if (dcData && dcData.name) {
+        if (dcData.owner !== 'GEMINI') return; // Do nothing for Rainclaude datacenters
         window.openDatacenterCoopPanel(dcData);
         return; // Intercept click
       }
@@ -10510,10 +10598,10 @@ window.toggleRedSkin = function() {
       window.datacentersGroup.visible = (skin.name === 'CYBER');
   }
   
-  // Toggle CMD Help indicator for BLK Skin
+  // Ensure CMD Help indicator is always shown
   const cmdHelp = document.getElementById('btn-cmd-help');
   if (cmdHelp) {
-      cmdHelp.style.display = (skin.name === 'BLK') ? 'flex' : 'none';
+      cmdHelp.style.display = 'flex';
   }
 
   // Handle Cyber Warfare mechanics on BLK and CYBER skins
