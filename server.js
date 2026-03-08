@@ -170,6 +170,52 @@ const server = http.createServer((req, res) => {
     res.end(JSON.stringify({ 
       btcWallet: process.env.BTC_WALLET || "NOT_SET"
     }));
+  } else if (req.url === '/api/soundtrack') {
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    });
+    try {
+      const stPath = path.join(__dirname, 'soundtrack');
+      let files = fs.readdirSync(stPath);
+      // Filter for valid web audio files
+      files = files.filter(f => f.endsWith('.mp3') || f.endsWith('.wav') || f.endsWith('.ogg'));
+      // Shuffle the playlist
+      const shuffled = files.sort(() => 0.5 - Math.random());
+      res.end(JSON.stringify(shuffled));
+    } catch (e) {
+      console.error('Failed to read soundtrack directory:', e.message);
+      res.end(JSON.stringify([]));
+    }
+  } else if (req.url.startsWith('/soundtrack/')) {
+    const filename = decodeURIComponent(req.url.replace('/soundtrack/', ''));
+    const filePath = path.join(__dirname, 'soundtrack', filename);
+    
+    // Security check to avoid directory traversal
+    if (!filePath.startsWith(path.join(__dirname, 'soundtrack'))) {
+      res.writeHead(403);
+      return res.end('Forbidden');
+    }
+    
+    fs.stat(filePath, (err, stats) => {
+      if (err || !stats.isFile()) {
+        res.writeHead(404);
+        return res.end('Audio track not found');
+      }
+      
+      let contentType = 'audio/mpeg'; // default mp3
+      if (filename.endsWith('.wav')) contentType = 'audio/wav';
+      if (filename.endsWith('.ogg')) contentType = 'audio/ogg';
+      
+      res.writeHead(200, {
+        'Content-Type': contentType,
+        'Content-Length': stats.size,
+        'Access-Control-Allow-Origin': '*'
+      });
+      
+      const readStream = fs.createReadStream(filePath);
+      readStream.pipe(res);
+    });
   } else if (req.url === '/api/boats') {
     res.writeHead(200, {
       'Content-Type': 'application/json',

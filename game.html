@@ -1520,7 +1520,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     <i class="fa-solid fa-cloud-sun"></i>
     <span class="ops-tip">WEATHER</span>
   </button>
-  <button class="ops-btn" data-vol="1" onclick="SFX.toggleMute(); this.innerHTML = SFX.muted ? '<i class=\'fa-solid fa-volume-xmark\'></i><span class=\'ops-tip\'>VOLUME</span>' : '<i class=\'fa-solid fa-volume-high\'></i><span class=\'ops-tip\'>VOLUME</span>'">
+  <button class="ops-btn" data-vol="1" onclick="SFX.toggleMute(); const isMute = SFX.muted; this.innerHTML = isMute ? '<i class=\'fa-solid fa-volume-xmark\'></i><span class=\'ops-tip\'>VOLUME</span>' : '<i class=\'fa-solid fa-volume-high\'></i><span class=\'ops-tip\'>VOLUME</span>'; if(window.Howler){ Howler.mute(isMute); } document.querySelectorAll('audio, video').forEach(media => { media.muted = isMute; }); if(typeof radioAudio !== 'undefined'){ radioAudio.muted = isMute; } if(typeof customSoundtrack !== 'undefined'){ customSoundtrack.muted = isMute; }">
     <i class="fa-solid fa-volume-high"></i>
     <span class="ops-tip">VOLUME</span>
   </button>
@@ -3673,6 +3673,9 @@ function initDatacenters() {
             mesh.add(aura);
             const light = new THREE.PointLight(0x39ff14, 3, 3);
             mesh.add(light);
+            // Exchange arrows SVG
+            iconUrl = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjZjJmMmYyIiBkPSJNMzQyLjYgNTRMNDkyLjUgMjA0TDM0Mi42IDM1NFYzMDBIMTcwVjEwOEgzNDIuNlY1NHpNMTY5LjQgNDU4TDE5LjUgMzA4TDE2OS40IDE1OHY1NGgxNzIuNnYxOTJIMTY5LjR2NTR6Ii8+PC9zdmc+';
+            protocolName = 'D3X';
         } else if (isMaster) {
             mesh.scale.set(5, 5, 5); // 5x bigger
             
@@ -11565,6 +11568,39 @@ function scheduleNextFuzz() {
   setTimeout(triggerAIFuzzEvent, nextInterval);
 }
 
+// ================= CUSTOM SOUNDTRACK AND WARNING OVERLAY =================
+const soundtrackWarningOverlay = document.createElement('div');
+soundtrackWarningOverlay.style.cssText = "position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(20,0,0,0.85); z-index:9999; opacity:0; pointer-events:none; transition:opacity 0.5s;";
+soundtrackWarningOverlay.innerHTML = "<div style='color:#ff0033; font-family:\"Orbitron\", sans-serif; font-size:4vw; font-weight:800; text-align:center; text-shadow:0 0 20px #ff0033, 0 0 40px #ff0033; border:2px solid #ff0033; padding:40px; background:rgba(50,0,0,0.6); box-shadow:0 0 50px rgba(255,0,50,0.4); text-transform:uppercase;'>WELCOME TO NUCLEAR WAR SOUNDTRACK, ENJOY</div>";
+document.body.appendChild(soundtrackWarningOverlay);
+
+let customSoundtrack = new Audio();
+let soundtrackPlaylist = [];
+let soundtrackCurrentIdx = 0;
+let soundtrackWelcomed = false;
+
+function playCustomSoundtrack() {
+  if (soundtrackPlaylist.length === 0) {
+    fetch('/api/soundtrack').then(r => r.json()).then(files => {
+      soundtrackPlaylist = files;
+      if (soundtrackPlaylist.length > 0) playCustomSoundtrack();
+    }).catch(e => console.error("Could not load local soundtrack", e));
+    return;
+  }
+  
+  if (soundtrackCurrentIdx >= soundtrackPlaylist.length) soundtrackCurrentIdx = 0; // Loop playlist
+  
+  const track = soundtrackPlaylist[soundtrackCurrentIdx];
+  customSoundtrack.src = '/soundtrack/' + encodeURIComponent(track);
+  customSoundtrack.volume = 0.5;
+  customSoundtrack.play().catch(e => console.error("Soundtrack play failed:", e));
+  
+  customSoundtrack.onended = () => {
+    soundtrackCurrentIdx++;
+    playCustomSoundtrack();
+  };
+}
+
 // ================= AMBIENT RADIO FEED =================
 let radioAudio = new Audio();
 let radioStations = [];
@@ -11639,7 +11675,17 @@ window.toggleRadio = function() {
     lockBtn.style.display = 'none';
     nextBtn.style.display = 'none'; // Added
     if (labelBtn) labelBtn.style.display = 'none';
+    
+    // START CUSTOM SOUNDTRACK
+    if (!soundtrackWelcomed) {
+      soundtrackWelcomed = true;
+      soundtrackWarningOverlay.style.opacity = '1';
+      setTimeout(() => { soundtrackWarningOverlay.style.opacity = '0'; }, 4000);
+    }
+    playCustomSoundtrack();
+    
   } else {
+    customSoundtrack.pause(); // STOP CUSTOM SOUNDTRACK
     btn.innerHTML = '📻 ON';
     btn.classList.remove('radio-off');
     lockBtn.style.display = 'block';
