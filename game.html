@@ -1762,12 +1762,12 @@ Type 'help' for available commands.
 </div>
 
 <!-- Combat Report Modal -->
-<div id="report-modal">
+<div id="report-modal" onclick="if(event.target===this) document.getElementById('report-modal').classList.remove('show');">
   <div class="rep-card">
     <div class="rep-title">TACTICAL OPERATION REPORT</div>
     <div class="rep-desc" id="rep-summary">Operation complete. Awaiting commander review.</div>
     <div class="rep-list" id="rep-list"></div>
-    <button class="sp-btn" style="background:#0f8;color:#000;width:100%;padding:12px;font-size:14px; display:none !important;" onclick="closeReportAndEndTurn()">END TURN</button>
+    <button class="sp-btn" style="background:#0f8;color:#000;width:100%;padding:12px;font-size:14px; margin-top:15px;" onclick="document.getElementById('report-modal').classList.remove('show');">CLOSE REPORT</button>
   </div>
 </div>
 
@@ -7313,7 +7313,7 @@ function animate() {
     m.plume.material.opacity=0.5+0.4*Math.sin(m.time*30);
 
     const _s = window.SKINS && window.SKINS[window.currentSkinIndex];
-    m.group.visible = !(_s && _s.name === 'BLK');
+    m.group.visible = !(_s && (_s.name === 'BLK' || _s.name === 'GRN'));
 
     if(m.progress>=1){
       scene.remove(m.group);
@@ -7456,7 +7456,7 @@ function animate() {
     }
 
     const _skin = window.SKINS && window.SKINS[window.currentSkinIndex];
-    fj.group.visible = !(_skin && _skin.name === 'BLK');
+    fj.group.visible = !(_skin && (_skin.name === 'BLK' || _skin.name === 'GRN'));
 
     if(fj.progress>=1){
       scene.remove(fj.group);
