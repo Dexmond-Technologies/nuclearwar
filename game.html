@@ -6013,7 +6013,7 @@ function initGreenMarketUI() {
     <div style="font-size:10px; font-weight:bold; margin-bottom:6px; border-bottom:1px solid #0f8; padding-bottom:3px; letter-spacing:1px;">G-MARKET PORTFOLIO</div>
     <div style="font-size:8px; color:#aaa; margin-bottom:2px;">TOTAL NET WORTH (MIL)</div>
     <div id="green-market-networth" style="font-size:16px; font-weight:bold; color:#fff;">$0.00 M</div>
-    <div id="green-market-holdings" style="margin-top:8px; font-size:9px; max-height:150px; overflow-y:auto; pointer-events:auto; padding-right:3px;"></div>
+    <div id="green-market-holdings" style="margin-top:8px; font-size:9px; max-height:37px; overflow-y:auto; pointer-events:auto; padding-right:3px;"></div>
   `;
   document.body.appendChild(container);
 }
@@ -6072,7 +6072,7 @@ function updateGreenMarket() {
   const networthEl = document.getElementById('green-market-networth');
   if (networthEl) {
     networthEl.innerText = '$' + totalWorth.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}) + ' M';
-    if (holdingsHtml === '') holdingsHtml = '<div style="color:#555; font-style:italic; text-align:center; padding:10px;">No active stakes.<br><br>Select producer nations on the map to acquire resources.</div>';
+    if (holdingsHtml === '') holdingsHtml = ''; // Removed empty state text
     document.getElementById('green-market-holdings').innerHTML = holdingsHtml;
   }
 }
