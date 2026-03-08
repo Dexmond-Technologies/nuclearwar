@@ -1153,35 +1153,12 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
         <span>GEMINI ADVISOR</span>
         <button onclick="showStakingHelpModal()" style="background:none; border:1px solid #00dcff; border-radius:50%; color:#00dcff; width:22px; height:22px; font-size:12px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 0 5px rgba(0,220,255,0.5); padding:0; line-height:1;">?</button>
       </div>
-      <div id="gemini-feed" style="font-family:'Courier New', monospace; font-size:11px; color:#fff; height:150px; overflow-y:auto; margin-bottom:10px; display:flex; flex-direction:column; gap:5px; padding-right:5px;">
+      <div id="gemini-feed" style="font-family:'Courier New', monospace; font-size:11px; color:#fff; height:112px; overflow-y:auto; margin-bottom:10px; display:flex; flex-direction:column; gap:5px; padding-right:5px;">
         <div style="color:#0af;">[SYSTEM] Uplink established. Awaiting directives.</div>
       </div>
       <button class="sp-btn" id="btn-gemini-sync" style="background:linear-gradient(135deg,rgba(0,100,200,0.5),rgba(0,220,255,0.5)); border:1px solid #00dcff; color:#fff; width:100%;" onclick="toggleGeminiSync()">SYNC WITH GEMINI (AUTO)</button>
     </div>
 
-    <!-- Bottom Panel: Resource Allocation -->
-    <div id="power-allocation-panel" style="position:absolute; bottom:60px; left:50%; transform:translateX(-50%); width:600px; background:rgba(0,15,30,0.85); border:1px solid #00dcff; border-radius:4px; box-shadow:0 0 15px rgba(0,220,255,0.2); padding:15px; pointer-events:auto; backdrop-filter:blur(5px); display:flex; flex-direction:column; gap:10px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; font-family:'Share Tech Mono', monospace; color:#00dcff; border-bottom:1px solid rgba(0,220,255,0.3); padding-bottom:5px;">
-        <span style="font-size:16px; font-weight:bold; letter-spacing:2px;">GLOBAL POWER GRID</span>
-        <span style="font-size:14px;">PUE: <span id="pue-val" style="color:#0f8;">1.15</span> | BUDGET: <span id="power-budget-val">100</span>%</span>
-      </div>
-      <div style="display:flex; gap:20px; align-items:center;">
-        <div style="flex:1; display:flex; flex-direction:column; gap:5px;">
-          <div style="display:flex; justify-content:space-between; font-family:'Courier New', monospace; font-size:11px; color:#fff;">
-            <span>COOLING/DEFENSE</span>
-            <span id="alloc-cool-val" style="color:#0af;">50%</span>
-          </div>
-          <input type="range" id="slider-cooling" min="0" max="100" value="50" style="width:100%; accent-color:#0af; cursor:pointer;" oninput="updatePowerSliders('cooling')">
-        </div>
-        <div style="flex:1; display:flex; flex-direction:column; gap:5px;">
-          <div style="display:flex; justify-content:space-between; font-family:'Courier New', monospace; font-size:11px; color:#fff;">
-            <span>COMPUTE/ATTACK</span>
-            <span id="alloc-comp-val" style="color:#f24;">50%</span>
-          </div>
-          <input type="range" id="slider-compute" min="0" max="100" value="50" style="width:100%; accent-color:#f24; cursor:pointer;" oninput="updatePowerSliders('compute')">
-        </div>
-      </div>
-    </div>
 
     <!-- Right Panel: Datacenter Action Menu -->
     <div id="datacenter-action-panel" style="display:none; position:absolute; top:190px; right:220px; width:280px; background:rgba(0,15,30,0.95); border:1px solid #00dcff; border-radius:4px; box-shadow:0 0 20px rgba(0,220,255,0.25); padding:15px; pointer-events:auto; backdrop-filter:blur(5px);">
@@ -3675,24 +3652,6 @@ window.coopCompAlloc = 50;
 window.coopGeminiSync = false;
 window.selectedDatacenter = null;
 
-function updatePowerSliders(source) {
-  const coolSlider = document.getElementById('slider-cooling');
-  const compSlider = document.getElementById('slider-compute');
-  
-  // Force sum to 100
-  if (source === 'cooling') {
-    compSlider.value = 100 - parseInt(coolSlider.value, 10);
-  } else {
-    coolSlider.value = 100 - parseInt(compSlider.value, 10);
-  }
-  
-  window.coopCoolAlloc = parseInt(coolSlider.value, 10);
-  window.coopCompAlloc = parseInt(compSlider.value, 10);
-  
-  document.getElementById('alloc-cool-val').innerText = window.coopCoolAlloc + '%';
-  document.getElementById('alloc-comp-val').innerText = window.coopCompAlloc + '%';
-}
-
 function toggleGeminiSync() {
   window.coopGeminiSync = !window.coopGeminiSync;
   const btn = document.getElementById('btn-gemini-sync');
@@ -4732,7 +4691,7 @@ window.showCmdHelpModal = function() {
   modal.style.transform='translate(-50%,-50%)'; 
   modal.style.width='1600px';
   modal.style.maxWidth='90vw';
-  modal.style.height='800px';
+  modal.style.height='auto';
   modal.style.maxHeight='90vh';
   modal.style.backgroundColor='rgba(0,10,20,0.95)'; 
   modal.style.border='3px solid #00dcff';
@@ -4762,7 +4721,8 @@ window.showCmdHelpModal = function() {
   contentBox.style.fontSize='18px'; 
   contentBox.style.lineHeight='1.6';
   contentBox.style.flexGrow='1';
-  contentBox.style.overflowY='hidden'; // Remove scrollbar
+  contentBox.style.minHeight='0'; // Allow flex child to shrink
+  contentBox.style.overflowY='auto'; // Add scrollbar if content exceeds max-height
 
   // Determine Skin Text
   let skinSpecificTitle = "Autopilot Sequence Active";
@@ -9291,16 +9251,6 @@ setInterval(() => {
             } else {
                 window.coopCoolAlloc = 40;
                 window.coopCompAlloc = 60;
-            }
-            const coolSlider = document.getElementById('slider-cooling');
-            const compSlider = document.getElementById('slider-compute');
-            if(coolSlider) {
-                coolSlider.value = window.coopCoolAlloc;
-                document.getElementById('alloc-cool-val').innerText = window.coopCoolAlloc + '%';
-            }
-            if(compSlider) {
-                compSlider.value = window.coopCompAlloc;
-                document.getElementById('alloc-comp-val').innerText = window.coopCompAlloc + '%';
             }
         }
 
