@@ -138,6 +138,22 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   z-index: 100;
   display: none;
 }
+#datacenter-warfare-label {
+  position: absolute;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 16px;
+  font-weight: bold;
+  color: #00f0ff;
+  letter-spacing: 6px;
+  text-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff;
+  animation: cyberPulse 1s infinite alternate;
+  pointer-events: none;
+  z-index: 100;
+  display: none;
+}
 @keyframes cyberPulse {
   0% { opacity: 0.3; text-shadow: 0 0 5px #0f8; }
   100% { opacity: 1; text-shadow: 0 0 15px #0f8, 0 0 30px #0f8; }
@@ -1041,6 +1057,12 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     <div style="text-align:center; position:absolute; left:50%; transform:translateX(-50%);">
       <div id="game-title">☢ NUCLEAR WAR</div>
       <div id="phase-label">—</div>
+      <!-- Datacenter Power Load Display -->
+      <div id="datacenter-power-display" style="display:none; font-family:'Share Tech Mono', monospace; font-size:14px; margin-top:4px; border:1px solid rgba(0,255,136,0.3); background:rgba(0,10,20,0.8); padding:6px 14px; border-radius:4px; box-shadow:0 0 10px rgba(0,255,136,0.1); width:max-content; margin-left:auto; margin-right:auto;">
+        <span style="color:#00dcff; text-shadow:0 0 5px #00dcff;">HUMANITY OUTPUT: <span id="hum-pwr">2.41 TW</span></span>
+        <span style="color:#444; margin:0 12px; font-weight:lighter;">|</span>
+        <span style="color:#ff2244; text-shadow:0 0 5px #ff2244;">RAINCLAUDE DRAIN: <span id="rc-pwr">812 GW</span></span>
+      </div>
     </div>
     <div style="display:flex;gap:15px;pointer-events:auto;align-items:center; margin-left:auto;">
       <div style="display:flex;gap:12px;align-items:center;">
@@ -1063,6 +1085,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   
   <div id="botbar">
     <div id="cybercrime-map-label">CYBERCRIME MAP</div>
+    <div id="datacenter-warfare-label">DATACENTER WARFARE</div>
     <div id="log">SYSTEM INITIALIZED // AWAITING COMMAND // AURAL UPLINK SECURED</div>
     <div style="position:absolute; right:20px; display:flex; align-items:center; gap:10px; pointer-events:auto; z-index:100;">
       <span style="font-size:9px; color:rgba(255,255,255,0.5); font-family:'Courier New', monospace; letter-spacing:1px; max-width: 280px; text-align: right; line-height: 1.2;">Servers are provided for free so everyone can have fun.<br>Any support helps keep them running!</span>
@@ -3447,9 +3470,14 @@ function initDatacenters() {
 ];
 
     const dcGeo = new THREE.SphereGeometry(0.025, 32, 32); 
-    const dcMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff }); // Using bright cyan matching CYBER aesthetic
 
     dcData.forEach(dc => {
+        // Assign 25% to Rainclaude, 75% to Gemini
+        const isRainclaude = Math.random() < 0.25;
+        const colorHex = isRainclaude ? 0xff2244 : 0x00f0ff; // Red for Rainclaude, Cyan for Gemini
+        const owner = isRainclaude ? 'RAINCLAUDE' : 'GEMINI';
+
+        const dcMat = new THREE.MeshBasicMaterial({ color: colorHex });
         const mesh = new THREE.Mesh(dcGeo, dcMat);
         const latRad = dc.lat * Math.PI / 180;
         const lonRad = -dc.lon * Math.PI / 180;
@@ -3469,7 +3497,9 @@ function initDatacenters() {
             city: dc.location.toUpperCase(),
             lat: dc.lat,
             lon: dc.lon,
-            rev: 'ACTIVE' 
+            rev: 'ACTIVE',
+            owner: owner,
+            baseColor: colorHex
         };
         window.datacentersGroup.add(mesh);
     });
@@ -6194,6 +6224,7 @@ function slerp3D(a,b,t){
 }
 
 function launchMissile3D(fromIso, toIso, col) {
+  if (window.currentSkinIndex === 2 || window.currentSkinIndex === 3 || window.currentSkinIndex === 4) return;
   SFX.playLaunch();
   const fc=countryData[fromIso], tc=countryData[toIso];
   if(!fc||!tc) return;
@@ -6267,6 +6298,7 @@ function spawnFakeTroops() {
 }
 
 function spawnFakeJets() {
+  if (window.currentSkinIndex === 4 || window.currentSkinIndex === 3) return; // Completely disabled on BLK and CYBER Skins
   const count = Math.floor(Math.random() * 3) + 4; // 4 to 6 jets
   const isos = Object.keys(countryData);
   if (isos.length < 2) return;
@@ -6306,6 +6338,8 @@ function spawnFakeJets() {
 }
 
 function spawnSquadron() {
+  if (window.currentSkinIndex === 4 || window.currentSkinIndex === 3) return; // No squadrons on BLK or CYBER skin
+
   const isos = Object.keys(countryData);
   if (isos.length < 2) return;
   
@@ -6354,6 +6388,7 @@ function spawnSquadron() {
 }
 
 function spawnExplosion3D(lat,lon,col){
+  if(window.currentSkinIndex === 4 || window.currentSkinIndex === 3) return;
   if(lat===undefined||lon===undefined) return;
   SFX.playExplosion();
   const c=ll2v(lat,lon,GLOBE_R+.003);
@@ -6385,6 +6420,7 @@ function spawnExplosion3D(lat,lon,col){
 // VISUAL EFFECTS FOR MEGA BOMB
 // =====================================================================
 function spawnMegaBombExplosion3D(lat, lon, col) {
+  if (window.currentSkinIndex === 4 || window.currentSkinIndex === 3) return;
   if (lat === undefined || lon === undefined) return;
   SFX.playExplosion();
   const c = ll2v(lat, lon, GLOBE_R + .003);
@@ -6445,6 +6481,7 @@ function scheduleRandomMegaBomb() {
 // VISUAL EFFECTS FOR EMP AND GROUND BOMB
 // =====================================================================
 function spawnEMP3D(lat, lon) {
+  if (window.currentSkinIndex === 4) return;
   if (lat === undefined || lon === undefined) return;
   SFX.playExplosion(); // Consider a custom EMP sound if available
   const c = ll2v(lat, lon, GLOBE_R + .003);
@@ -6500,6 +6537,7 @@ function scheduleRandomEMP() {
 }
 
 function spawnGroundBomb3D(lat, lon) {
+  if (window.currentSkinIndex === 4) return;
   if (lat === undefined || lon === undefined) return;
   SFX.playExplosion();
   const c = ll2v(lat, lon, GLOBE_R + .003);
@@ -6786,6 +6824,8 @@ function createSpaceRocketCanvas() {
 }
 
 function spawnSpaceRocket3D(lat, lon) {
+  if (window.currentSkinIndex === 4 || window.currentSkinIndex === 3) return; // No rockets on BLK or CYBER skins
+  if (window.currentSkinIndex === 2) return; // Explicitly ignoring rockets on the Green Skin as previously requested
   if (lat === undefined || lon === undefined) return;
   const c = ll2v(lat, lon, GLOBE_R + 0.005);
   
@@ -8161,6 +8201,39 @@ function animate() {
                   mesh.material.color.setHex(attack.mesh.userData.baseColor);
                   delete window.activeAttacks[uuid];
               }
+          } else if (attack.state === 'datacenter_attack') {
+              // Pulse Green/Cyan
+              const pulse = (Math.sin(elapsed * 0.01) + 1) / 2; // 0 to 1
+              mesh.material.color.setHex(attack.mesh.userData.baseColor);
+              mesh.material.color.lerp(new THREE.Color(0x00ffaa), pulse);
+              
+              if (elapsed > attack.defenseTime) {
+                  // Resolve Attack
+                  const isDefended = Math.random() < 0.75; // 75% chance Rainclaude repels
+                  
+                  if (isDefended) {
+                      attack.state = 'datacenter_defend';
+                      mesh.material.color.setHex(0x880000); // Flashes Dark Red (Rainclaude blocks)
+                  } else {
+                      attack.state = 'datacenter_breach';
+                      mesh.material.color.setHex(0xffffff); // Flashes White/Blue (Gemini cuts through)
+                      
+                      if (termBox && Math.random() < 0.2) {
+                          const div = document.createElement('div');
+                          div.innerHTML = `> [SUCCESS] Gemini breached <span style="color:#fff">${mesh.userData.name}</span> firewall!`;
+                          termBox.appendChild(div);
+                          if (termBox.childElementCount > 30) termBox.removeChild(termBox.firstChild);
+                          termBox.scrollTop = termBox.scrollHeight;
+                      }
+                  }
+                  attack.resolveTime = now;
+              }
+          } else if (attack.state === 'datacenter_defend' || attack.state === 'datacenter_breach') {
+              // Wait 1.5 seconds then clear
+              if (now - attack.resolveTime > 1500) {
+                  mesh.material.color.setHex(attack.mesh.userData.baseColor);
+                  delete window.activeAttacks[uuid];
+              }
           }
       }
   }
@@ -8215,6 +8288,40 @@ function triggerAmbientWarfare() {
 
 // Start ambient war loop after brief initial delay
 setTimeout(triggerAmbientWarfare, 8000);
+
+// Datacenter Power Consumption Loop
+setInterval(() => {
+    const powerBox = document.getElementById('datacenter-power-display');
+    if (powerBox && powerBox.style.display !== 'none') {
+        const humPwrEl = document.getElementById('hum-pwr');
+        const rcPwrEl = document.getElementById('rc-pwr');
+        
+        // Base power levels
+        let humBase = 2.41; // TW
+        let rcBase = 812;   // GW
+        
+        // Count active datacenter attacks
+        let activeAttacks = 0;
+        if (window.activeAttacks) {
+            for (const key in window.activeAttacks) {
+                const atk = window.activeAttacks[key];
+                if (atk && (atk.state === 'datacenter_attack' || atk.state === 'datacenter_defend' || atk.state === 'datacenter_breach')) {
+                    activeAttacks++;
+                }
+            }
+        }
+        
+        // Add spikes based on attacks and random jitter
+        const humSpike = (activeAttacks * 0.05) + (Math.random() * 0.08 - 0.04);
+        const rcSpike = (activeAttacks * 45) + (Math.random() * 12 - 6);
+        
+        const humTotal = (humBase + humSpike).toFixed(2);
+        const rcTotal = Math.round(rcBase + rcSpike);
+        
+        if (humPwrEl) humPwrEl.innerText = `${humTotal} TW`;
+        if (rcPwrEl) rcPwrEl.innerText = `${rcTotal} GW`;
+    }
+}, 300);
 
 setTimeout(() => {
   if (typeof ws_isHost !== 'undefined') {
@@ -9728,10 +9835,13 @@ window.toggleRedSkin = function() {
       window.datacentersGroup.visible = (skin.name === 'CYBER');
   }
 
-  // Handle Cyber Warfare mechanics on BLK skin
-  if (skin.name === 'BLK') {
+  // Handle Cyber Warfare mechanics on BLK and CYBER skins
+  if (skin.name === 'BLK' || skin.name === 'CYBER') {
       if (!window.cyberWarfareInterval) {
-          window.cyberWarfareInterval = setInterval(window.launchCyberAttack, 1000 + Math.random() * 3000); // 1-4 seconds
+          window.cyberWarfareInterval = setInterval(() => {
+              if (window.SKINS[window.currentSkinIndex].name === 'BLK') window.launchCyberAttack();
+              if (window.SKINS[window.currentSkinIndex].name === 'CYBER') window.launchDatacenterAttack();
+          }, 1000 + Math.random() * 3000); // 1-4 seconds
       }
   } else {
       if (window.cyberWarfareInterval) {
@@ -9752,6 +9862,18 @@ window.toggleRedSkin = function() {
   const cyberLabel = document.getElementById('cybercrime-map-label');
   if (cyberLabel) {
       cyberLabel.style.display = (skin.name === 'BLK') ? 'block' : 'none';
+  }
+  
+  // Toggle Datacenter Warfare Label
+  const datacenterLabel = document.getElementById('datacenter-warfare-label');
+  if (datacenterLabel) {
+      datacenterLabel.style.display = (skin.name === 'CYBER') ? 'block' : 'none';
+  }
+  
+  // Toggle Datacenter Power Display
+  const datacenterPowerBox = document.getElementById('datacenter-power-display');
+  if (datacenterPowerBox) {
+      datacenterPowerBox.style.display = (skin.name === 'CYBER') ? 'block' : 'none';
   }
   
   // Toggle base map elements (Troops and Borders)
@@ -9862,11 +9984,16 @@ function triggerAIFuzzEvent() {
     if(!radioAudio.paused) radioAudio.pause();
   }
   
-  document.getElementById('ai-fuzz-warning').style.display = 'block';
+  const isHuman = Math.random() < 0.5;
+  const factionName = isHuman ? "HUMAN AI" : "RAINCLAUDE AI";
+  
+  const warningBox = document.getElementById('ai-fuzz-warning');
+  warningBox.innerHTML = `⚠️ ${factionName} FUZZED COMS - STANDBY`;
+  warningBox.style.display = 'block';
   staticOscillator = playSyntheticStatic();
   
   const fuzzDuration = Math.random() * 4000 + 4000; // 4 to 8 seconds
-  console.log(`📡 [RAINCLAUDE AI] Fuzzing comms for ${Math.round(fuzzDuration)}ms`);
+  console.log(`📡 [${factionName}] Fuzzing comms for ${Math.round(fuzzDuration)}ms`);
   
   setTimeout(() => {
     // End event
@@ -10449,6 +10576,56 @@ const MockTradeEconomy = (function() {
 // =====================================================================
 // CYBER WARFARE LOGIC (RAINCLAUDE VS GEMINI)
 // =====================================================================
+window.launchDatacenterAttack = function() {
+    if (window.SKINS[window.currentSkinIndex].name !== 'CYBER') return;
+
+    if (!window.datacentersGroup || !window.datacentersGroup.children) return;
+
+    // Gemini targets Rainclaude (Red) datacenters
+    const potentialTargets = window.datacentersGroup.children.filter(mesh => 
+        mesh.visible && mesh.userData && mesh.userData.owner === 'RAINCLAUDE'
+    );
+
+    if (potentialTargets.length === 0) return;
+
+    const termBox = document.getElementById('d0-reasoning'); // Gemini Terminal
+
+    const attacksToLaunch = Math.min(10, potentialTargets.length); // Max 10 simultaneous node attacks
+    for (let i = 0; i < attacksToLaunch; i++) {
+        const targetMesh = potentialTargets[Math.floor(Math.random() * potentialTargets.length)];
+        if (!targetMesh || window.activeAttacks[targetMesh.uuid]) continue;
+
+        if (!targetMesh.userData.baseColor) {
+            targetMesh.userData.baseColor = 0xff2244; 
+        }
+
+        // Register attack (Gemini probing)
+        window.activeAttacks[targetMesh.uuid] = {
+            mesh: targetMesh,
+            startTime: Date.now() + (Math.random() * 500),
+            state: 'datacenter_attack',
+            defenseTime: 2500 + Math.random() * 2000
+        };
+
+        if (termBox && Math.random() < 0.3) { 
+            const attackTypes = [
+                "quantum decryption",
+                "backdoor bypass",
+                "neural payload routing",
+                "node saturation",
+                "zero-day injection",
+                "sub-routine override"
+            ];
+            const randAttack = attackTypes[Math.floor(Math.random() * attackTypes.length)];
+            const div = document.createElement('div');
+            div.innerHTML = `> [NET] Gemini executing ${randAttack} on <span style="color:#0f8">${targetMesh.userData.name}</span>...`;
+            termBox.appendChild(div);
+            if (termBox.childElementCount > 30) termBox.removeChild(termBox.firstChild);
+            termBox.scrollTop = termBox.scrollHeight;
+        }
+    }
+};
+
 window.launchCyberAttack = function() {
     if (window.SKINS[window.currentSkinIndex].name !== 'BLK') return;
 

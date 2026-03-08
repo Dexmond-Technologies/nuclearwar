@@ -144,7 +144,8 @@ const server = http.createServer((req, res) => {
       limit: 100,
       hideBroken: true,
       hasGeoInfo: true,
-      countryCode: randomCountry
+      countryCode: randomCountry,
+      tagList: ['music']
     })
     .then(stations => {
       // Shuffle and slice randomly
