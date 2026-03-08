@@ -157,6 +157,24 @@ const server = http.createServer((req, res) => {
       console.error('Radio API error:', err);
       res.end(JSON.stringify({ error: 'Failed to fetch radio stations' }));
     });
+  } else if (req.url === '/api/boats') {
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    });
+    // Generate 50 random boats for AIS testing
+    const boats = [];
+    for(let i=0; i<50; i++) {
+        boats.push({
+            mmsi: 100000000 + Math.floor(Math.random() * 800000000),
+            name: 'VESSEL-' + Math.floor(Math.random()*1000),
+            lat: (Math.random() * 120 - 60).toFixed(4),
+            lon: (Math.random() * 360 - 180).toFixed(4),
+            cog: Math.floor(Math.random() * 360),
+            sog: (Math.random() * 20 + 5).toFixed(1)
+        });
+    }
+    res.end(JSON.stringify(boats));
   } else if (req.url === '/api/webcams') {
     res.writeHead(200, {
       'Content-Type': 'application/json',
@@ -620,13 +638,13 @@ function initWebSockets() {
         
         if (plan === 'coolant') {
             unlockTime += (1 * 24 * 60 * 60 * 1000); // 1 Day
-            baseYield = 0.04;
+            baseYield = 0.016;
         } else if (plan === 'surge') {
             unlockTime += (30 * 24 * 60 * 60 * 1000); // 1 Month ~ 30 days
-            baseYield = 2.1;
+            baseYield = 0.75;
         } else if (plan === 'fortress') {
             unlockTime += (365 * 24 * 60 * 60 * 1000); // 1 Year
-            baseYield = 45.0;
+            baseYield = 12.0;
         } else {
             // fallback logic
             unlockTime += (6 * 60 * 60 * 1000); // 6 hours

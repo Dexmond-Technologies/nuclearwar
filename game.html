@@ -3606,20 +3606,36 @@ function initDatacenters() {
         );
         mesh.lookAt(new THREE.Vector3(0,0,0));
         
+        let iconUrl = null;
+        let protocolName = null;
         if (isMaster) {
             mesh.scale.set(5, 5, 5); // 5x bigger
-            mesh.userData.isMasterNode = true;
+            
+            if (dc.name === "The Citadel Campus") { iconUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAAC91BMVEUAAAD//0LkfRb7oyrymSz7qUf5p0b6q0v9rkn9sUz9sEz9sEr8rkz8rUj4qUn2mjf6okP8rkj8rkn+skn9s0z/sEz/tE3/t0/9rEr5qUr9skr9r0r4qEjxiCr7q0b4p0j5qUn+sUr5W1v5qEf/s0n4pkX6qUjphyz5qEb5p0b7pjz5p0X/tkn4p0T1kyz4pEL5p0T5pkT5pkP7qkD5pkL5ojr4nzT4ozv5pUH6qED6uWv7xYT6rlT4ozz5njL/skX4pUH5nzL94b//////9+7+69P81qn7wHr6pkD5pD/5pD/+7dn//vz//fv8zJP4nzX5oTj8q0D6tF7//Pf//v3//f37vXL6tWL3ojz/+fL927H6sVn5pUD/r0L4pUD5njD6uGf/+vT+8N/5njT/rkH7pT3///78z5j5rFD8pTf4nTD5oDb//v74oDX948T2mjD9qT34pD/4oTj7wn74oTn4nTH6p0b+9Of80Z34nC7+6M781KP4njL93LT4ojr4oz34pD73oDb3nC3/9uz4ojn6qD/4nzP958v3oj34pD34nS78yY34nCz93rn3liH4oDb/qz34njH3mCT/rz7+8uP4myr3oTj3mij4oTf4ojr4mir4myz8pzn9pzn1njT95sj3mCX8pTT4min8pDj9pDj4mSf1kiD3oDb4nC35oDD3mSb7ozT/qjn4mSb4liP4mCX2lSL5mir4mij3njP3lyP8ozP/pDP7oDP7oTH6oDL4nzL4lyH4nS/3lh/3jxH4lyT4lBr4lyP3nC73lR36oC7/qDL3lR/4lBz3lyL8oDL9oS33lB34lR33miv/pi38nyn8nir4khj3kRX6mSL/oyv7nyv4mSj6miL3mCf7nSf4khb6mCD8nSH7mSD/pif3lyP9nSD3mCb8nSD/oSX9niH8mR79nB/9oSP7nCX2khv5mB//oyL3lR/5lx72kxz9mx//nh/2lBz9nB3/oB7/nR3/mhz7mBv8lxr5lBv8lhv8mxz5lRr+mxuhENzjAAAA/XRSTlMAAQUCFjBMaoOdudDe7vwRIVSL1+///////8L1/g5G/f+rAf///f8L//9Z///+Gfz///+s//////+K///////////////////8/P/////////R/////////f/////8//////9B//////+F//////8r8///////////////////////////wP/////////////////////9///+//+c20r//8f/9v//If3/iv+4//8x/0xr//3/zf/g7//4//////////3/nf//////1////v/2////Rv7e/YT9q/+6v1T//Kv/zv/Uisft/v5b//z//P///vP///+d3///2O+eXA7/KwAADvFJREFUeNq0k0WCpTAQhgNp3CUCBKfa/f6Hm0q/5Rj67aK/BMgWDJMSzZ1lO67nB2EUI1EY+J7r2FZCNNQ0yCUYVKubaZb7Rcm4EJwxKatKSqZHgpWFn2epqT3Q8z38qCd2XjcclWUVI6q6oVSMVBJ98KbO7eS2/+zwbeeFTHDZ9yitqt/QNvpecsFCr0tOrUGHsdwArx7iXg3/RPXxgDYD19IHz5Kn3VgKpnqlhhUoNMFEOXb65EQOonvMfCakjr4e1UvO62wixrEW9PHO51yh/EbwCFqwdYRD7Vsj+5GfNzPMaGEZLbxmf/zWbbiCeTegeJMnO0vQ7QfiHtR8AAX3IrB3lWCSh5wxgPkgAIzlLV63jYkSqxaP8HgCoERgbXwG/e+VCzw9ngMs5TNeuuX5zXyR8HIacL/kJqHr9dvxFVD/POCNj+1aB5Tc1a/w9nIqb/Bav69zQEkaLB+fp/OxBCmhq/SLBc7X1w4KdLBGH/N/XcAqB5S8Y//fF4Gv8J/vwCAP9Tb9X5SSQ4P0QBBAg09YH1fXkZKOaowa9tg21vr/l7UUvFuzXsHlcIlWDHZtDKsTn+ckt0+2gKioGjhcApHN4XNLHM/qNMBvLb6gBIKhcEQNy7JpA//3TeAYZ9QXsyQQT2Aylc6EnpbGlYhlo06G+y7/n+v2HFiBQr6AdxRLZQIA5QolAgFdcsL6z69rwPK2atRafFKp1bHRaDQxGBEBaKtNI5EKNTCIVm08+2UBdtwdsIQYCWIBsYHdUIVA2N7FfC/YpxQGugZfjwHPHA6zo4ElyLiHjXuBlDYAok6KeMd0VqvIAx1G2eH8swHLb1YXuYERsvDmb6DLGa7uBdJjYSCMj7DQKBSwe6zIAz1yi+omz34qwEk0R42AymmFggxPq7N+8V7gHDNjoPQigQXEwupSpQbkon8Y/mP8q+vBDTVgcEt5Wb03bkRxVIuvbR/LzEz2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'; protocolName = 'BTC'; }
+            if (dc.name === "Equinix Frankfurt Campus") { iconUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAMAAABlApw1AAACBFBMVEUAAADv7//09PTy8vXx9Pbz9Pjy9ffy9fjy9Pfx9Pfy9Pby9Pfx8/Xz8/Py8vTx9Pjv7/fy9Pfy9Pfy9ffz9ffy8/b09vjy9fXz9Pb09/ry9Pjz9fnv7/Tv9PTk5uiCg4Ssra9jZGWQkpTIycw7PDza296QkZIvMDBgYWK6vL21t7lHSUnm6OqEhojNz9Ly9PSztLednqB4envBw8Xv8vWen6Hv8/NsbW7x8/bP0NOpqqyJiovz8/dUVVXv7++lpqjy8/jz9Pbx9PZ9fn9bXF01NjYdHh4sLCw5Ojo0NTUwMTETExNucHBISElgYWE+Pz9zdHUaGhomJyfv7/oWFxckJSUtLi7x8vV4eXpRUlMhISHx8/Z1d3fy9PdnaGlERkaEhYZ6fHxrbW1AQUGDhYVWV1cqKipERUVOT1BcXV6LjI1iY2QyMzNMTU7Fx8lLTU2Sk5ba3N+HiIpKS0zW2Nt7fH4vLy+6vL6rrK6ChIXk5umfoKJYWVpXWVmQkpPd3+GTlJaXmJnOz9Lm5+qFhoepq6y6u77r7fB1dneRkpQ7PT2EhoeQkZPIysxISUnW2NrW19uztLa3uLqXmJp4enpTVVVvcHKsrrBmZ2g8PT2eoKJsbm+en6A9PT7v8/dsbm7BwsXd3+KEhYfx8/fy9fbP0dPx9Pjx8/bv8veJiozy9fnv8vQEFD2BAAAArHRSTlMAEDBQcI+fr7/f7/+AQGDPIJ9g33+vb1CPX+9/MDD//////////////////////2D/////UP9A/5D///9A/xD/r8/P/////////////////////zD///+g////sP/f/////////////////////////////////////////////////////////////////////////////////////0D/////gK//cO9g/1BgIk4dsgAACKdJREFUeNrM1YV1wEAMA9BjsMJOGfYfszBA0YnyJ5De6fmcPR9iyqW23gWfpPfWypBi8O7afEi5Cb4gLafxouGnPOOH5hyXa4Ufc8cvzWu8SvrUBH9Tt4U/nIZ/aZt3PGMW/JusI206MKIbIf4uMKTr4s60ZIG1EyssKwwYVGCMh19hFxxI09GHU3EwjUeu5wYGeDu6FRigfQtLgwHeI9wJDNAewWec7N6bzkdxOjWc0YOA4NFsRk8g2a2OP031JvMn0oWbn9/gWUCmLwb5qR5fuOfz9Y04s8BuJIihoGeJtMw4bVaYmRmXie5/kLDCCkx1RydwvVbp/3kOUnTeXPr3CzDlSvWqCN4LMLVQqTfSbRG//81Q0ZZkHvD3szVsAmhbcYLHV/P787AN0N6RPA8yJr/KOwDaCeTBxVrFC2EM3gXQLqAXpe+fedMAWtJ2025BpicYgPaKpIuDx/eEMtgA6h3CnqL4AkvzIID2STKRoe/3/nAIQPuJL/1UApjBBoCEgchAui+YcjgCoFVJosETgSLgGICVuiJzJ9ECSfMYABMGciPNArWGEwC0jViiLMUC5eEYgBMGYKW4LswMngygnQLMkAPwjDbYAMAweOb8gwFHgAGwHt9PFgHHAbQX8Ti2wQ5AvRHvCR5TEeAB6HC8PH5ClTgHAPL4ScQHyJsOAFbqHsd7gHJwALBSNxLtAUbDmQDaiHKInpAG+wAtUQ7RM7LE+QA6Bj0BX6PzcR/ASh1fq5+xBvsA2ol/2UzQJc4H0H66lD7BDfYBJuFLOnUPN9gH0F5W426mxPkAdKnrPgBwhwCYvgiAtpAaP2YM9gF4jzN0g/LmBQHaO7gomIkTAT6AVrkdimWwD6Bd1B26TkWAD8B7PMSlWH+4BID2Qlk2SxnsA/Cl7pkdUcpgH4AvdRmkwGi4JID2E2E8Ahh8WYB2QoJZrsT5AHwYzCEpkIcCAPVGYQkmSIN9AD4MPmwC3IhR4mzmFxaXll2CtkJ1CHC46f78ldW19XUXob2joMV3ohn88dPq5mwC+AidBfvcvTgGz3/+srpqAIYAh8HbUmkqygJ93dydVQPYmW/fI3iclX7QBtvuGIDNz1+/6VL3oViRyJv+zzcAQ1haZkvd9dINNgLmF3ZW/ziAbdKv4wTDBe7ofWiB7GyuugA7m7SMeTxS+sMZ/Pff6uZ4AIbwf4N3q+huNAZiy8zHJZedvp6WmfH7rr0FlpnKzMy0zPBP10XHUXDkF90LepHGGsgdT4/BFuYZqEbpI5AAlFUm1MUsAe4JiMO/jwTQDHyo27Yu4eEg4sa9+wEACWQ1Q0TaVSZoBz9A5+YmgEo6LySwg3wCHj56HAQSAlZJzGNwcB3xBFjnEgRsTZKFunWEgy88eRoEDAGLZ88FjwFFoAqcyxAwePFSXyoigepXr41zGQKIN2/PF4/Au7ogIAkgovVFlFBDo3cCTc07BZA3ZA0tXgm0tglbssROMdrrvBGIdnTKX2ICXXV+CHQ3iwfUNswROiIJNLURYwl6P9bQQxKI9lJ7MtvQEFZgCBjxM9giHMz17UxGv4gAlk7B1m+XsKnvHOgDKxRGAEvn4PFKSVO/UbrVKznqUKgriACKf2hYj4jGKrXyy4jRMbBCAQTGHfFPTOop0WBLPFocm1aqasb5EPoLINDk/OiJGq1nh4QbDmmWmFMGVfM5rRDmFH9lRHyMeZAZry8ogxQrvK/LQQBygxE/MVfZRi04PqgljB7NaoUwu/iPTepFfBQO5qgVU+cFZQBWaAECmXPDiU96CbOV8hVTLXshgVb4nJFA6xcQ/xJOEOcel71cmZWAjoAAiH9ikt4Ws4tuU0vXMOqmizok8LUZxb+EWWLRTa4p55QFWsESQPFH9Bq+VXKnBnu8HQpdOYpBe4VA9Lsj/h86CSPEfsaAXPP9VMlYQCuEWcS/hCn6ixyJnQZULUUd2aAdpobm8zXaYilCEBYAExA2yFBSw18gfgeV/HeBfu+ksKCSgCX1nBOaj/u8t9kIp99EpLCAdIHit/izkwCcTvM2QCu4odmCiBB2P7aKTfzRJVJwPwQUP38zd2CdARRSwgZoBRQ/GoApoqAhJlIgqv464kfM+jidto8xg39qCWgFrPwQISgFQR3ibIA4dXTnIIgfIgR1+u3pdvTn/+rOI0uKIAaiqrGVCFO4HU53wOQKdwC2dRcuwIod63EuMZfE28DPV9brfwLpSREZY1p98xccSOESIYBPtO74aXkqMtD/WpQIgXwMS2RMRAptgP5IaLHv2XCnvFQbgBxUJSwypiKFNqARgh2A2aELQKSQBiRCABLmRvC832cpJxOq58ggCAHoAJTJBSRSBBIhdADK7KdnX2UQXITQAeh1Nj5ShEYIbgBqRHykCI0Q3ADUiHgZBBwh3IsMQEZARoqQCJF4Zqs476UhDoo9wsqO8zIIiRCZx/KO3OlIERIhYAXzOvbjpBtbqmDlxGkZhAiAjNHK6LCXhkQIdoH0PYZlEBIh0AVSbsOHqkIiBLtASnWCB9LAC+IciaLcL6gMAosQXob8o8EaKQKLEG2yv+Ql6aWR76DKIRMpvmngSdZ9v/xIEVCEuGpChpA1UoQ6KC9gZcKSdcgPYeALxluRemlIhEipX7l+hvktRQAO2q6ZdepAI0UADir1d3wOHsQu+QD07+DZq9MuUJP6+25Rz/1XrpeVqp9/D2D/7N9B//qV+0e+GFcHIzj0hThrEJcAM8LtkxcCv/4g96t3pg7Gcql4R9prw5lm78ZIrk//IbQNS2KaO5s/z3rxZMqO5XKS2kI7tHSmObF8Znv4Fvp/tXj/FlqV8pNbKCuzPPnPwrgx2CLszI3YnR1bjuHS6KdifDPYwkyXjvz/aMDqQNyeH/s/UuoOUD3IdLv+dROPK7M4PDsbdWy/35q6cZ0tnme4fnvj7NY4lvKpl1bKeLRVN25nlP4W8ZTRGOsAez8AAAAASUVORK5CYII='; protocolName = 'EVM'; }
+            if (dc.name === "Equinix Singapore Campus") { iconUrl = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTYgMjU2Ij4KICA8Y2lyY2xlIGN4PSIxMjgiIGN5PSIxMjgiIHI9IjEyOCIgZmlsbD0iIzRjNGM0YyIvPgogIDxwYXRoIGQ9Ik0xMjggMEM1Ny4zIDAgMCA1Ny4zIDAgMTI4aDQyLjZDNDIuNiA4MC45IDgwLjkgNDIuNiAxMjggNDIuNlMyMTMuNCA4MC45IDIxMy40IDEyOEgyNTZDMjU2IDU3LjMgMTk4LjcgMCAxMjggMHoiIGZpbGw9IiNmMjY4MjIiLz4KICA8cGF0aCBkPSJNMTI4IDE2NUw4Mi41IDExOS41VjU1SDQ1djgwbDgzIDgzIDgzLTgzVjU1aC0zNy41djY0LjV6IiBmaWxsPSIjZjI2ODIyIi8+Cjwvc3ZnPg=='; protocolName = 'XMR'; }
+            
+            if (iconUrl) {
+                const texLoader = new THREE.TextureLoader();
+                texLoader.setCrossOrigin('anonymous');
+                texLoader.load(iconUrl, (tex) => {
+                    const spriteMat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
+                    const sprite = new THREE.Sprite(spriteMat);
+                    sprite.scale.set(0.045, 0.045, 0.045); 
+                    sprite.position.set(0, 0.065, 0); // Above the node
+                    mesh.add(sprite);
+                });
+            }
+
             // Add an inner glowing aura
             const auraGeo = new THREE.SphereGeometry(0.035, 32, 32);
             const auraMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending });
             const aura = new THREE.Mesh(auraGeo, auraMat);
             mesh.add(aura);
-            mesh.userData.aura = aura;
 
             // Add a dynamic point light to make it actually emit light
             const light = new THREE.PointLight(0xaa00ff, 2, 2);
             mesh.add(light);
-            mesh.userData.light = light;
         }
         
         mesh.userData = { 
@@ -3634,7 +3650,10 @@ function initDatacenters() {
             owner: isMaster ? 'GEMINI' : owner, // Ensure Master is Gemini for safe keeping maybe, or random? Leaving random owner logic intact but overriding visual. Let's make it Gemini.
             baseColor: colorHex,
             isMasterNode: isMaster,
-            aura: isMaster ? mesh.children[0] : null
+            aura: isMaster ? mesh.children.find(c => c.type === 'Mesh') : null,
+            light: isMaster ? mesh.children.find(c => c.type === 'PointLight') : null,
+            iconUrl: iconUrl,
+            protocolName: protocolName
         };
         if(isMaster) mesh.userData.owner = 'GEMINI'; // Forcing Master Node to Gemini for now as the core
         
@@ -5962,7 +5981,7 @@ window.openMasterNodePanel = function(dcData) {
     ">×</button>
 
     <h1 style="color:#aa00ff; font-size:32px; text-shadow: 0 0 10px #aa00ff; margin-top:0; border-bottom:1px solid rgba(170,0,255,0.5); padding-bottom:15px; text-transform:uppercase;">
-      ❖ ${dcData.name.replace('DATACENTER: ', '')}
+      ❖ ${dcData.protocolName ? dcData.protocolName + " " : ""}${dcData.name.replace('DATACENTER: ', '')}
     </h1>
     
     <div style="display:flex; justify-content:space-between; margin-bottom: 30px; border-bottom:1px solid rgba(255,170,0,0.3); padding-bottom:20px;">
@@ -5978,11 +5997,12 @@ window.openMasterNodePanel = function(dcData) {
     </div>
 
     <div style="flex-grow:1; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); border:1px dashed rgba(170,0,255,0.4); border-radius:8px;">
-        <h2 style="color:#ffaa00; letter-spacing:3px; margin-bottom:10px;">AWAITING CHAIN DEPLOYMENT</h2>
+        ${dcData.iconUrl ? `<img src="${dcData.iconUrl}" referrerpolicy="no-referrer" crossorigin="anonymous" style="height: 120px; margin-bottom: 25px; filter: drop-shadow(0 0 15px #ffaa00);" />` : ''}
+        <h2 style="color:#ffaa00; letter-spacing:3px; margin-bottom:10px;">${dcData.protocolName ? "CHAIN DEPLOYMENT ACTIVE" : "AWAITING CHAIN DEPLOYMENT"}</h2>
         <p style="color:#ccc; font-size:14px; text-align:center; max-width:600px; line-height:1.6;">
-            This Central Interlink Node is pre-configured to handle multi-chain aggregation and high-throughput routing. 
+            ${dcData.protocolName ? `This Central Interlink Node is actively bridging <b>${dcData.protocolName}</b> protocol layers into the Gemini Core network.` : `This Central Interlink Node is pre-configured to handle multi-chain aggregation and high-throughput routing. 
             <br><br>
-            <span style="color:#aa00ff; font-style:italic;">[ FUTURE EXPANSION SLOT FOR BLOCKCHAIN PROTOCOL INTEGRATION ]</span>
+            <span style="color:#aa00ff; font-style:italic;">[ FUTURE EXPANSION SLOT FOR BLOCKCHAIN PROTOCOL INTEGRATION ]</span>`}
         </p>
     </div>
   `;
@@ -6094,16 +6114,24 @@ canvas.addEventListener('mousemove', e => {
 // --- GREEN SKIN MARKET SYSTEM ---
 window.greenMarket = {
   commodities: {
-    'Copper': { price: 1540, vol: 0.02, shares: 0, history: [1540] },
-    'Lithium': { price: 8200, vol: 0.05, shares: 0, history: [8200] },
-    'Rare Earth Elements': { price: 12500, vol: 0.08, shares: 0, history: [12500] },
-    'Iron ore': { price: 120, vol: 0.01, shares: 0, history: [120] },
-    'Gold': { price: 1950, vol: 0.015, shares: 0, history: [1950] },
-    'Nickel': { price: 21000, vol: 0.03, shares: 0, history: [21000] },
-    'Tin': { price: 25000, vol: 0.04, shares: 0, history: [25000] },
-    'Aluminum (Bauxite)': { price: 2200, vol: 0.02, shares: 0, history: [2200] },
-    'Aluminum': { price: 2200, vol: 0.02, shares: 0, history: [2200] },
-    'Cobalt': { price: 33000, vol: 0.06, shares: 0, history: [33000] }
+    // METALS (scaled down from Metric Ton / Global Quote to per-unit/kg for gameplay)
+    'Copper': { price: 12.98, vol: 0.02, shares: 0, history: [12.98] }, // 12986 / 1000
+    'Lithium': { price: 68.97, vol: 0.05, shares: 0, history: [68.97] }, // ETF proxy
+    'Rare Earth Elements': { price: 92.53, vol: 0.08, shares: 0, history: [92.53] },
+    'Iron ore': { price: 14.97, vol: 0.01, shares: 0, history: [14.97] }, // ETF proxy
+    'Gold': { price: 473.51, vol: 0.015, shares: 0, history: [473.51] }, // ETF proxy
+    'Nickel': { price: 3.02, vol: 0.03, shares: 0, history: [3.02] }, // ETF proxy
+    'Tin': { price: 71.85, vol: 0.04, shares: 0, history: [71.85] },
+    'Aluminum (Bauxite)': { price: 3.13, vol: 0.02, shares: 0, history: [3.13] }, // 3133 / 1000
+    'Aluminum': { price: 3.13, vol: 0.02, shares: 0, history: [3.13] }, // 3133 / 1000
+    'Cobalt': { price: 71.85, vol: 0.06, shares: 0, history: [71.85] },
+    
+    // NATURAL RESOURCES
+    'Lumber (Wood)': { price: 5.40, vol: 0.015, shares: 0, history: [5.40] },
+    'Freshwater': { price: 0.85, vol: 0.005, shares: 0, history: [0.85] },
+    'Natural Gas': { price: 2.15, vol: 0.04, shares: 0, history: [2.15] },
+    'Crude Oil': { price: 82.40, vol: 0.03, shares: 0, history: [82.40] },
+    'Wheat': { price: 6.20, vol: 0.02, shares: 0, history: [6.20] }
   },
   lastUpdate: Date.now()
 };
