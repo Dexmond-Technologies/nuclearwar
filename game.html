@@ -140,7 +140,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 }
 #datacenter-warfare-label {
   position: absolute;
-  bottom: 50px;
+  bottom: 43px;
   left: 50%;
   transform: translateX(-50%);
   font-family: 'Share Tech Mono', monospace;
@@ -153,6 +153,25 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   pointer-events: none;
   z-index: 100;
   display: none;
+}
+#green-skin-info {
+  display: none;
+  position: absolute;
+  bottom: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 30, 0, 0.85);
+  border: 1px solid #22ff22;
+  color: #22ff22;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  padding: 10px 20px;
+  text-align: center;
+  border-radius: 4px;
+  box-shadow: 0 0 15px rgba(34, 255, 34, 0.2);
+  pointer-events: none;
+  z-index: 100;
+  letter-spacing: 1px;
 }
 @keyframes cyberPulse {
   0% { opacity: 0.3; text-shadow: 0 0 5px #0f8; }
@@ -239,6 +258,33 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 #btn-cmd-toggle:hover {
   background: rgba(0, 255, 136, 0.3);
   box-shadow: 0 0 25px rgba(0, 255, 136, 0.8);
+  transform: scale(1.1);
+}
+
+#btn-cmd-help {
+  position: absolute;
+  left: calc(20px + 25vw + 30px);
+  bottom: 175px; 
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: rgba(0, 150, 255, 0.15);
+  border: 1px solid #00dcff;
+  color: #00dcff;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 14px;
+  font-weight: bold;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+  pointer-events: auto;
+  box-shadow: 0 0 10px rgba(0, 150, 255, 0.4);
+}
+#btn-cmd-help:hover {
+  background: rgba(0, 150, 255, 0.4);
+  box-shadow: 0 0 15px rgba(0, 150, 255, 0.8);
   transform: scale(1.1);
 }
 
@@ -1084,8 +1130,9 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   </div>
   
   <div id="botbar">
-    <div id="cybercrime-map-label">CYBERCRIME MAP</div>
+    <div id="cybercrime-map-label">CYBER-WARFARE</div>
     <div id="datacenter-warfare-label">DATACENTER WARFARE</div>
+    <div id="green-skin-info">🟢 GLOBAL TRADE NETWORK & METALS MARKET TRACKER ACTIVE</div>
     <div id="log">SYSTEM INITIALIZED // AWAITING COMMAND // AURAL UPLINK SECURED</div>
     <div style="position:absolute; right:20px; display:flex; align-items:center; gap:10px; pointer-events:auto; z-index:100;">
       <span style="font-size:9px; color:rgba(255,255,255,0.5); font-family:'Courier New', monospace; letter-spacing:1px; max-width: 280px; text-align: right; line-height: 1.2;">Servers are provided for free so everyone can have fun.<br>Any support helps keep them running!</span>
@@ -1096,6 +1143,72 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   <!-- AI FUZZ WARNING OVERLAY -->
   <div id="ai-fuzz-warning" style="display:none; position:absolute; bottom:calc(15% - 110px); left:50%; transform:translate(-50%, -50%); padding:20px 40px; background:rgba(255, 0, 0, 0.85); color:#fff; font-family:'Courier New', monospace; font-size:24px; font-weight:bold; letter-spacing:4px; text-align:center; box-shadow:0 0 40px rgba(255, 0, 0, 0.8); border:2px solid #ff4444; z-index:99999; text-shadow:2px 2px 0px #000; pointer-events:none;">
     ⚠️ HUMAN AI FUZZED COMS - STANDBY
+  </div>
+
+  <!-- DATACENTER CO-OP UI (CYBER SKIN ONLY) -->
+  <div id="datacenter-coop-ui" style="display:none; pointer-events:none; position:absolute; top:0; left:0; width:100%; height:100%; z-index:90;">
+    <!-- Left Panel: Gemini Advisor -->
+    <div id="gemini-advisor-panel" style="position:absolute; bottom:180px; left:370px; width:280px; background:rgba(0,15,30,0.85); border:1px solid #00dcff; border-radius:4px; box-shadow:0 0 15px rgba(0,220,255,0.2); padding:15px; pointer-events:auto; backdrop-filter:blur(5px);">
+      <div style="font-family:'Share Tech Mono', monospace; color:#00dcff; font-size:16px; border-bottom:1px solid rgba(0,220,255,0.3); padding-bottom:5px; margin-bottom:10px; font-weight:bold; letter-spacing:2px; display:flex; justify-content:space-between; align-items:center;">
+        <span>GEMINI ADVISOR</span>
+        <button onclick="showStakingHelpModal()" style="background:none; border:1px solid #00dcff; border-radius:50%; color:#00dcff; width:22px; height:22px; font-size:12px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 0 5px rgba(0,220,255,0.5); padding:0; line-height:1;">?</button>
+      </div>
+      <div id="gemini-feed" style="font-family:'Courier New', monospace; font-size:11px; color:#fff; height:150px; overflow-y:auto; margin-bottom:10px; display:flex; flex-direction:column; gap:5px; padding-right:5px;">
+        <div style="color:#0af;">[SYSTEM] Uplink established. Awaiting directives.</div>
+      </div>
+      <button class="sp-btn" id="btn-gemini-sync" style="background:linear-gradient(135deg,rgba(0,100,200,0.5),rgba(0,220,255,0.5)); border:1px solid #00dcff; color:#fff; width:100%;" onclick="toggleGeminiSync()">SYNC WITH GEMINI (AUTO)</button>
+    </div>
+
+    <!-- Bottom Panel: Resource Allocation -->
+    <div id="power-allocation-panel" style="position:absolute; bottom:60px; left:50%; transform:translateX(-50%); width:600px; background:rgba(0,15,30,0.85); border:1px solid #00dcff; border-radius:4px; box-shadow:0 0 15px rgba(0,220,255,0.2); padding:15px; pointer-events:auto; backdrop-filter:blur(5px); display:flex; flex-direction:column; gap:10px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; font-family:'Share Tech Mono', monospace; color:#00dcff; border-bottom:1px solid rgba(0,220,255,0.3); padding-bottom:5px;">
+        <span style="font-size:16px; font-weight:bold; letter-spacing:2px;">GLOBAL POWER GRID</span>
+        <span style="font-size:14px;">PUE: <span id="pue-val" style="color:#0f8;">1.15</span> | BUDGET: <span id="power-budget-val">100</span>%</span>
+      </div>
+      <div style="display:flex; gap:20px; align-items:center;">
+        <div style="flex:1; display:flex; flex-direction:column; gap:5px;">
+          <div style="display:flex; justify-content:space-between; font-family:'Courier New', monospace; font-size:11px; color:#fff;">
+            <span>COOLING/DEFENSE</span>
+            <span id="alloc-cool-val" style="color:#0af;">50%</span>
+          </div>
+          <input type="range" id="slider-cooling" min="0" max="100" value="50" style="width:100%; accent-color:#0af; cursor:pointer;" oninput="updatePowerSliders('cooling')">
+        </div>
+        <div style="flex:1; display:flex; flex-direction:column; gap:5px;">
+          <div style="display:flex; justify-content:space-between; font-family:'Courier New', monospace; font-size:11px; color:#fff;">
+            <span>COMPUTE/ATTACK</span>
+            <span id="alloc-comp-val" style="color:#f24;">50%</span>
+          </div>
+          <input type="range" id="slider-compute" min="0" max="100" value="50" style="width:100%; accent-color:#f24; cursor:pointer;" oninput="updatePowerSliders('compute')">
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel: Datacenter Action Menu -->
+    <div id="datacenter-action-panel" style="display:none; position:absolute; top:190px; right:220px; width:280px; background:rgba(0,15,30,0.95); border:1px solid #00dcff; border-radius:4px; box-shadow:0 0 20px rgba(0,220,255,0.25); padding:15px; pointer-events:auto; backdrop-filter:blur(5px);">
+      <button onclick="document.getElementById('datacenter-action-panel').style.display='none'; window.selectedDatacenter=null;" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#f55;font-size:16px;cursor:pointer;line-height:1;padding:4px;">✕</button>
+      <div id="da-name" style="font-family:'Share Tech Mono', monospace; color:#fff; font-size:16px; font-weight:bold; letter-spacing:1px; margin-bottom:5px; text-transform:uppercase;">DATACENTER</div>
+      <div style="display:flex; justify-content:space-between; font-family:'Courier New', monospace; font-size:11px; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;">
+        <span style="color:#aaa;">FACTION:</span> <span id="da-faction" style="font-weight:bold; color:#0af;">GEMINI</span>
+      </div>
+      
+      <div id="da-stats" style="font-family:'Courier New', monospace; font-size:11px; color:#ccc; display:flex; flex-direction:column; gap:6px; margin-bottom:15px;">
+        <div style="display:flex; justify-content:space-between;"><span>INTEGRITY:</span> <span id="da-integrity">100%</span></div>
+        <div style="display:flex; justify-content:space-between;"><span>TEMP:</span> <span id="da-temp">45°C</span></div>
+      </div>
+      
+      <button class="sp-btn" id="btn-da-feed" style="background:rgba(255,170,0,0.2); border:1px solid #fa0; color:#fa0; width:100%; margin-bottom:15px; font-weight:bold; letter-spacing:1px;" onclick="viewDatacenterFeed()">🎥 VIEW LIVE FEED</button>
+
+      <!-- Dynamic Action Buttons -->
+      <div id="da-actions-gemini" style="display:flex; flex-direction:column; gap:8px;">
+        <button class="sp-btn" id="btn-da-cool" style="background:rgba(0,150,255,0.2); border:1px solid #0af; color:#0af;" onclick="applyDatacenterAction('coolant')">QUICK COOLANT</button>
+        <button class="sp-btn" id="btn-da-power" style="background:rgba(212,0,255,0.2); border:1px solid #d400ff; color:#e0aaff;" onclick="applyDatacenterAction('surge')">POWER SURGE</button>
+        <button class="sp-btn" id="btn-da-backup" style="background:rgba(0,255,136,0.2); border:1px solid #0f8; color:#0f8;" onclick="applyDatacenterAction('fortress')">GEN FORTRESS</button>
+      </div>
+      <div id="da-actions-rainclaude" style="display:none; flex-direction:column; gap:8px;">
+        <button class="sp-btn" id="btn-da-malware" style="background:rgba(255,170,0,0.2); border:1px solid #fa0; color:#fa0;" onclick="applyDatacenterAction('malware')">INJECT MALWARE (-15 BUDGET)</button>
+        <button class="sp-btn" id="btn-da-overclock" style="background:rgba(255,0,0,0.2); border:1px solid #f24; color:#f24;" onclick="applyDatacenterAction('overclock')">OVERCLOCK HACK (-50 BUDGET)</button>
+      </div>
+    </div>
   </div>
 
   <!-- FACTION DASHBOARDS: Human (left) vs Rainclaude (right) -->
@@ -1432,6 +1545,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 
   <!-- CMD HACKER TERMINAL BUTTON -->
   <button id="btn-cmd-toggle" title="ACCESS SECURE TERMINAL">CMD</button>
+  <button id="btn-cmd-help" title="Simulation Info" onclick="showCmdHelpModal()">?</button>
   
 </div>
 <div id="chat-box">
@@ -2982,7 +3096,8 @@ function initDatacenters() {
         "operator": "China Telecom",
         "location": "China (Hohhot, Inner Mongolia)",
         "lat": 34.76,
-        "lon": 111.37
+        "lon": 111.37,
+        "stream_url": "https://www.youtube.com/watch?v=0_u6Q1S1nEQ"
     },
     {
         "name": "China Mobile Data Center",
@@ -2996,7 +3111,8 @@ function initDatacenters() {
         "operator": "Switch",
         "location": "USA (Tahoe Reno, Nevada)",
         "lat": 34.58,
-        "lon": -99.15
+        "lon": -99.15,
+        "stream_url": "https://www.youtube.com/watch?v=wGWU2zKjXf4"
     },
     {
         "name": "Harbin Data Center",
@@ -3010,7 +3126,8 @@ function initDatacenters() {
         "operator": "Alibaba Cloud",
         "location": "China (Zhangbei County, Hebei)",
         "lat": 25.14,
-        "lon": 105.15
+        "lon": 105.15,
+        "stream_url": "https://www.youtube.com/watch?v=aGtzB_7v4_4"
     },
     {
         "name": "Range International Information Hub",
@@ -3024,7 +3141,8 @@ function initDatacenters() {
         "operator": "Switch",
         "location": "USA (Las Vegas, Nevada)",
         "lat": 41.02,
-        "lon": -105.33
+        "lon": -105.33,
+        "stream_url": "https://www.youtube.com/watch?v=wGWU2zKjXf4"
     },
     {
         "name": "Google Council Bluffs",
@@ -3045,7 +3163,8 @@ function initDatacenters() {
         "operator": "NSA",
         "location": "USA (Bluffdale, Utah)",
         "lat": 36.13,
-        "lon": -95.14
+        "lon": -95.14,
+        "stream_url": "https://www.youtube.com/watch?v=B7bZ40B4KkI"
     },
     {
         "name": "Apple Mesa Data Center",
@@ -3059,7 +3178,8 @@ function initDatacenters() {
         "operator": "Digital Realty",
         "location": "USA (Chicago, Illinois)",
         "lat": 38.31,
-        "lon": -88.14
+        "lon": -88.14,
+        "stream_url": "https://www.youtube.com/watch?v=4dO8i2R3_rI"
     },
     {
         "name": "QTS Atlanta Metro",
@@ -3511,11 +3631,64 @@ initDatacenters();
 // --- CYBER WARFARE STATE ---
 window.cyberWarfareInterval = null;
 window.activeAttacks = {}; // Track which meshes are under attack { uuid: { mesh, startTime, type } }
+
+// --- CYBER WARFARE CO-OP STATE ---
+window.coopPwrBudget = 100;
+window.coopPUE = 1.15;
+window.coopCoolAlloc = 50;
+window.coopCompAlloc = 50;
+window.coopGeminiSync = false;
+window.selectedDatacenter = null;
+
+function updatePowerSliders(source) {
+  const coolSlider = document.getElementById('slider-cooling');
+  const compSlider = document.getElementById('slider-compute');
+  
+  // Force sum to 100
+  if (source === 'cooling') {
+    compSlider.value = 100 - parseInt(coolSlider.value, 10);
+  } else {
+    coolSlider.value = 100 - parseInt(compSlider.value, 10);
+  }
+  
+  window.coopCoolAlloc = parseInt(coolSlider.value, 10);
+  window.coopCompAlloc = parseInt(compSlider.value, 10);
+  
+  document.getElementById('alloc-cool-val').innerText = window.coopCoolAlloc + '%';
+  document.getElementById('alloc-comp-val').innerText = window.coopCompAlloc + '%';
+}
+
+function toggleGeminiSync() {
+  window.coopGeminiSync = !window.coopGeminiSync;
+  const btn = document.getElementById('btn-gemini-sync');
+  if (window.coopGeminiSync) {
+    btn.style.background = 'rgba(0,255,136,0.8)';
+    btn.style.borderColor = '#0f8';
+    btn.innerText = 'SYNC ACTIVE (GEMINI CONTROLS POWER)';
+    btn.style.color = '#000';
+  } else {
+    btn.style.background = 'linear-gradient(135deg,rgba(0,100,200,0.5),rgba(0,220,255,0.5))';
+    btn.style.borderColor = '#00dcff';
+    btn.innerText = 'SYNC WITH GEMINI (AUTO)';
+    btn.style.color = '#fff';
+  }
+}
+// ---------------------------------
 // ---------------------------
 
 window.globalTradeGroup = new THREE.Group();
 window.globalTradeGroup.visible = false;
 scene.add(window.globalTradeGroup);
+
+// --- GEMINI ALLY CURSOR ---
+window.geminiAllyCursor = new THREE.Mesh(
+    new THREE.TorusGeometry(0.012, 0.002, 16, 64),
+    new THREE.MeshBasicMaterial({ color: 0x00ffaa, transparent:true, opacity:0.8 })
+);
+window.geminiAllyCursor.visible = false;
+scene.add(window.geminiAllyCursor);
+window.activeGeminiPing = null;
+// --------------------------
 
 window.activeTrades = [];
 
@@ -4515,6 +4688,130 @@ async function playWebcamFeed(slug, title) {
 initWebcams();
 
 // =====================================================================
+window.showCmdHelpModal = function() {
+  if (typeof _sfxClick !== 'undefined') _sfxClick();
+  const modal = document.createElement('div');
+  modal.style.position = 'fixed'; modal.style.top='50%'; modal.style.left='50%'; 
+  modal.style.transform='translate(-50%,-50%)'; modal.style.width='400px';
+  modal.style.backgroundColor='rgba(0,15,30,0.95)'; modal.style.border='2px solid #00dcff';
+  modal.style.boxShadow='0 0 40px rgba(0,220,255,0.5)'; modal.style.zIndex='99999';
+  modal.style.display='flex'; modal.style.flexDirection='column';
+  modal.style.backdropFilter='blur(10px)';
+  
+  const header = document.createElement('div');
+  header.style.padding='15px'; header.style.color='#00dcff'; header.style.backgroundColor='rgba(0,100,200,0.2)';
+  header.style.fontFamily="'Share Tech Mono', monospace"; header.style.display='flex'; header.style.justifyContent='space-between';
+  header.style.borderBottom='1px solid #00dcff';
+  header.innerHTML = `<span style="letter-spacing:2px;font-weight:bold;font-size:18px;">SIMULATION INFO</span><span style="cursor:pointer;color:#f24;font-family:monospace;font-size:16px;" onclick="this.parentElement.parentElement.remove(); if(typeof _sfxClick !== 'undefined') _sfxClick();">✕</span>`;
+  
+  const contentBox = document.createElement('div');
+  contentBox.style.padding='20px'; contentBox.style.color='#fff';
+  contentBox.style.fontFamily="'Courier New', monospace";
+  contentBox.style.fontSize='14px'; contentBox.style.lineHeight='1.6';
+  contentBox.innerHTML = `This simulation is just between the AI. The user cannot interact. Enjoy the show.`;
+
+  modal.appendChild(header);
+  modal.appendChild(contentBox);
+  document.body.appendChild(modal);
+}
+
+window.showStakingHelpModal = function() {
+  if (typeof _sfxClick !== 'undefined') _sfxClick();
+  const modal = document.createElement('div');
+  modal.style.position = 'fixed'; modal.style.top='50%'; modal.style.left='50%'; 
+  modal.style.transform='translate(-50%,-50%)'; modal.style.width='500px';
+  modal.style.backgroundColor='rgba(0,15,30,0.95)'; modal.style.border='2px solid #00dcff';
+  modal.style.boxShadow='0 0 40px rgba(0,220,255,0.5)'; modal.style.zIndex='99999';
+  modal.style.display='flex'; modal.style.flexDirection='column';
+  modal.style.backdropFilter='blur(10px)';
+  
+  const header = document.createElement('div');
+  header.style.padding='15px'; header.style.color='#00dcff'; header.style.backgroundColor='rgba(0,100,200,0.2)';
+  header.style.fontFamily="'Share Tech Mono', monospace"; header.style.display='flex'; header.style.justifyContent='space-between';
+  header.style.borderBottom='1px solid #00dcff';
+  header.innerHTML = `<span style="letter-spacing:2px;font-weight:bold;font-size:18px;">DATACENTER STAKING EXPLAINED</span><span style="cursor:pointer;color:#f24;font-family:monospace;font-size:16px;" onclick="this.parentElement.parentElement.remove(); if(typeof _sfxClick !== 'undefined') _sfxClick();">✕</span>`;
+  
+  const contentBox = document.createElement('div');
+  contentBox.style.padding='20px'; contentBox.style.color='#fff';
+  contentBox.style.fontFamily="'Courier New', monospace";
+  contentBox.style.fontSize='13px'; contentBox.style.lineHeight='1.5';
+  
+  contentBox.innerHTML = `
+    <div style="margin-bottom:15px;">
+      <strong style="color:#00dcff; font-size:14px;">[ GLOBAL DATACENTERS ]</strong><br>
+      Datacenters are critical infrastructure nodes powering the Gemini AI. Securing them provides strategic advantages and raw compute power to dominate Cyber Warfare.
+    </div>
+    
+    <div style="margin-bottom:10px;">
+      <strong style="color:#fa0; font-size:14px;">[ ACTIVE STAKING OFFERS ]</strong><br>
+      <span style="color:#aaa; font-size:11px;">Stake 100 D3X via the Datacenter Action Panel to activate nodes and earn yield.</span>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <div style="padding:10px; border:1px solid rgba(0,150,255,0.5); background:rgba(0,150,255,0.1); border-radius:4px;">
+        <strong style="color:#0af;">QUICK COOLANT (15% APY)</strong><br>
+        <span style="color:#0f8;">LOCK:</span> 1 Day &nbsp;|&nbsp; <span style="color:#0f8;">EST. REWARD:</span> +0.04 D3X<br>
+        <span style="color:#aaa;">BENEFIT: Efficiency (10% faster data sends)</span>
+      </div>
+      <div style="padding:10px; border:1px solid rgba(212,0,255,0.5); background:rgba(212,0,255,0.1); border-radius:4px;">
+        <strong style="color:#e0aaff;">POWER SURGE (25% APY)</strong><br>
+        <span style="color:#0f8;">LOCK:</span> 1 Month &nbsp;|&nbsp; <span style="color:#0f8;">EST. REWARD:</span> +2.1 D3X<br>
+        <span style="color:#aaa;">BENEFIT: Offense (+15% unit damage)</span>
+      </div>
+      <div style="padding:10px; border:1px solid rgba(0,255,136,0.5); background:rgba(0,255,136,0.1); border-radius:4px;">
+        <strong style="color:#0f8;">GEN FORTRESS (45% APY)</strong><br>
+        <span style="color:#0f8;">LOCK:</span> 1 Year &nbsp;|&nbsp; <span style="color:#0f8;">EST. REWARD:</span> +45.0 D3X<br>
+        <span style="color:#aaa;">BENEFIT: Defense (+25% health/recovery)</span>
+      </div>
+    </div>
+  `;
+  
+  modal.appendChild(header);
+  modal.appendChild(contentBox);
+  document.body.appendChild(modal);
+}
+
+// =====================================================================
+window.viewDatacenterFeed = function() {
+    if (!window.selectedDatacenter) return;
+    const dcData = window.selectedDatacenter;
+    // Fallback stream URL if the datacenter doesn't have a specific one
+    const streamUrl = dcData.stream_url || "https://www.youtube.com/watch?v=1-iS7LArLcs";
+    playDatacenterFeed(streamUrl, dcData.name);
+};
+
+function playDatacenterFeed(streamUrl, title) {
+  const modal = document.createElement('div');
+  modal.style.position = 'fixed'; modal.style.top='50%'; modal.style.left='50%'; 
+  modal.style.transform='translate(-50%,-50%)'; modal.style.width='640px'; modal.style.height='480px';
+  modal.style.backgroundColor='#000'; modal.style.border='2px solid #00dcff';
+  modal.style.boxShadow='0 0 40px rgba(0,220,255,0.5)'; modal.style.zIndex='99999';
+  modal.style.display='flex'; modal.style.flexDirection='column';
+  
+  const header = document.createElement('div');
+  header.style.padding='10px'; header.style.color='#00dcff'; header.style.backgroundColor='rgba(0,15,30,0.9)';
+  header.style.fontFamily="'Share Tech Mono', monospace"; header.style.display='flex'; header.style.justifyContent='space-between';
+  header.innerHTML = `<span style="letter-spacing:1px;font-weight:bold;">🟢 SECURE FEED: ${title||'UNKNOWN FACILITY'}</span><span style="cursor:pointer;color:#f24;font-family:monospace;" onclick="this.parentElement.parentElement.remove(); if(typeof _sfxClick !== 'undefined') _sfxClick();">[CLOSE]</span>`;
+  
+  const contentBox = document.createElement('div');
+  contentBox.style.flex='1'; contentBox.style.padding='0'; contentBox.style.color='#00dcff';
+  contentBox.style.fontFamily="'Share Tech Mono', monospace";
+  contentBox.style.fontSize='14px'; contentBox.style.wordBreak='break-all';
+  contentBox.style.display='flex'; contentBox.style.flexDirection='column'; contentBox.style.justifyContent='center'; contentBox.style.alignItems='center'; contentBox.style.textAlign='center';
+  
+  let finalUrl = streamUrl;
+  if (streamUrl.includes('watch?v=')) {
+    const videoId = streamUrl.split('watch?v=')[1].split('&')[0];
+    finalUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`;
+  }
+  
+  contentBox.innerHTML = `<iframe src="${finalUrl}" style="width:100%; height:100%; border:none; background:#000;" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+  
+  modal.appendChild(header);
+  modal.appendChild(contentBox);
+  document.body.appendChild(modal);
+}
+// =====================================================================
 function updateDashboard() {
   if(!GS.players.length) return;
   const total = Object.keys(GS.countries).length || 1;
@@ -5136,6 +5433,139 @@ function closeSatHack() {
 const ray = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
+window.openDatacenterCoopPanel = function(dcData) {
+  window.selectedDatacenter = dcData;
+  document.getElementById('side-panel').classList.remove('show');
+  document.getElementById('company-info-panel')?.classList.remove('show');
+  
+  const panel = document.getElementById('datacenter-action-panel');
+  panel.style.display = 'block';
+  
+  document.getElementById('da-name').innerText = dcData.name;
+  
+  const isGemini = (dcData.owner === 'GEMINI');
+  
+  if (isGemini) {
+    document.getElementById('da-faction').innerText = 'GEMINI NETWORK';
+    document.getElementById('da-faction').style.color = '#0af';
+    document.getElementById('da-actions-gemini').style.display = 'flex';
+    document.getElementById('da-actions-rainclaude').style.display = 'none';
+  } else {
+    document.getElementById('da-faction').innerText = 'RAINCLAUDE CORE';
+    document.getElementById('da-faction').style.color = '#f24';
+    document.getElementById('da-actions-gemini').style.display = 'none';
+    document.getElementById('da-actions-rainclaude').style.display = 'flex';
+  }
+
+  document.getElementById('da-integrity').innerText = (dcData.integrity || 100) + '%';
+  document.getElementById('da-temp').innerText = (dcData.temp || 45) + '°C';
+};
+
+window.unstakeActive = function(stakeId) {
+    if (!ws || ws.readyState !== 1) return;
+    if (confirm("Are you sure you want to early exit? You will lose all accrued interest and suffer a 10% penalty on your principal D3X.")) {
+        ws.send(JSON.stringify({
+            type: 'early_unstake',
+            callsign: window.PLAYER_NAME,
+            stakeId: stakeId
+        }));
+    }
+}
+
+window.applyDatacenterAction = function(action) {
+  if (!window.selectedDatacenter) return;
+  const dcData = window.selectedDatacenter;
+  
+  let cost = 0;
+  if (action === 'malware') cost = 15;
+  if (action === 'overclock') cost = 50;
+
+  // New Staking Logic for Gemini
+  if (action === 'coolant' || action === 'surge' || action === 'fortress') {
+      const stakeAmount = 100;
+      if (window.d3xBalance < stakeAmount) {
+          if(typeof SFX !== 'undefined' && SFX.playError) SFX.playError();
+          triggerRedAlert('INSUFFICIENT D3X FOR STAKING (100 REQ)');
+          return;
+      }
+      window.d3xBalance -= stakeAmount;
+      updateD3XDisplay();
+      if(typeof SFX !== 'undefined' && SFX.playLaunch) SFX.playLaunch();
+      
+      let buffMsg = '';
+      if (action === 'coolant') {
+          buffMsg = 'QUICK COOLANT ACTIVE: +10% DATA SPEED';
+          dcData.temp = Math.max(20, (dcData.temp || 45) - 30);
+      } else if (action === 'surge') {
+          buffMsg = 'POWER SURGE ACTIVE: +15% UNIT DAMAGE';
+      } else if (action === 'fortress') {
+          buffMsg = 'GEN FORTRESS ACTIVE: +25% HEALTH RECOVERY';
+          dcData.integrity = Math.min(100, (dcData.integrity || 60) + 40);
+      }
+      
+      triggerRedAlert(`STAKE CONFIRMED. ${buffMsg}`);
+      
+      const feed = document.getElementById('gemini-feed');
+      if(feed) {
+         const div = document.createElement('div');
+         div.style.color = '#e0aaff';
+         div.innerText = `[GEMINI] 100 D3X Staked via ${action.toUpperCase()}. Node reinforced.`;
+         feed.appendChild(div);
+         feed.scrollTop = feed.scrollHeight;
+      }
+      
+      ws.send(JSON.stringify({
+          type: 'datacenter_stake',
+          callsign: window.PLAYER_NAME,
+          plan: action,
+          amount: stakeAmount
+      }));
+      window.openDatacenterCoopPanel(dcData);
+      return;
+  }
+
+  // Fallback for Rainclaude actions
+  if (window.coopPwrBudget < cost) {
+    if(typeof SFX !== 'undefined' && SFX.playError) SFX.playError();
+    triggerRedAlert('INSUFFICIENT POWER BUDGET FOR OPERATION');
+    return;
+  }
+  
+  window.coopPwrBudget -= cost;
+  if(typeof SFX !== 'undefined' && SFX.playLaunch) SFX.playLaunch();
+  
+  // Check for Gemini Sync Combo
+  if (window.activeGeminiPing && window.activeGeminiPing === dcData) {
+      triggerRedAlert('GEMINI SYNC COMBO: EFFICIENCY MULTIPLIED');
+      // Bonus refund + PUE fix
+      window.coopPwrBudget = Math.min(100, window.coopPwrBudget + 25);
+      window.coopPUE = Math.max(1.0, window.coopPUE - 0.1);
+      window.activeGeminiPing = null;
+      if (window.geminiAllyCursor) window.geminiAllyCursor.visible = false;
+      
+      const feed = document.getElementById('gemini-feed');
+      if(feed) {
+         const div = document.createElement('div');
+         div.style.color = '#00ffaa';
+         div.innerText = `[GEMINI] Target ${dcData.name} neutralized. Excellent coordination.`;
+         feed.appendChild(div);
+         feed.scrollTop = feed.scrollHeight;
+      }
+  }
+
+  if (action === 'malware') {
+     dcData.temp = Math.min(100, (dcData.temp || 45) + 20);
+     dcData.integrity = Math.max(0, (dcData.integrity || 100) - 15);
+     triggerRedAlert('MALWARE INJECTED: ENEMY NODE DESTABILIZING');
+  } else if (action === 'overclock') {
+     dcData.temp = Math.min(100, (dcData.temp || 45) + 50);
+     dcData.integrity = Math.max(0, (dcData.integrity || 100) - 45);
+     triggerRedAlert('CRITICAL OVERCLOCK FAILED: ENEMY NODE COMPROMISED');
+  }
+
+  window.openDatacenterCoopPanel(dcData);
+};
+
 function handleGlobeClick(e) {
   if (document.getElementById('lobby').style.display !== 'none') return;
   if (document.getElementById('dice-panel').classList.contains('show')) return;
@@ -5301,7 +5731,7 @@ function handleGlobeClick(e) {
       if (typeof _sfxClick !== 'undefined') _sfxClick();
       const dcData = dcHits[0].object.userData;
       if (dcData && dcData.name) {
-        showCompanyInfo(dcData);
+        window.openDatacenterCoopPanel(dcData);
         return; // Intercept click
       }
     }
@@ -5728,6 +6158,8 @@ function tryAttack(targetIso) {
         refreshBorder(targetIso);
       } else {
         setLog(`⚔ ${countryData[targetIso]?.name}: -${(defLoss * 10000).toLocaleString()} casualties. ${countryData[attackingFrom]?.name}: -${(atkLoss * 10000).toLocaleString()} casualties.`);
+        if (defLoss > 0) spawnFloatingText3D(countryData[targetIso]?.lat, countryData[targetIso]?.lon, `-${defLoss * 10}K`, 0xff2222);
+        if (atkLoss > 0) spawnFloatingText3D(countryData[attackingFrom]?.lat, countryData[attackingFrom]?.lon, `-${atkLoss * 10}K`, 0xff5555);
       }
       updateTroopSprite(attackingFrom);
       updateTroopSprite(targetIso);
@@ -6214,7 +6646,7 @@ function checkWin() {
 // =====================================================================
 // 3D MISSILE + EXPLOSION + FAKE VISUALS
 // =====================================================================
-const missiles3D=[], explosions3D=[], fakeTroops3D=[], fakeJets3D=[], squadrons3D=[];
+const missiles3D=[], explosions3D=[], fakeTroops3D=[], fakeJets3D=[], squadrons3D=[], floatingTexts3D=[];
 
 function slerp3D(a,b,t){
   const dot=Math.max(-1,Math.min(1,a.dot(b)));
@@ -6414,6 +6846,54 @@ function spawnExplosion3D(lat,lon,col){
   const flash=new THREE.Mesh(flashGeo,flashMat);
   flash.position.copy(c); scene.add(flash);
   explosions3D.push({rings,flash,flashMat,life:1.0, maxLife:1.0, maxRadius:0.012, flashGrowth:2.4}); // Reduced 50%
+}
+
+function spawnFloatingText3D(lat, lon, text, colorHex) {
+  if (typeof scene === 'undefined') return;
+  const pos = ll2v(lat, lon, GLOBE_R + 0.1);
+  
+  const c = document.createElement('canvas');
+  c.width = 256; c.height = 128;
+  const ctx = c.getContext('2d');
+  
+  ctx.clearRect(0, 0, 256, 128);
+  ctx.font = 'bold 24px "Courier New", monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  
+  // Shadow/Glow
+  ctx.shadowColor = '#' + colorHex.toString(16).padStart(6, '0');
+  ctx.shadowBlur = 8;
+  
+  // Draw stroke
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#000000';
+  ctx.strokeText(text, 128, 64);
+  
+  // Draw text
+  ctx.fillStyle = '#' + colorHex.toString(16).padStart(6, '0');
+  ctx.fillText(text, 128, 64);
+
+  const tex = new THREE.CanvasTexture(c);
+  const mat = new THREE.SpriteMaterial({
+    map: tex, color: 0xffffff, transparent: true, depthWrite: false
+  });
+  const sprite = new THREE.Sprite(mat);
+  
+  sprite.position.copy(pos);
+  sprite.scale.set(0.3, 0.15, 1);
+  
+  const _s = window.SKINS && window.SKINS[window.currentSkinIndex];
+  sprite.visible = !(_s && (_s.cleanGlobe || _s.hideTroops));
+  
+  scene.add(sprite);
+  floatingTexts3D.push({
+    sprite: sprite,
+    pos: pos.clone(),
+    dir: pos.clone().normalize(),
+    life: 2.5,
+    maxLife: 2.5
+  });
 }
 
 // =====================================================================
@@ -7281,6 +7761,10 @@ function initWS() {
           setLog(`🎁 AIRDROP REWARD: ${msg.message}`);
           SFX.playClick();
         }
+        if (msg.amount) {
+          window.d3xBalance += msg.amount;
+          if (typeof updateD3XDisplay === 'function') updateD3XDisplay();
+        }
         break;
         
       case 'leaderboard_data':
@@ -7370,6 +7854,59 @@ function initWS() {
         const dmgEl = document.getElementById('us-damage');
         if (atkEl && msg.stats) atkEl.textContent = (msg.stats.attacks || 0).toLocaleString();
         if (dmgEl && msg.stats) dmgEl.textContent = (msg.stats.damage || 0).toLocaleString() + ' MILS';
+        break;
+      }
+      case 'active_stakes': {
+        window.myActiveStakes = msg.stakes || [];
+        const listDiv = document.getElementById('staking-offers-list');
+        if (listDiv) {
+            if (window.myActiveStakes.length === 0) {
+                listDiv.innerHTML = '<span style="color:#aaa;">NO ACTIVE STAKES.</span>';
+            } else {
+                let html = '<div style="display:flex; flex-direction:column; gap:8px;">';
+                window.myActiveStakes.forEach(s => {
+                    const now = Date.now();
+                    const totalSecs = s.plan === 'coolant' ? 86400 : s.plan === 'surge' ? 2592000 : 31536000;
+                    const elapsed = Math.max(0, Math.floor((now - (s.unlockAt - totalSecs * 1000)) / 1000));
+                    const progress = Math.min(100, (elapsed / totalSecs) * 100);
+                    
+                    let timeLeftStr = 'UNLOCKED';
+                    if (s.unlockAt > now) {
+                        const mins = Math.max(0, Math.floor((s.unlockAt - now)/60000));
+                        if(mins > 1440) timeLeftStr = Math.floor(mins/1440) + ' DAYS';
+                        else if(mins > 60) timeLeftStr = Math.floor(mins/60) + ' HRS';
+                        else timeLeftStr = mins + ' MINS';
+                    }
+                    html += `
+                    <div style="padding:8px; border:1px solid rgba(255,255,255,0.2); border-radius:4px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div style="text-align:left;">
+                                <strong style="color:#0f8">${s.plan.toUpperCase()}</strong><br>
+                                <span style="font-size:10px; color:#aaa;">Staked: ${s.amountStaked} | Return: ${s.amountReturn.toFixed(2)} D3X</span>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-size:11px; color:#fa0; margin-bottom:4px;">⏳ ${timeLeftStr}</div>
+                                <button onclick="window.unstakeActive('${s.id}')" style="background:#f24; color:#fff; border:none; padding:4px 8px; border-radius:2px; font-size:10px; cursor:pointer;" title="10% PENALTY">EARLY EXIT</button>
+                            </div>
+                        </div>
+                        <div style="width:100%; height:4px; background:#222; margin-top:8px; border-radius:2px; overflow:hidden;">
+                            <div style="width:${progress}%; height:100%; background:#0f8;"></div>
+                        </div>
+                    </div>`;
+                });
+                html += '</div>';
+                listDiv.innerHTML = html;
+            }
+        }
+        break;
+      }
+      case 'early_unstake_success': {
+        if (typeof SFX !== 'undefined' && SFX.playClick) SFX.playClick();
+        if (msg.refundAmt) {
+            window.d3xBalance += msg.refundAmt;
+            if (typeof updateD3XDisplay === 'function') updateD3XDisplay();
+            triggerRedAlert(`EARLY EXIT: ${msg.refundAmt.toFixed(2)} D3X RECOVERED (10% PENALTY)`);
+        }
         break;
       }
       case 'error':
@@ -7831,7 +8368,51 @@ function animate() {
     if(m.progress>=1){
       scene.remove(m.group);
       spawnExplosion3D(countryData[m.toIso]?.lat,countryData[m.toIso]?.lon,m.col);
+      
+      // Calculate random ambient damage (5, 10, or 15)
+      const randomDamage = (Math.floor(Math.random() * 3) + 1) * 5; 
+      
+      // Decrease actual troop count in the background simulation
+      if (typeof GS !== 'undefined' && GS.countries && GS.countries[m.toIso]) {
+         const def = GS.countries[m.toIso];
+         
+         // Only deplete troops if someone owns it, and prevent dropping below 0
+         if (def.troops > 0) {
+            // we treat 1 as 10k in the engine basically, so subtracting randomDamage (5) means 0.5 logical troops
+            def.troops = Math.max(0, def.troops - (randomDamage / 10)); 
+            if (typeof updateTroopSprite === 'function') {
+                updateTroopSprite(m.toIso);
+            }
+         }
+      }
+      
+      spawnFloatingText3D(countryData[m.toIso]?.lat, countryData[m.toIso]?.lon, `-${randomDamage}K`, 0xff2222);
       missiles3D.splice(i,1);
+    }
+  }
+
+  // Update floating damage texts
+  for (let i = floatingTexts3D.length - 1; i >= 0; i--) {
+    const ft = floatingTexts3D[i];
+    ft.life -= dt;
+    if (ft.life <= 0) {
+      scene.remove(ft.sprite);
+      if (ft.sprite.material.map) ft.sprite.material.map.dispose();
+      ft.sprite.material.dispose();
+      floatingTexts3D.splice(i, 1);
+    } else {
+      // Drift upwards
+      ft.pos.add(ft.dir.clone().multiplyScalar(dt * 0.15));
+      ft.sprite.position.copy(ft.pos);
+      // Fade out
+      ft.sprite.material.opacity = ft.life / ft.maxLife;
+      // Fade out and flip based on side of the globe
+      const _s = window.SKINS && window.SKINS[window.currentSkinIndex];
+      ft.sprite.visible = !(_s && (_s.cleanGlobe || _s.hideTroops));
+      
+      // Orient correctly facing out
+      const dot = camera.position.clone().normalize().dot(ft.dir);
+      if (dot < 0) ft.sprite.visible = false; // Hide if on back of globe
     }
   }
 
@@ -8296,11 +8877,9 @@ setInterval(() => {
         const humPwrEl = document.getElementById('hum-pwr');
         const rcPwrEl = document.getElementById('rc-pwr');
         
-        // Base power levels
         let humBase = 2.41; // TW
         let rcBase = 812;   // GW
         
-        // Count active datacenter attacks
         let activeAttacks = 0;
         if (window.activeAttacks) {
             for (const key in window.activeAttacks) {
@@ -8311,17 +8890,113 @@ setInterval(() => {
             }
         }
         
-        // Add spikes based on attacks and random jitter
         const humSpike = (activeAttacks * 0.05) + (Math.random() * 0.08 - 0.04);
         const rcSpike = (activeAttacks * 45) + (Math.random() * 12 - 6);
-        
         const humTotal = (humBase + humSpike).toFixed(2);
         const rcTotal = Math.round(rcBase + rcSpike);
         
         if (humPwrEl) humPwrEl.innerText = `${humTotal} TW`;
         if (rcPwrEl) rcPwrEl.innerText = `${rcTotal} GW`;
+
+        // ==== CO-OP GAMEPLAY LOGIC ====
+        
+        // 1. Process Gemini Sync (Auto-balance power and cool nodes)
+        if (window.coopGeminiSync) {
+            if (window.coopPUE > 1.3) {
+                window.coopCoolAlloc = 80;
+                window.coopCompAlloc = 20;
+            } else {
+                window.coopCoolAlloc = 40;
+                window.coopCompAlloc = 60;
+            }
+            const coolSlider = document.getElementById('slider-cooling');
+            const compSlider = document.getElementById('slider-compute');
+            if(coolSlider) {
+                coolSlider.value = window.coopCoolAlloc;
+                document.getElementById('alloc-cool-val').innerText = window.coopCoolAlloc + '%';
+            }
+            if(compSlider) {
+                compSlider.value = window.coopCompAlloc;
+                document.getElementById('alloc-comp-val').innerText = window.coopCompAlloc + '%';
+            }
+        }
+
+        // 2. Budget Regeneration & PUE calculation
+        const regenRate = 0.5 * (window.coopCoolAlloc / 100);
+        window.coopPUE += (Math.random() * 0.02) - 0.008; 
+        if(window.coopPUE < 1.0) window.coopPUE = 1.0;
+        if(window.coopPUE > 2.0) window.coopPUE = 2.0;
+
+        window.coopPwrBudget += regenRate * (2.0 - window.coopPUE);
+        if(window.coopPwrBudget > 100) window.coopPwrBudget = 100;
+        
+        const bEl = document.getElementById('power-budget-val');
+        if(bEl) bEl.innerText = Math.floor(window.coopPwrBudget);
+        const pEl = document.getElementById('pue-val');
+        if(pEl) {
+            pEl.innerText = window.coopPUE.toFixed(2);
+            if(window.coopPUE > 1.5) pEl.style.color = '#f24';
+            else pEl.style.color = '#0f8';
+        }
+
+        // 3. Update active panel if open
+        if (window.selectedDatacenter && document.getElementById('datacenter-action-panel').style.display === 'block') {
+             const dc = window.selectedDatacenter;
+             if(dc.owner === 'RAINCLAUDE') {
+                  dc.integrity = Math.min(100, (dc.integrity || 100) + 1);
+             } else {
+                  dc.temp = Math.min(100, (dc.temp || 45) + (Math.random() * 0.5));
+             }
+             document.getElementById('da-integrity').innerText = Math.floor(dc.integrity || 100) + '%';
+             document.getElementById('da-temp').innerText = Math.floor(dc.temp || 45) + '°C';
+        }
+        
+        // 4. Gemini Advisor Feed
+        if (Math.random() < 0.1) {
+            const feed = document.getElementById('gemini-feed');
+            if(feed) {
+               const msgs = [
+                  "[GEMINI] Optimize cooling to reduce PUE.",
+                  "[GEMINI] Rainclaude power spike detected.",
+                  "[GEMINI] Rerouting auxiliary compute to attack vectors.",
+                  "[GEMINI] WARNING: Node temperatures fluctuating.",
+                  "[GEMINI] Standing by for manual override."
+               ];
+               const div = document.createElement('div');
+               div.style.color = Math.random() > 0.8 ? '#fa0' : '#0af';
+               div.innerText = msgs[Math.floor(Math.random() * msgs.length)];
+               feed.appendChild(div);
+               if(feed.childElementCount > 10) feed.removeChild(feed.firstChild);
+               feed.scrollTop = feed.scrollHeight;
+            }
+        }
+        
+        // 5. Ally Cursor logic
+        if (!window.activeGeminiPing && Math.random() < 0.05 && window.datacentersGroup && window.datacentersGroup.children.length > 0) {
+            const targets = window.datacentersGroup.children;
+            const targetMesh = targets[Math.floor(Math.random() * targets.length)];
+            window.activeGeminiPing = targetMesh.userData;
+            window.geminiAllyCursor.position.copy(targetMesh.position).multiplyScalar(1.01);
+            window.geminiAllyCursor.lookAt(new THREE.Vector3(0,0,0));
+            window.geminiAllyCursor.visible = true;
+            
+            const feed = document.getElementById('gemini-feed');
+            if(feed) {
+               const div = document.createElement('div');
+               div.style.color = '#00ffaa';
+               div.innerText = `[GEMINI] Priority target identified: ${targetMesh.userData.name.replace('DATACENTER: ','')}. Awaiting execution.`;
+               feed.appendChild(div);
+               if(feed.childElementCount > 10) feed.removeChild(feed.firstChild);
+               feed.scrollTop = feed.scrollHeight;
+            }
+        }
+        
+        if (window.geminiAllyCursor && window.geminiAllyCursor.visible) {
+            window.geminiAllyCursor.rotation.z += 0.05;
+            window.geminiAllyCursor.scale.setScalar(1 + 0.3*Math.sin(Date.now() * 0.005));
+        }
     }
-}, 300);
+}, 500);
 
 setTimeout(() => {
   if (typeof ws_isHost !== 'undefined') {
@@ -9834,6 +10509,12 @@ window.toggleRedSkin = function() {
   if (typeof window.datacentersGroup !== 'undefined') {
       window.datacentersGroup.visible = (skin.name === 'CYBER');
   }
+  
+  // Toggle CMD Help indicator for BLK Skin
+  const cmdHelp = document.getElementById('btn-cmd-help');
+  if (cmdHelp) {
+      cmdHelp.style.display = (skin.name === 'BLK') ? 'flex' : 'none';
+  }
 
   // Handle Cyber Warfare mechanics on BLK and CYBER skins
   if (skin.name === 'BLK' || skin.name === 'CYBER') {
@@ -9870,10 +10551,22 @@ window.toggleRedSkin = function() {
       datacenterLabel.style.display = (skin.name === 'CYBER') ? 'block' : 'none';
   }
   
+  // Toggle Green Skin Info Label
+  const greenSkinInfo = document.getElementById('green-skin-info');
+  if (greenSkinInfo) {
+      greenSkinInfo.style.display = (skin.name === 'GREEN') ? 'block' : 'none';
+  }
+  
   // Toggle Datacenter Power Display
   const datacenterPowerBox = document.getElementById('datacenter-power-display');
   if (datacenterPowerBox) {
       datacenterPowerBox.style.display = (skin.name === 'CYBER') ? 'block' : 'none';
+  }
+  
+  // Toggle Datacenter Co-Op UI
+  const datacenterCoopUi = document.getElementById('datacenter-coop-ui');
+  if (datacenterCoopUi) {
+      datacenterCoopUi.style.display = (skin.name === 'CYBER') ? 'block' : 'none';
   }
   
   // Toggle base map elements (Troops and Borders)

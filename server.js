@@ -590,6 +590,136 @@ function initWebSockets() {
         break;
       }
 
+      case 'datacenter_stake': {
+        const callsign = msg.callsign;
+        const plan = msg.plan;
+        const amount = msg.amount || 100;
+        if (!callsign) break;
+        
+        if (!globalGameState) {
+          globalGameState = { players: [], countries: {}, activePlayerIndex: 0 };
+        }
+        if (!globalGameState.stakes) {
+          globalGameState.stakes = [];
+        }
+        
+        // Dynamic APY check
+        const TOTAL_D3X_SUPPLY = 1000000;
+        let currentTotalStaked = 0;
+        globalGameState.stakes.forEach(s => currentTotalStaked += s.amountStaked);
+        
+        let apyModifier = 1.0;
+        if ((currentTotalStaked + amount) / TOTAL_D3X_SUPPLY > 0.40) {
+            apyModifier = 0.5; // Halve the rewards if over 40% supply staked
+            console.log(`[STAKE] Global stake exceeds 40% supply! Applying 0.5x APY modifier.`);
+        }
+
+        // Define unlocks based on plan
+        let unlockTime = Date.now();
+        let baseYield = 0;
+        
+        if (plan === 'coolant') {
+            unlockTime += (1 * 24 * 60 * 60 * 1000); // 1 Day
+            baseYield = 0.04;
+        } else if (plan === 'surge') {
+            unlockTime += (30 * 24 * 60 * 60 * 1000); // 1 Month ~ 30 days
+            baseYield = 2.1;
+        } else if (plan === 'fortress') {
+            unlockTime += (365 * 24 * 60 * 60 * 1000); // 1 Year
+            baseYield = 45.0;
+        } else {
+            // fallback logic
+            unlockTime += (6 * 60 * 60 * 1000); // 6 hours
+            baseYield = 2.0; 
+        }
+
+        // Apply Synergy Bonus (check if they have the other 2 types already staked)
+        const myStakes = globalGameState.stakes.filter(s => s.callsign === callsign);
+        const hasCoolant = myStakes.some(s => s.plan === 'coolant') || plan === 'coolant';
+        const hasSurge = myStakes.some(s => s.plan === 'surge') || plan === 'surge';
+        const hasFortress = myStakes.some(s => s.plan === 'fortress') || plan === 'fortress';
+        
+        let synergyMultiplier = 1.0;
+        if (hasCoolant && hasSurge && hasFortress) {
+            synergyMultiplier = 1.1;
+            console.log(`[STAKE] Commander ${callsign} achieved Triple-Stake Synergy (+10%).`);
+        }
+        
+        // Apply Active Play Boost (check DB for attacks)
+        let activePlayMultiplier = 1.0;
+        if (pgPool) {
+            try {
+                const res = await pgPool.query('SELECT attacks FROM commanders WHERE callsign = $1', [callsign]);
+                if (res.rows.length > 0 && res.rows[0].attacks > 0) {
+                    activePlayMultiplier = 1.2;
+                    console.log(`[STAKE] Commander ${callsign} achieved Active Play Boost (+20%).`);
+                }
+            } catch (err) {
+                console.error('DB Error checking attacks for active play boost');
+            }
+        }
+        
+        const finalYield = baseYield * apyModifier * synergyMultiplier * activePlayMultiplier;
+        const amountReturn = amount + finalYield;
+        
+        globalGameState.stakes.push({
+            id: Date.now() + Math.random().toString(36).substr(2, 9),
+            callsign: callsign,
+            plan: plan,
+            amountStaked: amount,
+            amountReturn: amountReturn,
+            unlockAt: unlockTime
+        });
+        
+        saveGameState(globalGameState);
+        console.log(`[STAKE] Commander ${callsign} staked ${amount} D3X via ${plan}. Yield: +${finalYield.toFixed(2)} D3X.`);
+        
+        // Auto-refresh their stakes
+        ws.send(JSON.stringify({ 
+            type: 'active_stakes', 
+            stakes: globalGameState.stakes.filter(s => s.callsign === callsign) 
+        }));
+        break;
+      }
+
+      case 'get_active_stakes': {
+        const callsign = msg.callsign;
+        if (!callsign || !globalGameState || !globalGameState.stakes) break;
+        ws.send(JSON.stringify({ 
+            type: 'active_stakes', 
+            stakes: globalGameState.stakes.filter(s => s.callsign === callsign) 
+        }));
+        break;
+      }
+      
+      case 'early_unstake': {
+        const callsign = msg.callsign;
+        const stakeId = msg.stakeId;
+        if (!callsign || !stakeId || !globalGameState || !globalGameState.stakes) break;
+        
+        const stakeIdx = globalGameState.stakes.findIndex(s => s.id === stakeId && s.callsign === callsign);
+        if (stakeIdx >= 0) {
+            const stake = globalGameState.stakes[stakeIdx];
+            // Penalty: lose all yields, and lose 10% of principal
+            const returnedPrincipal = stake.amountStaked * 0.90;
+            globalGameState.stakes.splice(stakeIdx, 1);
+            saveGameState(globalGameState);
+            
+            console.log(`[STAKE] Commander ${callsign} early unstaked ${stake.plan}. Penalty applied. Returned ${returnedPrincipal} D3X.`);
+            ws.send(JSON.stringify({
+               type: 'early_unstake_success',
+               refundAmt: returnedPrincipal
+            }));
+            
+            // Auto-refresh their stakes
+            ws.send(JSON.stringify({ 
+                type: 'active_stakes', 
+                stakes: globalGameState.stakes.filter(s => s.callsign === callsign) 
+            }));
+        }
+        break;
+      }
+
       case 'get_leaderboard': {
         if (pgPool) {
           try {
@@ -779,6 +909,47 @@ async function checkD3XRewards() {
 
 // Check eligible connected players once a minute
 setInterval(checkD3XRewards, 60000);
+
+function checkD3XStakes() {
+  if (!globalGameState || !globalGameState.stakes) return;
+  
+  const now = Date.now();
+  let updated = false;
+  
+  for (let i = globalGameState.stakes.length - 1; i >= 0; i--) {
+      const stake = globalGameState.stakes[i];
+      if (now >= stake.unlockAt) {
+          console.log(`[STAKE REWARD] Commander ${stake.callsign} stake unlocked! Yielding ${stake.amountReturn} D3X.`);
+          
+          let clientWs = null;
+          for (const client of connectedClients) {
+              if (client.name === stake.callsign) {
+                  clientWs = client.ws;
+                  break;
+              }
+          }
+          
+          if (clientWs && clientWs.readyState === WebSocket.OPEN) {
+               clientWs.send(JSON.stringify({ 
+                type: 'd3x_reward', 
+                amount: stake.amountReturn,
+                message: `${stake.amountReturn} D3X YIELD (Datacenter Stake Matured)`
+              }));
+          } else {
+               console.log(`[STAKE REWARD] Player ${stake.callsign} offline. D3X disbursed to local cache or lost.`);
+          }
+          
+          globalGameState.stakes.splice(i, 1);
+          updated = true;
+      }
+  }
+  
+  if (updated) {      
+      saveGameState(globalGameState);
+  }
+}
+
+setInterval(checkD3XStakes, 60000);
 
 // --- AI Database Combat Loop (Gemini vs Rainclaude) ---
 
