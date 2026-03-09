@@ -3821,7 +3821,7 @@ function initDatacenters() {
             dehCanvas.width = 512;
             dehCanvas.height = 64;
             const dehCtx = dehCanvas.getContext('2d');
-            dehCtx.font = 'bold 36px "Orbitron", sans-serif';
+            dehCtx.font = 'bold 32px "Orbitron", sans-serif';
             dehCtx.fillStyle = '#39ff14'; // Neon green
             dehCtx.textAlign = 'center';
             dehCtx.textBaseline = 'middle';
@@ -3831,7 +3831,7 @@ function initDatacenters() {
             const dehSpriteMat = new THREE.SpriteMaterial({ map: dehTex, transparent: true, depthTest: false });
             const dehSprite = new THREE.Sprite(dehSpriteMat);
             dehSprite.scale.set(0.16, 0.02, 1);
-            dehSprite.position.set(0, 0.15, 0); // Position above the node and arrows
+            dehSprite.position.set(0, 0.045, 0); // Position above the node and arrows
             mesh.add(dehSprite);
             
         } else if (isMaster) {
