@@ -165,13 +165,16 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   color: #22ff22;
   font-family: 'Courier New', monospace;
   font-size: 12px;
-  padding: 10px 20px;
+  padding: 12px 25px;
   text-align: center;
-  border-radius: 4px;
-  box-shadow: 0 0 15px rgba(34, 255, 34, 0.2);
-  pointer-events: none;
-  z-index: 100;
+  border-radius: 6px;
+  box-shadow: 0 0 15px rgba(34, 255, 34, 0.4);
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 1000;
   letter-spacing: 1px;
+  backdrop-filter: blur(5px);
+  transition: opacity 0.3s;
 }
 @keyframes cyberPulse {
   0% { opacity: 0.3; text-shadow: 0 0 5px #0f8; }
@@ -1144,7 +1147,17 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   <div id="botbar">
     <div id="cybercrime-map-label">CYBER-WARFARE</div>
     <div id="datacenter-warfare-label">DATACENTER WARFARE</div>
-    <div id="green-skin-info">🟢 GLOBAL TRADE NETWORK & METALS MARKET TRACKER ACTIVE</div>
+    <div id="green-skin-info" onclick="if(typeof window.showGMarketWallet === 'function') window.showGMarketWallet();">
+      <div style="display:flex; align-items:center;">
+          <div style="display:flex; flex-direction:column; text-align:left; border-right:1px solid rgba(0,255,0,0.4); padding-right:15px; margin-right:15px; line-height:1.2;">
+            <div style="font-size:10px; font-weight:bold; margin-bottom:4px; letter-spacing:1px; font-family:'Orbitron', sans-serif;">G-MARKET PORTFOLIO</div>
+            <div style="font-size:8px; color:#aaa; margin-bottom:2px; font-family:'Orbitron', sans-serif;">TOTAL NET WORTH (MIL)</div>
+            <div id="green-market-networth" style="font-size:16px; font-weight:bold; color:#fff; font-family:'Orbitron', sans-serif;">$0.00 M</div>
+          </div>
+          <div>🟢 GLOBAL TRADE NETWORK & METALS MARKET TRACKER ACTIVE</div>
+          <div id="green-market-holdings" style="display:none;"></div>
+      </div>
+    </div>
     <div id="log">SYSTEM INITIALIZED // AWAITING COMMAND // AURAL UPLINK SECURED</div>
     <div style="position:absolute; right:20px; display:flex; align-items:center; gap:10px; pointer-events:auto; z-index:100;">
       <span style="font-size:9px; color:rgba(255,255,255,0.5); font-family:'Courier New', monospace; letter-spacing:1px; max-width: 280px; text-align: right; line-height: 1.2;">Servers are provided for free so everyone can have fun.<br>Any support helps keep them running!</span>
@@ -6653,28 +6666,11 @@ window.greenMarket = {
 };
 
 function initGreenMarketUI() {
-  if (document.getElementById('green-market-overlay')) return;
-  const container = document.createElement('div');
-  container.id = 'green-market-overlay';
-  container.style.cssText = 'position:absolute; bottom:55px; left:calc(43px + 25vw + 60px); width:136px; background:rgba(0,20,10,0.85); border:1px solid #0f8; border-radius:6px; padding:6px; color:#0f8; font-family:"Orbitron", sans-serif; display:none; pointer-events:auto; cursor:pointer; z-index:1000; box-shadow: 0 0 10px rgba(0,255,136,0.2); backdrop-filter: blur(5px); transition: opacity 0.3s;';
-  container.setAttribute("onclick", "if(typeof window.showGMarketWallet === 'function') window.showGMarketWallet();");
-  container.innerHTML = `
-    <div style="font-size:10px; font-weight:bold; margin-bottom:6px; border-bottom:1px solid #0f8; padding-bottom:3px; letter-spacing:1px;">G-MARKET PORTFOLIO</div>
-    <div style="font-size:8px; color:#aaa; margin-bottom:2px;">TOTAL NET WORTH (MIL)</div>
-    <div id="green-market-networth" style="font-size:16px; font-weight:bold; color:#fff;">$0.00 M</div>
-    <div id="green-market-holdings" style="margin-top:8px; font-size:9px; max-height:37px; overflow-y:auto; pointer-events:auto; padding-right:3px;"></div>
-  `;
-  document.body.appendChild(container);
+  // Deprecated: UI is now merged directly into green-skin-info tracker bar.
 }
 
 function updateGreenMarket() {
   const isGreen = (window.currentSkinIndex === 2);
-  const overlay = document.getElementById('green-market-overlay');
-  if (!overlay && isGreen) initGreenMarketUI();
-  
-  if (overlay) {
-    overlay.style.display = isGreen ? 'block' : 'none';
-  }
 
   let totalWorth = 0;
   let holdingsHtml = '';
