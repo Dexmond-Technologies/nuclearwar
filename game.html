@@ -667,7 +667,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 .dash-bar-fill{height:100%;border-radius:3px;transition:width .5s ease;}
 .dash-val{font-size:10px;min-width:30px;text-align:right;opacity:.8;}
 
-.dash-stat-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:5px 10px;margin-top:2px;}
+.dash-stat-grid{display:grid;grid-template-columns:repeat(4, 1fr);gap:5px 10px;margin-top:2px;}
 .dash-stat{display:flex;flex-direction:column;}
 .dash-stat-label{font-size:8px;letter-spacing:1px;opacity:.5;text-transform:uppercase;}
 .dash-stat-val{font-size:20px;font-weight:bold;letter-spacing:1px;}
@@ -1122,6 +1122,8 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     </div>
     <div style="display:flex;gap:15px;pointer-events:auto;align-items:center; margin-left:auto;">
       <div style="display:flex;gap:12px;align-items:center;">
+        <div id="d3x-multiplier-badge" style="display:none; color:#fa0; font-family:'Courier New', monospace; font-size:11px; font-weight:bold; letter-spacing:1px; text-shadow:0 0 8px rgba(255,170,0,0.8); border:1px solid rgba(255,170,0,0.5); padding:6px 10px; background:rgba(20,10,0,0.8); border-radius:4px; animation: alertFlash 2s infinite alternate;">🔥 2X MULTIPLIER</div>
+        <button id="btn-reinvest-d3x" onclick="reinvestD3X()" style="display:none; padding:6px 12px; background:rgba(0,255,136,0.15); border:1px solid #0f8; color:#0f8; font-family:'Courier New', monospace; font-size:11px; font-weight:bold; cursor:pointer; border-radius:4px; transition:all 0.2s; box-shadow:0 0 10px rgba(0,255,136,0.2);">♻️ REINVEST</button>
         <div id="connected-wallet-display" style="display:none; color:#0af; font-family:'Courier New', monospace; font-size:11px; font-weight:bold; letter-spacing:1px; text-shadow:0 0 8px rgba(0,170,255,0.6); border:1px solid rgba(0,170,255,0.3); padding:6px 10px; background:rgba(0,10,20,0.6);"></div>
         <button class="phase-btn" id="btn-end-turn" style="padding:10px 15px; display:none !important;">END TURN ▶</button>
       </div>
@@ -4733,54 +4735,67 @@ function initGame(playerNames, myIndex) {
   const HUMAN_BLOC = ['USA', 'GBR', 'FRA', 'DEU', 'JPN', 'KOR', 'AUS', 'CAN', 'POL', 'ITA', 'ESP', 'UKR', 'ISR', 'TWN', 'NLD', 'BEL', 'SWE', 'NOR', 'FIN', 'DNK', 'GRC', 'PRT', 'CZE', 'ROU', 'CHE', 'AUT', 'NZL', 'PHL', 'CHL', 'ARG', 'COL'];
   const RAINCLAUDE_BLOC = ['RUS', 'CHN', 'IRN', 'PRK', 'SYR', 'BLR', 'VEN', 'CUB', 'MMR', 'NIC', 'ERI', 'MLI', 'BFA', 'NER', 'CAF', 'ZIM', 'SDN'];
 
-  const GLOBAL_TROOP_POOL = 1000; // Base units (multiplied by 10k in UI to represent 10,000,000 global starting troops roughly)
+  const EXACT_BASE_TROOPS_PER_FACTION = 50000; // Multiplied by 10k in UI: 50,000 * 10,000 = 500,000,000 troops per side
 
-  isos.forEach((iso) => {
-    let owner = -1; // Default to neutral (Non-aligned / Global South)
-    
-    // Assign 80% chance of sticking to real blocs, 20% friction/rebellions for gameplay variety, unless it's a superpower
-    const isSuperpower = ['USA', 'RUS', 'CHN', 'UKR', 'IRN', 'GBR', 'FRA'].includes(iso);
-    if (HUMAN_BLOC.includes(iso) && (isSuperpower || Math.random() < 0.8)) owner = 0;
-    else if (RAINCLAUDE_BLOC.includes(iso) && (isSuperpower || Math.random() < 0.8)) owner = 1;
-    
-    // If neutral, randomly assign to a player 70% of the time to ensure they are NOT GREYED OUT
-    if (owner === -1 && Math.random() < 0.70) {
-      owner = Math.random() > 0.5 ? 0 : 1;
-    }
+  // Collect all isos
+  let allIsos = [...isos];
+  // Calculate how many countries each faction should roughly get (Half of the world)
+  const targetTerritoriesPerFaction = Math.floor(allIsos.length / 2); // Should be 101 each
+  const troopsPerCountry = Math.floor(EXACT_BASE_TROOPS_PER_FACTION / targetTerritoriesPerFaction); // ~495 base troops
 
-    if (iso.startsWith('USA_V')) {
-      owner = 0;
-    } else if (iso.startsWith('CHN_V')) {
-      owner = 1;
-    }
+  // We assign sequentially to ensure EXACT 50/50 split
+  let humanTerritoriesLeft = targetTerritoriesPerFaction;
+  let rainclaudeTerritoriesLeft = targetTerritoriesPerFaction;
+
+  // First allocate the hardcoded blocs
+  allIsos.forEach(iso => {
     const stats = getCountryStat(iso);
-    
-    // Scale mil strength (1-100) into game troops (1-15)
-    const milTroops = Math.round(1 + (stats.mil / 100) * 14);
-    const initTroops = owner === -1 ? Math.max(1, Math.round(milTroops * 0.4)) : milTroops;
-
-    // Income per turn derived from GDP (log scale so small countries still matter)
     const income = Math.max(1, Math.round(Math.log10(stats.gdp + 1) * 3));
     
+    let owner = -1;
+    if (HUMAN_BLOC.includes(iso) && humanTerritoriesLeft > 0) {
+      owner = 0;
+      humanTerritoriesLeft--;
+    } else if (RAINCLAUDE_BLOC.includes(iso) && rainclaudeTerritoriesLeft > 0) {
+      owner = 1;
+      rainclaudeTerritoriesLeft--;
+    }
+
     GS.countries[iso] = {
-      owner, troops: initTroops, nuked: 0,
+      owner, troops: troopsPerCountry, nuked: 0,
       name: countryData[iso].name, lat: countryData[iso].lat, lon: countryData[iso].lon,
       gdp: stats.gdp, mil: stats.mil, pop: stats.pop, income,
-      infrastructure: 3, // 0-5 scale, starts at 3
-      airwings: 0, ships: 0,
+      infrastructure: 3, airwings: 0, ships: 0,
     };
   });
 
-  // Pick exactly 15 neutral countries and make them Illuminati (owner = 2)
-  const neutralCountries = Object.keys(GS.countries).filter(iso => GS.countries[iso].owner === -1);
-  for (let i = neutralCountries.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [neutralCountries[i], neutralCountries[j]] = [neutralCountries[j], neutralCountries[i]];
-  }
-  const illuminatiCount = Math.min(15, neutralCountries.length);
-  for (let i = 0; i < illuminatiCount; i++) {
-    GS.countries[neutralCountries[i]].owner = 2;
-  }
+  // Now allocate the remaining neutral countries alternately between Human (0) and Rainclaude (1)
+  let nextAssignee = 0;
+  Object.keys(GS.countries).forEach(iso => {
+    if (GS.countries[iso].owner === -1) {
+      if (nextAssignee === 0 && humanTerritoriesLeft > 0) {
+        GS.countries[iso].owner = 0;
+        humanTerritoriesLeft--;
+        nextAssignee = 1;
+      } else if (nextAssignee === 1 && rainclaudeTerritoriesLeft > 0) {
+        GS.countries[iso].owner = 1;
+        rainclaudeTerritoriesLeft--;
+        nextAssignee = 0;
+      } else if (humanTerritoriesLeft > 0) {
+        GS.countries[iso].owner = 0;
+        humanTerritoriesLeft--;
+      } else if (rainclaudeTerritoriesLeft > 0) {
+        GS.countries[iso].owner = 1;
+        rainclaudeTerritoriesLeft--;
+      } else {
+        // Any leftovers go to 2 (Illuminati neutral, if odd numbering)
+        GS.countries[iso].owner = 2;
+      }
+    }
+  });
+
+  // In this highly competitive balanced restart, we omit the 'Illuminati' completely out of the core list
+  // so that Humanity and Rainclaude truly fight a pure 1v1 battle of 500 million vs 500 million.
 
   // Count troops for reinforcement baseline
   GS.players.forEach((_,pi) => {
@@ -7222,6 +7237,12 @@ function tryNuke(targetIso) {
        callsign: window.myCallsign || document.getElementById('player-name')?.value || 'Commander',
        damage: nukeStr
      }));
+     // Deal massive damage to Rainclaude's Data Core (Nuke Strength * 15)
+     ws.send(JSON.stringify({
+       type: 'human_combat_support',
+       target: 'claude',
+       amount: nukeStr * 15
+     }));
   }
   
   def.troops = Math.max(0, def.troops - nukeStr);
@@ -7430,6 +7451,12 @@ function executeAttackPreset(type) {
          type: 'record_attack',
          callsign: window.myCallsign || document.getElementById('player-name')?.value || 'Commander',
          damage: dl
+       }));
+       // Deal structural damage to Rainclaude's Data Core (Troops Killed * 5)
+       ws.send(JSON.stringify({
+         type: 'human_combat_support',
+         target: 'claude',
+         amount: dl * 5
        }));
     }
     
@@ -8795,7 +8822,16 @@ function initWS() {
           if (typeof updateD3XDisplay === 'function') updateD3XDisplay();
         }
         break;
-        
+      case 'd3x_multiplier_active':
+        const multBadge = document.getElementById('d3x-multiplier-badge');
+        if (multBadge) multBadge.style.display = 'block';
+        break;
+      case 'reinvest_success':
+        if (typeof setLog === 'function') setLog(`♻️ REINVEST SUCCESS: Locked ${msg.amount} D3X for 7 Days.`);
+        break;
+      case 'reinvest_failed':
+        if (typeof setLog === 'function') setLog(`⚠️ REINVEST FAILED: ${msg.reason}`);
+        break;
       case 'leaderboard_data':
         const container = document.getElementById('leaderboard-content');
         if (!container) break;
@@ -9053,10 +9089,12 @@ function joinGlobalWar() {
   }
   
   const walletDisp = document.getElementById('connected-wallet-display');
+  const reinvestBtn = document.getElementById('btn-reinvest-d3x');
   if (walletDisp && window.pendingSolanaAddress) {
     const addr = window.pendingSolanaAddress;
     walletDisp.innerHTML = '🛡️ ' + addr.substring(0,4) + '...' + addr.substring(addr.length-4);
     walletDisp.style.display = 'block';
+    if(reinvestBtn) reinvestBtn.style.display = 'block';
   }
   
   initWS();
@@ -9085,6 +9123,15 @@ function joinGlobalWar() {
     if (window.SKINS && window.SKINS[window.currentSkinIndex] && window.SKINS[window.currentSkinIndex].cleanGlobe) return;
     spawnSquadron();
   }, 7000); // Every 7 seconds
+}
+
+function reinvestD3X() {
+    if (ws && ws.readyState === WebSocket.OPEN && myName) {
+        ws.send(JSON.stringify({ type: 'reinvest_earnings', callsign: myName }));
+        if (typeof setLog === 'function') setLog(`🔄 Initiating D3X Reinvestment Protocol...`);
+    } else {
+        if (typeof setLog === 'function') setLog(`⚠️ NETWORK ERROR: Cannot reinvest right now.`);
+    }
 }
 
 function closeOnboarding() {

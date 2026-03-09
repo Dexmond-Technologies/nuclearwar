@@ -452,6 +452,20 @@ function initWebSockets() {
     totalPlayers: connectedClients.size
   }, ws);
 
+  // Send initial AI Health State directly from DB so the HUD syncs immediately
+  if (pgPool) {
+    pgPool.query("SELECT gemini_hp, claude_hp FROM ai_combat_state WHERE id = 1").then(res => {
+      if (res.rows.length > 0) {
+        ws.send(JSON.stringify({
+          type: 'ai_combat_log',
+          log: 'Establishing secure link to AI datacenters...',
+          gemini_hp: res.rows[0].gemini_hp,
+          claude_hp: res.rows[0].claude_hp
+        }));
+      }
+    }).catch(console.warn);
+  }
+
   ws.on('message', async raw => {
     let msg;
     try { msg = JSON.parse(raw); } catch { return; }
@@ -799,6 +813,53 @@ function initWebSockets() {
         break;
       }
 
+      case 'reinvest_earnings': {
+        const callsign = msg.callsign;
+        if (!pgPool || !callsign || !globalGameState) break;
+
+        try {
+            const res = await pgPool.query(`SELECT pending_d3x FROM commanders WHERE callsign = $1`, [callsign]);
+            if (res.rows.length > 0) {
+                const pending = res.rows[0].pending_d3x;
+                if (pending >= 10) { // arbitrary minimum
+                    // Deduct from DB
+                    await pgPool.query(`UPDATE commanders SET pending_d3x = 0 WHERE callsign = $1`, [callsign]);
+                    
+                    if (!globalGameState.stakes) globalGameState.stakes = [];
+                    
+                    // 7-day lock, 10% yield
+                    const amount = pending;
+                    const finalYield = amount * 0.10; 
+                    const unlockTime = Date.now() + (7 * 24 * 60 * 60 * 1000); 
+
+                    globalGameState.stakes.push({
+                        id: Date.now() + Math.random().toString(36).substr(2, 9),
+                        callsign: callsign,
+                        plan: 'reinvest',
+                        amountStaked: amount,
+                        amountReturn: amount + finalYield,
+                        unlockAt: unlockTime
+                    });
+                    
+                    saveGameState(globalGameState);
+                    console.log(`[REINVEST] Commander ${callsign} reinvested ${amount} D3X.`);
+                    
+                    // Auto-refresh stakes
+                    ws.send(JSON.stringify({ 
+                        type: 'active_stakes', 
+                        stakes: globalGameState.stakes.filter(s => s.callsign === callsign) 
+                    }));
+                    ws.send(JSON.stringify({ type: 'reinvest_success', amount: amount }));
+                } else {
+                    ws.send(JSON.stringify({ type: 'reinvest_failed', reason: 'Minimum 10 D3X to reinvest' }));
+                }
+            }
+        } catch (err) {
+            console.error('DB Error on reinvest_earnings:', err.message);
+        }
+        break;
+      }
+
       case 'get_leaderboard': {
         if (pgPool) {
           try {
@@ -947,13 +1008,31 @@ async function checkD3XRewards() {
       if ((now - client.connectedAt) >= 600000 /* 10 mins */) {
         try {
            client.connectedAt = now; // reset session timer for next 10 mins
-           await pgPool.query(`UPDATE commanders SET pending_d3x = pending_d3x + 5 WHERE callsign = $1`, [client.name]);
-           console.log(`[REWARD] Commander ${client.name} played 10 mins. +5 D3X pending.`);
+           
+           // Check for active stakes giving the 2x Multiplier (>= 10,000 staked)
+           let multiplier = 1;
+           if (globalGameState && globalGameState.stakes) {
+               const validStake = globalGameState.stakes.find(s => 
+                   s.callsign === client.name && s.amountStaked >= 10000 && now < s.unlockAt
+               );
+               if (validStake) {
+                   multiplier = 2;
+               }
+           }
+           
+           const amountEarned = 5 * multiplier;
+
+           await pgPool.query(`UPDATE commanders SET pending_d3x = pending_d3x + $2 WHERE callsign = $1`, [client.name, amountEarned]);
+           console.log(`[REWARD] Commander ${client.name} played 10 mins. +${amountEarned} D3X pending (Multiplier: ${multiplier}x).`);
            client.ws.send(JSON.stringify({ 
                type: 'd3x_reward', 
-               amount: 5,
-               message: '5 D3X Accumulated (10 min session)'
+               amount: amountEarned,
+               message: `${amountEarned} D3X Accumulated (10 min session)`
            }));
+           
+           if (multiplier > 1) {
+               client.ws.send(JSON.stringify({ type: 'd3x_multiplier_active' }));
+           }
         } catch(e) {
            console.error('⚠ Error updating pending D3X:', e.message);
         }
@@ -1301,7 +1380,7 @@ async function startServer() {
       await pgPool.query(`
         CREATE TABLE IF NOT EXISTS ai_combat_state (
           id INTEGER PRIMARY KEY DEFAULT 1,
-          gemini_hp INTEGER DEFAULT 10000,
+          gemini_hp INTEGER DEFAULT 5000,
           claude_hp INTEGER DEFAULT 10000,
           current_turn VARCHAR(20) DEFAULT 'gemini',
           last_log TEXT DEFAULT 'Commencing AI database operations...',
@@ -1343,6 +1422,7 @@ async function startServer() {
       }
 
       await pgPool.query(`INSERT INTO ai_combat_state (id) VALUES (1) ON CONFLICT (id) DO NOTHING`);
+      await pgPool.query(`UPDATE ai_combat_state SET gemini_hp = 5000 WHERE id = 1 AND gemini_hp > 5000`);
       
       console.log('☢ PostgreSQL connected — game_state and commanders tables ready');
       const state = await loadGameState();
