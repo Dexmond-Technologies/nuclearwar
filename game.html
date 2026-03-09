@@ -3909,8 +3909,8 @@ function initDatacenters() {
             // STAKING TOWER ADDITION FOR CYBER SKIN
             // Generate ONE massive Staking Tower specifically next to the D3X Exchange object.
             if (isD3XExchange) {
-                const towerLatRad = (dc.lat + 22) * Math.PI / 180; // High offset to prevent clipping with scale 7 Exchange
-                const towerLonRad = -(dc.lon - 22) * Math.PI / 180;
+                const towerLatRad = (dc.lat + 44) * Math.PI / 180; // High offset to prevent clipping with scale 7 Exchange
+                const towerLonRad = -(dc.lon - 44) * Math.PI / 180;
                 const towerGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.35, 32);
                 towerGeo.translate(0, 0.175, 0); // Pivot at bottom
                 const towerMat = new THREE.MeshPhongMaterial({ color: 0xff0033, shininess: 100, specular: 0xffffff });
