@@ -3869,7 +3869,7 @@ function initDatacenters() {
                 const spriteMat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
                 const sprite = new THREE.Sprite(spriteMat);
                 sprite.scale.set(0.06, 0.03, 1);
-                sprite.position.set(0, 0.07, 0); // Position above the node
+                sprite.position.set(0, 0.035, 0); // Position above the node (pulled closer)
                 mesh.add(sprite);
             }
 
@@ -3922,7 +3922,7 @@ function initDatacenters() {
                     r * Math.cos(towerLatRad) * Math.sin(towerLonRad)
                 );
                 towerMesh.lookAt(new THREE.Vector3(0,0,0));
-                towerMesh.rotateX(Math.PI/2); // Align cylinder outwards
+                towerMesh.rotateX(-Math.PI/2); // Align cylinder outwards to prevent clipping
 
                 // Big STAKING Text Sprite
                 const tCanvas = document.createElement('canvas');
