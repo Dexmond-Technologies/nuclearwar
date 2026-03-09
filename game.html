@@ -3804,6 +3804,27 @@ function initDatacenters() {
                 });
             }
 
+            if (protocolName) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 256;
+                canvas.height = 128;
+                const ctx = canvas.getContext('2d');
+                ctx.font = 'bold 50px "Orbitron", sans-serif';
+                ctx.fillStyle = '#ffffff';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                // Use 'ETH' for 'EVM' display
+                let displayName = protocolName === 'EVM' ? 'ETH' : protocolName;
+                ctx.fillText(displayName, 128, 64);
+                
+                const tex = new THREE.CanvasTexture(canvas);
+                const spriteMat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
+                const sprite = new THREE.Sprite(spriteMat);
+                sprite.scale.set(0.12, 0.06, 1);
+                sprite.position.set(0, 0.08, 0); // Position above the node
+                mesh.add(sprite);
+            }
+
             // Add an inner glowing aura
             const auraGeo = new THREE.SphereGeometry(0.035, 32, 32);
             const auraMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending });
