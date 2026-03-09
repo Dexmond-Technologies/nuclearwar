@@ -1,0 +1,203 @@
+use anchor_lang::prelude::*;
+use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
+
+// Determine your program ID here
+declare_id!("D3xStake11111111111111111111111111111111111");
+
+const SECONDS_IN_YEAR: u64 = 31_536_000;
+const APY_BPS: u64 = 1200; // 12% APY (in basis points)
+
+#[program]
+pub mod d3x_staking {
+    use super::*;
+
+    pub fn initialize(ctx: Context<Initialize>, _bump: u8) -> Result<()> {
+        let vault = &mut ctx.accounts.vault_state;
+        vault.reward_mint = ctx.accounts.reward_mint.key();
+        vault.total_staked = 0;
+        vault.bump = _bump;
+        Ok(())
+    }
+
+    pub fn stake(ctx: Context<Stake>, amount: u64) -> Result<()> {
+        let user_info = &mut ctx.accounts.user_info;
+        let clock = Clock::get()?;
+
+        // If the user already has a stake, calculate their pending rewards first
+        if user_info.amount_staked > 0 {
+            let time_elapsed = clock.unix_timestamp.saturating_sub(user_info.last_stake_timestamp);
+            let pending_reward = calculate_reward(user_info.amount_staked, time_elapsed);
+            user_info.reward_debt = user_info.reward_debt.checked_add(pending_reward).unwrap();
+        }
+
+        // Transfer tokens from User to Vault
+        let cpi_accounts = Transfer {
+            from: ctx.accounts.user_token_account.to_account_info(),
+            to: ctx.accounts.vault_token_account.to_account_info(),
+            authority: ctx.accounts.user.to_account_info(),
+        };
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
+        token::transfer(cpi_ctx, amount)?;
+
+        // Update State
+        user_info.amount_staked = user_info.amount_staked.checked_add(amount).unwrap();
+        user_info.last_stake_timestamp = clock.unix_timestamp;
+
+        let vault = &mut ctx.accounts.vault_state;
+        vault.total_staked = vault.total_staked.checked_add(amount).unwrap();
+
+        Ok(())
+    }
+
+    pub fn unstake(ctx: Context<Unstake>) -> Result<()> {
+        let user_info = &mut ctx.accounts.user_info;
+        let clock = Clock::get()?;
+
+        require!(user_info.amount_staked > 0, StakingError::NoActiveStake);
+
+        // Calculate final rewards
+        let time_elapsed = clock.unix_timestamp.saturating_sub(user_info.last_stake_timestamp);
+        let pending_reward = calculate_reward(user_info.amount_staked, time_elapsed);
+        let total_reward = user_info.reward_debt.checked_add(pending_reward).unwrap();
+
+        let total_payout = user_info.amount_staked.checked_add(total_reward).unwrap();
+
+        // Signer seeds for the vault PDA
+        let bump = ctx.accounts.vault_state.bump;
+        let seeds = &["vault".as_bytes(), &[bump]];
+        let signer = &[&seeds[..]];
+
+        // Transfer tokens from Vault back to User
+        let cpi_accounts = Transfer {
+            from: ctx.accounts.vault_token_account.to_account_info(),
+            to: ctx.accounts.user_token_account.to_account_info(),
+            authority: ctx.accounts.vault_state.to_account_info(),
+        };
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
+        token::transfer(cpi_ctx, total_payout)?;
+
+        // Update Global Vault State
+        let vault = &mut ctx.accounts.vault_state;
+        vault.total_staked = vault.total_staked.checked_sub(user_info.amount_staked).unwrap();
+
+        // Burn the User Info Account State
+        user_info.amount_staked = 0;
+        user_info.reward_debt = 0;
+        user_info.last_stake_timestamp = 0;
+
+        Ok(())
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Mathematical Helpers
+// ----------------------------------------------------------------------------
+fn calculate_reward(amount_staked: u64, time_elapsed_seconds: i64) -> u64 {
+    if time_elapsed_seconds <= 0 {
+        return 0;
+    }
+    // simple interest: Reward = Principal * (12% / SecondsInYear) * SecondsElapsed
+    // BPS = 1200 / 10000 = 12%
+    let annual_reward = amount_staked.checked_mul(APY_BPS).unwrap() / 10000;
+    let reward_per_second = annual_reward as f64 / SECONDS_IN_YEAR as f64;
+    
+    (reward_per_second * time_elapsed_seconds as f64) as u64
+}
+
+// ----------------------------------------------------------------------------
+// Account Contexts
+// ----------------------------------------------------------------------------
+
+#[derive(Accounts)]
+pub struct Initialize<'info> {
+    #[account(
+        init, 
+        payer = authority, 
+        space = 8 + 32 + 8 + 1, 
+        seeds = [b"vault"], 
+        bump
+    )]
+    pub vault_state: Account<'info, VaultState>,
+    pub reward_mint: Account<'info, Mint>,
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct Stake<'info> {
+    #[account(mut)]
+    pub user: Signer<'info>,
+    
+    #[account(
+        init_if_needed,
+        payer = user,
+        space = 8 + 8 + 8 + 8,
+        seeds = [b"user_info", user.key().as_ref()],
+        bump
+    )]
+    pub user_info: Account<'info, UserInfo>,
+
+    #[account(mut, seeds = [b"vault"], bump = vault_state.bump)]
+    pub vault_state: Account<'info, VaultState>,
+
+    #[account(mut)]
+    pub user_token_account: Account<'info, TokenAccount>,
+    
+    #[account(mut)]
+    pub vault_token_account: Account<'info, TokenAccount>,
+    
+    pub token_program: Program<'info, Token>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct Unstake<'info> {
+    #[account(mut)]
+    pub user: Signer<'info>,
+    
+    #[account(
+        mut,
+        seeds = [b"user_info", user.key().as_ref()],
+        bump,
+        close = user // Return rent to user on close
+    )]
+    pub user_info: Account<'info, UserInfo>,
+
+    #[account(mut, seeds = [b"vault"], bump = vault_state.bump)]
+    pub vault_state: Account<'info, VaultState>,
+
+    #[account(mut)]
+    pub user_token_account: Account<'info, TokenAccount>,
+    
+    #[account(mut)]
+    pub vault_token_account: Account<'info, TokenAccount>,
+    
+    pub token_program: Program<'info, Token>,
+}
+
+// ----------------------------------------------------------------------------
+// State Encodings
+// ----------------------------------------------------------------------------
+
+#[account]
+pub struct VaultState {
+    pub reward_mint: Pubkey,
+    pub total_staked: u64,
+    pub bump: u8,
+}
+
+#[account]
+pub struct UserInfo {
+    pub amount_staked: u64,
+    pub reward_debt: u64,
+    pub last_stake_timestamp: i64,
+}
+
+#[error_code]
+pub enum StakingError {
+    #[msg("No active stake found to withdraw.")]
+    NoActiveStake,
+}
