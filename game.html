@@ -5152,7 +5152,8 @@ window.showCmdHelpModal = function() {
   
   const idx = window.currentSkinIndex !== undefined ? window.currentSkinIndex : 0;
   if (idx === 4) {
-      modal.style.width = '960px';
+      modal.style.width = '1104px'; // 15% wider than the previous 960px
+      modal.style.height = '60vh';  // 25% shorter than original ~80vh average
   }
   
   if (idx === 0) {
