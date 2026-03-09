@@ -5185,12 +5185,13 @@ window.showCmdHelpModal = function() {
     contentBox.style.padding = '0'; // Remove default padding for this specific layout
     contentBox.style.display = 'flex';
     contentBox.style.flexDirection = 'column';
+    contentBox.style.overflow = 'hidden'; // Force hide the scrollbar
 
     contentBox.innerHTML = `
-      <div style="padding: 20px 40px 0 40px; font-size:32px; color:#00dcff; font-weight:bold; margin-bottom:10px; text-transform:uppercase; border-bottom:1px dashed rgba(0,220,255,0.4); padding-bottom:10px; letter-spacing:2px;">` + skinSpecificTitle + `</div>
-      <div style="flex-grow: 1; margin: 10px 40px 20px 40px; background:rgba(255,51,102,0.05); padding:20px 40px; border-radius:10px; border:1px solid rgba(255,51,102,0.3); text-align:center; display: flex; flex-direction: column; justify-content: center;">
-         <div style="font-size:24px; color:#ff3366; margin-bottom:20px; letter-spacing:4px; font-weight:bold; text-transform:uppercase;">[ THE CORE OF THE CONFLICT ]</div>
-         <div style="font-size:18px; color:#ff88aa; max-width:850px; margin:0 auto; line-height:1.8;">
+      <div style="padding: 15px 40px 0 40px; font-size:26px; color:#00dcff; font-weight:bold; margin-bottom:5px; text-transform:uppercase; border-bottom:1px dashed rgba(0,220,255,0.4); padding-bottom:10px; letter-spacing:2px;">` + skinSpecificTitle + `</div>
+      <div style="flex-grow: 1; margin: 10px 40px 15px 40px; background:rgba(255,51,102,0.05); padding:15px 30px; border-radius:10px; border:1px solid rgba(255,51,102,0.3); text-align:center; display: flex; flex-direction: column; justify-content: center;">
+         <div style="font-size:20px; color:#ff3366; margin-bottom:15px; letter-spacing:4px; font-weight:bold; text-transform:uppercase;">[ THE CORE OF THE CONFLICT ]</div>
+         <div style="font-size:16px; color:#ff88aa; max-width:850px; margin:0 auto; line-height:1.6;">
            You have reached the core of what this project was built for.<br><br>This is an epic, continuous battle. What you are witnessing is <b>the real war between two AI entities: Rainclaude and Gemini</b>.<br><br>Their neural networks clashing across the globe determines the ultimate fate of all digital infrastructure and power grids worldwide. Observe the spectacle as lines of code tear across the planetary map. Every explosion, every data breach is a calculated move in an eternal game of 4D chess.<br><br><span style="color:#00dcff;"><b>Manual override is fully disabled.</b> You cannot intervene between the AIs. Simply sit back and enjoy the show.</span>
          </div>
       </div>
