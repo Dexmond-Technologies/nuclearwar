@@ -3906,58 +3906,57 @@ function initDatacenters() {
             
             window.datacentersGroup.add(mesh);
 
-            // STAKING TOWER ADDITION FOR CYBER SKIN (Added on supported chains)
-            // Generate a Staking Tower right beside specific important nodes or all Datacenters?
-            // "on the cyber skin... build another object... staking tower... red cylindrical... write STAKING"
-            // Let's spawn them beside all Datacenters to make the Cyber Skin heavily staking focused, or just the top level ones.
-            // Spawning beside all nodes.
-            const towerLatRad = (dc.lat + 1.5) * Math.PI / 180; // Offset slightly
-            const towerLonRad = -(dc.lon + 1.5) * Math.PI / 180;
-            const towerGeo = new THREE.CylinderGeometry(0.015, 0.015, 0.08, 16);
-            towerGeo.translate(0, 0.04, 0); // Pivot at bottom
-            const towerMat = new THREE.MeshPhongMaterial({ color: 0xff0033, shininess: 100, specular: 0xffffff });
-            const towerMesh = new THREE.Mesh(towerGeo, towerMat);
-            
-            towerMesh.position.set(
-                r * Math.cos(towerLatRad) * Math.cos(towerLonRad),
-                r * Math.sin(towerLatRad),
-                r * Math.cos(towerLatRad) * Math.sin(towerLonRad)
-            );
-            towerMesh.lookAt(new THREE.Vector3(0,0,0));
-            towerMesh.rotateX(Math.PI/2); // Align cylinder outwards
+            // STAKING TOWER ADDITION FOR CYBER SKIN
+            // Generate ONE massive Staking Tower specifically next to the D3X Exchange object.
+            if (isD3XExchange) {
+                const towerLatRad = (dc.lat + 12) * Math.PI / 180; // High offset to prevent clipping with scale 7 Exchange
+                const towerLonRad = -(dc.lon - 12) * Math.PI / 180;
+                const towerGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.35, 32);
+                towerGeo.translate(0, 0.175, 0); // Pivot at bottom
+                const towerMat = new THREE.MeshPhongMaterial({ color: 0xff0033, shininess: 100, specular: 0xffffff });
+                const towerMesh = new THREE.Mesh(towerGeo, towerMat);
+                
+                towerMesh.position.set(
+                    r * Math.cos(towerLatRad) * Math.cos(towerLonRad),
+                    r * Math.sin(towerLatRad),
+                    r * Math.cos(towerLatRad) * Math.sin(towerLonRad)
+                );
+                towerMesh.lookAt(new THREE.Vector3(0,0,0));
+                towerMesh.rotateX(Math.PI/2); // Align cylinder outwards
 
-            // STAKING Text Sprite
-            const tCanvas = document.createElement('canvas');
-            tCanvas.width = 256;
-            tCanvas.height = 64;
-            const tCtx = tCanvas.getContext('2d');
-            tCtx.font = 'bold 30px "Orbitron", sans-serif';
-            tCtx.fillStyle = '#ffffff';
-            tCtx.textAlign = 'center';
-            tCtx.textBaseline = 'middle';
-            tCtx.fillText('STAKING', 128, 32);
-            
-            const tTex = new THREE.CanvasTexture(tCanvas);
-            const tSpriteMat = new THREE.SpriteMaterial({ map: tTex, transparent: true, depthTest: false });
-            const tSprite = new THREE.Sprite(tSpriteMat);
-            tSprite.scale.set(0.08, 0.02, 1);
-            tSprite.position.set(0, 0.12, 0); 
-            towerMesh.add(tSprite);
+                // Big STAKING Text Sprite
+                const tCanvas = document.createElement('canvas');
+                tCanvas.width = 512;
+                tCanvas.height = 128;
+                const tCtx = tCanvas.getContext('2d');
+                tCtx.font = 'bold 80px "Orbitron", sans-serif';
+                tCtx.fillStyle = '#ffffff';
+                tCtx.textAlign = 'center';
+                tCtx.textBaseline = 'middle';
+                tCtx.fillText('STAKING', 256, 64);
+                
+                const tTex = new THREE.CanvasTexture(tCanvas);
+                const tSpriteMat = new THREE.SpriteMaterial({ map: tTex, transparent: true, depthTest: false });
+                const tSprite = new THREE.Sprite(tSpriteMat);
+                tSprite.scale.set(0.3, 0.075, 1);
+                tSprite.position.set(0, 0.45, 0); 
+                towerMesh.add(tSprite);
 
-            // Aura for tower
-            const tAuraGeo = new THREE.SphereGeometry(0.025, 16, 16);
-            const tAuraMat = new THREE.MeshBasicMaterial({ color: 0xff0033, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending });
-            const tAura = new THREE.Mesh(tAuraGeo, tAuraMat);
-            towerMesh.add(tAura);
+                // Big Aura for tower
+                const tAuraGeo = new THREE.SphereGeometry(0.08, 32, 32);
+                const tAuraMat = new THREE.MeshBasicMaterial({ color: 0xff0033, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending });
+                const tAura = new THREE.Mesh(tAuraGeo, tAuraMat);
+                tAura.position.set(0, 0.175, 0);
+                towerMesh.add(tAura);
 
-            towerMesh.userData = {
-                type: 'staking_tower',
-                name: "STAKING TOWER: " + dc.name.toUpperCase(),
-                protocol: protocolName || 'D3X CORE NETWORK'
-            };
-            
-            window.datacentersGroup.add(towerMesh);
-            window.datacentersGroup.add(towerMesh);
+                towerMesh.userData = {
+                    type: 'staking_tower',
+                    name: "D3X STAKING TOWER",
+                    protocol: protocolName || 'D3X CORE NETWORK'
+                };
+                
+                window.datacentersGroup.add(towerMesh);
+            }
         });
     }
 
