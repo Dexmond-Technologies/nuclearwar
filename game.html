@@ -159,7 +159,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   position: absolute;
   bottom: 56px;
   left: 50%;
-  transform: translateX(calc(-50% + 10px));
+  transform: translateX(-50%) scale(0.8);
   background: rgba(0, 30, 0, 0.85);
   border: 1px solid #22ff22;
   color: #22ff22;
@@ -1146,7 +1146,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   
   <div id="botbar">
     <div id="cybercrime-map-label">CYBER-WARFARE</div>
-    <div id="datacenter-warfare-label">DATACENTER WARFARE</div>
+    <div id="datacenter-warfare-label">CITADEL BANK TOKENIZED ASSETS AND BRIDGES</div>
     <div id="green-skin-info" onclick="if(typeof window.showGMarketWallet === 'function') window.showGMarketWallet();">
       <div style="display:flex; align-items:center;">
           <div style="display:flex; flex-direction:column; text-align:left; border-right:1px solid rgba(0,255,0,0.4); padding-right:15px; margin-right:15px; line-height:1.2;">
@@ -4986,7 +4986,26 @@ async function initBoats() {
   try {
     const res = await fetch('/api/boats');
     const data = await res.json();
-    if (!data || data.length === 0) return;
+    let validBoats = [];
+    
+    // We only need an artificial count here if API changes to return 0,
+    // but the API is returning 50 random boats.
+    // Instead of taking literal API coords, we will re-roll them locally 
+    // to strictly enforce ocean-only spawning, as requested by user.
+    for(let b=0; b < data.length; b++) {
+       let oceanLat, oceanLon;
+       for (let attempt = 0; attempt < 100; attempt++) {
+           oceanLat = Math.random() * 140 - 70; // Stay away from extreme poles
+           oceanLon = Math.random() * 360 - 180;
+           // If getCountryAt returns null, we are NOT in a country polygon (we are in the ocean)
+           if (typeof getCountryAt === 'function' && getCountryAt(oceanLat, oceanLon) === null) {
+               validBoats.push({ ...data[b], lat: oceanLat, lon: oceanLon });
+               break;
+           }
+       }
+    }
+    
+    if (validBoats.length === 0) return;
 
     // Create a 2D boat shape
     const shape = new THREE.Shape();
@@ -5002,9 +5021,9 @@ async function initBoats() {
     geo.scale(0.06, 0.06, 0.06);
     const mat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
 
-    const rainclaudeCount = Math.floor(data.length * 0.3);
+    const rainclaudeCount = Math.floor(validBoats.length * 0.3);
 
-    data.forEach((boat, index) => {
+    validBoats.forEach((boat, index) => {
       const isRainclaude = index < rainclaudeCount;
       const dotColor = isRainclaude ? 0xff2222 : 0x00aaff;
       

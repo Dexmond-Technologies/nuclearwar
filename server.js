@@ -255,7 +255,7 @@ const server = http.createServer((req, res) => {
     const fetchPromises = [];
     for (let i = 1; i <= 8; i++) {
       fetchPromises.push(
-        fetch(`https://openwebcamdb.com/api/v1/webcams?page=${i}&per_page=100`, {
+        fetch(`https://openwebcamdb.com/api/v1/webcams?page=${i}&per_page=100&status=active`, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
