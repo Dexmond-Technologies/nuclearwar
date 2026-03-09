@@ -3742,7 +3742,7 @@ function initDatacenters() {
         let iconUrl = null;
         let protocolName = null;
         if (isD3XExchange) {
-            mesh.scale.set(10, 10, 10); // 10x bigger (Twice the size of Master)
+            mesh.scale.set(7, 7, 7); // 30% smaller than previous 10x scale
             const auraGeo = new THREE.SphereGeometry(0.045, 32, 32);
             const auraMat = new THREE.MeshBasicMaterial({ color: 0x39ff14, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
             const aura = new THREE.Mesh(auraGeo, auraMat);
