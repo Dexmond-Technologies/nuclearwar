@@ -1166,7 +1166,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   </div>
 
   <!-- AI FUZZ WARNING OVERLAY -->
-  <div id="ai-fuzz-warning" style="display:none; position:absolute; bottom:calc(15% - 110px); left:50%; transform:translate(-50%, -50%); padding:20px 40px; background:rgba(255, 0, 0, 0.80); color:#fff; font-family:'Courier New', monospace; font-size:24px; font-weight:bold; letter-spacing:4px; text-align:center; box-shadow:0 0 40px rgba(255, 0, 0, 0.8); border:2px solid #ff4444; z-index:99999; text-shadow:2px 2px 0px #000; pointer-events:none;">
+  <div id="ai-fuzz-warning" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); padding:20px 40px; background:rgba(255, 0, 0, 0.80); color:#fff; font-family:'Courier New', monospace; font-size:24px; font-weight:bold; letter-spacing:4px; text-align:center; box-shadow:0 0 40px rgba(255, 0, 0, 0.8); border:2px solid #ff4444; z-index:99999; text-shadow:2px 2px 0px #000; pointer-events:none;">
     ⚠️ HUMAN AI FUZZED COMS - STANDBY
   </div>
 
@@ -1175,7 +1175,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 
 
     <!-- Right Panel: Datacenter Action Menu -->
-    <div id="datacenter-action-panel" style="display:none; position:absolute; top:190px; right:220px; width:280px; background:rgba(0,15,30,0.95); border:1px solid #00dcff; border-radius:4px; box-shadow:0 0 20px rgba(0,220,255,0.25); padding:15px; pointer-events:auto; backdrop-filter:blur(5px);">
+    <div id="datacenter-action-panel" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:1120px; background:rgba(0,15,30,0.95); border:1px solid #00dcff; border-radius:4px; box-shadow:0 0 20px rgba(0,220,255,0.25); padding:15px; pointer-events:auto; backdrop-filter:blur(5px);">
       <button onclick="document.getElementById('datacenter-action-panel').style.display='none'; window.selectedDatacenter=null;" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#f55;font-size:16px;cursor:pointer;line-height:1;padding:4px;">✕</button>
       <div id="da-name" style="font-family:'Share Tech Mono', monospace; color:#fff; font-size:16px; font-weight:bold; letter-spacing:1px; margin-bottom:5px; text-transform:uppercase;">DATACENTER</div>
       <div style="display:flex; justify-content:space-between; font-family:'Courier New', monospace; font-size:11px; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;">
@@ -1198,6 +1198,14 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       <div id="da-actions-rainclaude" style="display:none; flex-direction:column; gap:8px;">
         <button class="sp-btn" id="btn-da-malware" style="background:rgba(255,170,0,0.2); border:1px solid #fa0; color:#fa0;" onclick="applyDatacenterAction('malware')">INJECT MALWARE (-15 BUDGET)</button>
         <button class="sp-btn" id="btn-da-overclock" style="background:rgba(255,0,0,0.2); border:1px solid #f24; color:#f24;" onclick="applyDatacenterAction('overclock')">OVERCLOCK HACK (-50 BUDGET)</button>
+      </div>
+
+      <!-- DOMAIN/XRP WALLET INFO -->
+      <div style="margin-top:15px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.1); font-family:'Courier New', monospace; font-size:10px; color:#ccc; text-align:center; word-wrap:break-word;">
+        <div style="color:#0af; margin-bottom:4px; font-weight:bold; letter-spacing:1px;">XRP WALLET</div>
+        <div style="user-select:all; cursor:pointer;" title="Click to copy" onclick="navigator.clipboard.writeText('rLNmmcNEizWaygypRVTKaWoZG6RrqfsJpi')">rLNmmcNEizWaygypRVTKaWoZG6RrqfsJpi</div>
+        <div style="color:#0af; margin-top:8px; margin-bottom:4px; font-weight:bold; letter-spacing:1px;">DESTINATION TAG</div>
+        <div style="user-select:all; cursor:pointer;" title="Click to copy" onclick="navigator.clipboard.writeText('2552749221')">2552749221</div>
       </div>
     </div>
   </div>
@@ -1236,7 +1244,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   </div>
   <div style="position:absolute; bottom:12px; left:20px; font-family:'Share Tech Mono', monospace; font-size:10px; font-weight:normal; letter-spacing:3px; color:#0af; text-transform:uppercase; z-index:15; pointer-events:none; text-shadow:0 0 5px rgba(0,170,255,0.8);">DEXMOND TECHNOLOGIES Ltd</div>
   
-  <div id="skin-hint-arrow" style="position:absolute; bottom:121px; right:calc(115px + 25vw + 10px); font-size:32px; color:#ff5577; text-shadow:0 0 15px rgba(255,-85,119,0.8); opacity:0; pointer-events:none; z-index:9999; transition:opacity 0.5s; animation:bounceRight 0.5s infinite alternate;">➔</div>
+  <div id="skin-hint-arrow" style="position:absolute; bottom:115px; right:calc(115px + 25vw + 10px); font-size:32px; color:#ff5577; text-shadow:0 0 15px rgba(255,-85,119,0.8); opacity:0; pointer-events:none; z-index:9999; transition:opacity 0.5s; animation:bounceRight 0.5s infinite alternate;">➔</div>
   <button id="btn-toggle-skin" onclick="toggleRedSkin()">🔴 RED SKIN</button>
   <button id="btn-toggle-soundtrack" onclick="toggleSoundtrack()">🎵 SOUNDTRACK</button>
   <button id="btn-toggle-radio" onclick="toggleRadio()">📻 ON</button>
@@ -1491,7 +1499,7 @@ const authWaitInterval = setInterval(() => {
   border: 1px solid rgba(0, 180, 255, 0.35);
   border-radius: 28px;
   padding: 10px 7px;
-  z-index: 50;
+  z-index: 10;
   pointer-events: auto;
   box-shadow: 0 0 20px rgba(0, 170, 255, 0.12), 0 4px 30px rgba(0,0,0,0.5);
   backdrop-filter: blur(8px);
@@ -6442,9 +6450,14 @@ window.openMasterNodePanel = function(dcData) {
         <div id="sol-deposit-container" style="display:none; margin-top: 20px; padding: 15px; background: rgba(0,255,150,0.1); border: 1px solid #00ff96; border-radius: 8px; text-align: center; width: 80%; max-width: 500px;">
             <div style="color: #00ff96; font-size: 14px; margin-bottom: 5px; font-weight: bold; letter-spacing: 1px;">SOL DEPLOYMENT LAYER</div>
             <div style="color: #fff; font-size: 11px; margin-bottom: 10px; opacity: 0.8;">Send SOL deposits to initialize the Solana Node.</div>
-            <div style="display: flex; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,150,0.3); border-radius: 4px; overflow: hidden;">
+            <div style="display: flex; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,150,0.3); border-radius: 4px; overflow: hidden; margin-bottom: 10px;">
                 <input type="text" id="sol-wallet-address" readonly style="flex-grow: 1; background: transparent; border: none; color: #00ff96; font-family: monospace; padding: 10px; outline: none; text-align: center; font-size: 14px;" value="LOADING ADDRESS..."/>
                 <button id="copy-sol-btn" style="background: rgba(0,255,150,0.2); border: none; border-left: 1px solid rgba(0,255,150,0.3); color: #00ff96; padding: 0 15px; cursor: pointer; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: bold; transition: background 0.2s;">COPY</button>
+            </div>
+            
+            <div style="display: flex; align-items: stretch; justify-content: center; margin-top: 15px;">
+                <input type="number" id="sol-donation-amount" placeholder="Amount SOL" step="0.1" min="0.1" style="width: 120px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,150,0.5); color: #00ff96; padding: 8px; border-radius: 4px 0 0 4px; font-family: 'Orbitron', sans-serif; text-align: center; outline: none;">
+                <button id="btn-sol-donate" onclick="triggerSolanaDonation()" style="background: rgba(0,255,150,0.2); border: 1px solid rgba(0,255,150,0.5); border-left: none; color: #00ff96; padding: 8px 15px; border-radius: 0 4px 4px 0; font-family: 'Orbitron', sans-serif; font-weight: bold; cursor: pointer; transition: background 0.2s;">SEND SUPPORT</button>
             </div>
         </div>
     </div>
@@ -6623,6 +6636,68 @@ window.openMasterNodePanel = function(dcData) {
           });
       };
   }
+};
+
+window.triggerSolanaDonation = async function() {
+    try {
+        const amountInput = document.getElementById('sol-donation-amount');
+        const amount = parseFloat(amountInput.value);
+        
+        if (isNaN(amount) || amount <= 0) {
+            alert("Please enter a valid amount of SOL to send.");
+            return;
+        }
+
+        const provider = window.solana;
+        if (!provider || !provider.isPhantom) {
+            alert("Phantom Extention not found. Please install the Phantom Wallet extension.");
+            return;
+        }
+
+        if (!provider.publicKey) {
+            await provider.connect();
+        }
+
+        const targetWallet = document.getElementById('sol-wallet-address').value;
+        if (!targetWallet || targetWallet.includes("OFFLINE") || targetWallet.includes("LOADING") || targetWallet.includes("FAILED")) {
+            alert("Solana deployment layer is currently offline or the target address is invalid.");
+            return;
+        }
+
+        // Fetch recent blockhash from backend solana connection via an API call
+        const { Transaction, SystemProgram, PublicKey } = window.solanaWeb3;
+        
+        // Ensure web3.js is loaded
+        if (!window.solanaWeb3) {
+             alert("Solana Web3.js library not loaded. Please try again later.");
+             return;
+        }
+
+        const connection = new window.solanaWeb3.Connection("https://api.mainnet-beta.solana.com");
+        
+        const lamports = amount * window.solanaWeb3.LAMPORTS_PER_SOL;
+        const transaction = new Transaction().add(
+            SystemProgram.transfer({
+                fromPubkey: provider.publicKey,
+                toPubkey: new PublicKey(targetWallet),
+                lamports: lamports,
+            })
+        );
+        
+        const { blockhash } = await connection.getLatestBlockhash();
+        transaction.recentBlockhash = blockhash;
+        transaction.feePayer = provider.publicKey;
+
+        const { signature } = await provider.signAndSendTransaction(transaction);
+        await connection.confirmTransaction(signature, 'processed');
+
+        alert(`Successfully sent ${amount} SOL support to the deployment layer! Signature: ${signature}`);
+        amountInput.value = '';
+
+    } catch (err) {
+        console.error("Solana donation failed:", err);
+        alert(`Transaction Failed: ${err.message || 'Unknown error'}`);
+    }
 };
 
   // Intercept clicks on Datacenters (Cyber Skin)
@@ -11958,7 +12033,7 @@ function scheduleNextFuzz() {
 // ================= CUSTOM SOUNDTRACK AND WARNING OVERLAY =================
 const soundtrackWarningOverlay = document.createElement('div');
 soundtrackWarningOverlay.style.cssText = "position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(20,0,0,0.85); z-index:9999; opacity:0; pointer-events:none; transition:opacity 0.5s;";
-soundtrackWarningOverlay.innerHTML = "<div style='color:#ff0033; font-family:\"Orbitron\", sans-serif; font-size:4vw; font-weight:800; text-align:center; text-shadow:0 0 20px #ff0033, 0 0 40px #ff0033; border:2px solid #ff0033; padding:40px; background:rgba(50,0,0,0.6); box-shadow:0 0 50px rgba(255,0,50,0.4); text-transform:uppercase;'>WELCOME TO NUCLEAR WAR, ENJOY</div>";
+soundtrackWarningOverlay.innerHTML = "<div style='color:#ff0033; font-family:\"Orbitron\", sans-serif; font-size:4vw; font-weight:800; text-align:center; text-shadow:0 0 20px #ff0033, 0 0 40px #ff0033; border:2px solid #ff0033; padding:40px; background:rgba(50,0,0,0.6); box-shadow:0 0 50px rgba(255,0,50,0.4); text-transform:uppercase; position:relative; z-index:10001;'>WELCOME TO NUCLEAR WAR, ENJOY</div>";
 document.body.appendChild(soundtrackWarningOverlay);
 
 let customSoundtrack = new Audio();
@@ -12064,6 +12139,7 @@ window.toggleSoundtrack = function() {
     if (!soundtrackWelcomed) {
       soundtrackWelcomed = true;
       soundtrackWarningOverlay.style.opacity = '1';
+
       setTimeout(() => { 
         soundtrackWarningOverlay.style.opacity = '0';
         
