@@ -1171,6 +1171,28 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   </div>
 
   <!-- DATACENTER CO-OP UI (CYBER SKIN ONLY) -->
+  <!-- STAKING TOWER MODAL -->
+  <div id="staking-tower-modal" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:600px; background:rgba(20,0,0,0.95); border:1px solid #ff0033; border-radius:8px; box-shadow:0 0 30px rgba(255,0,50,0.3); padding:20px; pointer-events:auto; backdrop-filter:blur(10px); z-index:100;">
+    <button onclick="document.getElementById('staking-tower-modal').style.display='none'; window.selectedStakingTower=null;" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#f55;font-size:16px;cursor:pointer;line-height:1;padding:4px;">✕</button>
+    <h2 style="margin:0 0 5px 0; color:#ff0033; font-family:'Orbitron', sans-serif; font-size:22px; text-transform:uppercase; letter-spacing:2px; text-shadow:0 0 10px rgba(255,0,50,0.5);">STAKING TERMINAL</h2>
+    <div style="color:#aaa; font-family:'Share Tech Mono', monospace; font-size:12px; margin-bottom:20px;">NODE PROTOCOL: <span style="color:#fff;" id="staking-tower-node-name">D3X CORE NETWORK</span></div>
+    
+    <div style="display:flex; gap:15px;">
+      <div style="flex:1; border:1px solid rgba(255,0,50,0.3); padding:15px; background:rgba(40,0,0,0.5); border-radius:4px;">
+        <div style="color:#fa0; font-family:'Share Tech Mono', monospace; font-size:14px; margin-bottom:10px;">AVAILABLE D3X: <span style="color:#fff;" id="staking-tower-balance">100</span></div>
+        <div style="color:#0f0; font-family:'Share Tech Mono', monospace; font-size:14px; margin-bottom:20px;">ESTIMATED APY: <span style="color:#fff;">12.5%</span></div>
+        <input type="number" id="staking-tower-amount-input" placeholder="Amount to Stake" style="width:100%; box-sizing:border-box; padding:8px; background:rgba(255,255,255,0.05); border:1px solid #ff0033; color:#fff; font-family:'Courier New', monospace; outline:none; margin-bottom:10px; border-radius:2px;">
+        <button onclick="alert('Transaction signing initiated...')" style="width:100%; padding:10px; background:rgba(255,0,50,0.2); border:1px solid #ff0033; color:#ff0033; font-family:'Share Tech Mono', monospace; cursor:pointer; font-weight:bold; transition:all 0.2s; border-radius:2px;">DEPOSIT STAKE</button>
+      </div>
+      <div style="flex:1; border:1px solid rgba(255,0,50,0.3); padding:15px; background:rgba(40,0,0,0.5); border-radius:4px;">
+        <div style="color:#0af; font-family:'Share Tech Mono', monospace; font-size:14px; margin-bottom:10px;">ACTIVE STAKED: <span style="color:#fff;" id="staking-tower-active">0 D3X</span></div>
+        <div style="color:#f0f; font-family:'Share Tech Mono', monospace; font-size:14px; margin-bottom:20px;">UNCLAIMED REWARDS: <span style="color:#fff;">0.00 D3X</span></div>
+        <button onclick="alert('Claiming rewards...')" style="width:100%; padding:10px; background:rgba(0,170,255,0.1); border:1px solid #0af; color:#0af; font-family:'Share Tech Mono', monospace; cursor:pointer; font-weight:bold; transition:all 0.2s; margin-bottom:10px; border-radius:2px;">CLAIM REWARDS</button>
+        <button onclick="alert('Unstaking...')" style="width:100%; padding:10px; background:transparent; border:1px solid #777; color:#ccc; font-family:'Share Tech Mono', monospace; cursor:pointer; transition:all 0.2s; border-radius:2px;">UNSTAKE ALL</button>
+      </div>
+    </div>
+  </div>
+
   <div id="datacenter-coop-ui" style="display:none; pointer-events:none; position:absolute; top:0; left:0; width:100%; height:100%; z-index:90;">
 
 
@@ -3794,6 +3816,24 @@ function initDatacenters() {
             mesh.add(arrowGroup);
             mesh.userData.arrowGroup = arrowGroup;
             
+            // Add Dexmond Exchange Hub floating text
+            const dehCanvas = document.createElement('canvas');
+            dehCanvas.width = 512;
+            dehCanvas.height = 64;
+            const dehCtx = dehCanvas.getContext('2d');
+            dehCtx.font = 'bold 36px "Orbitron", sans-serif';
+            dehCtx.fillStyle = '#39ff14'; // Neon green
+            dehCtx.textAlign = 'center';
+            dehCtx.textBaseline = 'middle';
+            dehCtx.fillText('DEXMOND EXCHANGE HUB', 256, 32);
+            
+            const dehTex = new THREE.CanvasTexture(dehCanvas);
+            const dehSpriteMat = new THREE.SpriteMaterial({ map: dehTex, transparent: true, depthTest: false });
+            const dehSprite = new THREE.Sprite(dehSpriteMat);
+            dehSprite.scale.set(0.16, 0.02, 1);
+            dehSprite.position.set(0, 0.15, 0); // Position above the node and arrows
+            mesh.add(dehSprite);
+            
         } else if (isMaster) {
             mesh.scale.set(5, 5, 5); // 5x bigger
             
@@ -3844,29 +3884,83 @@ function initDatacenters() {
             mesh.add(light);
         }
         
-        mesh.userData = { 
-            name: isD3XExchange ? "EXCHANGE: " + dc.name.toUpperCase() : (isMaster ? "MASTER DATACENTER: " : "DATACENTER: ") + dc.name.toUpperCase(), 
-            val: dc.operator.toUpperCase(), 
-            ind: 'DATA', 
-            hq: dc.location.toUpperCase(), 
-            city: dc.location.toUpperCase(),
-            lat: dc.lat,
-            lon: dc.lon,
-            rev: 'ACTIVE',
-            owner: (isMaster || isD3XExchange) ? 'GEMINI' : owner, // Ensure Master is Gemini for safe keeping maybe, or random? Leaving random owner logic intact but overriding visual. Let's make it Gemini.
-            baseColor: colorHex,
-            isMasterNode: isMaster,
-            isD3XExchange: isD3XExchange,
-            aura: (isMaster || isD3XExchange) ? mesh.children.find(c => c.type === 'Mesh') : null,
-            light: (isMaster || isD3XExchange) ? mesh.children.find(c => c.type === 'PointLight') : null,
-            iconUrl: iconUrl,
-            protocolName: protocolName
-        };
-        if(isMaster || isD3XExchange) mesh.userData.owner = 'GEMINI'; // Forcing Master Node to Gemini for now as the core
-        
-        window.datacentersGroup.add(mesh);
-    });
-}
+            mesh.userData = { 
+                name: isD3XExchange ? "EXCHANGE: " + dc.name.toUpperCase() : (isMaster ? "MASTER DATACENTER: " : "DATACENTER: ") + dc.name.toUpperCase(), 
+                val: dc.operator.toUpperCase(), 
+                ind: 'DATA', 
+                hq: dc.location.toUpperCase(), 
+                city: dc.location.toUpperCase(),
+                lat: dc.lat,
+                lon: dc.lon,
+                rev: 'ACTIVE',
+                owner: (isMaster || isD3XExchange) ? 'GEMINI' : owner,
+                baseColor: colorHex,
+                isMasterNode: isMaster,
+                isD3XExchange: isD3XExchange,
+                aura: (isMaster || isD3XExchange) ? mesh.children.find(c => c.type === 'Mesh') : null,
+                light: (isMaster || isD3XExchange) ? mesh.children.find(c => c.type === 'PointLight') : null,
+                iconUrl: iconUrl,
+                protocolName: protocolName
+            };
+            if(isMaster || isD3XExchange) mesh.userData.owner = 'GEMINI';
+            
+            window.datacentersGroup.add(mesh);
+
+            // STAKING TOWER ADDITION FOR CYBER SKIN (Added on supported chains)
+            // Generate a Staking Tower right beside specific important nodes or all Datacenters?
+            // "on the cyber skin... build another object... staking tower... red cylindrical... write STAKING"
+            // Let's spawn them beside all Datacenters to make the Cyber Skin heavily staking focused, or just the top level ones.
+            // Spawning beside all nodes.
+            const towerLatRad = (dc.lat + 1.5) * Math.PI / 180; // Offset slightly
+            const towerLonRad = -(dc.lon + 1.5) * Math.PI / 180;
+            const towerGeo = new THREE.CylinderGeometry(0.015, 0.015, 0.08, 16);
+            towerGeo.translate(0, 0.04, 0); // Pivot at bottom
+            const towerMat = new THREE.MeshPhongMaterial({ color: 0xff0033, shininess: 100, specular: 0xffffff });
+            const towerMesh = new THREE.Mesh(towerGeo, towerMat);
+            
+            towerMesh.position.set(
+                r * Math.cos(towerLatRad) * Math.cos(towerLonRad),
+                r * Math.sin(towerLatRad),
+                r * Math.cos(towerLatRad) * Math.sin(towerLonRad)
+            );
+            towerMesh.lookAt(new THREE.Vector3(0,0,0));
+            towerMesh.rotateX(Math.PI/2); // Align cylinder outwards
+
+            // STAKING Text Sprite
+            const tCanvas = document.createElement('canvas');
+            tCanvas.width = 256;
+            tCanvas.height = 64;
+            const tCtx = tCanvas.getContext('2d');
+            tCtx.font = 'bold 30px "Orbitron", sans-serif';
+            tCtx.fillStyle = '#ffffff';
+            tCtx.textAlign = 'center';
+            tCtx.textBaseline = 'middle';
+            tCtx.fillText('STAKING', 128, 32);
+            
+            const tTex = new THREE.CanvasTexture(tCanvas);
+            const tSpriteMat = new THREE.SpriteMaterial({ map: tTex, transparent: true, depthTest: false });
+            const tSprite = new THREE.Sprite(tSpriteMat);
+            tSprite.scale.set(0.08, 0.02, 1);
+            tSprite.position.set(0, 0.12, 0); 
+            towerMesh.add(tSprite);
+
+            // Aura for tower
+            const tAuraGeo = new THREE.SphereGeometry(0.025, 16, 16);
+            const tAuraMat = new THREE.MeshBasicMaterial({ color: 0xff0033, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending });
+            const tAura = new THREE.Mesh(tAuraGeo, tAuraMat);
+            towerMesh.add(tAura);
+
+            towerMesh.userData = {
+                type: 'staking_tower',
+                name: "STAKING TOWER: " + dc.name.toUpperCase(),
+                protocol: protocolName || 'D3X CORE NETWORK'
+            };
+            
+            window.datacentersGroup.add(towerMesh);
+            window.datacentersGroup.add(towerMesh);
+        });
+    }
+
 initDatacenters();
 
 window.dcNetworkGroup = new THREE.Group();
@@ -6295,6 +6389,42 @@ window.rebuildD3XExchangeMenu = function() {
         " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
             ► PROCEED TO JUPITER
         </button>
+
+        <button onclick="loadExchangeIframe('https://uniswap.org')" style="
+            display:block; width: 80%; max-width: 400px; padding: 15px; margin-bottom: 20px;
+            background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
+            font-size: 20px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
+            box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
+        " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
+            ► PROCEED TO UNISWAP
+        </button>
+        
+        <button onclick="loadExchangeIframe('https://pancakeswap.finance')" style="
+            display:block; width: 80%; max-width: 400px; padding: 15px; margin-bottom: 20px;
+            background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
+            font-size: 20px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
+            box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
+        " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
+            ► PROCEED TO PANCAKESWAP
+        </button>
+
+        <button onclick="loadExchangeIframe('https://curve.fi')" style="
+            display:block; width: 80%; max-width: 400px; padding: 15px; margin-bottom: 20px;
+            background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
+            font-size: 20px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
+            box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
+        " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
+            ► PROCEED TO CURVE FINANCE
+        </button>
+
+        <button onclick="loadExchangeIframe('https://sushi.com')" style="
+            display:block; width: 80%; max-width: 400px; padding: 15px; margin-bottom: 20px;
+            background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
+            font-size: 20px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
+            box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
+        " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
+            ► PROCEED TO SUSHISWAP
+        </button>
     `;
 };
 
@@ -6359,6 +6489,42 @@ window.openD3XExchangePanel = function(dcData) {
             box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
         " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
             ► PROCEED TO JUPITER
+        </button>
+
+        <button onclick="loadExchangeIframe('https://uniswap.org')" style="
+            display:block; width: 80%; max-width: 400px; padding: 15px; margin-bottom: 20px;
+            background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
+            font-size: 20px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
+            box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
+        " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
+            ► PROCEED TO UNISWAP
+        </button>
+        
+        <button onclick="loadExchangeIframe('https://pancakeswap.finance')" style="
+            display:block; width: 80%; max-width: 400px; padding: 15px; margin-bottom: 20px;
+            background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
+            font-size: 20px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
+            box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
+        " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
+            ► PROCEED TO PANCAKESWAP
+        </button>
+
+        <button onclick="loadExchangeIframe('https://curve.fi')" style="
+            display:block; width: 80%; max-width: 400px; padding: 15px; margin-bottom: 20px;
+            background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
+            font-size: 20px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
+            box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
+        " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
+            ► PROCEED TO CURVE FINANCE
+        </button>
+
+        <button onclick="loadExchangeIframe('https://sushi.com')" style="
+            display:block; width: 80%; max-width: 400px; padding: 15px; margin-bottom: 20px;
+            background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
+            font-size: 20px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
+            box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
+        " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
+            ► PROCEED TO SUSHISWAP
         </button>
     </div>
   `;
@@ -6702,11 +6868,29 @@ window.triggerSolanaDonation = async function() {
 
   // Intercept clicks on Datacenters (Cyber Skin)
   if (window.currentSkinIndex === 3 && window.datacentersGroup && window.datacentersGroup.visible && window.datacentersGroup.children.length > 0) {
-    const dcHits = ray.intersectObjects(window.datacentersGroup.children, false);
+    // Search children heavily because of auras and inner sprites on staking towers
+    const dcHits = ray.intersectObjects(window.datacentersGroup.children, true);
     if (dcHits.length > 0) {
       if (typeof _sfxClick !== 'undefined') _sfxClick();
-      const dcData = dcHits[0].object.userData;
-      if (dcData && dcData.name) {
+      
+      // Find the topmost parent mesh
+      let topMesh = dcHits[0].object;
+      while (topMesh.parent && topMesh.parent !== window.datacentersGroup && topMesh.parent.type !== 'Scene') {
+          topMesh = topMesh.parent;
+      }
+      
+      const dcData = topMesh.userData;
+      if (dcData && dcData.type === 'staking_tower') {
+          window.selectedStakingTower = topMesh;
+          document.getElementById('staking-tower-node-name').textContent = dcData.protocol || 'D3X CORE NETWORK';
+          document.getElementById('staking-tower-balance').textContent = window.localD3XBalance ? window.localD3XBalance.toFixed(2) : '100';
+          document.getElementById('staking-tower-active').textContent = (Math.random() * 50).toFixed(2) + ' D3X';
+          document.getElementById('staking-tower-modal').style.display = 'block';
+          document.getElementById('datacenter-action-panel').style.display = 'none'; // Close DC panel if open
+          return;
+      }
+      
+      if (dcData && dcData.name && !dcData.type) {
         if (dcData.isD3XExchange) {
             window.openD3XExchangePanel(dcData);
             return;
