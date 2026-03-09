@@ -9911,7 +9911,7 @@ function animate() {
           
           if (attack.state === 'attack') {
               // Pulse Red
-              const pulse = (Math.sin(elapsed * 0.01) + 1) / 2; // 0 to 1
+              const pulse = (Math.sin(elapsed * 0.015) + 1) / 2; // 0 to 1
               mesh.material.color.setHex(attack.mesh.userData.baseColor);
               mesh.material.color.lerp(new THREE.Color(0xff0000), pulse);
               
@@ -9961,7 +9961,7 @@ function animate() {
               }
           } else if (attack.state === 'datacenter_attack') {
               // Pulse Green/Cyan
-              const pulse = (Math.sin(elapsed * 0.01) + 1) / 2; // 0 to 1
+              const pulse = (Math.sin(elapsed * 0.015) + 1) / 2; // 0 to 1
               mesh.material.color.setHex(attack.mesh.userData.baseColor);
               mesh.material.color.lerp(new THREE.Color(0x00ffaa), pulse);
               
