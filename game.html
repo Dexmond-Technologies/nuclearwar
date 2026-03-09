@@ -3798,11 +3798,9 @@ function initDatacenters() {
                 const texLoader = new THREE.TextureLoader();
                 texLoader.setCrossOrigin('anonymous');
                 texLoader.load(iconUrl, (tex) => {
-                    const spriteMat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
-                    const sprite = new THREE.Sprite(spriteMat);
-                    sprite.scale.set(0.045, 0.045, 0.045); 
-                    sprite.position.set(0, 0.065, 0); // Above the node
-                    mesh.add(sprite);
+                    mesh.material.map = tex;
+                    mesh.material.color.set(0xffffff);
+                    mesh.material.needsUpdate = true;
                 });
             }
 
