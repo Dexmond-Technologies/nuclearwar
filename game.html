@@ -5119,6 +5119,10 @@ window.showCmdHelpModal = function() {
   let skinSpecificOversight = "You are currently witnessing live telemetry injected directly from the active Datacenters. The flashing nodes, orbital strikes, and tactical deployments represent neural network decision trees executing in real-time. Do not attempt to intervene until the autopilot cycle concludes.";
   
   const idx = window.currentSkinIndex !== undefined ? window.currentSkinIndex : 0;
+  if (idx === 4) {
+      modal.style.width = '960px';
+  }
+  
   if (idx === 0) {
       skinSpecificTitle = "LIVE SKIN OP CENTER";
       skinSpecificDesc = "This is the primary theater of operations. Witness the real war and the real battle unfold with live troops, combat planes, and tactical rockets sweeping across the globe.";
@@ -9583,7 +9587,14 @@ function animate() {
       let pos;
       
       if (fj.straight) {
-        pos = fj.sd.clone().lerp(fj.ed, t);
+        let rawPos = fj.sd.clone().lerp(fj.ed, t);
+        const upAxis = fj.sd.clone().normalize();
+        const arbitrary = new THREE.Vector3(0, 1, 0);
+        if(Math.abs(upAxis.y) > 0.99) arbitrary.set(1, 0, 0);
+        const rightAxis = new THREE.Vector3().crossVectors(upAxis, arbitrary).normalize();
+        const bendAngle = t * (Math.PI / 10);
+        rawPos.applyAxisAngle(rightAxis, bendAngle);
+        pos = rawPos;
         // Calculate fade based on distance from the current rocket head
         // Head is at fj.progress. Tail is at 0.
         // We want the tail to fade to 0 opacity.
