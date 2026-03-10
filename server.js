@@ -519,6 +519,9 @@ function initWebSockets() {
     }).catch(console.warn);
   }
 
+  // Force fetch AI balances immediately so the new player doesn't have to wait 60s
+  fetchAndBroadcastAIBalances();
+
   ws.on('message', async raw => {
     let msg;
     try { msg = JSON.parse(raw); } catch { return; }
