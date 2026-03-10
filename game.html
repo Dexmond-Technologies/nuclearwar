@@ -4886,6 +4886,30 @@ window.issGroup = issGroup; // Expose globally to bind click interactions
 window.issOrbitGroup = issOrbitGroup; // Expose for animation loop
 
 
+// =====================================================================
+// GLOBAL ECONOMY SPRITE (123T D3X) FOR BLACK SKIN
+// =====================================================================
+const ecoCanvas = document.createElement('canvas');
+ecoCanvas.width = 1024;
+ecoCanvas.height = 256;
+const ecoCtx = ecoCanvas.getContext('2d');
+ecoCtx.fillStyle = '#ffffff';
+ecoCtx.shadowColor = '#ffffff';
+ecoCtx.shadowBlur = 15;
+ecoCtx.font = "bold 90px 'Share Tech Mono', monospace";
+ecoCtx.textAlign = "center";
+ecoCtx.textBaseline = "middle";
+ecoCtx.fillText("123T D3X", 512, 128);
+
+const ecoTex = new THREE.CanvasTexture(ecoCanvas);
+const ecoMat = new THREE.SpriteMaterial({ map: ecoTex, color: 0xffffff, transparent: true, opacity: 0.8 });
+window.economySprite = new THREE.Sprite(ecoMat);
+window.economySprite.scale.set(4.0, 1.0, 1);
+// Position it hovering to the left (dark side of the earth visually)
+window.economySprite.position.set(-2.5, 0.2, 0.5);
+window.economySprite.visible = false;
+scene.add(window.economySprite);
+
 // Atmosphere
 scene.add(new THREE.Mesh(
   new THREE.SphereGeometry(GLOBE_R*1.06,32,32),
@@ -13383,6 +13407,11 @@ window.toggleRedSkin = function() {
      window.africaCompaniesGroup.visible = (skin.name === 'BLK');
      window.microCompaniesGroup.visible = (skin.name === 'BLK');
      window.russiaAsiaCompaniesGroup.visible = (skin.name === 'BLK');
+  }
+  
+  // Toggle Economy Marker
+  if (typeof window.economySprite !== 'undefined') {
+     window.economySprite.visible = (skin.name === 'BLK');
   }
 
   // Toggle Datacenters (CYBER Skin specific)
