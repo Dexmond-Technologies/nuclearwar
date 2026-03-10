@@ -11674,35 +11674,36 @@ function animate() {
 
   // Animate Satellites & Lasers for all non-LIVE skins
   if (window.currentSkinIndex && window.currentSkinIndex > 0) {
-    // 30 second cycle for laser scans
+    // 0.8 second cycle for rapid laser flashing strobe
     window.lastLaserTime = window.lastLaserTime || 0;
-    if (time3 - window.lastLaserTime > 30) {
+    if (time3 - window.lastLaserTime > 0.8) {
       window.lastLaserTime = time3;
       // Turn off all existing lasers
       redSats.forEach(s => { if(s.laser) s.laser.visible = false; });
-      // Pick 2 random satellites to fire
-      if (redSats.length > 1) {
-        let idx1 = Math.floor(Math.random() * redSats.length);
-        let idx2 = Math.floor(Math.random() * redSats.length);
-        while(idx1 === idx2) idx2 = Math.floor(Math.random() * redSats.length);
+      // Pick 8 random satellites to fire
+      if (redSats.length > 8) {
+        const firedSats = [];
+        for (let i = 0; i < 8; i++) {
+            let idx = Math.floor(Math.random() * redSats.length);
+            firedSats.push(redSats[idx]);
+        }
         
         // Dynamically color the laser based on the current skin color
         const skinColor = SKINS[window.currentSkinIndex].color;
         
-        if(redSats[idx1].laser) {
-          redSats[idx1].laser.material.color.setHex(skinColor);
-          redSats[idx1].laser.visible = true;
-        }
-        if(redSats[idx2].laser) {
-          redSats[idx2].laser.material.color.setHex(skinColor);
-          redSats[idx2].laser.visible = true;
-        }
+        firedSats.forEach(sat => {
+            if(sat.laser) {
+              sat.laser.material.color.setHex(skinColor);
+              sat.laser.visible = true;
+            }
+        });
         
-        // Turn them off after 2 seconds
+        // Turn them off very quickly (0.3 seconds) for a flashing strobe effect
         setTimeout(() => {
-          if(redSats[idx1] && redSats[idx1].laser) redSats[idx1].laser.visible = false;
-          if(redSats[idx2] && redSats[idx2].laser) redSats[idx2].laser.visible = false;
-        }, 2000);
+          firedSats.forEach(sat => {
+              if(sat && sat.laser) sat.laser.visible = false;
+          });
+        }, 300);
       }
     }
 
@@ -11714,12 +11715,27 @@ function animate() {
       for(let i=0; i<window.planeData.length; i++) {
         const p = window.planeData[i];
         if (p && p.pivot) {
-           p.pivot.rotateOnAxis(p.axis, p.speed * ((dt*60)||1));
-           // Randomly drop bombs from planes
-           if (window.isRedSkin && Math.random() < 0.005) {
-               // Calculate world position of the plane
-               const planeWorldPos = new THREE.Vector3();
-               p.pivot.children[0].getWorldPosition(planeWorldPos);
+           // Dramatically increase airplane speed
+           p.pivot.rotateOnAxis(p.axis, p.speed * 4.0 * ((dt*60)||1));
+           
+           // Calculate world position of the plane for contrails and bombs
+           const planeWorldPos = new THREE.Vector3();
+           p.pivot.children[0].getWorldPosition(planeWorldPos);
+           
+           if (window.isRedSkin) {
+               // Leave thick contrails behind the planes frequently
+               if (Math.random() < 0.3) {
+                   if (!window.redWarfareParticles) window.redWarfareParticles = [];
+                   const trailMat = new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(createGlowCanvas('#ffffff')), color: 0xffffff, transparent: true, opacity: 0.8 });
+                   const trail = new THREE.Sprite(trailMat);
+                   trail.position.copy(planeWorldPos);
+                   trail.scale.set(0.02, 0.02, 1);
+                   scene.add(trail);
+                   redWarfareParticles.push({ mesh: trail, life: 1.0, decay: 0.03, scaleMax: 0.08 });
+               }
+
+               // Rapid fire bombs from planes
+               if (Math.random() < 0.05) {
                
                const bombGeo = new THREE.CylinderGeometry(0.006, 0.006, 0.02, 8);
                const bombMat = new THREE.MeshBasicMaterial({ color: 0x555555 });
@@ -11737,18 +11753,39 @@ function animate() {
                redWarfareProjectiles.push({
                    mesh: bomb, type: 'bomb',
                    startPos: startPos, endPos: endPos,
-                   progress: 0, speed: 0.02
+                   progress: 0, speed: 0.08
                });
            }
         }
       }
     }
     
-    // Randomly spawn boat rockets
-    if (window.isRedSkin && typeof boatMarkers !== 'undefined' && boatMarkers.length > 1 && Math.random() < 0.02) {
-        // Pick random shooter
-        const shooterIdx = Math.floor(Math.random() * boatMarkers.length);
-        const shooter = boatMarkers[shooterIdx].userData.parent; // the boatGroup
+    // Process Boat flashing sirens and rapid boat rockets
+    if (window.isRedSkin && typeof boatMarkers !== 'undefined' && boatMarkers.length > 1) {
+        
+        // Flashing sirens (alternating red and blue 5 times a second)
+        const sirenCycle = Math.floor(time3 * 5) % 2;
+        if (!window.cachedSirenRed) window.cachedSirenRed = new THREE.CanvasTexture(createGlowCanvas('#ff0000'));
+        if (!window.cachedSirenBlue) window.cachedSirenBlue = new THREE.CanvasTexture(createGlowCanvas('#0066ff'));
+        
+        boatMarkers.forEach((boat, ix) => {
+             if (!boat.userData.sirenSprite) {
+                 const mat = new THREE.SpriteMaterial({ map: window.cachedSirenRed, color: 0xffffff, blending: THREE.AdditiveBlending, depthWrite: false });
+                 const spr = new THREE.Sprite(mat);
+                 spr.scale.set(0.12, 0.12, 1);
+                 spr.position.y = 0.03; // Hover just above the boat
+                 boat.userData.parent.add(spr);
+                 boat.userData.sirenSprite = spr;
+             }
+             boat.userData.sirenSprite.material.map = (sirenCycle === 0) ? window.cachedSirenRed : window.cachedSirenBlue;
+             boat.userData.sirenSprite.visible = (Math.floor(time3*10 + ix) % 2 === 0);
+        });
+
+        // Fire rate massively increased
+        if (Math.random() < 0.15) {
+            // Pick random shooter
+            const shooterIdx = Math.floor(Math.random() * boatMarkers.length);
+            const shooter = boatMarkers[shooterIdx].userData.parent; // the boatGroup
         
         let targetIdx = Math.floor(Math.random() * boatMarkers.length);
         while(targetIdx === shooterIdx) targetIdx = Math.floor(Math.random() * boatMarkers.length);
@@ -11774,7 +11811,7 @@ function animate() {
             redWarfareProjectiles.push({
                 mesh: rocket, type: 'rocket',
                 startPos: startPos, endPos: endPos, arcHeight: arcHeight,
-                progress: 0, speed: 0.015
+                progress: 0, speed: 0.06
             });
         }
     }
