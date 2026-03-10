@@ -1360,11 +1360,20 @@ function processAIAction(result, actor, victim, actorName) {
   
   actor.budget -= cost;
   
-  // TRIGGER PHYSICAL ON-CHAIN SPEND
-  if (actorName === 'gemini') {
-      transferD3XOnChain(geminiKeypair, BURN_ADDRESS, cost);
-  } else if (actorName === 'claude') {
-      transferD3XOnChain(rainclaudeKeypair, BURN_ADDRESS, cost);
+  // LOG SPEND IN DATABASE FOR HOURLY SETTLEMENT
+  if (pgPool) {
+    let fromWallet = 'NOT_SET';
+    if (actorName === 'gemini' && geminiKeypair) fromWallet = geminiKeypair.publicKey.toBase58();
+    else if (actorName === 'gemini' && process.env.gemini_wallet) fromWallet = process.env.gemini_wallet;
+    else if (actorName === 'claude' && rainclaudeKeypair) fromWallet = rainclaudeKeypair.publicKey.toBase58();
+    else if (actorName === 'claude' && process.env.RAINCLAUDE_SOLANA_WALLET) fromWallet = process.env.RAINCLAUDE_SOLANA_WALLET;
+
+    if (fromWallet !== 'NOT_SET') {
+      pgPool.query(`
+        INSERT INTO pending_settlements (from_wallet, to_wallet, amount, reason) 
+        VALUES ($1, $2, $3, $4)
+      `, [fromWallet, BURN_ADDRESS.toBase58(), cost, 'kinetic_strike_or_espionage']).catch(console.error);
+    }
   }
 
   switch (action) {
@@ -1544,6 +1553,69 @@ setInterval(fetchAndBroadcastAIBalances, 60000);
 // Tick the combat every 30 minutes (1800000ms) to maintain persistent global conflict with minimal API cost
 setInterval(runAICombatTurn, 1800000);
 
+// Hourly Netting and On-Chain Settlement
+async function processHourlySettlements() {
+    if (!pgPool) return;
+    try {
+        console.log("⚙️ [SETTLEMENT] Initiating hourly on-chain D3X settlement...");
+        // Get all unsettled transactions grouped by wallet pairs
+        const pending = await pgPool.query(`
+            SELECT from_wallet, to_wallet, SUM(amount) as net_amount
+            FROM pending_settlements 
+            WHERE settled = FALSE 
+            GROUP BY from_wallet, to_wallet
+        `);
+
+        if (pending.rows.length === 0) {
+            console.log("⚙️ [SETTLEMENT] No pending transactions to settle.");
+            return;
+        }
+
+        for (const row of pending.rows) {
+            const { from_wallet, to_wallet, net_amount } = row;
+            if (net_amount <= 0) continue;
+
+            const toAddress = new web3.PublicKey(to_wallet);
+            let fromKeypair = null;
+            
+            // Match the from_wallet string back to our loaded keypairs
+            if (geminiKeypair && geminiKeypair.publicKey.toBase58() === from_wallet) fromKeypair = geminiKeypair;
+            else if (process.env.gemini_wallet === from_wallet) {
+                // We only have the public key env for gemini fallback, cannot sign transaction.
+                console.warn(`[SETTLEMENT] Cannot sign for ${from_wallet}. Need private key.`);
+                continue;
+            } else if (rainclaudeKeypair && rainclaudeKeypair.publicKey.toBase58() === from_wallet) {
+                 fromKeypair = rainclaudeKeypair;
+            }
+            
+            if (fromKeypair) {
+                console.log(`🔗 [ON-CHAIN] Settling ${net_amount} D3X from ${from_wallet} to ${to_wallet}...`);
+                try {
+                    const txHash = await transferD3XOnChain(fromKeypair, toAddress, net_amount);
+                    if (txHash) {
+                        // Mark all rows for this pair as settled
+                        await pgPool.query(`
+                            UPDATE pending_settlements 
+                            SET settled = TRUE, tx_hash = $1 
+                            WHERE from_wallet = $2 AND to_wallet = $3 AND settled = FALSE
+                        `, [txHash, from_wallet, to_wallet]);
+                        console.log(`✅ [SETTLEMENT] Complete: ${txHash}`);
+                    }
+                } catch (err) {
+                    console.error(`❌ [SETTLEMENT] Transfer Failed for ${from_wallet}:`, err.message);
+                }
+            } else {
+                 console.warn(`[SETTLEMENT] No matching local keypair loaded for ${from_wallet}. Skipping.`);
+            }
+        }
+    } catch (err) {
+        console.error("Settlement Error:", err.message);
+    }
+}
+
+// Ensure settlement fires exactly every 60 minutes
+setInterval(processHourlySettlements, 60 * 60 * 1000);
+
 // On Sever Startup, init DB and try to load state immediately before listening
 async function startServer() {
   // 1. Try PostgreSQL
@@ -1554,6 +1626,19 @@ async function startServer() {
           id INTEGER PRIMARY KEY DEFAULT 1,
           state JSONB NOT NULL,
           updated_at TIMESTAMPTZ DEFAULT NOW()
+        )
+      `);
+      
+      await pgPool.query(`
+        CREATE TABLE IF NOT EXISTS pending_settlements (
+          id SERIAL PRIMARY KEY,
+          from_wallet VARCHAR(255),
+          to_wallet VARCHAR(255),
+          amount BIGINT,
+          reason VARCHAR(100),
+          created_at TIMESTAMPTZ DEFAULT NOW(),
+          settled BOOLEAN DEFAULT FALSE,
+          tx_hash VARCHAR(255)
         )
       `);
       
