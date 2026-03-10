@@ -2759,34 +2759,20 @@ function initD3XCaves() {
 
     // Rock mesh
     const rockGeo = new THREE.DodecahedronGeometry(0.09, 0); 
-    const rockMat = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.2, metalness: 0.8, transparent: true, opacity: 0.9 });
+    const rockMat = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.2, metalness: 0.8, transparent: true, opacity: 0.5 }); // Lowered opacity so it glows more
     const rock = new THREE.Mesh(rockGeo, rockMat);
     rock.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, Math.random()*Math.PI);
     rock.userData.isD3XRock = true; // Tag for animation loop
     group.add(rock);
 
     // Glowing core
-    const coreGeo = new THREE.DodecahedronGeometry(0.045, 0);
+    const coreGeo = new THREE.DodecahedronGeometry(0.065, 0); // Increased core size so it glows brighter through the rock
     const coreMat = new THREE.MeshBasicMaterial({ color: 0xff00ff });
     const core = new THREE.Mesh(coreGeo, coreMat);
     core.userData.isD3XCore = true; // Tag for animation loop
     group.add(core);
 
-    // Text Label Maker ("D3X" directly on the rocks)
-    const canvas = document.createElement('canvas');
-    canvas.width = 128; canvas.height = 128;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)'; // Bright white to contrast with rainbow rocks
-    ctx.font = 'bold 40px monospace';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText("D3X", 64, 64);
-    const tex = new THREE.CanvasTexture(canvas);
-    const spriteMat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
-    const sprite = new THREE.Sprite(spriteMat);
-    sprite.scale.set(0.2, 0.2, 1);
-    sprite.position.set(0, 0, 0); // Centered exactly on the rock core
-    group.add(sprite);
+    // D3X Text Removed as requested
 
     // Hitbox specifically for clicking
     const hitGeo = new THREE.BoxGeometry(0.3, 0.3, 0.3);
