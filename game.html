@@ -2699,7 +2699,7 @@ const NEUTRAL = { hex:'#445566', int:0x445566, name:'NEUTRAL' };
 const canvas = document.getElementById('c');
 const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-renderer.setSize(innerWidth, innerHeight);
+renderer.setSize(innerWidth / 0.75, innerHeight / 0.75);
 renderer.setClearColor(0x02050a,1);
 
 const scene = new THREE.Scene();
@@ -11583,7 +11583,7 @@ function animate() {
 }
 
 window.addEventListener('resize',()=>{
-  renderer.setSize(innerWidth,innerHeight);
+  renderer.setSize(innerWidth/0.75,innerHeight/0.75);
   camera.aspect=innerWidth/innerHeight;
   camera.updateProjectionMatrix();
 });
