@@ -1984,6 +1984,34 @@ async function fetchAndBroadcastAIBalances() {
 
         } catch(e) { console.error('Claude balance error:', e.message); claudeBalance = 0; }
 
+        try {
+            if (cachedWorldBankWallet && cachedWorldBankWallet !== "NOT_SET") {
+                await new Promise(r => setTimeout(r, 2000));
+                const wbPubkey = new web3.PublicKey(cachedWorldBankWallet);
+                const accounts = await solanaConnection.getParsedTokenAccountsByOwner(
+                    wbPubkey, 
+                    { mint: D3X_MINT_ADDRESS }
+                );
+                if (accounts.value.length > 0) {
+                    let liveWBBalance = accounts.value[0].account.data.parsed.info.tokenAmount.uiAmount || 0;
+                    if (pgPool) {
+                        await pgPool.query(`UPDATE commanders SET d3x_balance = $1 WHERE callsign = 'WORLD BANK'`, [liveWBBalance]);
+                        // Instantly broadcast the live balance update to all connected clients
+                        const wbRes = await pgPool.query(`SELECT portfolio FROM commanders WHERE callsign = 'WORLD BANK'`);
+                        if (wbRes.rows.length > 0) {
+                            const wbPort = wbRes.rows[0].portfolio || {};
+                            broadcastAll({
+                                type: 'world_bank_stats',
+                                d3x: liveWBBalance,
+                                portfolio: wbPort,
+                                commodities: wbPort.commodities || {}
+                            });
+                        }
+                    }
+                }
+            }
+        } catch(e) { console.error('World Bank balance fetch error:', e.message); }
+
         cachedGeminiBalance = geminiBalance;
         cachedClaudeBalance = claudeBalance;
         cachedGeminiWallet = targetGeminiPubkey ? (typeof targetGeminiPubkey === 'string' ? targetGeminiPubkey : targetGeminiPubkey.toBase58()) : process.env.gemini_wallet || "NOT_SET";
