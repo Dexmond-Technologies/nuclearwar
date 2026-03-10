@@ -1152,8 +1152,9 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     <div style="display:flex;gap:15px;pointer-events:auto;align-items:center; margin-left:auto;">
       <div style="display:flex;gap:12px;align-items:center;">
         <div id="d3x-multiplier-badge" style="display:none; color:#fa0; font-family:'Courier New', monospace; font-size:11px; font-weight:bold; letter-spacing:1px; text-shadow:0 0 8px rgba(255,170,0,0.8); border:1px solid rgba(255,170,0,0.5); padding:6px 10px; background:rgba(20,10,0,0.8); border-radius:4px; animation: alertFlash 2s infinite alternate;">🔥 2X MULTIPLIER</div>
-        <button id="btn-reinvest-d3x" onclick="reinvestD3X()" style="display:none; padding:6px 12px; background:rgba(0,255,136,0.15); border:1px solid #0f8; color:#0f8; font-family:'Courier New', monospace; font-size:11px; font-weight:bold; cursor:pointer; border-radius:4px; transition:all 0.2s; box-shadow:0 0 10px rgba(0,255,136,0.2);">♻️ REINVEST</button>
-        <div id="connected-wallet-display" style="display:none; color:#0af; font-family:'Courier New', monospace; font-size:11px; font-weight:bold; letter-spacing:1px; text-shadow:0 0 8px rgba(0,170,255,0.6); border:1px solid rgba(0,170,255,0.3); padding:6px 10px; background:rgba(0,10,20,0.6);"></div>
+        <div id="connected-wallet-display" style="display:none; color:#0af; font-family:'Courier New', monospace; font-size:11px; font-weight:bold; letter-spacing:1px; text-shadow:0 0 8px rgba(0,170,255,0.6); border:1px solid rgba(0,170,255,0.3); padding:6px 10px; background:rgba(0,10,20,0.6);">
+            <span id="cwd-icon">🛡️</span> <span id="cwd-addr"></span> <span id="cwd-bal" style="color:#0f8; margin-left:8px;"></span>
+        </div>
         <button class="phase-btn" id="btn-end-turn" style="padding:10px 15px; display:none !important;">END TURN ▶</button>
       </div>
     </div>
@@ -1313,6 +1314,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   </div>
   <div style="position:absolute; bottom:12px; left:20px; font-family:'Share Tech Mono', monospace; font-size:10px; font-weight:normal; letter-spacing:3px; color:#0af; text-transform:uppercase; z-index:15; pointer-events:none; text-shadow:0 0 5px rgba(0,170,255,0.8);">DEXMOND TECHNOLOGIES Ltd</div>
   
+  <button id="btn-reinvest-d3x" onclick="reinvestD3X()" style="display:none; position:absolute; bottom:145px; right:20px; z-index:100; padding:6px 12px; background:rgba(0,255,136,0.15); border:1px solid #0f8; color:#0f8; font-family:'Courier New', monospace; font-size:11px; font-weight:bold; cursor:pointer; border-radius:4px; transition:all 0.2s; box-shadow:0 0 10px rgba(0,255,136,0.2);">♻️ REINVEST</button>
   <div id="skin-hint-arrow" style="position:absolute; bottom:115px; right:calc(115px + 25vw + 10px); font-size:32px; color:#ff5577; text-shadow:0 0 15px rgba(255,-85,119,0.8); opacity:0; pointer-events:none; z-index:9999; transition:opacity 0.5s; animation:bounceRight 0.5s infinite alternate;">➔</div>
   <button id="btn-toggle-skin" onclick="toggleRedSkin()">🔴 RED SKIN</button>
   <button id="btn-toggle-soundtrack" onclick="toggleSoundtrack()">🎵 SOUNDTRACK</button>
@@ -9666,6 +9668,13 @@ function initWS() {
         break;
       case 'chat':
         appendChat(msg.name,msg.text, 0); break;
+      case 'my_d3x_balance': {
+          const balEl = document.getElementById('cwd-bal');
+          if (balEl && msg.amount !== undefined) {
+              balEl.innerText = "| " + Number(msg.amount).toLocaleString(undefined, { maximumFractionDigits: 1 }) + " D3X";
+          }
+          break;
+      }
       case 'ai_combat_log': {
         const d0Hp = document.getElementById('d0-ai-hp');
         const d1Hp = document.getElementById('d1-ai-hp');
@@ -9878,13 +9887,24 @@ function joinGlobalWar() {
     window.buildFakeStaticMarkers();
   }
   
-  const walletDisp = document.getElementById('connected-wallet-display');
   const reinvestBtn = document.getElementById('btn-reinvest-d3x');
   if (walletDisp && window.pendingSolanaAddress) {
     const addr = window.pendingSolanaAddress;
-    walletDisp.innerHTML = '🛡️ ' + addr.substring(0,4) + '...' + addr.substring(addr.length-4);
+    document.getElementById('cwd-addr').innerText = addr.substring(0,4) + '...' + addr.substring(addr.length-4);
     walletDisp.style.display = 'block';
     if(reinvestBtn) reinvestBtn.style.display = 'block';
+    
+    // Fetch and display balance immediately
+    if (ws && ws.readyState === 1) {
+        ws.send(JSON.stringify({ type: 'get_my_d3x_balance', wallet: addr }));
+    } else {
+        // Wait for connection
+        setTimeout(() => {
+            if (ws && ws.readyState === 1) {
+                ws.send(JSON.stringify({ type: 'get_my_d3x_balance', wallet: addr }));
+            }
+        }, 1000);
+    }
   }
   
   initWS();

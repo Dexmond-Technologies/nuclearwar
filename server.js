@@ -637,6 +637,22 @@ function initWebSockets() {
         
         break;
       }
+      
+      case 'get_my_d3x_balance': {
+          const walletAddr = msg.wallet;
+          if (!walletAddr) break;
+          try {
+              const pub = new web3.PublicKey(walletAddr);
+              const ta = await splToken.getAssociatedTokenAddress(D3X_MINT_ADDRESS, pub);
+              const info = await solanaConnection.getTokenAccountBalance(ta);
+              const bal = info.value.uiAmount || 0;
+              ws.send(JSON.stringify({ type: 'my_d3x_balance', amount: bal }));
+          } catch(e) {
+              // Usually means token account doesn't exist (balance 0)
+              ws.send(JSON.stringify({ type: 'my_d3x_balance', amount: 0 }));
+          }
+          break;
+      }
 
       case 'start_game': {
         // Prevent clearing existing world if already active
