@@ -1378,7 +1378,7 @@ body {
       <div class="dash-dot" style="background:#ff3232"></div>
       <div class="dash-pname" style="color:#ff3232">RAINCLAUDE AI</div>
       <div class="dash-tag">ADVERSARY</div>
-      <div style="position:absolute; top:-2px; right:10px; text-align:right;">
+      <div style="position:absolute; top:-2px; right:60px; text-align:right;">
          <div style="color:#f24; font-family:'Courier New', monospace; font-size:14px; font-weight:bold; text-shadow:0 0 5px #f24;" id="d1-d3x-bal">SYNCING...</div>
          <div style="color:#ccc; font-family:'Courier New', monospace; font-size:9px; letter-spacing:1px; margin-top:2px;" id="d1-d3x-address">LOADING WALLET...</div>
       </div>
@@ -7979,8 +7979,9 @@ function showGreenSkinResourceModal(iso) {
   let metalsHtml = '';
   // Check if we have tailored metal data for this exact country name
   if (METALS_DATA[cName]) {
-    metalsHtml = `<div style="margin-top:20px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px;">
-      <b style="color:#0f8; font-size:13px; display:block; margin-bottom:10px;">★ STATE-CONTROLLED METALS</b>`;
+    metalsHtml = `<div style="margin-top:15px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px;">
+      <b style="color:#0f8; font-size:13px; display:block; margin-bottom:10px;">★ STATE-CONTROLLED METALS</b>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">`;
     METALS_DATA[cName].forEach(m => {
       let tradeHtml = '';
       if (window.greenMarket && window.greenMarket.commodities[m.name]) {
@@ -8007,7 +8008,7 @@ function showGreenSkinResourceModal(iso) {
         ${tradeHtml}
       </div>`;
     });
-    metalsHtml += `</div>`;
+    metalsHtml += `</div></div>`;
   }
   
   const content = `
@@ -8019,7 +8020,7 @@ function showGreenSkinResourceModal(iso) {
       <span style="opacity:0.6;">Owned and managed by:</span><br>
       <b style="font-size:14px; color:#0f8;">${cName} GOVERNMENT</b>
     </div>
-    <div style="padding-right: 5px;">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-right: 5px;">
       <div class="strat-item">
         <div class="strat-item-title" style="color:#fa0;">🛢 Oil (Petroleum)</div>
         <div class="strat-item-desc">State monopolies or direct government control over production (e.g., National Oil Companies).</div>
@@ -8060,8 +8061,8 @@ function showGreenSkinResourceModal(iso) {
         <div class="strat-item-title" style="color:#08f;">💧 Water (Freshwater)</div>
         <div class="strat-item-desc">Governments strictly control extraction, distribution, and ownership.</div>
       </div>
-      ${metalsHtml}
     </div>
+    ${metalsHtml}
   `;
   
   if (typeof openDrawer === 'function') {
@@ -12192,7 +12193,7 @@ function openDrawer(id, titleHtml, bodyHtml) {
   const drawer = document.createElement('div');
   drawer.className = 'strat-drawer';
   if (id === 'intel-layers') drawer.classList.add('intel-mode');
-  if (id === 'arms-ind') drawer.classList.add('centered-mode');
+  if (id === 'arms-ind' || id === 'natural-res') drawer.classList.add('centered-mode');
   drawer.id = 'drawer-' + id;
   drawer.innerHTML = `
     <div class="strat-drawer-title">
