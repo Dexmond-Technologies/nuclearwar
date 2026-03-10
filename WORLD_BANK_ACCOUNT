@@ -1,6 +1,6 @@
 {
   "name": "World Bank",
-  "faction": "Black Skin Central Account",
+  "faction": "Humanity",
   "walletAddress": "d3x_WORLDBANK_000000000000000000",
   "balances": {
     "D3X": 12300000.0
