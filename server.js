@@ -2544,14 +2544,12 @@ async function startServer() {
       
       // Initialize World Bank
       try {
-          const wbDataRaw = await fs.promises.readFile(path.join(__dirname, 'WORLD_BANK_ACCOUNT'), 'utf8');
-          const wbData = JSON.parse(wbDataRaw);
-          const initialBal = wbData.balances && wbData.balances.D3X ? wbData.balances.D3X : 12300000;
+          const wbDefault = { name: "World Bank", faction: "Humanity", commodities: {} };
           await pgPool.query(`
               INSERT INTO commanders (callsign, d3x_balance, portfolio) 
               VALUES ($1, $2, $3) 
               ON CONFLICT (callsign) DO NOTHING
-          `, ['WORLD BANK', initialBal, JSON.stringify(wbData)]);
+          `, ['WORLD BANK', 0, JSON.stringify(wbDefault)]);
           console.log('☢ PostgreSQL Initialized WORLD BANK profile');
       } catch(e) {
           console.error("Failed to inject World Bank into DB:", e.message);
