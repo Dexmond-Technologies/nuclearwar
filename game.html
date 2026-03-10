@@ -10900,6 +10900,9 @@ function animate() {
               if (container.children.length > 5) container.lastChild.remove();
               document.getElementById('d0-crypto-total').innerText = 'VOL: $' + window.geminiCryptoVol.toLocaleString();
           }
+          if (['BUY', 'STAKE', 'ACCUMULATE'].includes(action) && window.socket && window.socket.readyState === WebSocket.OPEN) {
+              window.socket.send(JSON.stringify({ type: 'ai_market_buy', aiName: 'gemini', cost: amt / 1000, itemType: coin }));
+          }
       } else {
           window.claudeCryptoVol += amt;
           const line = document.createElement('div');
@@ -10909,6 +10912,9 @@ function animate() {
               container.prepend(line);
               if (container.children.length > 5) container.lastChild.remove();
               document.getElementById('d1-crypto-total').innerText = 'VOL: $' + window.claudeCryptoVol.toLocaleString();
+          }
+          if (['BUY', 'STAKE', 'ACCUMULATE'].includes(action) && window.socket && window.socket.readyState === WebSocket.OPEN) {
+              window.socket.send(JSON.stringify({ type: 'ai_market_buy', aiName: 'claude', cost: amt / 1000, itemType: coin }));
           }
       }
   }

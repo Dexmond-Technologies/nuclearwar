@@ -783,6 +783,35 @@ function initWebSockets() {
         break;
       }
 
+      case 'ai_market_buy': {
+        if (!pgPool) return;
+        const aiName = msg.aiName; // 'gemini' or 'claude'
+        const cost = msg.cost;
+        const itemType = msg.itemType || 'market_resource';
+        
+        if (!aiName || !cost || cost <= 0) return;
+        
+        let fromWallet = 'NOT_SET';
+        if (aiName === 'gemini' && geminiKeypair) fromWallet = geminiKeypair.publicKey.toBase58();
+        else if (aiName === 'gemini' && process.env.gemini_wallet) fromWallet = process.env.gemini_wallet;
+        else if (aiName === 'claude' && rainclaudeKeypair) fromWallet = rainclaudeKeypair.publicKey.toBase58();
+        else if (aiName === 'claude' && process.env.RAINCLAUDE_SOLANA_WALLET) fromWallet = process.env.RAINCLAUDE_SOLANA_WALLET;
+        
+        if (fromWallet !== 'NOT_SET') {
+          try {
+            await pgPool.query(`
+              INSERT INTO pending_settlements (from_wallet, to_wallet, amount, reason) 
+              VALUES ($1, $2, $3, $4)
+            `, [fromWallet, BURN_ADDRESS.toBase58(), cost, `market_buy_${itemType}`]);
+            console.log(`[AI MARKET] Logged spend of ${cost} D3X by ${aiName} for ${itemType}.`);
+          } catch (err) {
+            console.error('[AI MARKET] DB Error:', err.message);
+          }
+        }
+        break;
+      }
+
+
       case 'datacenter_stake': {
         const callsign = msg.callsign;
         const plan = msg.plan;
