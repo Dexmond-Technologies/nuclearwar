@@ -10805,8 +10805,11 @@ function animate() {
                   
                   bridge.children.forEach(braid => {
                       const posArray = braid.geometry.attributes.position.array;
-                      const phase = time3 * braid.userData.freq1 + braid.userData.phaseOff;
-                      const phase2 = time3 * braid.userData.freq2;
+                      
+                      // Lightning updates 15 times a second to look like snappy zaps
+                      const seedStr = Math.floor(time3 * 15) + braid.userData.braidIdx * 100;
+                      // Pseudo-random hash function for stable jagged offsets per flash
+                      const hash = (n) => (Math.sin(n) * 43758.5453123) - Math.floor(Math.sin(n) * 43758.5453123);
                       
                       for (let i = 0; i <= segments; i++) {
                           const t = i / segments;
@@ -10824,19 +10827,28 @@ function animate() {
                           by += nor.y * arcHeight;
                           bz += nor.z * arcHeight;
                           
-                          // Braid displacement (perpendicular to path)
+                          // Jagged Lightning displacement
                           const dir = new THREE.Vector3(p2.x-p1.x, p2.y-p1.y, p2.z-p1.z).normalize();
                           const up = dir.clone().cross(nor).normalize();
                           const right = dir.clone().cross(up).normalize();
                           
-                          // Taper radius at ends and pulse overall radius
+                          // Taper radius at ends so it connects at the nodes
                           const envelope = Math.sin(t * Math.PI);
-                          const pulse = 1.0 + Math.sin(time3 * 10 + braid.userData.phaseOff) * 0.3;
-                          const r = braid.userData.radius * envelope * pulse;
                           
-                          const dx = Math.cos(phase + t * Math.PI * 4) * r * right.x + Math.sin(phase2 + t * Math.PI * 6) * r * up.x;
-                          const dy = Math.cos(phase + t * Math.PI * 4) * r * right.y + Math.sin(phase2 + t * Math.PI * 6) * r * up.y;
-                          const dz = Math.cos(phase + t * Math.PI * 4) * r * right.z + Math.sin(phase2 + t * Math.PI * 6) * r * up.z;
+                          // Base radius of displacement
+                          const r = 0.5 * envelope; // Jagged amplitude
+                          
+                          // Two orthogonal offsets based on hash
+                          const r1 = (hash(seedStr + i * 2) - 0.5) * r * 2.0;
+                          const r2 = (hash(seedStr + i * 2 + 1) - 0.5) * r * 2.0;
+                          
+                          // Add chaotic large jumps occasionally (like main lightning branches)
+                          const jumpR1 = (hash(seedStr + i * 3) > 0.8) ? (hash(seedStr + i * 4) - 0.5) * r * 4.0 : 0;
+                          const jumpR2 = (hash(seedStr + i * 3) > 0.8) ? (hash(seedStr + i * 5) - 0.5) * r * 4.0 : 0;
+
+                          const dx = (r1 + jumpR1) * right.x + (r2 + jumpR2) * up.x;
+                          const dy = (r1 + jumpR1) * right.y + (r2 + jumpR2) * up.y;
+                          const dz = (r1 + jumpR1) * right.z + (r2 + jumpR2) * up.z;
                           
                           posArray[i*3] = bx + dx;
                           posArray[i*3+1] = by + dy;
