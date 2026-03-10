@@ -1,0 +1,41 @@
+{
+  "name": "Gemini AI",
+  "faction": "Humanity (Allied)",
+  "walletAddress": "D3X_GEMINI_000000000000000000",
+  "balances": {
+    "D3X": 0.0
+  },
+  "commodities": {
+    "Metals": {
+      "Copper": 0,
+      "Lithium": 0,
+      "Rare Earth Elements": 0,
+      "Iron ore": 0,
+      "Gold": 0,
+      "Nickel": 0,
+      "Tin": 0,
+      "Aluminum (Bauxite)": 0,
+      "Aluminum": 0,
+      "Cobalt": 0
+    },
+    "Natural Resources": {
+      "Lumber (Wood)": 0,
+      "Freshwater": 0,
+      "Natural Gas": 0,
+      "Crude Oil": 0,
+      "Wheat": 0
+    },
+    "Tech & Compute Hardware": {
+      "NVIDIA H100 Tensor Core": 0,
+      "NVIDIA A100 80GB": 0,
+      "Google Cloud TPU v5e": 0,
+      "AMD EPYC 9004 CPUs": 0,
+      "DDR5 ECC RAM (128GB)": 0,
+      "Enterprise NVMe SSD (15TB)": 0,
+      "Compute Motherboards (Dual Socket)": 0,
+      "Titanium Grade PSUs (2000W)": 0,
+      "Direct-to-Chip Liquid Cooling Units": 0,
+      "Networking Switches (400GbE)": 0
+    }
+  }
+}

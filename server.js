@@ -1479,11 +1479,20 @@ async function fetchAndBroadcastAIBalances() {
             // Persist the real-time balance back into the RAINCLAUDE_ACCOUNT file
             const fs = require('fs');
             const path = require('path');
+            
             const rcPath = path.join(__dirname, 'RAINCLAUDE_ACCOUNT');
             if (fs.existsSync(rcPath)) {
                 let rcData = JSON.parse(fs.readFileSync(rcPath, 'utf8'));
                 rcData.balances.D3X = claudeBalance;
                 fs.writeFileSync(rcPath, JSON.stringify(rcData, null, 2));
+            }
+            
+            const gemPath = path.join(__dirname, 'GEMINI_BANK_AND_TRADING_ACCOUNT');
+            if (fs.existsSync(gemPath)) {
+                let gemData = JSON.parse(fs.readFileSync(gemPath, 'utf8'));
+                gemData.balances.D3X = geminiBalance;
+                if (authorityKeypair) gemData.walletAddress = authorityKeypair.publicKey.toBase58();
+                fs.writeFileSync(gemPath, JSON.stringify(gemData, null, 2));
             }
 
         } catch(e) { console.error('Claude balance error:', e.message); claudeBalance = 0; }
