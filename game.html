@@ -10824,7 +10824,311 @@ function createSatelliteCanvas(color) {
   return c;
 }
 
-function spawnAmbients() {
+// =====================================================================
+// WTR SKIN CINEMATIC DRONE BATTLE LOGIC
+// =====================================================================
+window.droneBattleState = {
+    active: false,
+    drones: [],
+    missiles: [],
+    explosions: [],
+    lasers: [],
+    buildingsGroup: new THREE.Group()
+};
+
+function spawnDroneCity() {
+    if (!window.countryData || Object.keys(window.countryData).length < 3) return;
+    const isos = Object.keys(window.countryData);
+    
+    if (window.droneBattleState.buildingsGroup.parent) {
+        scene.remove(window.droneBattleState.buildingsGroup);
+    }
+    window.droneBattleState.buildingsGroup = new THREE.Group();
+    
+    // Spawn 5 dense skyscraper clusters
+    for (let c = 0; c < 5; c++) {
+        const centerIso = isos[Math.floor(Math.random() * isos.length)];
+        const lat = window.countryData[centerIso].lat;
+        const lon = window.countryData[centerIso].lon;
+        const centerVec = ll2v(lat, lon, GLOBE_R);
+        
+        const numBuildings = 30 + Math.floor(Math.random() * 20);
+        for (let i = 0; i < numBuildings; i++) {
+            // Random offset tangent to surface
+            const offsetDir = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize();
+            offsetDir.cross(centerVec.clone().normalize());
+            
+            // Concentrate closer to center
+            const distance = Math.pow(Math.random(), 2) * 0.15; 
+            const bPos = centerVec.clone().add(offsetDir.multiplyScalar(distance)).normalize().multiplyScalar(GLOBE_R);
+            
+            const width = 0.006 + Math.random() * 0.012;
+            const depth = 0.006 + Math.random() * 0.012;
+            const height = 0.03 + Math.random() * 0.18; // Variation in tallness
+            
+            const bGeo = new THREE.BoxGeometry(width, height, depth);
+            bGeo.translate(0, height / 2, 0); // Origin at bottom
+            
+            const isHologram = Math.random() > 0.7;
+            const bMat = new THREE.MeshBasicMaterial({
+                color: isHologram ? 0x004488 : 0x112233,
+                transparent: true,
+                opacity: isHologram ? 0.4 : 0.85,
+                wireframe: isHologram
+            });
+            
+            const building = new THREE.Mesh(bGeo, bMat);
+            building.position.copy(bPos);
+            building.lookAt(new THREE.Vector3(0,0,0));
+            building.rotateX(-Math.PI/2); // Point straight up from globe
+            
+            // Sci-fi Glowing Edges
+            const edges = new THREE.EdgesGeometry(bGeo);
+            const lineMat = new THREE.LineBasicMaterial({
+                color: isHologram ? 0x00ffff : 0x0066aa, 
+                transparent: true, 
+                opacity: 0.5, 
+                blending: THREE.AdditiveBlending
+            });
+            const outline = new THREE.LineSegments(edges, lineMat);
+            building.add(outline);
+            
+            window.droneBattleState.buildingsGroup.add(building);
+        }
+    }
+    scene.add(window.droneBattleState.buildingsGroup);
+    window.droneBattleState.buildingsGroup.visible = false; // Hidden until WTR skin active
+}
+
+function initDroneBattle() {
+    spawnDroneCity();
+    
+    const factions = [
+        { name: 'WHITE', color: 0xffffff, count: 100 },
+        { name: 'RED', color: 0xff0044, count: 50 },  // Rainclaude red
+        { name: 'BLUE', color: 0x0088ff, count: 50 }   // Gemini blue
+    ];
+    
+    // sleek forward-facing cone primitive
+    const droneGeo = new THREE.ConeGeometry(0.005, 0.02, 4);
+    droneGeo.rotateX(Math.PI/2); // point tip along +Z
+    
+    factions.forEach(faction => {
+        const mat = new THREE.MeshBasicMaterial({color: faction.color, transparent: true, opacity: 0.95});
+        for (let i = 0; i < faction.count; i++) {
+            const drone = new THREE.Mesh(droneGeo, mat);
+            
+            // Random start position safely above ground
+            const startVec = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
+            drone.position.copy(startVec.multiplyScalar(GLOBE_R + 0.05 + Math.random()*0.1));
+            
+            const roles = ['Fighter', 'Fighter', 'Bomber', 'Scout']; // Weighted to Fighter
+            const role = roles[Math.floor(Math.random() * roles.length)];
+            
+            let speed, turnSpeed, hp;
+            if (role === 'Fighter') { speed = 0.08; turnSpeed = 0.05; hp = 10; }
+            else if (role === 'Bomber') { speed = 0.04; turnSpeed = 0.02; hp = 25; drone.scale.set(1.5, 1.5, 1.5); }
+            else { speed = 0.12; turnSpeed = 0.08; hp = 5; drone.scale.set(0.7, 0.7, 0.7); } 
+            
+            drone.visible = false; // Hidden until WTR skin active
+            scene.add(drone);
+            
+            // Random tangental velocity
+            const up = drone.position.clone().normalize();
+            const axis = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
+            let velocity = new THREE.Vector3().crossVectors(up, axis).normalize().multiplyScalar(speed);
+            if (velocity.lengthSq() < 0.001) velocity = new THREE.Vector3(0,1,0).cross(up).normalize().multiplyScalar(speed); // Fallback
+            
+            window.droneBattleState.drones.push({
+                mesh: drone,
+                faction: faction.name,
+                role: role,
+                speed: speed,
+                turnSpeed: turnSpeed,
+                hp: hp,
+                maxHp: hp,
+                velocity: velocity,
+                cooldown: Math.random() * 3, // Initial spread
+                target: null
+            });
+        }
+    });
+    window.droneBattleState.active = true;
+}
+
+function updateDroneBattle(dt) {
+    if (!window.droneBattleState.active || !window.droneBattleState.drones) return;
+    
+    const isWTR = window.currentSkinIndex === 5;
+    window.droneBattleState.buildingsGroup.visible = isWTR;
+    
+    window.droneBattleState.drones.forEach(d => {
+        d.mesh.visible = isWTR;
+        if (!isWTR) return;
+        
+        let closestEnemy = null;
+        let minDistSq = Infinity;
+        let separation = new THREE.Vector3();
+        let alignment = new THREE.Vector3();
+        let cohesion = new THREE.Vector3();
+        let neighborCount = 0;
+        
+        const pos = d.mesh.position;
+        
+        window.droneBattleState.drones.forEach(other => {
+            if (d === other) return;
+            const distSq = pos.distanceToSquared(other.mesh.position);
+            if (distSq < 0.05) { 
+                if (d.faction === other.faction) {
+                    if (distSq < 0.005) { 
+                         const push = pos.clone().sub(other.mesh.position).normalize().divideScalar(Math.sqrt(distSq));
+                         separation.add(push);
+                    }
+                    alignment.add(other.velocity);
+                    cohesion.add(other.mesh.position);
+                    neighborCount++;
+                } else if (d.faction !== 'WHITE' && other.faction !== 'WHITE') {
+                    if (distSq < minDistSq) {
+                        minDistSq = distSq;
+                        closestEnemy = other;
+                    }
+                }
+            }
+        });
+        
+        let desiredVelocity = d.velocity.clone();
+        if (neighborCount > 0) {
+            alignment.divideScalar(neighborCount).normalize();
+            cohesion.divideScalar(neighborCount).sub(pos).normalize();
+            desiredVelocity.add(separation.multiplyScalar(0.05));
+            desiredVelocity.add(alignment.multiplyScalar(0.02));
+            desiredVelocity.add(cohesion.multiplyScalar(0.01));
+        }
+        
+        if (closestEnemy) {
+            d.target = closestEnemy;
+            const toEnemy = closestEnemy.mesh.position.clone().sub(pos).normalize();
+            desiredVelocity.add(toEnemy.multiplyScalar(0.1)); 
+        } else {
+            d.target = null;
+        }
+        
+        const altitude = GLOBE_R + 0.05 + (d.role === 'Bomber' ? 0.05 : 0.0);
+        
+        desiredVelocity.normalize().multiplyScalar(d.speed);
+        d.velocity.lerp(desiredVelocity, d.turnSpeed * (dt*60));
+        
+        const up = pos.clone().normalize();
+        d.velocity.projectOnPlane(up).normalize().multiplyScalar(d.speed);
+        pos.add(d.velocity.clone().multiplyScalar(dt));
+        pos.normalize().multiplyScalar(altitude);
+        
+        const right = new THREE.Vector3().crossVectors(d.velocity, up).normalize();
+        if (right.lengthSq() < 0.001) right.set(1,0,0).cross(up).normalize();
+        const fwd = new THREE.Vector3().crossVectors(up, right).normalize();
+        const m = new THREE.Matrix4().makeBasis(right, up, fwd);
+        d.mesh.quaternion.setFromRotationMatrix(m);
+        d.mesh.rotateZ(Math.sin(Date.now()*0.005 + d.mesh.id) * 0.3);
+        
+        d.cooldown -= dt;
+        if (d.target && minDistSq < 0.01 && d.cooldown <= 0) {
+            if (d.role === 'Bomber') {
+                d.cooldown = 4.0;
+                spawnDroneMissile(pos.clone(), d.target.mesh);
+            } else {
+                d.cooldown = 0.5;
+                spawnDroneLaser(pos.clone(), d.target.mesh.position.clone(), d.faction);
+                if (Math.random() < 0.3) d.target.hp -= 2;
+            }
+        }
+        
+        if (d.hp <= 0) {
+            spawnDroneExplosion(pos.clone());
+            const startVec = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
+            pos.copy(startVec.multiplyScalar(altitude));
+            d.hp = d.maxHp;
+            d.target = null;
+        }
+    });
+    
+    if (!isWTR) return;
+    
+    for (let i = window.droneBattleState.lasers.length - 1; i >= 0; i--) {
+        const l = window.droneBattleState.lasers[i];
+        l.life -= dt * 5;
+        if (l.life <= 0) { scene.remove(l.mesh); window.droneBattleState.lasers.splice(i, 1); }
+        else l.mesh.material.opacity = l.life;
+    }
+    
+    for (let i = window.droneBattleState.missiles.length - 1; i >= 0; i--) {
+        const m = window.droneBattleState.missiles[i];
+        if (!m.target || !m.target.parent) { 
+             scene.remove(m.mesh); window.droneBattleState.missiles.splice(i, 1); continue;
+        }
+        const toTarget = m.target.position.clone().sub(m.mesh.position).normalize();
+        m.velocity.lerp(toTarget.multiplyScalar(0.12), 0.1 * (dt*60));
+        m.mesh.position.add(m.velocity.clone().multiplyScalar(dt));
+        
+        const tUp = m.mesh.position.clone().normalize();
+        const tRight = new THREE.Vector3().crossVectors(m.velocity, tUp).normalize();
+        const tFwd = new THREE.Vector3().crossVectors(tUp, tRight).normalize();
+        m.mesh.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(tRight, tUp, tFwd));
+        
+        if (dt > 0 && Math.random() > 0.5) spawnDroneSmoke(m.mesh.position.clone());
+        
+        if (m.mesh.position.distanceToSquared(m.target.position) < 0.0005) {
+            spawnDroneExplosion(m.mesh.position.clone());
+            scene.remove(m.mesh); window.droneBattleState.missiles.splice(i, 1);
+            const hitDrone = window.droneBattleState.drones.find(d => d.mesh === m.target);
+            if (hitDrone) hitDrone.hp -= 15;
+        }
+    }
+    
+    for (let i = window.droneBattleState.explosions.length - 1; i >= 0; i--) {
+        const e = window.droneBattleState.explosions[i];
+        e.life -= dt * e.decayMs;
+        if (e.life <= 0) { scene.remove(e.mesh); window.droneBattleState.explosions.splice(i, 1); }
+        else {
+            const s = e.maxScale * (1 - Math.pow(1 - e.life, 3)); 
+            e.mesh.scale.set(s,s,s);
+            e.mesh.material.opacity = e.life;
+        }
+    }
+}
+
+function spawnDroneLaser(start, end, faction) {
+    const geo = new THREE.BufferGeometry().setFromPoints([start, end]);
+    const color = faction === 'RED' ? 0xff0044 : 0x00aaff;
+    const mat = new THREE.LineBasicMaterial({color: color, transparent: true, opacity: 1.0, blending: THREE.AdditiveBlending});
+    const line = new THREE.Line(geo, mat);
+    scene.add(line);
+    window.droneBattleState.lasers.push({mesh: line, life: 1.0});
+}
+
+function spawnDroneMissile(pos, targetMesh) {
+    const geo = new THREE.ConeGeometry(0.002, 0.01, 3);
+    geo.rotateX(Math.PI/2);
+    const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({color: 0xffaa00}));
+    mesh.position.copy(pos);
+    scene.add(mesh);
+    window.droneBattleState.missiles.push({mesh: mesh, target: targetMesh, velocity: pos.clone().normalize().multiplyScalar(0.05)});
+}
+
+function spawnDroneExplosion(pos) {
+    const mat = new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(createGlowCanvas('#ffaa00')), color: 0xffffff, transparent: true, blending: THREE.AdditiveBlending });
+    const sprite = new THREE.Sprite(mat);
+    sprite.position.copy(pos);
+    scene.add(sprite);
+    window.droneBattleState.explosions.push({ mesh: sprite, life: 1.0, decayMs: 2.0, maxScale: 0.15 });
+}
+
+function spawnDroneSmoke(pos) {
+    const mat = new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(createGlowCanvas('#666666')), color: 0x888888, transparent: true, opacity: 0.5 });
+    const sprite = new THREE.Sprite(mat);
+    sprite.position.copy(pos);
+    scene.add(sprite);
+    window.droneBattleState.explosions.push({ mesh: sprite, life: 1.0, decayMs: 1.0, maxScale: 0.05 });
+}
   const texJet = new THREE.CanvasTexture(createJetCanvas());
   const texSub = new THREE.CanvasTexture(createSubCanvas());
   const texShip = new THREE.CanvasTexture(createShipCanvas());
@@ -10960,6 +11264,8 @@ function animate() {
   requestAnimationFrame(animate);
   const dt=Math.min(clock3.getDelta(),.05);
   time3+=dt;
+  
+  updateDroneBattle(dt);
 
   // Animate Satellites & Lasers for all non-LIVE skins
   if (window.currentSkinIndex && window.currentSkinIndex > 0) {
@@ -12110,6 +12416,7 @@ setTimeout(() => {
   }
 }, 8000);
 spawnAmbients();
+initDroneBattle();
 animate();
 
 // =====================================================================
