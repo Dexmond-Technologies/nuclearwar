@@ -1136,6 +1136,7 @@ body {
         if (existing) existing.remove();
         
         document.body.insertAdjacentHTML('beforeend', logHtml);
+        setTimeout(() => { makeDraggable(document.getElementById('market-override-modal')); }, 50);
       };
       
       window.openAIWalletScreen = function(data) {
@@ -1207,6 +1208,7 @@ body {
               
           </div>`;
           document.body.insertAdjacentHTML('beforeend', uiText);
+          setTimeout(() => { makeDraggable(document.getElementById('aiwallet-override-modal')); }, 50);
       };
     </script>
       </div>
