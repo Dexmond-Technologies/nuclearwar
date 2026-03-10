@@ -1695,34 +1695,35 @@ setInterval(() => { geminiDailySpent = 0; claudeDailySpent = 0; console.log('[AI
 // Full commodity catalog (items the AIs can autonomously purchase)
 const AI_MARKET_CATALOG = [
   // Metals
-  { name: 'Iron Ore', category: 'Metals', basePrice: 120, unit: 'MT' },
-  { name: 'Copper', category: 'Metals', basePrice: 9500, unit: 'MT' },
-  { name: 'Aluminium', category: 'Metals', basePrice: 2300, unit: 'MT' },
-  { name: 'Gold', category: 'Metals', basePrice: 62000, unit: 'oz' },
-  { name: 'Silver', category: 'Metals', basePrice: 750, unit: 'oz' },
-  { name: 'Nickel', category: 'Metals', basePrice: 16800, unit: 'MT' },
-  { name: 'Lithium', category: 'Metals', basePrice: 23000, unit: 'MT' },
-  { name: 'Cobalt', category: 'Metals', basePrice: 33000, unit: 'MT' },
-  { name: 'Titanium', category: 'Metals', basePrice: 11000, unit: 'MT' },
-  { name: 'Rare Earths', category: 'Metals', basePrice: 87000, unit: 'MT' },
-  // Energy
-  { name: 'Crude Oil', category: 'Energy', basePrice: 82, unit: 'barrel' },
-  { name: 'Natural Gas', category: 'Energy', basePrice: 2800, unit: 'MMBtu' },
-  { name: 'Coal', category: 'Energy', basePrice: 130, unit: 'MT' },
-  { name: 'Uranium', category: 'Energy', basePrice: 91, unit: 'lb' },
-  { name: 'Solar Panels', category: 'Energy', basePrice: 8500, unit: 'kW' },
-  // Agriculture
-  { name: 'Wheat', category: 'Agriculture', basePrice: 220, unit: 'MT' },
-  { name: 'Corn', category: 'Agriculture', basePrice: 185, unit: 'MT' },
-  { name: 'Soy Beans', category: 'Agriculture', basePrice: 420, unit: 'MT' },
-  { name: 'Rice', category: 'Agriculture', basePrice: 525, unit: 'MT' },
-  { name: 'Cotton', category: 'Agriculture', basePrice: 1800, unit: 'bale' },
-  // Tech
-  { name: 'Silicon Wafers', category: 'Tech', basePrice: 18000, unit: 'unit' },
-  { name: 'GPU Compute Node', category: 'Tech', basePrice: 32000, unit: 'unit' },
-  { name: 'Network Switches', category: 'Tech', basePrice: 7500, unit: 'unit' },
-  { name: 'SSD Storage (1TB)', category: 'Tech', basePrice: 85, unit: 'unit' },
-  { name: 'RAM (64GB)', category: 'Tech', basePrice: 340, unit: 'unit' },
+  { name: 'Copper', category: 'Metals', basePrice: 8.50 },
+  { name: 'Lithium', category: 'Metals', basePrice: 35.00 },
+  { name: 'Rare Earth Elements', category: 'Metals', basePrice: 120.00 },
+  { name: 'Iron ore', category: 'Metals', basePrice: 1.20 },
+  { name: 'Gold', category: 'Metals', basePrice: 2150.00 },
+  { name: 'Nickel', category: 'Metals', basePrice: 18.50 },
+  { name: 'Tin', category: 'Metals', basePrice: 27.00 },
+  { name: 'Aluminum (Bauxite)', category: 'Metals', basePrice: 2.50 },
+  { name: 'Aluminum', category: 'Metals', basePrice: 4.80 },
+  { name: 'Cobalt', category: 'Metals', basePrice: 28.00 },
+  
+  // Natural Resources
+  { name: 'Lumber (Wood)', category: 'Natural Resources', basePrice: 0.50 },
+  { name: 'Freshwater', category: 'Natural Resources', basePrice: 0.10 },
+  { name: 'Natural Gas', category: 'Natural Resources', basePrice: 3.50 },
+  { name: 'Crude Oil', category: 'Natural Resources', basePrice: 78.50 },
+  { name: 'Wheat', category: 'Natural Resources', basePrice: 0.60 },
+  
+  // Tech & Compute Hardware
+  { name: 'NVIDIA H100 Tensor Core', category: 'Tech & Compute Hardware', basePrice: 35000.00 },
+  { name: 'NVIDIA A100 80GB', category: 'Tech & Compute Hardware', basePrice: 12000.00 },
+  { name: 'Google Cloud TPU v5e', category: 'Tech & Compute Hardware', basePrice: 9500.00 },
+  { name: 'AMD EPYC 9004 CPUs', category: 'Tech & Compute Hardware', basePrice: 4500.00 },
+  { name: 'DDR5 ECC RAM (128GB)', category: 'Tech & Compute Hardware', basePrice: 380.00 },
+  { name: 'Enterprise NVMe SSD (15TB)', category: 'Tech & Compute Hardware', basePrice: 1250.00 },
+  { name: 'Compute Motherboards (Dual Socket)', category: 'Tech & Compute Hardware', basePrice: 1100.00 },
+  { name: 'Titanium Grade PSUs (2000W)', category: 'Tech & Compute Hardware', basePrice: 550.00 },
+  { name: 'Direct-to-Chip Liquid Cooling Units', category: 'Tech & Compute Hardware', basePrice: 5500.00 },
+  { name: 'Networking Switches (400GbE)', category: 'Tech & Compute Hardware', basePrice: 18000.00 }
 ];
 
 async function runAIMarketBuying() {
@@ -1776,13 +1777,22 @@ async function runAIMarketBuying() {
         if (!geminiAccount.balances) geminiAccount.balances = { D3X: 0 };
         geminiAccount.balances.D3X = Math.max(0, geminiAccount.balances.D3X - cost);
         
-        if (!geminiAccount.commodities) geminiAccount.commodities = {};
-        if (!geminiAccount.commodities[item.category]) geminiAccount.commodities[item.category] = {};
+        if (!geminiAccount.portfolio) geminiAccount.portfolio = { commodities: {}, tradeLogs: [] };
         
-        if (!geminiAccount.commodities[item.category][item.name]) {
-            geminiAccount.commodities[item.category][item.name] = 0;
+        if (!geminiAccount.portfolio.commodities[item.name]) {
+            geminiAccount.portfolio.commodities[item.name] = { shares: 0, avgCost: 0, totalSpent: 0 };
         }
-        geminiAccount.commodities[item.category][item.name] += units;
+        
+        let c = geminiAccount.portfolio.commodities[item.name];
+        let totalShares = c.shares + units;
+        let newTotalSpent = c.totalSpent + cost;
+        c.avgCost = newTotalSpent / totalShares;
+        c.totalSpent = newTotalSpent;
+        c.shares += units;
+        
+        const tString = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
+        geminiAccount.portfolio.tradeLogs.push(`[${tString}] BOUGHT ${units} ${item.name} for ${cost.toLocaleString()} D3X`);
+        if (geminiAccount.portfolio.tradeLogs.length > 50) geminiAccount.portfolio.tradeLogs.shift();
     }
 
     const gemFromWallet = geminiKeypair ? geminiKeypair.publicKey.toBase58() : (process.env.gemini_wallet || 'GEMINI_NOT_SET');
@@ -1806,13 +1816,22 @@ async function runAIMarketBuying() {
         if (!claudeAccount.balances) claudeAccount.balances = { D3X: 0 };
         claudeAccount.balances.D3X = Math.max(0, claudeAccount.balances.D3X - cost);
         
-        if (!claudeAccount.commodities) claudeAccount.commodities = {};
-        if (!claudeAccount.commodities[item.category]) claudeAccount.commodities[item.category] = {};
+        if (!claudeAccount.portfolio) claudeAccount.portfolio = { commodities: {}, tradeLogs: [] };
         
-        if (!claudeAccount.commodities[item.category][item.name]) {
-            claudeAccount.commodities[item.category][item.name] = 0;
+        if (!claudeAccount.portfolio.commodities[item.name]) {
+            claudeAccount.portfolio.commodities[item.name] = { shares: 0, avgCost: 0, totalSpent: 0 };
         }
-        claudeAccount.commodities[item.category][item.name] += units;
+        
+        let c = claudeAccount.portfolio.commodities[item.name];
+        let totalShares = c.shares + units;
+        let newTotalSpent = c.totalSpent + cost;
+        c.avgCost = newTotalSpent / totalShares;
+        c.totalSpent = newTotalSpent;
+        c.shares += units;
+        
+        const tString = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
+        claudeAccount.portfolio.tradeLogs.push(`[${tString}] BOUGHT ${units} ${item.name} for ${cost.toLocaleString()} D3X`);
+        if (claudeAccount.portfolio.tradeLogs.length > 50) claudeAccount.portfolio.tradeLogs.shift();
     }
     
     const claudeFromWallet = rainclaudeKeypair ? rainclaudeKeypair.publicKey.toBase58() : 'CLAUDE_NOT_SET';

@@ -9943,6 +9943,37 @@ function initWS() {
             }
         } catch(e) { console.error("Error loading portfolio:", e); }
         break;
+      case 'ai_market_purchases':
+        if (!window.greenMarket || !window.greenMarket.commodities) break;
+        if (msg.buys && msg.buys.length > 0) {
+            msg.buys.forEach(buy => {
+                const c = window.greenMarket.commodities[buy.item];
+                if (c) {
+                    // AI purchase slightly drives up demand/price
+                    c.price *= 1.005;
+                    
+                    const tString = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
+                    const aiNameUi = buy.aiName === 'gemini' ? '<span style="color:#0af">GEMINI AI</span>' : '<span style="color:#fa0">RAINCLAUDE</span>';
+                    
+                    // Add public log to Green Market ledger
+                    window.greenMarket.tradeLogs.push(`[${tString}] ${aiNameUi} <span style="color:#0f8">BOUGHT</span> ${buy.units} ${buy.item} for ${buy.cost.toLocaleString()} D3X`);
+                    if (window.greenMarket.tradeLogs.length > 50) window.greenMarket.tradeLogs.shift();
+                }
+                
+                // Print to terminal if looking at the Cyber Simulation log
+                const termBox = document.getElementById('d1-reasoning');
+                if (termBox && window.currentSkinIndex === 2) {
+                    const aiNamePlain = buy.aiName === 'gemini' ? 'GEMINI' : 'RAINCLAUDE';
+                    const div = document.createElement('div');
+                    div.innerHTML = `> [MARKET] <span style="color:#fff">${aiNamePlain}</span> <span style="color:#0f8">BOUGHT</span> ${buy.units}x ${buy.item} @ ${buy.cost.toLocaleString()} D3X`;
+                    termBox.appendChild(div);
+                    if (termBox.childElementCount > 30) termBox.removeChild(termBox.firstChild);
+                    termBox.scrollTop = termBox.scrollHeight;
+                }
+            });
+            if (typeof updateGreenMarket === 'function') updateGreenMarket();
+        }
+        break;
       case 'd3x_reward':
         if (typeof setLog === 'function') {
           setLog(`🎁 AIRDROP REWARD: ${msg.message}`);
