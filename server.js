@@ -738,8 +738,21 @@ function initWebSockets() {
             INSERT INTO commanders (callsign, last_seen) 
             VALUES ($1, NOW()) 
             ON CONFLICT (callsign) DO UPDATE SET last_seen = NOW() 
-            RETURNING attacks, damage
+            RETURNING attacks, damage, portfolio
           `, [callsign]);
+          
+          ws.send(JSON.stringify({
+            type: 'commander_stats',
+            stats: { attacks: res.rows[0].attacks, damage: parseInt(res.rows[0].damage) }
+          }));
+          
+          // If the user has a saved portfolio, send it over
+          if (res.rows[0].portfolio) {
+              ws.send(JSON.stringify({
+                  type: 'portfolio_data',
+                  data: res.rows[0].portfolio
+              }));
+          }
           
           ws.send(JSON.stringify({
             type: 'commander_stats',
@@ -987,6 +1000,19 @@ function initWebSockets() {
           }
         } catch (e) {
           console.error('DB Error on human_combat_support:', e.message);
+        }
+        break;
+      }
+      
+      case 'save_portfolio': {
+        const callsign = msg.callsign;
+        const portfolioData = msg.portfolio;
+        if (!pgPool || !callsign || !portfolioData) break;
+        try {
+            await pgPool.query(`UPDATE commanders SET portfolio = $1 WHERE callsign = $2`, [portfolioData, callsign]);
+            // console.log(`[MARKET] Saved updated portfolio for Commander ${callsign}`);
+        } catch (e) {
+            console.error('DB Error on save_portfolio:', e.message);
         }
         break;
       }
@@ -1495,6 +1521,7 @@ async function startServer() {
       try {
         await pgPool.query(`ALTER TABLE commanders ADD COLUMN IF NOT EXISTS last_d3x_claim TIMESTAMPTZ`);
         await pgPool.query(`ALTER TABLE commanders ADD COLUMN IF NOT EXISTS pending_d3x INTEGER DEFAULT 0`);
+        await pgPool.query(`ALTER TABLE commanders ADD COLUMN IF NOT EXISTS portfolio JSONB`);
         console.log('☢ D3X Schema Migration successful');
       } catch(e) { /* Col exists */ }
 

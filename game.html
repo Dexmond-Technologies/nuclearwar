@@ -7664,6 +7664,18 @@ window.tradeGreenMetal = function(metalName, amount) {
   updateGreenMarket();
   if (typeof updateDashboard === 'function') updateDashboard();
 
+  // 💰 PERSIST PORTFOLIO TO DB ON EVERY TRADE
+  if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({
+          type: 'save_portfolio',
+          callsign: window.myCallsign || GS.playerCallsign,
+          portfolio: {
+              commodities: window.greenMarket.commodities,
+              tradeLogs: window.greenMarket.tradeLogs
+          }
+      }));
+  }
+
   // Sync the top-right wallet balance UI
   const balEl = document.getElementById('cwd-bal');
   if (balEl) {
@@ -9878,6 +9890,26 @@ function initWS() {
           // Fallback fetch if stats were omitted in standard payload
           ws.send(JSON.stringify({ type: 'get_commander_stats', callsign: msg.name }));
         }
+        break;
+      case 'portfolio_data':
+        try {
+            if (msg.data && typeof msg.data === 'object' && msg.data.commodities) {
+                // Merge loaded portfolio into live market prices
+                if (!window.greenMarket) window.greenMarket = { commodities: {}, tradeLogs: [] };
+                Object.keys(msg.data.commodities).forEach(k => {
+                    if (window.greenMarket.commodities[k]) {
+                        window.greenMarket.commodities[k].shares = msg.data.commodities[k].shares || 0;
+                        window.greenMarket.commodities[k].avgCost = msg.data.commodities[k].avgCost || 0;
+                        window.greenMarket.commodities[k].totalSpent = msg.data.commodities[k].totalSpent || 0;
+                    }
+                });
+                if (msg.data.tradeLogs) window.greenMarket.tradeLogs = msg.data.tradeLogs;
+                console.log("🟢 [MARKET] Loaded persistent user portfolio from DB.");
+                if (document.getElementById('green-market-modal').style.display === 'flex') {
+                    renderGreenMarketList();
+                }
+            }
+        } catch(e) { console.error("Error loading portfolio:", e); }
         break;
       case 'd3x_reward':
         if (typeof setLog === 'function') {
