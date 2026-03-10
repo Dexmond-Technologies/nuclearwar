@@ -660,30 +660,51 @@ function initWebSockets() {
       case 'get_my_d3x_balance': {
           const walletAddr = msg.wallet;
           if (!walletAddr) break;
-          // 1. Check if the user has a saved off-chain ledger balance from previous G-Market trades
+          
+          let liveOnChainBal = 0;
+          try {
+              const pub = new web3.PublicKey(walletAddr);
+              const ta = await splToken.getAssociatedTokenAddress(D3X_MINT_ADDRESS, pub);
+              const info = await solanaConnection.getTokenAccountBalance(ta);
+              liveOnChainBal = info.value.uiAmount || 0;
+          } catch(e) {
+              // Usually means token account doesn't exist yet
+              liveOnChainBal = 0;
+          }
+
+          // Merge live Solana deposits into the internal game ledger
           try {
               if (pgPool) {
                   const res = await pgPool.query(`SELECT portfolio FROM commanders WHERE callsign = $1`, [walletAddr]);
-                  if (res.rows.length > 0 && res.rows[0].portfolio && res.rows[0].portfolio.localD3XBalance !== undefined) {
-                      ws.send(JSON.stringify({ type: 'my_d3x_balance', amount: res.rows[0].portfolio.localD3XBalance }));
-                      break; // internal balance is found and prioritized
+                  if (res.rows.length > 0 && res.rows[0].portfolio) {
+                      let port = res.rows[0].portfolio;
+                      let lastKnown = port.lastKnownOnChainBalance || liveOnChainBal;
+                      let localLedger = port.localD3XBalance !== undefined ? port.localD3XBalance : liveOnChainBal;
+                      
+                      // If the user acquired MORE tokens on-chain since last save, add the difference to their buying power
+                      if (liveOnChainBal > lastKnown) {
+                          localLedger += (liveOnChainBal - lastKnown);
+                      } else if (liveOnChainBal < lastKnown) {
+                          // If they withdrew on-chain, subtract buying power (clamp to 0)
+                          localLedger = Math.max(0, localLedger - (lastKnown - liveOnChainBal));
+                      }
+                      
+                      // Auto-update the portfolio with the newly synced tracking watermark
+                      port.lastKnownOnChainBalance = liveOnChainBal;
+                      port.localD3XBalance = localLedger;
+                      await pgPool.query(`UPDATE commanders SET portfolio = $1 WHERE callsign = $2`, [port, walletAddr]);
+                      
+                      ws.send(JSON.stringify({ type: 'my_d3x_balance', amount: localLedger }));
+                      break; 
                   }
               }
           } catch(e) {
               console.error('get_my_d3x_balance DB Error:', e.message);
           }
           
-          // 2. Fallback to on-chain SOL SPL query for new sign-ins
-          try {
-              const pub = new web3.PublicKey(walletAddr);
-              const ta = await splToken.getAssociatedTokenAddress(D3X_MINT_ADDRESS, pub);
-              const info = await solanaConnection.getTokenAccountBalance(ta);
-              const bal = info.value.uiAmount || 0;
-              ws.send(JSON.stringify({ type: 'my_d3x_balance', amount: bal }));
-          } catch(e) {
-              // Usually means token account doesn't exist (balance 0)
-              ws.send(JSON.stringify({ type: 'my_d3x_balance', amount: 0 }));
-          }
+          // Fallback if no portfolio exists yet
+          ws.send(JSON.stringify({ type: 'my_d3x_balance', amount: liveOnChainBal }));
+          
           break;
       }
 
@@ -1085,7 +1106,18 @@ function initWebSockets() {
         const portfolioData = msg.portfolio;
         if (!pgPool || !callsign || !portfolioData) break;
         try {
-            await pgPool.query(`UPDATE commanders SET portfolio = $1 WHERE callsign = $2`, [portfolioData, callsign]);
+            // First fetch the existing portfolio to avoid wiping internal server properties
+            const res = await pgPool.query(`SELECT portfolio FROM commanders WHERE callsign = $1`, [callsign]);
+            let finalPortfolio = portfolioData;
+            
+            if (res.rows.length > 0 && res.rows[0].portfolio) {
+                finalPortfolio = {
+                    ...res.rows[0].portfolio,
+                    ...portfolioData // Let client override commodities, logs, and localD3XBalance
+                };
+            }
+            
+            await pgPool.query(`UPDATE commanders SET portfolio = $1 WHERE callsign = $2`, [finalPortfolio, callsign]);
             // console.log(`[MARKET] Saved updated portfolio for Commander ${callsign}`);
         } catch (e) {
             console.error('DB Error on save_portfolio:', e.message);
