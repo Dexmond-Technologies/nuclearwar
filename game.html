@@ -4615,7 +4615,7 @@ function initWorldBank() {
   const labelTex = new THREE.CanvasTexture(c);
   const labelMat = new THREE.SpriteMaterial({ map: labelTex, transparent: true, depthTest: false });
   const labelSprite = new THREE.Sprite(labelMat);
-  labelSprite.scale.set(0.3, 0.075, 1);
+  labelSprite.scale.set(0.27, 0.0675, 0.9); // reduced by 10% from 0.3, 0.075, 1
   labelSprite.position.set(0, 0.28, 0);
   building.add(labelSprite);
 
