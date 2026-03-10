@@ -10909,26 +10909,67 @@ function initDroneBattle() {
         { name: 'BLUE', color: 0x0088ff, count: 5 }   // Gemini blue
     ];
     
-    // sleek forward-facing cone primitive
-    const droneGeo = new THREE.ConeGeometry(0.005, 0.02, 4);
-    droneGeo.rotateX(Math.PI/2); // point tip along +Z
+    // Quadcopter geometry
+    const bodyGeo = new THREE.BoxGeometry(0.015, 0.005, 0.015);
+    const arm1Geo = new THREE.BoxGeometry(0.04, 0.002, 0.005);
+    const arm2Geo = new THREE.BoxGeometry(0.005, 0.002, 0.04);
+    
+    // Instead of complex merging, we'll create a single drone object with these parts
+    const createDroneMesh = (mat, scaleMult) => {
+        const droneGroup = new THREE.Group();
+        const body = new THREE.Mesh(bodyGeo, mat);
+        const arm1 = new THREE.Mesh(arm1Geo, mat);
+        const arm2 = new THREE.Mesh(arm2Geo, mat);
+        droneGroup.add(body);
+        droneGroup.add(arm1);
+        droneGroup.add(arm2);
+        
+        // Quadcopter rings (propeller guards)
+        const ringGeo = new THREE.TorusGeometry(0.008, 0.001, 4, 12);
+        const ringMat = new THREE.MeshBasicMaterial({color: 0x555555, transparent: true, opacity: 0.8});
+        
+        const offsets = [
+            [-0.015, -0.015], [0.015, -0.015],
+            [-0.015, 0.015], [0.015, 0.015]
+        ];
+        offsets.forEach(pos => {
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotateX(Math.PI/2);
+            ring.position.set(pos[0], 0.001, pos[1]);
+            droneGroup.add(ring);
+        });
+        
+        // To make "lookAt" and forward direction match (+Z)
+        // the droneGroup itself is fine since it's symmetric, but we'll add a directional indicator
+        const noseGeo = new THREE.BoxGeometry(0.006, 0.006, 0.01);
+        const noseMat = new THREE.MeshBasicMaterial({color: 0xffaa00});
+        const nose = new THREE.Mesh(noseGeo, noseMat);
+        nose.position.set(0, 0, 0.015);
+        droneGroup.add(nose);
+        
+        // Increase base size by 200% (so * 3) and apply specific role multiplier
+        const s = 3.0 * scaleMult;
+        droneGroup.scale.set(s, s, s);
+        return droneGroup;
+    };
     
     factions.forEach(faction => {
         const mat = new THREE.MeshBasicMaterial({color: faction.color, transparent: true, opacity: 0.95});
         for (let i = 0; i < faction.count; i++) {
-            const drone = new THREE.Mesh(droneGeo, mat);
+            const roles = ['Fighter', 'Fighter', 'Bomber', 'Scout']; // Weighted to Fighter
+            const role = roles[Math.floor(Math.random() * roles.length)];
+            
+            let scaleMult = 1.0;
+            let speed, turnSpeed, hp;
+            if (role === 'Fighter') { speed = 0.08; turnSpeed = 0.05; hp = 10; scaleMult = 1.0; }
+            else if (role === 'Bomber') { speed = 0.04; turnSpeed = 0.02; hp = 25; scaleMult = 1.5; }
+            else { speed = 0.12; turnSpeed = 0.08; hp = 5; scaleMult = 0.7; } 
+            
+            const drone = createDroneMesh(mat, scaleMult);
             
             // Random start position safely above ground
             const startVec = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
             drone.position.copy(startVec.multiplyScalar(GLOBE_R + 0.05 + Math.random()*0.1));
-            
-            const roles = ['Fighter', 'Fighter', 'Bomber', 'Scout']; // Weighted to Fighter
-            const role = roles[Math.floor(Math.random() * roles.length)];
-            
-            let speed, turnSpeed, hp;
-            if (role === 'Fighter') { speed = 0.08; turnSpeed = 0.05; hp = 10; }
-            else if (role === 'Bomber') { speed = 0.04; turnSpeed = 0.02; hp = 25; drone.scale.set(1.5, 1.5, 1.5); }
-            else { speed = 0.12; turnSpeed = 0.08; hp = 5; drone.scale.set(0.7, 0.7, 0.7); } 
             
             drone.visible = false; // Hidden until WTR skin active
             scene.add(drone);
