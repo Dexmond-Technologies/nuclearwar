@@ -31,6 +31,10 @@ function loadKeypairFromEnv(envVarName, label) {
         const kp = web3.Keypair.fromSecretKey(decodedKey);
         console.log(`✅ Solana ${label} Wallet Loaded:`, kp.publicKey.toBase58());
         return kp;
+      } else if (decodedKey.length === 32) {
+        const kp = web3.Keypair.fromSeed(decodedKey);
+        console.log(`✅ Solana ${label} Wallet Loaded (from seed):`, kp.publicKey.toBase58());
+        return kp;
       } else {
         console.error(`⚠ ${label} Private Key has incorrect length:`, decodedKey.length);
       }
@@ -46,6 +50,11 @@ function loadKeypairFromEnv(envVarName, label) {
 let authorityKeypair = loadKeypairFromEnv('SOLANA_WALLET_PRIVATE_KEY', 'Authority (Earth)');
 let rainclaudeKeypair = loadKeypairFromEnv('RAINCLAUDE_SOLANA_KEY', 'Rainclaude');
 let geminiKeypair = loadKeypairFromEnv('gemini_wallet_pvt_key', 'Gemini AI');
+
+let cachedGeminiBalance = 0;
+let cachedClaudeBalance = 0;
+let cachedGeminiWallet = "NOT_SET";
+let cachedClaudeWallet = "NOT_SET";
 
 async function transferD3XOnChain(fromKeypair, toAddress, amount) {
     if (!fromKeypair) return;
@@ -505,6 +514,15 @@ function initWebSockets() {
     totalPlayers: connectedClients.size
   }, ws);
 
+  // Immediately send cached AI balances
+  ws.send(JSON.stringify({
+    type: 'ai_d3x_balances',
+    gemini: cachedGeminiBalance,
+    claude: cachedClaudeBalance,
+    geminiWallet: cachedGeminiWallet,
+    claudeWallet: cachedClaudeWallet
+  }));
+
   // Send initial AI Health State directly from DB so the HUD syncs immediately
   if (pgPool) {
     pgPool.query("SELECT gemini_hp, claude_hp FROM ai_combat_state WHERE id = 1").then(res => {
@@ -518,9 +536,6 @@ function initWebSockets() {
       }
     }).catch(console.warn);
   }
-
-  // Force fetch AI balances immediately so the new player doesn't have to wait 60s
-  fetchAndBroadcastAIBalances();
 
   ws.on('message', async raw => {
     let msg;
@@ -1449,14 +1464,9 @@ async function fetchAndBroadcastAIBalances() {
     try {
         let geminiBalance = 0;
         let claudeBalance = 0;
-        
-        // Use SOLANA_WALLET_ADDRESS (the old Authority/Earth wallet) as fallback for Gemini if gemini_wallet is missing
-        const geminiPubkeyStr = process.env.gemini_wallet || process.env.SOLANA_WALLET_ADDRESS;
-        const targetGeminiPubkey = geminiKeypair ? geminiKeypair.publicKey : (geminiPubkeyStr ? new web3.PublicKey(geminiPubkeyStr) : null);
-        
-        // Use RAINCLAUDE_SOLANA_WALLET from env, fallback to hardcoded if missing
-        const rainclaudePubkeyStr = process.env.RAINCLAUDE_SOLANA_WALLET || "5rdrJ46YJbtVHEx7xRgURGm49Cwf1WikLhU71VnS8zk3";
-        const rainclaudePubkey = new web3.PublicKey(rainclaudePubkeyStr);
+        const geminiPubkeyStr = process.env.gemini_wallet;
+        const targetGeminiPubkey = geminiPubkeyStr ? new web3.PublicKey(geminiPubkeyStr) : (geminiKeypair ? geminiKeypair.publicKey : (authorityKeypair ? authorityKeypair.publicKey : null));
+        const rainclaudePubkey = rainclaudeKeypair ? rainclaudeKeypair.publicKey : new web3.PublicKey("5rdrJ46YJbtVHEx7xRgURGm49Cwf1WikLhU71VnS8zk3");
         
         try {
             if (targetGeminiPubkey) {
@@ -1496,15 +1506,12 @@ async function fetchAndBroadcastAIBalances() {
                 rcData.balances.D3X = claudeBalance;
                 fs.writeFileSync(rcPath, JSON.stringify(rcData, null, 2));
             }
-        } catch(e) { console.error('Claude balance fetch error:', e.message); claudeBalance = 0; }
             
-        try {
-            const fs = require('fs');
-            const path = require('path');
             const gemPath = path.join(__dirname, 'GEMINI_BANK_AND_TRADING_ACCOUNT');
             if (fs.existsSync(gemPath)) {
                 let gemData = JSON.parse(fs.readFileSync(gemPath, 'utf8'));
                 gemData.balances.D3X = geminiBalance;
+                
                 
                 const trgPubKeyStr = targetGeminiPubkey ? (typeof targetGeminiPubkey === 'string' ? targetGeminiPubkey : targetGeminiPubkey.toBase58()) : geminiPubkeyStr;
                 if (trgPubKeyStr) gemData.walletAddress = trgPubKeyStr;
@@ -1512,14 +1519,19 @@ async function fetchAndBroadcastAIBalances() {
                 fs.writeFileSync(gemPath, JSON.stringify(gemData, null, 2));
             }
 
-        } catch(e) { console.error('Claude/Gemini JSON save error:', e.message); }
+        } catch(e) { console.error('Claude balance error:', e.message); claudeBalance = 0; }
+
+        cachedGeminiBalance = geminiBalance;
+        cachedClaudeBalance = claudeBalance;
+        cachedGeminiWallet = targetGeminiPubkey ? (typeof targetGeminiPubkey === 'string' ? targetGeminiPubkey : targetGeminiPubkey.toBase58()) : process.env.gemini_wallet || "NOT_SET";
+        cachedClaudeWallet = rainclaudePubkey.toBase58();
 
         broadcastAll({
             type: 'ai_d3x_balances',
-            gemini: geminiBalance,
-            claude: claudeBalance,
-            geminiWallet: targetGeminiPubkey ? (typeof targetGeminiPubkey === 'string' ? targetGeminiPubkey : targetGeminiPubkey.toBase58()) : (geminiPubkeyStr || "NOT_SET"),
-            claudeWallet: rainclaudePubkey.toBase58()
+            gemini: cachedGeminiBalance,
+            claude: cachedClaudeBalance,
+            geminiWallet: cachedGeminiWallet,
+            claudeWallet: cachedClaudeWallet
         });
     } catch (err) {
         console.error("Balance Fetch Error:", err.message);
