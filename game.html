@@ -3126,6 +3126,17 @@ function showCompanyInfo(compData) {
      conflictStr = `<div style="margin-top:10px; padding:5px; background:rgba(255,150,0,0.1); border:1px solid #f80; color:#f80; font-size:11px; text-align:center;">⚔️ ACTIVE AI CYBER-WARFARE DETECTED ⚔️</div>`;
   }
 
+  let balanceHtml = '';
+  if (window.currentSkinIndex === 2) { // Black Skin only
+      if (typeof compData.d3xBalance === 'undefined') {
+          compData.d3xBalance = (compData.name === 'WORLD BANK') ? 12300000 : (200000 + Math.random() * 1800000);
+      }
+      balanceHtml = `<div style="margin-top:15px; background:rgba(0,255,136,0.1); padding:10px; border:1px solid #0f8; border-radius:4px; text-align:center; box-shadow:0 0 10px rgba(0,255,136,0.2);">
+          <div style="color:#aaa; font-size:10px; margin-bottom:5px;">CORPORATE LIQUIDITY:</div>
+          <div style="color:#0f8; font-size:18px; font-weight:bold; font-family:'Orbitron', 'Courier New', monospace; text-shadow:0 0 5px #0f8;">${compData.d3xBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} D3X</div>
+      </div>`;
+  }
+
   modal.innerHTML = `
     <div style="position:absolute;top:10px;right:15px;cursor:pointer;color:#f24;font-weight:bold;" onclick="document.getElementById('company-info-modal').style.display='none'">X</div>
     <div style="margin-bottom:15px;">
@@ -3145,6 +3156,7 @@ function showCompanyInfo(compData) {
         <div style="color:#fff; font-size:14px; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">${targetAsset}</div>
         ${conflictStr}
     </div>
+    ${balanceHtml}
   `;
   modal.style.display = 'block';
 }
