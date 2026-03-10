@@ -14330,29 +14330,33 @@ window.openD3XMiningCave = function(caveName) {
     document.getElementById('d3x-mining-modal').style.display = 'flex';
 };
 
+window.lastMiningTime = 0;
+const MINING_COOLDOWN_MS = 15000; // 15 Seconds Cooldown
+
 window.mineD3XCoin = function() {
     const myPlayer = GS.players && GS.players[GS.myIndex];
     if (!myPlayer) return;
     
-    if (myPlayer.budget < 1) {
+    // Check Cooldown Timer
+    const now = Date.now();
+    const timeSinceLastMine = now - window.lastMiningTime;
+    
+    if (timeSinceLastMine < MINING_COOLDOWN_MS) {
         SFX.playError();
+        const timeLeft = Math.ceil((MINING_COOLDOWN_MS - timeSinceLastMine) / 1000);
         const log = document.getElementById('mining-log');
-        log.innerHTML += `<div><span style="color:#f55">ERROR: Insufficient D3X. Required: 1 D3X.</span></div>`;
+        log.innerHTML += `<div><span style="color:#f55">DRILL OVERHEATED: Cooling down. Please wait ${timeLeft}s...</span></div>`;
         log.scrollTop = log.scrollHeight;
         return;
     }
     
-    // Burn 1 D3X
-    myPlayer.budget -= 1;
-    updateDashboard(); // Updates the UI balance globally
-    
-    SFX.playLaser(); // Good enough for a laser drill sound placeholder
-    
-    // Accumulate +0.05
+    // Free Action granted
+    window.lastMiningTime = now;
+    SFX.playLaser(); // Drilling sound
     window.internalD3XMiningAmount += 0.05;
     
     const log = document.getElementById('mining-log');
-    log.innerHTML += `<div><span style="color:#aaa">-1 D3X Burned.</span> Mining operation yielded <span style="color:#0f8">+0.05 D3X</span> internal progress.</div>`;
+    log.innerHTML += `<div><span style="color:#aaa">Energy Consumed.</span> Drill fired! Yielded <span style="color:#0f8">+0.05 D3X</span> progress.</div>`;
     
     // Check if we hit 1.0 total
     if (window.internalD3XMiningAmount >= 0.99) { // Using 0.99 to avoid float precision bugs around 1.0
@@ -14360,15 +14364,35 @@ window.mineD3XCoin = function() {
         myPlayer.budget += 1; // Payout 1 whole D3X
         updateDashboard();
         SFX.playSiren(); // Payout sound
-        log.innerHTML += `<div style="color:#0f8; font-weight:bold; font-size:14px; margin-top:10px;">JACKPOT! 1.0 D3X Deposited to Wallet!</div>`;
-        if (typeof setLog === 'function') setLog("💎 D3X Mining Operation Successful! +1 D3X added to balance.");
+        log.innerHTML += `<div style="color:#ffcc00; font-weight:bold; font-size:14px; margin-top:10px;">💎 JACKPOT 💎<br/>1.0 D3X Deposited from Master Wallet!</div>`;
+        if (typeof setLog === 'function') setLog("💎 D3X Mining Operation Successful! +1 D3X granted.");
     }
     
     // Update mining modal UI
     document.getElementById('internal-mining-amount').textContent = window.internalD3XMiningAmount.toFixed(2);
     document.getElementById('mining-progress-bar').style.width = (window.internalD3XMiningAmount * 100) + '%';
-    document.getElementById('d3x-balance').textContent = myPlayer.budget; // Update black market balance if open behind it
     log.scrollTop = log.scrollHeight;
+    
+    // Start Visual Cooldown Tick
+    const btn = document.querySelector('#d3x-mining-modal button[onclick="mineD3XCoin()"]');
+    if (btn) {
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        let cd = MINING_COOLDOWN_MS / 1000;
+        
+        const tick = setInterval(() => {
+            cd--;
+            if (cd <= 0) {
+                clearInterval(tick);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                btn.style.opacity = '1.0';
+            } else {
+                btn.innerHTML = `RECHARGING (${cd}s)...`;
+            }
+        }, 1000);
+    }
 };
 
 </script>
