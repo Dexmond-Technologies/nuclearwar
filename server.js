@@ -197,6 +197,17 @@ const server = http.createServer((req, res) => {
       res.end(data);
     });
 
+  } else if (req.url === '/DEXMOND.png') {
+    fs.readFile(path.join(__dirname, 'DEXMOND.png'), (err, data) => {
+      if (err) {
+        res.writeHead(404);
+        return res.end('Not found');
+      }
+      res.writeHead(200, { 'Content-Type': 'image/png' });
+      res.end(data);
+    });
+
+
   } else if (req.url === '/api/radio/random') {
     res.writeHead(200, {
       'Content-Type': 'application/json',
