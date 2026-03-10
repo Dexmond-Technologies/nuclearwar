@@ -7520,12 +7520,39 @@ function updateGreenMarket() {
   Object.keys(window.greenMarket.commodities).forEach(k => {
     let c = window.greenMarket.commodities[k];
     
+    // Initialize basePrice if not set for dynamic floors
+    if (!c.basePrice) c.basePrice = c.price;
+    if (typeof c.avgCost === 'undefined') c.avgCost = 0;
+    if (typeof c.totalSpent === 'undefined') c.totalSpent = 0;
+    
     // Process Volatility Random Walk
-    let change = 1 + (Math.random() * c.vol * 2 - c.vol);
+    let warVolMultiplier = 1.0;
+    let directionalDrift = 1.0;
+    
+    if (typeof GS !== 'undefined' && GS.globalMetrics) {
+        if (GS.globalMetrics.defcon <= 4 || (GS.catastrophes && GS.catastrophes.active)) {
+            warVolMultiplier = 2.5; // War makes markets 2.5x more volatile
+            
+            // War Asset Correlation Bias
+            if (k === 'Crude Oil' || k === 'Natural Gas' || k === 'Gold') {
+                directionalDrift = 1.002; // Steady upward drift for Energy/Safe Havens
+            } else if (k.includes('NVIDIA') || k.includes('TPU') || k.includes('EPYC')) {
+                directionalDrift = 0.997; // Steady downward drift for Tech Hardware (Supply Chain Shock)
+            }
+        }
+    }
+
+    let change = 1 + (Math.random() * (c.vol * warVolMultiplier) * 2 - (c.vol * warVolMultiplier));
+    // Apply directional correlation drift
+    change *= directionalDrift;
+    
     // 5% chance of Rainclaude market manipulation (pump or dump)
     if (Math.random() < 0.05) change *= (Math.random() < 0.5 ? 0.85 : 1.15);
     
-    c.price = Math.max(10, c.price * change);
+    // Dynamic Price Floor (10% of original value, so Freshwater 0.10 can drop to 0.01 but not jump to 10)
+    const floor = c.basePrice * 0.1;
+    c.price = Math.max(floor, c.price * change);
+    
     c.history.push(c.price);
     if(c.history.length > 20) c.history.shift();
 
@@ -7535,9 +7562,14 @@ function updateGreenMarket() {
     totalWorth += (c.shares * shareVal);
 
     if (c.shares > 0) {
+      let unrealizedPnL = (shareVal - c.avgCost) * c.shares;
+      let pnlColor = unrealizedPnL >= 0 ? '#0f0' : '#f00';
+      let pnlSign = unrealizedPnL >= 0 ? '+' : '';
+      
       holdingsHtml += `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; background:rgba(0,255,136,0.1); padding:4px; border-radius:3px; border:1px solid rgba(0,255,136,0.2); font-size:9px;">
           <span style="color:#fff">${k} <span style="color:#0f8; font-weight:bold; margin-left:3px;">x${c.shares}</span></span>
+          <span style="color:${pnlColor}; font-family:'Orbitron', monospace; font-size:9px;">[${pnlSign}${unrealizedPnL.toFixed(2)}]</span>
           <span style="font-family:'Orbitron', monospace; font-size:10px; font-weight:bold; text-align:right;">${trend} ${shareVal.toFixed(2)} D3X</span>
         </div>
       `;
@@ -7576,27 +7608,59 @@ window.tradeGreenMetal = function(metalName, amount) {
   
   // Ensure wallet is initialized
   if (window.localD3XBalance === undefined) window.localD3XBalance = 0;
+  if (typeof c.avgCost === 'undefined') c.avgCost = 0;
+  if (typeof c.totalSpent === 'undefined') c.totalSpent = 0;
+  if (!window.greenMarket.tradeLogs) window.greenMarket.tradeLogs = [];
 
   const cost = c.price; // Native D3X cost
   const totalCost = Math.round(cost * Math.abs(amount) * 100) / 100;
 
   if (amount > 0) {
     if (window.localD3XBalance >= totalCost) {
+      // Calculate Average Cost Basis
+      let totalShares = c.shares + amount;
+      let newTotalSpent = c.totalSpent + totalCost;
+      c.avgCost = newTotalSpent / totalShares;
+      c.totalSpent = newTotalSpent;
+        
       window.localD3XBalance -= totalCost;
       c.shares += amount;
+      
+      const tString = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
+      window.greenMarket.tradeLogs.push(`[${tString}] <span style="color:#0f8">BOUGHT</span> 1 ${metalName} @ ${cost.toFixed(2)} D3X`);
+      if (window.greenMarket.tradeLogs.length > 50) window.greenMarket.tradeLogs.shift();
+      
       if (typeof setLog === 'function') setLog(`📈 ACQUIRED: ${amount}x ${metalName} stake for ${totalCost} D3X.`);
     } else {
       if (typeof setLog === 'function') setLog(`❌ INSUFFICIENT FUNDS: ${totalCost} D3X needed for ${metalName} stake.`);
     }
   } else if (amount < 0) {
     if (c.shares >= Math.abs(amount)) {
+      // Calculate Realized P&L
+      let realizedPnL = (cost - c.avgCost) * Math.abs(amount);
+      let pnlStr = realizedPnL >= 0 ? `<span style="color:#0f0">+$${realizedPnL.toFixed(2)} D3X</span>` : `<span style="color:#f00">-$${Math.abs(realizedPnL).toFixed(2)} D3X</span>`;
+      
+      c.totalSpent -= (c.avgCost * Math.abs(amount));
+      if (c.totalSpent < 0) c.totalSpent = 0;
+      
       c.shares += amount; 
+      if (c.shares === 0) {
+          c.avgCost = 0;
+          c.totalSpent = 0;
+      }
+      
       window.localD3XBalance += totalCost;
+      
+      const tString = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
+      window.greenMarket.tradeLogs.push(`[${tString}] <span style="color:#f55">SOLD</span> 1 ${metalName} @ ${cost.toFixed(2)} D3X | P&L: ${pnlStr}`);
+      if (window.greenMarket.tradeLogs.length > 50) window.greenMarket.tradeLogs.shift();
+
       if (typeof setLog === 'function') setLog(`📉 LIQUIDATED: ${Math.abs(amount)}x ${metalName} stake for a ${totalCost} D3X return.`);
     } else {
       if (typeof setLog === 'function') setLog(`❌ NO STAKE: You do not own shares of ${metalName} to sell.`);
     }
   }
+
   updateGreenMarket();
   if (typeof updateDashboard === 'function') updateDashboard();
 
@@ -7607,8 +7671,60 @@ window.tradeGreenMetal = function(metalName, amount) {
   }
 };
 
+window.simulateGreenMarketAI = function() {
+    // Only run this processing if companies exists
+    if (!window.companiesGroup) return;
+
+    let allCompanies = [];
+    const groups = [window.companiesGroup, window.mediumCompaniesGroup, window.africaCompaniesGroup, window.microCompaniesGroup, window.russiaAsiaCompaniesGroup];
+    groups.forEach(g => {
+        if(g && g.children) allCompanies.push(...g.children.filter(mesh => mesh.visible && mesh.userData && mesh.userData.name));
+    });
+
+    if (allCompanies.length === 0 || !window.greenMarket || !window.greenMarket.commodities) return;
+    
+    const commoditiesArr = Object.keys(window.greenMarket.commodities);
+
+    // 5 AI Trades per tick
+    for (let i = 0; i < 5; i++) {
+        let trader = allCompanies[Math.floor(Math.random() * allCompanies.length)].userData;
+        let cName = commoditiesArr[Math.floor(Math.random() * commoditiesArr.length)];
+        let c = window.greenMarket.commodities[cName];
+        
+        let isBuy = Math.random() > 0.5;
+        let pChange = 0;
+
+        // Initialize basePrice if not set
+        if (!c.basePrice) c.basePrice = c.price;
+
+        if (isBuy) {
+            // AI Bought -> Demand + -> Price +
+            pChange = 1.002;
+            c.price *= pChange;
+        } else {
+            // AI Sold -> Demand - -> Price -
+            pChange = 0.998;
+            c.price = Math.max(c.basePrice * 0.1, c.price * pChange);
+        }
+
+        // Just to visually show that SOME trade happened if the user is looking at the terminal
+        if (Math.random() < 0.05 && window.currentSkinIndex === 2) {
+            const termBox = document.getElementById('d1-reasoning');
+            if (termBox) {
+                const action = isBuy ? '<span style="color:#0f8">BOUGHT</span>' : '<span style="color:#f55">SOLD</span>';
+                const div = document.createElement('div');
+                div.innerHTML = `> [MARKET] <span style="color:#fff">${trader.name}</span> AI ${action} $${Array(Math.floor(Math.random()*5)+1).fill('M').join('')} in ${cName}`;
+                termBox.appendChild(div);
+                if (termBox.childElementCount > 30) termBox.removeChild(termBox.firstChild);
+                termBox.scrollTop = termBox.scrollHeight;
+            }
+        }
+    }
+};
+
 updateGreenMarket(); // Initial render to prevent 2-3s delay on script load
 setInterval(updateGreenMarket, 3000);
+setInterval(window.simulateGreenMarketAI, 3000);
 
 window.showGMarketWallet = function() {
   if (typeof _sfxClick !== 'undefined') _sfxClick();
@@ -7668,9 +7784,10 @@ window.showGMarketWallet = function() {
   let listHtml = `<table style="width:100%; border-collapse:collapse; font-size:13px;">
     <tr style="border-bottom:1px dashed #0f8; color:#0f8;">
       <th style="padding:10px 8px; text-align:left;">RESOURCE</th>
-      <th style="padding:10px 8px; text-align:right;">PRICE / SHARE</th>
+      <th style="padding:10px 8px; text-align:right;">AVG COST</th>
+      <th style="padding:10px 8px; text-align:right;">CUR. PRICE</th>
       <th style="padding:10px 8px; text-align:right;">OWNED</th>
-      <th style="padding:10px 8px; text-align:right;">TOTAL VALUE</th>
+      <th style="padding:10px 8px; text-align:right;">UNREALIZED P&L</th>
       <th style="padding:10px 8px; text-align:center;">TRADE ACTIONS</th>
     </tr>`;
 
@@ -7678,7 +7795,7 @@ window.showGMarketWallet = function() {
 
   Object.keys(window.greenMarket.commodities).forEach(k => {
     let c = window.greenMarket.commodities[k];
-    let shareVal = c.price / 100;
+    let shareVal = c.price; 
     let holdVal = c.shares * Math.max(0, shareVal);
     totalVal += holdVal;
     
@@ -7687,12 +7804,23 @@ window.showGMarketWallet = function() {
        trend = c.history[c.history.length-1] >= c.history[c.history.length-2] ? '<span style="color:#0f0">▲</span>' : '<span style="color:#f00">▼</span>';
     }
 
+    let avgCostStr = (c.avgCost && c.shares > 0) ? c.avgCost.toFixed(2) : '-.--';
+    
+    let pnlHtml = '-.--';
+    if (c.shares > 0) {
+        let pnl = (shareVal - c.avgCost) * c.shares;
+        let pColor = pnl >= 0 ? '#0f0' : '#f00';
+        let pSign = pnl >= 0 ? '+' : '';
+        pnlHtml = `<span style="color:${pColor}; font-weight:bold;">${pSign}${pnl.toFixed(2)} D3X</span>`;
+    }
+
     listHtml += `
       <tr style="border-bottom:1px solid rgba(0,255,136,0.15);">
         <td style="padding:10px 8px; color:#fff; font-weight:bold;">${parseInt(c.shares) > 0 ? '▶ ' : ''}${k}</td>
+        <td style="padding:10px 8px; text-align:right; font-family:'Courier New', monospace; color:#aaa;">${avgCostStr}</td>
         <td style="padding:10px 8px; text-align:right; font-family:'Courier New', monospace; font-weight:bold;">${trend} ${shareVal.toFixed(2)} D3X</td>
         <td style="padding:10px 8px; text-align:right; font-weight:bold; color:${c.shares > 0 ? '#0f8' : '#aaa'};">${c.shares}</td>
-        <td style="padding:10px 8px; text-align:right; font-family:'Courier New', monospace; color:${c.shares > 0 ? '#0f8' : '#aaa'};">${holdVal.toFixed(2)} D3X</td>
+        <td style="padding:10px 8px; text-align:right; font-family:'Courier New', monospace;">${pnlHtml}</td>
         <td style="padding:10px 8px; text-align:center;">
           <button onclick="tradeGreenMetal('${k}', 1); showGMarketWallet();" style="background:none; border:1px solid #0f8; color:#0f8; font-family:'Orbitron', sans-serif; font-size:10px; padding:4px 10px; cursor:pointer; border-radius:3px; transition:0.2s;" onmouseover="this.style.background='#0f8'; this.style.color='#000';" onmouseout="this.style.background='none'; this.style.color='#0f8';">BUY</button>
           <button onclick="tradeGreenMetal('${k}', -1); showGMarketWallet();" style="background:none; border:1px solid #f22; color:#f22; font-family:'Orbitron', sans-serif; font-size:10px; padding:4px 10px; cursor:pointer; border-radius:3px; transition:0.2s; opacity:${c.shares > 0 ? 1 : 0.4}; margin-left:8px;" ${c.shares > 0 ? '' : 'disabled'} onmouseover="this.style.background='#f22'; this.style.color='#fff';" onmouseout="this.style.background='none'; this.style.color='#f22';">SELL</button>
@@ -7703,10 +7831,27 @@ window.showGMarketWallet = function() {
 
   listHtml += `</table>`;
   
+  // Create trade history log section
+  let historyHtml = `<div style="margin-top:20px; border-top:1px dashed #0f8; padding-top:15px;">
+    <h4 style="margin:0 0 10px 0; color:#0f8; font-size:14px; letter-spacing:1px;">📜 TRADE HISTORY</h4>
+    <div id="gmarket-trade-log" style="background:rgba(0,10,5,0.8); border:1px solid rgba(0,255,136,0.3); height:120px; overflow-y:auto; padding:10px; font-family:'Share Tech Mono', monospace; font-size:12px; border-radius:4px;">
+  `;
+  
+  if (!window.greenMarket.tradeLogs || window.greenMarket.tradeLogs.length === 0) {
+      historyHtml += `<span style="color:#aaa;">No trades executed yet...</span>`;
+  } else {
+      window.greenMarket.tradeLogs.slice().reverse().forEach(log => {
+          historyHtml += `<div style="margin-bottom:4px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:4px;">${log}</div>`;
+      });
+  }
+  historyHtml += `</div></div>`;
+  
+  listHtml += historyHtml;
+  
   listHtml += `
-  <div style="display:flex; justify-content:space-between; margin-top:20px; padding-top:15px; border-top:1px dashed #0f8;">
+  <div style="display:flex; justify-content:space-between; margin-top:15px; padding-top:15px; border-top:1px solid #0f8;">
     <div style="font-size:14px; font-weight:bold; color:#aaa; font-family:'Courier New', monospace;">
-      AVAILABLE D3X WALLET BALANCE: <span style="color:#fff;">${window.localD3XBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} D3X</span>
+      AVAILABLE WALLET BALANCE: <span style="color:#fff;">${window.localD3XBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} D3X</span>
     </div>
     <div style="text-align:right; font-size:16px; font-weight:bold; color:#fff;">
       NET WORTH (HOLDINGS): <span style="color:#0f8; font-family:'Courier New', monospace;">${totalVal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} D3X</span>
