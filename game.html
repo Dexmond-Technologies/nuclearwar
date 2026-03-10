@@ -5003,7 +5003,8 @@ let GS = {
     economy: 100,
     airTrafficDisabledTurns: 0,
     satelliteDisruptedTurns: 0,
-    commJamTurns: 0
+    commJamTurns: 0,
+    globalEconomyD3X: 123000000000000
   }
 };
 
@@ -5993,6 +5994,33 @@ function updateDashboard() {
 
   // Local UI Update for User Stats Box - handled by WebSocket response now for ATK/DMG
   // The US UI is updated directly via 'commander_stats' WSS event.
+  
+  // Update Global Economy Sprite dynamically based on current game state
+  if (typeof window.economySprite !== 'undefined' && GS.globalMetrics && GS.globalMetrics.globalEconomyD3X !== null) {
+      const eCanvas = document.createElement('canvas');
+      eCanvas.width = 1024;
+      eCanvas.height = 256;
+      const ecCtx = eCanvas.getContext('2d');
+      ecCtx.fillStyle = '#ffffff';
+      ecCtx.shadowColor = '#ffffff';
+      ecCtx.shadowBlur = 15;
+      ecCtx.font = "bold 90px 'Share Tech Mono', monospace";
+      ecCtx.textAlign = "center";
+      ecCtx.textBaseline = "middle";
+      
+      let ecoVal = GS.globalMetrics.globalEconomyD3X;
+      let dispStr = ecoVal.toLocaleString() + " D3X";
+      if (ecoVal >= 1000000000000) dispStr = (ecoVal / 1000000000000).toFixed(0) + "T D3X";
+      else if (ecoVal >= 1000000000) dispStr = (ecoVal / 1000000000).toFixed(1) + "B D3X";
+      else if (ecoVal >= 1000000) dispStr = (ecoVal / 1000000).toFixed(1) + "M D3X";
+      
+      ecCtx.fillText(dispStr, 512, 128);
+      
+      const oldTex = window.economySprite.material.map;
+      window.economySprite.material.map = new THREE.CanvasTexture(eCanvas);
+      window.economySprite.material.needsUpdate = true;
+      if (oldTex) oldTex.dispose();
+  }
 }
 
 // =====================================================================
@@ -14302,6 +14330,23 @@ window.launchDatacenterAttack = function() {
             if (termBox.childElementCount > 30) termBox.removeChild(termBox.firstChild);
             termBox.scrollTop = termBox.scrollHeight;
         }
+        
+        // ECONOMY RECOVERY LOGIC - Gemini recovers D3X stolen by Rainclaude
+        if (GS.globalMetrics && GS.globalMetrics.globalEconomyD3X) {
+            const recoveredAmount = 1000000 + (Math.random() * 99000000); // 1M to 100M recovered per attack
+            GS.globalMetrics.globalEconomyD3X += recoveredAmount;
+            
+            // Randomly flash the global economy text green when recovering funds
+            if (recoveredAmount > 50000000 && typeof window.economySprite !== 'undefined') {
+                window.economySprite.material.color.setHex(0x00ff88);
+                setTimeout(() => { if (window.economySprite) window.economySprite.material.color.setHex(0xffffff); }, 200);
+            }
+        }
+    }
+    
+    if (GS.globalMetrics && GS.globalMetrics.globalEconomyD3X) {
+        if (typeof syncState === 'function') syncState(); // Push new economy value to all players
+        if (typeof updateDashboard === 'function') updateDashboard(); // Force UI update
     }
 };
 
@@ -14370,6 +14415,23 @@ window.launchCyberAttack = function() {
             if (termBox.childElementCount > 30) termBox.removeChild(termBox.firstChild);
             termBox.scrollTop = termBox.scrollHeight;
         }
+        
+        // ECONOMY BLEED LOGIC - Rainclaude forcibly siphons D3X from global supply
+        if (GS.globalMetrics && GS.globalMetrics.globalEconomyD3X) {
+            const stolenAmount = 5000000 + (Math.random() * 495000000); // 5M to 500M per attack
+            GS.globalMetrics.globalEconomyD3X = Math.max(0, GS.globalMetrics.globalEconomyD3X - stolenAmount);
+            
+            // Randomly flash the global economy text red when hit hard
+            if (stolenAmount > 300000000 && typeof window.economySprite !== 'undefined') {
+                window.economySprite.material.color.setHex(0xff2222);
+                setTimeout(() => { if (window.economySprite) window.economySprite.material.color.setHex(0xffffff); }, 200);
+            }
+        }
+    }
+    
+    if (GS.globalMetrics && GS.globalMetrics.globalEconomyD3X) {
+        if (typeof syncState === 'function') syncState(); // Push new economy value to all players
+        if (typeof updateDashboard === 'function') updateDashboard(); // Force UI update
     }
     
     if (typeof _sfxError !== 'undefined' && Math.random() < 0.3) _sfxError();
