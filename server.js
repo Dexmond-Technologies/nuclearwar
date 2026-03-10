@@ -1433,6 +1433,7 @@ async function fetchAndBroadcastAIBalances() {
             }
         } catch(e) { console.error('Gemini balance error:', e.message); geminiBalance = 0; }
         
+        try {
             // Add a small delay between requests to avoid bursting the RPC node rate limits
             await new Promise(r => setTimeout(r, 2000));
 

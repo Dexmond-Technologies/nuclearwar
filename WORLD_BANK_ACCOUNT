@@ -3,39 +3,39 @@
   "faction": "Black Skin Central Account",
   "walletAddress": "d3x_WORLDBANK_000000000000000000",
   "balances": {
-    "D3X": 0.0
+    "D3X": 12300000.0
   },
   "commodities": {
     "Metals": {
-      "Copper": 0,
-      "Lithium": 0,
-      "Rare Earth Elements": 0,
-      "Iron ore": 0,
-      "Gold": 0,
-      "Nickel": 0,
-      "Tin": 0,
-      "Aluminum (Bauxite)": 0,
-      "Aluminum": 0,
-      "Cobalt": 0
+      "Copper": 11764,
+      "Lithium": 2857,
+      "Rare Earth Elements": 833,
+      "Iron ore": 83333,
+      "Gold": 100,
+      "Nickel": 5405,
+      "Tin": 3703,
+      "Aluminum (Bauxite)": 40000,
+      "Aluminum": 20833,
+      "Cobalt": 3571
     },
     "Natural Resources": {
-      "Lumber (Wood)": 0,
-      "Freshwater": 0,
-      "Natural Gas": 0,
-      "Crude Oil": 0,
-      "Wheat": 0
+      "Lumber (Wood)": 200000,
+      "Freshwater": 1000000,
+      "Natural Gas": 28571,
+      "Crude Oil": 1273,
+      "Wheat": 166666
     },
     "Tech & Compute Hardware": {
-      "NVIDIA H100 Tensor Core": 0,
-      "NVIDIA A100 80GB": 0,
-      "Google Cloud TPU v5e": 0,
-      "AMD EPYC 9004 CPUs": 0,
-      "DDR5 ECC RAM (128GB)": 0,
-      "Enterprise NVMe SSD (15TB)": 0,
-      "Compute Motherboards (Dual Socket)": 0,
-      "Titanium Grade PSUs (2000W)": 0,
-      "Direct-to-Chip Liquid Cooling Units": 0,
-      "Networking Switches (400GbE)": 0
+      "NVIDIA H100 Tensor Core": 100,
+      "NVIDIA A100 80GB": 100,
+      "Google Cloud TPU v5e": 100,
+      "AMD EPYC 9004 CPUs": 222,
+      "DDR5 ECC RAM (128GB)": 2631,
+      "Enterprise NVMe SSD (15TB)": 833,
+      "Compute Motherboards (Dual Socket)": 1111,
+      "Titanium Grade PSUs (2000W)": 1428,
+      "Direct-to-Chip Liquid Cooling Units": 172,
+      "Networking Switches (400GbE)": 100
     }
   }
 }

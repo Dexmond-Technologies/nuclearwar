@@ -14324,8 +14324,12 @@ window.simulateCompanyD3XTrading = function() {
         if (sender.name === receiver.name) continue;
         
         // Ensure they have pseudo-wallets (Distributing ~123 Million D3X Global Economy)
-        if (typeof sender.d3xBalance === 'undefined') sender.d3xBalance = 200000 + Math.random() * 1800000;
-        if (typeof receiver.d3xBalance === 'undefined') receiver.d3xBalance = 200000 + Math.random() * 1800000;
+        if (typeof sender.d3xBalance === 'undefined') {
+            sender.d3xBalance = (sender.name === 'WORLD BANK') ? 12300000 : (200000 + Math.random() * 1800000);
+        }
+        if (typeof receiver.d3xBalance === 'undefined') {
+            receiver.d3xBalance = (receiver.name === 'WORLD BANK') ? 12300000 : (200000 + Math.random() * 1800000);
+        }
         
         const txAmount = parseFloat((Math.random() * (sender.d3xBalance * 0.05)).toFixed(2));
         if (txAmount <= 0) continue;
