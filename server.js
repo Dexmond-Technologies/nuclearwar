@@ -14,9 +14,9 @@ require('dotenv').config();
 const web3 = require('@solana/web3.js');
 const splToken = require('@solana/spl-token');
 
-// Custom DEXMOND network support
-const RPC_URL = process.env.DEXMOND_RPC_URL || web3.clusterApiUrl('mainnet-beta');
-const D3X_MINT_ADDRESS = new web3.PublicKey(process.env.DEXMOND_D3X_MINT || 'AGN8SrMCMEgiP1ghvPHa5VRf5rPFDSYVrGFyBGE1Cqpa');
+// Standard Solana Mainnet support
+const RPC_URL = process.env.SOLANA_RPC_URL || web3.clusterApiUrl('mainnet-beta');
+const D3X_MINT_ADDRESS = new web3.PublicKey(process.env.D3X_MINT_ADDRESS || 'AGN8SrMCMEgiP1ghvPHa5VRf5rPFDSYVrGFyBGE1Cqpa');
 const solanaConnection = new web3.Connection(RPC_URL, 'confirmed');
 const BURN_ADDRESS = new web3.PublicKey('11111111111111111111111111111111');
 
@@ -66,7 +66,7 @@ async function transferD3XOnChain(fromKeypair, toAddress, amount) {
             fromKeypair.publicKey,
             transferAmount
         );
-        console.log(`🔗 [DEXMOND Network] Physical Tx Sent! Burned ${amount} D3X. Signature: ${signature}`);
+        console.log(`🔗 [Solana Mainnet] Physical Tx Sent! Burned ${amount} D3X. Signature: ${signature}`);
         
         // Broadcast the real transaction to all connected players
         broadcastAll({
