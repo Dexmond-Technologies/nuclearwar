@@ -1004,6 +1004,22 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+/* Green Market Ledger Scrollbar styling */
+#gmarket-ledger-content::-webkit-scrollbar {
+  width: 10px;
+}
+#gmarket-ledger-content::-webkit-scrollbar-track {
+  background: rgba(0, 150, 50, 0.1);
+  border-left: 1px solid rgba(0, 255, 136, 0.2);
+}
+#gmarket-ledger-content::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 136, 0.5);
+  border-radius: 5px;
+}
+#gmarket-ledger-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 136, 0.8);
+}
 </style>
 </head>
 <body>
@@ -4259,9 +4275,9 @@ function initDatacenters() {
                     window.datacentersGroup.add(towerMesh);
                 });
 
-                // MOVED TESLA TOWERS TO TOP OF THE GLOBE
-                const npLat = 90; // Exactly on top of the globe
-                const npLon = 0;
+                // MOVED TESLA TOWERS HALFWAY TO STAKING TOWER
+                const npLat = (90 + centerLat) / 2; // Midpoint latitude
+                const npLon = (0 + centerLon) / 2; // Midpoint longitude
                 
                 towerOffsets.forEach((off, idx) => {
                     const towerLatRad = (npLat + (off.lat * 0.5)) * Math.PI / 180; // Tighter cluster
@@ -7407,7 +7423,19 @@ window.greenMarket = {
     'Freshwater': { price: 0.85, vol: 0.005, shares: 0, history: [0.85] },
     'Natural Gas': { price: 2.15, vol: 0.04, shares: 0, history: [2.15] },
     'Crude Oil': { price: 82.40, vol: 0.03, shares: 0, history: [82.40] },
-    'Wheat': { price: 6.20, vol: 0.02, shares: 0, history: [6.20] }
+    'Wheat': { price: 6.20, vol: 0.02, shares: 0, history: [6.20] },
+    
+    // TECH & COMPUTE HARDWARE
+    'NVIDIA H100 Tensor Core': { price: 30000.00, vol: 0.08, shares: 0, history: [30000.00] },
+    'NVIDIA A100 80GB': { price: 15000.00, vol: 0.05, shares: 0, history: [15000.00] },
+    'Google Cloud TPU v5e': { price: 12500.00, vol: 0.06, shares: 0, history: [12500.00] },
+    'AMD EPYC 9004 CPUs': { price: 8000.00, vol: 0.04, shares: 0, history: [8000.00] },
+    'DDR5 ECC RAM (128GB)': { price: 1200.00, vol: 0.03, shares: 0, history: [1200.00] },
+    'Enterprise NVMe SSD (15TB)': { price: 2500.00, vol: 0.02, shares: 0, history: [2500.00] },
+    'Compute Motherboards (Dual Socket)': { price: 1800.00, vol: 0.015, shares: 0, history: [1800.00] },
+    'Titanium Grade PSUs (2000W)': { price: 450.00, vol: 0.01, shares: 0, history: [450.00] },
+    'Direct-to-Chip Liquid Cooling Units': { price: 5500.00, vol: 0.02, shares: 0, history: [5500.00] },
+    'Networking Switches (400GbE)': { price: 18000.00, vol: 0.035, shares: 0, history: [18000.00] }
   },
   lastUpdate: Date.now()
 };
