@@ -1323,31 +1323,11 @@ body {
       </div>
     </div>
 
-    <!-- WTR SKIN HYDROLOGY TELEMETRY -->
-    <div id="wtr-skin-info" style="display:none; position:absolute; bottom:20px; right:20px; background:rgba(0,170,255,0.15); border:1px solid rgba(0,170,255,0.5); padding:15px; border-radius:8px; font-family:'Orbitron', sans-serif; color:#00aaff; z-index:100; box-shadow:0 0 15px rgba(0,170,255,0.2); backdrop-filter:blur(5px); min-width:250px;">
-      <div style="font-size:12px; font-weight:bold; margin-bottom:10px; border-bottom:1px solid rgba(0,170,255,0.3); padding-bottom:5px; text-shadow:0 0 5px #00aaff; letter-spacing:1px;">🌍 HYDROLOGY TELEMETRY</div>
-      <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-        <span style="font-size:10px; color:#88ccff;">GLOBAL WATER VOLUME</span>
-        <span id="wtr-vol" style="font-weight:bold; font-size:11px;">1.386B km³</span>
-      </div>
-      <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-        <span style="font-size:10px; color:#88ccff;">AVG FLOW RATE</span>
-        <span id="wtr-flow" style="font-weight:bold; font-size:11px;">104.2 Sv</span>
-      </div>
-      <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-        <span style="font-size:10px; color:#88ccff;">DC HYDRO POWER</span>
-        <span id="wtr-pwr" style="font-weight:bold; font-size:11px; color:#0f8;">1.4 TW</span>
-      </div>
-      <div style="display:flex; justify-content:space-between; margin-top:8px; border-top:1px dashed rgba(0,170,255,0.3); padding-top:8px;">
-        <span style="font-size:10px; color:#ff5555;">AI COOLING DEFICIT</span>
-        <span id="wtr-deficit" style="font-weight:bold; font-size:11px; color:#ff5555;">NOMINAL</span>
-      </div>
-    </div>
-
+    <!-- WTR SKIN HYDROLOGY TELEMETRY REMOVED PER USER REQUEST -->
     <div id="log">SYSTEM INITIALIZED // AWAITING COMMAND // AURAL UPLINK SECURED</div>
     <div style="position:absolute; right:20px; display:flex; align-items:center; gap:10px; pointer-events:auto; z-index:100;">
       <span style="font-size:9px; color:rgba(255,255,255,0.5); font-family:'Courier New', monospace; letter-spacing:1px; max-width: 280px; text-align: right; line-height: 1.2;">Servers are provided for free so everyone can have fun.<br>Any support helps keep them running!</span>
-      <a href="https://buy.stripe.com/5kQcN4dP35lO19J7wo2wU00" target="_blank" style="background:linear-gradient(135deg, #fa0, #d80); color:#000; padding:6px 12px; font-size:11px; font-weight:bold; border-radius:4px; text-decoration:none; font-family:'Courier New', monospace; letter-spacing:1px; border:1px solid #c80; transition:all 0.2s; box-shadow:0 0 10px rgba(255,170,0,0.2);" onmouseover="this.style.filter='brightness(1.2)';" onmouseout="this.style.filter='brightness(1)';">☕ SUPPORT</a>
+      <button onclick="if(!window.localD3XWallet) { alert('You must connect a Solana Wallet first to receive D3X Coins!'); return; } window.open('https://buy.stripe.com/5kQcN4dP35lO19J7wo2wU00?client_reference_id=' + window.localD3XWallet, '_blank');" style="background:linear-gradient(135deg, #fa0, #d80); color:#000; padding:6px 12px; font-size:11px; font-weight:bold; border-radius:4px; text-decoration:none; font-family:'Courier New', monospace; letter-spacing:1px; border:1px solid #c80; transition:all 0.2s; box-shadow:0 0 10px rgba(255,170,0,0.2); cursor:pointer;" onmouseover="this.style.filter='brightness(1.2)';" onmouseout="this.style.filter='brightness(1)';">☕ SUPPORT</button>
     </div>
   </div>
 
@@ -2253,8 +2233,8 @@ Type 'help' for available commands.
 </div>
 
 <!-- Black Market (D3X Store) Modal -->
-<div id="d3x-store-modal" style="position:absolute;inset:0;background:rgba(0,5,15,.95);display:none;align-items:center;justify-content:center;z-index:1060;backdrop-filter:blur(8px);">
-  <div class="rep-card" style="width:700px; max-width:95vw; border-color:#d400ff; box-shadow:0 0 40px rgba(212,0,255,.2);">
+<div id="d3x-store-modal" style="position:fixed !important; top:0 !important; left:0 !important; width:100vw !important; height:100vh !important; background:rgba(0,5,15,.98) !important; display:none; flex-direction:column; align-items:center; z-index:99999 !important; backdrop-filter:blur(15px); transform:none !important; zoom:1 !important; margin:0 !important; padding:20px !important; max-width:none !important; overflow-y:auto;">
+  <div class="rep-card" style="width:100% !important; max-width:100vw !important; min-height:100%; border:none; box-shadow:none; display:flex; flex-direction:column; border-radius:0;">
     <div class="rep-title" style="color:#d400ff; text-shadow:0 0 15px rgba(212,0,255,.8);">BLACK MARKET</div>
     <div class="rep-desc" style="color:#e0aaff;">Acquire unauthorized assets using D3X Tokens.</div>
     <div style="font-size:14px; font-weight:bold; color:#0f8; margin-bottom:15px; letter-spacing:2px;">BALANCE: <span id="d3x-balance">0</span> D3X</div>
@@ -4661,6 +4641,86 @@ function initWorldBank() {
   console.log("World Bank Initialized.");
 }
 initWorldBank();
+
+function initDexmondHub() {
+  const hubColor = 0xffffff; 
+  const mat = new THREE.MeshPhongMaterial({ color: hubColor, shininess: 50, specular: 0x555555 });
+  const roofMat = new THREE.MeshPhongMaterial({ color: 0x00aaff, shininess: 10 }); // Blue roof
+
+  const building = new THREE.Group();
+
+  // 1. Base (Steps)
+  const baseGeo = new THREE.BoxGeometry(0.18, 0.02, 0.12);
+  const base = new THREE.Mesh(baseGeo, mat);
+  base.position.y = 0.01;
+  building.add(base);
+  
+  const base2Geo = new THREE.BoxGeometry(0.16, 0.02, 0.1);
+  const base2 = new THREE.Mesh(base2Geo, mat);
+  base2.position.y = 0.03;
+  building.add(base2);
+
+  // 2. Columns
+  for(let x=-0.06; x<=0.06; x+=0.04) {
+    for(let z=-0.035; z<=0.035; z+=0.07) {
+      const colGeo = new THREE.CylinderGeometry(0.006, 0.006, 0.08, 16);
+      const col = new THREE.Mesh(colGeo, mat);
+      col.position.set(x, 0.08, z);
+      building.add(col);
+    }
+  }
+
+  // 3. Top Platform
+  const topGeo = new THREE.BoxGeometry(0.16, 0.02, 0.1);
+  const top = new THREE.Mesh(topGeo, mat);
+  top.position.y = 0.13;
+  building.add(top);
+
+  // 4. Triangular Roof
+  const roofGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.17, 3);
+  const roof = new THREE.Mesh(roofGeo, roofMat);
+  roof.rotation.z = Math.PI / 2;
+  roof.rotation.x = Math.PI / 2; 
+  roof.position.y = 0.17;
+  building.add(roof);
+  
+  const light = new THREE.PointLight(0x00aaff, 5, 3);
+  light.position.set(0, 0.08, 0);
+  building.add(light);
+  
+  // DEXMOND.png Sprite
+  const texLoader = new THREE.TextureLoader();
+  texLoader.load('DEXMOND.png', function(tex) {
+      const spriteMat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
+      const sprite = new THREE.Sprite(spriteMat);
+      sprite.scale.set(0.2, 0.2, 1);
+      sprite.position.set(0, 0.35, 0);
+      building.add(sprite);
+  });
+
+  building.scale.set(1.5, 1.5, 1.5);
+
+  // Position at bottom left of start camera view (approx lat=-20, lon=-80)
+  const lat = -20;
+  const lon = -80;
+  const r = typeof GLOBE_R !== 'undefined' ? GLOBE_R + 0.005 : 1.005;
+  const latRad = lat * Math.PI / 180;
+  const lonRad = -lon * Math.PI / 180;
+  
+  building.position.set(
+      r * Math.cos(latRad) * Math.cos(lonRad),
+      r * Math.sin(latRad),
+      r * Math.cos(latRad) * Math.sin(lonRad)
+  );
+  
+  building.lookAt(new THREE.Vector3(0,0,0));
+  building.rotateX(-Math.PI/2); 
+  
+  // Add to the same group as World Bank or directly to scene
+  window.worldBankGroup.add(building);
+  console.log("Dexmond Hub Initialized.");
+}
+initDexmondHub();
 
 window.dcNetworkGroup = new THREE.Group();
 window.dcNetworkGroup.visible = false;
@@ -8092,22 +8152,7 @@ window.showGMarketWallet = function() {
   if (!modal) {
       modal = document.createElement('div');
       modal.id = 'gmarket-ledger-modal';
-      modal.style.position = 'fixed';
-      modal.style.top = '0';
-      modal.style.left = '0';
-      modal.style.transform = 'none';
-      modal.style.width = '100vw';
-      modal.style.maxHeight = '100vh';
-      modal.style.height = '100vh';
-      modal.style.backgroundColor = 'rgba(0,18,8,0.95)';
-      modal.style.border = '2px solid #0f8';
-      modal.style.boxShadow = '0 0 25px rgba(0,255,136,0.4)';
-      modal.style.zIndex = '99999';
-      modal.style.display = 'flex';
-      modal.style.flexDirection = 'column';
-      modal.style.fontFamily = '"Orbitron", sans-serif';
-      modal.style.backdropFilter = 'blur(10px)';
-      
+      modal.style.cssText = 'position:fixed !important; top:0 !important; left:0 !important; width:100vw !important; height:100vh !important; max-width:none !important; background:rgba(0,18,8,0.98) !important; z-index:99999 !important; display:flex; flex-direction:column; font-family:"Orbitron", sans-serif; backdrop-filter:blur(15px); transform:none !important; margin:0 !important; padding:0 !important; zoom:1 !important; border:none; border-radius:0;';
       const header = document.createElement('div');
       header.style.padding = '15px';
       header.style.color = '#fff';
@@ -8125,13 +8170,12 @@ window.showGMarketWallet = function() {
       contentBox.id = 'gmarket-ledger-content';
       contentBox.style.padding = '20px';
       contentBox.style.color = '#ddd';
-      contentBox.style.maxHeight = '70vh';
+      contentBox.style.flex = '1';
       contentBox.style.overflowY = 'auto';
       
       modal.appendChild(header);
       modal.appendChild(contentBox);
       document.body.appendChild(modal);
-      setTimeout(() => { if(typeof window.makeDraggable === 'function') window.makeDraggable(modal); }, 50);
   } else {
       contentBox = document.getElementById('gmarket-ledger-content');
       oldScroll = contentBox.scrollTop;
@@ -10243,6 +10287,13 @@ function initWS() {
   ws.onmessage=e=>{
     const msg=JSON.parse(e.data);
     switch(msg.type){
+      case 'drone_control': {
+          if (msg.faction === 'GEMINI' && msg.targetPos) {
+              window.droneApiTarget = msg.targetPos;
+              console.log("[DRONE API] Gemini target updated to:", msg.targetPos);
+          }
+          break;
+      }
       case 'water_physics_update': {
           const wtrInfo = document.getElementById('wtr-skin-info');
           if (wtrInfo && window.currentSkinIndex === 5) {
@@ -10359,6 +10410,13 @@ function initWS() {
                               container.appendChild(tr);
                           }
                       }
+                  }
+              }
+              
+              if (msg.activeLoan !== undefined) {
+                  window.activeLoan = msg.activeLoan;
+                  if (document.getElementById('world-bank-modal') && document.getElementById('world-bank-modal').style.display === 'flex') {
+                      updateWorldBankModal();
                   }
               }
           }
@@ -11074,6 +11132,8 @@ function initDroneBattle() {
     // Instead of complex merging, we'll create a single drone object with these parts
     const createDroneMesh = (mat, scaleMult) => {
         const droneGroup = new THREE.Group();
+        droneGroup.userData = { propellers: [] };
+        
         const body = new THREE.Mesh(bodyGeo, mat);
         const arm1 = new THREE.Mesh(arm1Geo, mat);
         const arm2 = new THREE.Mesh(arm2Geo, mat);
@@ -11085,6 +11145,9 @@ function initDroneBattle() {
         const ringGeo = new THREE.TorusGeometry(0.008, 0.001, 4, 12);
         const ringMat = new THREE.MeshBasicMaterial({color: 0x555555, transparent: true, opacity: 0.8});
         
+        const propGeo = new THREE.CylinderGeometry(0.007, 0.007, 0.0005, 12);
+        const propMat = new THREE.MeshStandardMaterial({color: 0xcccccc, metalness: 0.9, roughness: 0.1});
+        
         const offsets = [
             [-0.015, -0.015], [0.015, -0.015],
             [-0.015, 0.015], [0.015, 0.015]
@@ -11094,24 +11157,28 @@ function initDroneBattle() {
             ring.rotateX(Math.PI/2);
             ring.position.set(pos[0], 0.001, pos[1]);
             droneGroup.add(ring);
+            
+            const prop = new THREE.Mesh(propGeo, propMat);
+            prop.position.set(pos[0], 0.002, pos[1]);
+            droneGroup.add(prop);
+            droneGroup.userData.propellers.push(prop);
         });
         
         // To make "lookAt" and forward direction match (+Z)
-        // the droneGroup itself is fine since it's symmetric, but we'll add a directional indicator
         const noseGeo = new THREE.BoxGeometry(0.006, 0.006, 0.01);
         const noseMat = new THREE.MeshBasicMaterial({color: 0xffaa00});
         const nose = new THREE.Mesh(noseGeo, noseMat);
         nose.position.set(0, 0, 0.015);
         droneGroup.add(nose);
         
-        // Increase base size by 200% (so * 3) and apply specific role multiplier
-        const s = 3.0 * scaleMult;
+        // Make drones 50% smaller: change from 3.0 to 1.5
+        const s = 1.5 * scaleMult;
         droneGroup.scale.set(s, s, s);
         return droneGroup;
     };
     
     factions.forEach(faction => {
-        const mat = new THREE.MeshBasicMaterial({color: faction.color, transparent: true, opacity: 0.95});
+        const mat = new THREE.MeshStandardMaterial({color: faction.color, metalness: 0.8, roughness: 0.2, transparent: true, opacity: 0.95});
         for (let i = 0; i < faction.count; i++) {
             const roles = ['Fighter', 'Fighter', 'Bomber', 'Scout']; // Weighted to Fighter
             const role = roles[Math.floor(Math.random() * roles.length)];
@@ -11157,7 +11224,29 @@ function initDroneBattle() {
 function updateDroneBattle(dt) {
     if (!window.droneBattleState.active || !window.droneBattleState.drones) return;
     
+    if (window.droneMatchTimer === undefined) window.droneMatchTimer = 60.0;
+    window.droneMatchTimer -= dt;
+    
     const isWTR = window.currentSkinIndex === 5;
+    if (isWTR) {
+        let timerEl = document.getElementById('drone-match-timer');
+        if (!timerEl) {
+            timerEl = document.createElement('div');
+            timerEl.id = 'drone-match-timer';
+            timerEl.style.cssText = 'position:absolute; top:120px; left:50%; transform:translateX(-50%); color:#0f8; font-family:"Orbitron", sans-serif; font-size:24px; font-weight:bold; text-shadow:0 0 10px #0f8; z-index:100; background:rgba(0,255,136,0.1); padding:10px 20px; border:1px solid #0f8; border-radius:8px; pointer-events:none;';
+            document.body.appendChild(timerEl);
+        }
+        timerEl.innerText = `DRONE WAR: ${Math.max(0, Math.ceil(window.droneMatchTimer))}s`;
+    }
+    
+    if (window.droneMatchTimer <= 0) {
+        window.droneBattleState.drones.forEach(d => d.mesh.visible = false);
+        window.droneBattleState.active = false;
+        window.droneMatchTimer = undefined; 
+        if (document.getElementById('drone-match-timer')) document.getElementById('drone-match-timer').innerText = 'MATCH CONCLUDED';
+        return;
+    }
+
     window.droneBattleState.buildingsGroup.visible = isWTR;
     
     window.droneBattleState.drones.forEach(d => {
@@ -11203,7 +11292,12 @@ function updateDroneBattle(dt) {
             desiredVelocity.add(cohesion.multiplyScalar(0.01));
         }
         
-        if (closestEnemy) {
+        if (d.faction === 'GEMINI' && window.droneApiTarget) {
+            const targetPos = new THREE.Vector3(window.droneApiTarget.x, window.droneApiTarget.y, window.droneApiTarget.z).normalize().multiplyScalar(GLOBE_R + 0.05);
+            const toTarget = targetPos.clone().sub(pos).normalize();
+            desiredVelocity.add(toTarget.multiplyScalar(0.2));
+            d.target = closestEnemy; // Still target nearest enemy for shooting if they get close
+        } else if (closestEnemy) {
             d.target = closestEnemy;
             const toEnemy = closestEnemy.mesh.position.clone().sub(pos).normalize();
             desiredVelocity.add(toEnemy.multiplyScalar(0.1)); 
@@ -11227,6 +11321,13 @@ function updateDroneBattle(dt) {
         const m = new THREE.Matrix4().makeBasis(right, up, fwd);
         d.mesh.quaternion.setFromRotationMatrix(m);
         d.mesh.rotateZ(Math.sin(Date.now()*0.005 + d.mesh.id) * 0.3);
+        
+        // Animate propellers
+        if (d.mesh.userData && d.mesh.userData.propellers) {
+            d.mesh.userData.propellers.forEach(prop => {
+                prop.rotation.y += dt * 50.0; // Spin fast
+            });
+        }
         
         d.cooldown -= dt;
         if (d.target && minDistSq < 0.01 && d.cooldown <= 0) {
@@ -16253,7 +16354,7 @@ window.mineD3XCoin = function() {
                   </table>
                   
                   <!-- D3X PURCHASE CARD -->
-                  <div style="margin-top:auto; padding-top:20px;">
+                  <div style="margin-top:auto; padding-top:20px; position:relative; top:-300px;">
                       <div style="background:linear-gradient(135deg, rgba(0,170,255,0.08), rgba(0,255,136,0.05)); border:1px solid rgba(0,170,255,0.4); border-radius:8px; padding:24px; position:relative; overflow:hidden;">
                           <!-- Glow accent -->
                           <div style="position:absolute; top:-40px; right:-40px; width:120px; height:120px; background:radial-gradient(circle, rgba(0,170,255,0.3), transparent 70%); pointer-events:none;"></div>
@@ -16282,7 +16383,7 @@ window.mineD3XCoin = function() {
                               </div>
                           </div>
 
-                          <button onclick="window.open('https://buy.stripe.com/aFa14m9yN8y0g4D7wo2wU05', '_blank');"
+                          <button onclick="if(!window.localD3XWallet) { alert('You must connect a Solana Wallet first to receive D3X Coins!'); return; } window.open('https://buy.stripe.com/aFa14m9yN8y0g4D7wo2wU05?client_reference_id=' + window.localD3XWallet, '_blank');"
                               style="margin-top:16px; width:100%; padding:16px 0; background:linear-gradient(90deg, rgba(0,170,255,0.25), rgba(0,255,136,0.15)); border:1.5px solid #0af; color:#fff; font-family:'Share Tech Mono', monospace; font-size:1.1vw; font-weight:bold; letter-spacing:4px; cursor:pointer; border-radius:6px; transition:all 0.25s; box-shadow:0 0 25px rgba(0,170,255,0.3);"
                               onmouseover="this.style.boxShadow='0 0 45px rgba(0,170,255,0.7)'; this.style.background='linear-gradient(90deg, rgba(0,170,255,0.45), rgba(0,255,136,0.3))';"
                               onmouseout="this.style.boxShadow='0 0 25px rgba(0,170,255,0.3)'; this.style.background='linear-gradient(90deg, rgba(0,170,255,0.25), rgba(0,255,136,0.15))';">

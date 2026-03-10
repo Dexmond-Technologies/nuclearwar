@@ -487,9 +487,11 @@ const server = http.createServer((req, res) => {
         // Handle the checkout.session.completed event
         if (event.type === 'checkout.session.completed') {
             const session = event.data.object;
-            // Get the user's wallet address from custom fields or metadata
-            // Assuming the user entered it in a custom field named "solana_wallet"
-            let userWallet = session.metadata?.solana_wallet;
+            // Get the user's wallet address from client_reference_id (appended securely to URL)
+            let userWallet = session.client_reference_id;
+            
+            // Fallback to metadata or custom fields just in case
+            if (!userWallet) userWallet = session.metadata?.solana_wallet;
             
             if (!userWallet && session.custom_fields) {
                const walletField = session.custom_fields.find(f => 
@@ -852,6 +854,7 @@ function initWebSockets() {
                   type: 'world_bank_stats',
                   d3x: row.d3x_balance || 0,
                   portfolio: portfolio,
+                  activeLoan: portfolio.active_loan || null,
                   commodities: portfolio.commodities || {}
               }));
           } catch(e) {
@@ -994,6 +997,16 @@ function initWebSockets() {
           type: 'chat',
           name: chatObj.name,
           text: chatObj.text
+        });
+        break;
+      }
+
+      case 'drone_control': {
+        // Broadcast API control target to all clients to sync the Blue drone swarm
+        broadcastAll({
+          type: 'drone_control',
+          faction: msg.faction,
+          targetPos: msg.targetPos
         });
         break;
       }
@@ -2079,7 +2092,8 @@ async function runAIMarketBuying() {
       const variance = 0.95 + (Math.random() * 0.1); // ±5%
       const effectivePrice = item.basePrice * variance;
       
-      let affordableUnits = Math.floor(remainingBudgetC / effectivePrice);
+      // Divide remaining budget by 100 so it can sustain 1-min intervals all day
+      let affordableUnits = Math.floor((remainingBudgetC / 100) / effectivePrice);
       
       // Stop if we literally can't even afford 1 unit of this random item
       if (affordableUnits < 1) {
@@ -2136,10 +2150,12 @@ async function runAIMarketBuying() {
       const remainingBudgetR = claudeDailyCap - claudeDailySpent;
       
       const item = validCatalog[Math.floor(Math.random() * validCatalog.length)];
-      const variance = 0.95 + (Math.random() * 0.1);
+      // Calculate how many of this item we can comfortably buy with remaining budget
+      const variance = 0.95 + (Math.random() * 0.1); // ±5%
       const effectivePrice = item.basePrice * variance;
       
-      let affordableUnits = Math.floor(remainingBudgetR / effectivePrice);
+      // Divide remaining budget by 100 so it can sustain 1-min intervals all day
+      let affordableUnits = Math.floor((remainingBudgetR / 100) / effectivePrice);
       
       if (affordableUnits < 1) {
           if (claudePurchasesThisCycle === 0) {
@@ -2321,8 +2337,8 @@ async function runAISpendingProtocol() {
   console.log(`[AI SPENDING] Executed incremental purchase for ${todayDate} (${transactionTotal} D3X). Total spent today: ${spentToday + transactionTotal}/${dailySpendCap}`);
 }
 
-// Run protocol check occasionally (every 10 minutes) allowing AI to spread buys out
-setInterval(runAISpendingProtocol, 10 * 60 * 1000);
+// Run protocol check occasionally (every 1 minute) allowing AI to spread buys out
+setInterval(runAISpendingProtocol, 60 * 1000);
 setTimeout(runAISpendingProtocol, 30000); // Run slightly after boot
 
 // Hourly Netting and On-Chain Settlement
