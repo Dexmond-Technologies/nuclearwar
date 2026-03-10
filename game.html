@@ -1293,10 +1293,6 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       <div class="dash-dot" style="background:#00dcff"></div>
       <div class="dash-pname" style="color:#00dcff">HUMANITY (SUPPORTED BY GEMINI)</div>
       <div class="dash-tag">YOU + ALLIES</div>
-      <div style="width: 100%; padding-left: 16px; margin-top: 6px; margin-bottom: 4px; text-align:left;">
-         <div style="color:#0f8; font-family:'Courier New', monospace; font-size:14px; font-weight:bold; text-shadow:0 0 5px #0f8;" id="d0-d3x-bal">SYNCING...</div>
-         <div style="color:#ccc; font-family:'Courier New', monospace; font-size:9px; letter-spacing:1px; margin-top:2px;" id="d0-d3x-address">LOADING WALLET...</div>
-      </div>
     </div>
     <div class="dash-stat-grid" style="grid-template-columns: repeat(4, 1fr);">
       <div class="dash-stat"><div class="dash-stat-label">Territories</div><div class="dash-stat-val" style="color:#00dcff" id="d0-terr">—</div></div>
@@ -1335,9 +1331,16 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   </div>
   <div style="position:absolute; bottom:12px; left:20px; font-family:'Share Tech Mono', monospace; font-size:10px; font-weight:normal; letter-spacing:3px; color:#0af; text-transform:uppercase; z-index:15; pointer-events:none; text-shadow:0 0 5px rgba(0,170,255,0.8);">DEXMOND TECHNOLOGIES Ltd</div>
   
+  <div style="position:absolute; top:20px; right:20px; display:flex; gap:10px; align-items:center;">
+      <button id="btn-reinvest-d3x" onclick="toggleReinvest()" style="display:block; width:130px; pointer-events:auto; padding:8px 0; background:rgba(0,255,136,0.15); border:1px solid #0f8; color:#0f8; font-family:'Courier New', monospace; font-size:10px; font-weight:bold; text-align:center; cursor:pointer; border-radius:4px; transition:all 0.2s; box-shadow:0 0 10px rgba(0,255,136,0.2); box-sizing:border-box;">♻️ REINVEST: OFF<br/>AIRDROP 1X</button>
+      <div id="top-right-stats" style="background:rgba(0,180,255,0.1); border:1px solid rgba(0,180,255,0.4); padding:6px 12px; border-radius:4px; display:flex; align-items:center; gap:8px;">
+          <div style="color:#0af; font-weight:bold; font-size:11px;" id="d0-d3x-address">LOADING WALLET...</div>
+          <div style="color:#fff; opacity:0.5;">|</div>
+          <div style="color:#0f8; font-weight:bold; font-size:11px; text-shadow:0 0 5px rgba(0,255,136,0.5);" id="d0-d3x-bal">SYNCING...</div>
+      </div>
+  </div>
+  
   <div id="right-hud-group" style="position:absolute; bottom:55px; right:calc(25px + 25vw); display:flex; flex-direction:column; gap:8px; width:115px; z-index:100; align-items:stretch; pointer-events:none;">
-      
-      <button id="btn-reinvest-d3x" onclick="toggleReinvest()" style="display:block; width:100%; pointer-events:auto; padding:12px 0; margin-bottom:500px; background:rgba(0,255,136,0.15); border:1px solid #0f8; color:#0f8; font-family:'Courier New', monospace; font-size:10px; font-weight:bold; text-align:center; cursor:pointer; border-radius:4px; transition:all 0.2s; box-shadow:0 0 10px rgba(0,255,136,0.2); box-sizing:border-box;">♻️ REINVEST: OFF<br/>AIRDROP 1X</button>
       <div id="skin-hint-arrow" style="position:absolute; top:35px; left:-40px; font-size:32px; color:#ff5577; text-shadow:0 0 15px rgba(255,-85,119,0.8); opacity:0; pointer-events:none; z-index:9999; transition:opacity 0.5s; animation:bounceRight 0.5s infinite alternate;">➔</div>
       <button id="btn-toggle-skin" onclick="toggleRedSkin()">🔴 RED SKIN</button>
       
@@ -1362,7 +1365,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       <div class="dash-dot" style="background:#ff3232"></div>
       <div class="dash-pname" style="color:#ff3232">RAINCLAUDE AI</div>
       <div class="dash-tag">ADVERSARY</div>
-      <div style="position:absolute; top:-2px; right:110px; text-align:right;">
+      <div style="position:absolute; top:-2px; right:10px; text-align:right;">
          <div style="color:#f24; font-family:'Courier New', monospace; font-size:14px; font-weight:bold; text-shadow:0 0 5px #f24;" id="d1-d3x-bal">SYNCING...</div>
          <div style="color:#ccc; font-family:'Courier New', monospace; font-size:9px; letter-spacing:1px; margin-top:2px;" id="d1-d3x-address">LOADING WALLET...</div>
       </div>
