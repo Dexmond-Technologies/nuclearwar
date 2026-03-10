@@ -2899,6 +2899,42 @@ function initNaturalResources() {
 // Initialize immediately
 initNaturalResources();
 
+let greenMountainsGroup = new THREE.Group();
+greenMountainsGroup.visible = false;
+scene.add(greenMountainsGroup);
+window.greenMountainsGroup = greenMountainsGroup;
+
+function initGreenMountains() {
+    // Generate a shiny, detailed green material
+    const mat = new THREE.MeshStandardMaterial({
+        color: 0x00ff33,
+        roughness: 0.1, // Shiny
+        metalness: 0.7, // Distinct metallic glint
+        flatShading: true
+    });
+    
+    // Base mountain geometry (detailed icosahedron stretched on Y-axis)
+    const geom1 = new THREE.IcosahedronGeometry(0.12, 2);
+    const geom2 = new THREE.IcosahedronGeometry(0.15, 2);
+    
+    // 1. First Mountain (Alps)
+    const mount1 = new THREE.Mesh(geom1, mat);
+    mount1.scale.set(1, 2.5, 1); // stretch into a mountain
+    const pos1 = ll2v(46.8, 8.2, GLOBE_R); 
+    mount1.position.copy(pos1);
+    mount1.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pos1.clone().normalize());
+    greenMountainsGroup.add(mount1);
+    
+    // 2. Second Mountain (Himalayas)
+    const mount2 = new THREE.Mesh(geom2, mat);
+    mount2.scale.set(1, 3.2, 1); // taller/larger mountain
+    const pos2 = ll2v(27.9, 86.9, GLOBE_R);
+    mount2.position.copy(pos2);
+    mount2.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pos2.clone().normalize());
+    greenMountainsGroup.add(mount2);
+}
+initGreenMountains();
+
 function initD3XCaves() {
   const coords = [
     {lat: 40, lon: -100, name: "NA D3X Mine"},
@@ -14648,6 +14684,11 @@ window.toggleRedSkin = function() {
   // Toggle Global Trade Network
   if (typeof window.globalTradeGroup !== 'undefined') {
      window.globalTradeGroup.visible = (skin.name === 'GREEN');
+  }
+  
+  // Toggle Green Shiny Mountains exclusively on Green Skin
+  if (typeof window.greenMountainsGroup !== 'undefined') {
+      window.greenMountainsGroup.visible = (skin.name === 'GREEN');
   }
   
   // Toggle Metals Trade  // Elements normally toggled by specific skins
