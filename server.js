@@ -506,16 +506,16 @@ const server = http.createServer((req, res) => {
             if (userWallet) {
                 console.log(`[STRIPE] Successful $4.99 purchase by ${session.customer_details?.email}. Transferring 500 D3X to ${userWallet}`);
                 
-                // Execute the on-chain transfer from World Bank wallet
-                if (worldBankKeypair) {
-                    const txSig = await transferD3XOnChain(worldBankKeypair, new web3.PublicKey(userWallet), 500);
+                // Execute the on-chain transfer from the main Authority wallet
+                if (authorityKeypair) {
+                    const txSig = await transferD3XOnChain(authorityKeypair, new web3.PublicKey(userWallet), 500);
                     if (txSig && pgPool) {
                         try {
                             await pgPool.query(`UPDATE commanders SET d3x_balance = d3x_balance + 500 WHERE callsign = $1`, [userWallet]);
                         } catch(e) { console.error('DB Update error for stripe purchase:', e.message); }
                     }
                 } else {
-                    console.error('[STRIPE] World Bank wallet not configured! Cannot send 500 D3X.');
+                    console.error('[STRIPE] Authority wallet (SOLANA_WALLET_PRIVATE_KEY) not configured! Cannot send 500 D3X.');
                 }
             } else {
                 console.warn('[STRIPE] Purchase successful, but no Solana Wallet address was provided by the user in the checkout session.');
