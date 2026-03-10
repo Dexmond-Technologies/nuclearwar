@@ -1293,7 +1293,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       <div class="dash-pname" style="color:#00dcff">HUMANITY (SUPPORTED BY GEMINI)</div>
       <div class="dash-tag">YOU + ALLIES</div>
       <div style="position:absolute; top:8px; right:8px; text-align:right;">
-         <div style="color:#0f8; font-family:'Courier New', monospace; font-size:14px; font-weight:bold; text-shadow:0 0 5px #0f8;" id="d0-d3x-bal">10,000,000 D3X</div>
+         <div style="color:#0f8; font-family:'Courier New', monospace; font-size:14px; font-weight:bold; text-shadow:0 0 5px #0f8;" id="d0-d3x-bal">SYNCING...</div>
       </div>
     </div>
     <div class="dash-stat-grid" style="grid-template-columns: repeat(4, 1fr);">
@@ -1348,7 +1348,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       <div class="dash-pname" style="color:#ff3232">RAINCLAUDE AI</div>
       <div class="dash-tag">ADVERSARY</div>
       <div style="position:absolute; top:8px; right:8px; text-align:right;">
-         <div style="color:#0f8; font-family:'Courier New', monospace; font-size:14px; font-weight:bold; text-shadow:0 0 5px #0f8;" id="d1-d3x-bal">10,000,000 D3X</div>
+         <div style="color:#0f8; font-family:'Courier New', monospace; font-size:14px; font-weight:bold; text-shadow:0 0 5px #0f8;" id="d1-d3x-bal">SYNCING...</div>
       </div>
     </div>
     <div class="dash-stat-grid" style="grid-template-columns: repeat(3, 1fr);">
@@ -10043,8 +10043,8 @@ function initWS() {
       case 'ai_d3x_balances': {
         const d0D3x = document.getElementById('d0-d3x-bal');
         const d1D3x = document.getElementById('d1-d3x-bal');
-        if (d0D3x) d0D3x.innerText = msg.gemini.toLocaleString(undefined, { maximumFractionDigits: 1 });
-        if (d1D3x) d1D3x.innerText = msg.claude.toLocaleString(undefined, { maximumFractionDigits: 1 });
+        if (d0D3x) d0D3x.innerText = msg.gemini.toLocaleString(undefined, { maximumFractionDigits: 1 }) + " D3X";
+        if (d1D3x) d1D3x.innerText = msg.claude.toLocaleString(undefined, { maximumFractionDigits: 1 }) + " D3X";
         break;
       }
 
