@@ -1869,8 +1869,8 @@ async function runAIMarketBuying() {
   const geminiBalance = cachedGeminiBalance || 100000000; // Default 100M if not yet fetched
   const claudeBalance = cachedClaudeBalance || 100000000;
   
-  const geminiDailyCap = geminiBalance * 0.02; // 2% of total balance
-  const claudeDailyCap = claudeBalance * 0.02;
+  const geminiDailyCap = geminiBalance * 0.01; // 1% of total balance
+  const claudeDailyCap = claudeBalance * 0.01;
   
   const buys = [];
   
@@ -1888,8 +1888,8 @@ async function runAIMarketBuying() {
       console.error("[AI MARKET] Error reading portfolios from DB:", e);
   }
 
-  // Filter catalog down to only Metals and Natural Resources per user request
-  const validCatalog = AI_MARKET_CATALOG.filter(item => item.category === 'Metals' || item.category === 'Natural Resources');
+  // Allow full catalog (Metals, Resources, PC Components, Tech) per user request
+  const validCatalog = AI_MARKET_CATALOG;
   if (validCatalog.length === 0) return;
 
   // -- GEMINI buys --
@@ -1909,16 +1909,19 @@ async function runAIMarketBuying() {
       
       // Stop if we literally can't even afford 1 unit of this random item
       if (affordableUnits < 1) {
-          // Break is risky; just increment cycle count to eventually break if we're near strictly zero cap
-          geminiPurchasesThisCycle++;
-          continue; 
+          if (geminiPurchasesThisCycle === 0) {
+              affordableUnits = 1; // Force at least 1 transaction if it's the first
+          } else {
+              geminiPurchasesThisCycle++;
+              continue; 
+          }
       }
       
       // Buy an aggressive amount: between 50% and 100% of what's affordable, but at least 1 
       const unitsToBuy = Math.max(1, Math.floor(affordableUnits * (0.5 + Math.random() * 0.5)));
       const cost = Math.round(effectivePrice * unitsToBuy);
       
-      if (geminiDailySpent + cost > geminiDailyCap) break; // Final safety check
+      if (geminiDailySpent + cost > geminiDailyCap && geminiPurchasesThisCycle > 0) break; // Bypass safety check for 1st trade
       
       geminiDailySpent += cost;
       buys.push({ aiName: 'gemini', item: item.name, category: item.category, units: unitsToBuy, cost, unit: item.unit });
@@ -1965,14 +1968,18 @@ async function runAIMarketBuying() {
       const affordableUnits = Math.floor(remainingBudgetR / effectivePrice);
       
       if (affordableUnits < 1) {
-          claudePurchasesThisCycle++;
-          continue;
+          if (claudePurchasesThisCycle === 0) {
+              affordableUnits = 1;
+          } else {
+              claudePurchasesThisCycle++;
+              continue;
+          }
       }
       
       const unitsToBuy = Math.max(1, Math.floor(affordableUnits * (0.5 + Math.random() * 0.5)));
       const cost = Math.round(effectivePrice * unitsToBuy);
       
-      if (claudeDailySpent + cost > claudeDailyCap) break; // Final safety check
+      if (claudeDailySpent + cost > claudeDailyCap && claudePurchasesThisCycle > 0) break; // Final safety check
       
       claudeDailySpent += cost;
       buys.push({ aiName: 'claude', item: item.name, category: item.category, units: unitsToBuy, cost, unit: item.unit });
@@ -2042,7 +2049,7 @@ async function runAISpendingProtocol() {
   
   // Use cached Gemini balance, fallback to 100M
   const currentBalance = cachedGeminiBalance || 100000000;
-  const dailySpendCap = Math.floor(currentBalance * 0.02);
+  const dailySpendCap = Math.floor(currentBalance * 0.01);
   if (dailySpendCap <= 0) return;
 
   // Calculate how much we have already spent today by crawling the file for today's logs

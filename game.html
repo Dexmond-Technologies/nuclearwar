@@ -7984,6 +7984,7 @@ window.showGMarketWallet = function() {
       modal.appendChild(header);
       modal.appendChild(contentBox);
       document.body.appendChild(modal);
+      setTimeout(() => { if(typeof window.makeDraggable === 'function') window.makeDraggable(modal); }, 50);
   } else {
       contentBox = document.getElementById('gmarket-ledger-content');
       oldScroll = contentBox.scrollTop;
@@ -12886,6 +12887,8 @@ function openDrawer(id, titleHtml, bodyHtml) {
     <div id="drawer-body-${id}">${bodyHtml}</div>
   `;
   document.body.appendChild(drawer);
+  setTimeout(() => { if(typeof window.makeDraggable === 'function') window.makeDraggable(drawer); }, 50);
+  
   const btn = document.getElementById('ops-btn-' + id) || document.getElementById('btn-' + id);
   if (btn) btn.classList.add('active');
 }
