@@ -1172,23 +1172,23 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 
   <!-- DATACENTER CO-OP UI (CYBER SKIN ONLY) -->
   <!-- STAKING TOWER MODAL -->
-  <div id="staking-tower-modal" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:600px; background:rgba(20,0,0,0.95); border:1px solid #ff0033; border-radius:8px; box-shadow:0 0 30px rgba(255,0,50,0.3); padding:20px; pointer-events:auto; backdrop-filter:blur(10px); z-index:100;">
+  <div id="staking-tower-modal" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:840px; min-height:340px; display:flex; flex-direction:column; background:rgba(20,0,0,0.95); border:1px solid #ff0033; border-radius:8px; box-shadow:0 0 30px rgba(255,0,50,0.3); padding:20px; pointer-events:auto; backdrop-filter:blur(10px); z-index:100;">
     <button onclick="document.getElementById('staking-tower-modal').style.display='none'; window.selectedStakingTower=null;" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#f55;font-size:16px;cursor:pointer;line-height:1;padding:4px;">✕</button>
     <h2 style="margin:0 0 5px 0; color:#ff0033; font-family:'Orbitron', sans-serif; font-size:22px; text-transform:uppercase; letter-spacing:2px; text-shadow:0 0 10px rgba(255,0,50,0.5);">STAKING TERMINAL</h2>
     <div style="color:#aaa; font-family:'Share Tech Mono', monospace; font-size:12px; margin-bottom:20px;">NODE PROTOCOL: <span style="color:#fff;" id="staking-tower-node-name">D3X CORE NETWORK</span></div>
     
-    <div style="display:flex; gap:15px;">
-      <div style="flex:1; border:1px solid rgba(255,0,50,0.3); padding:15px; background:rgba(40,0,0,0.5); border-radius:4px;">
+    <div style="display:flex; gap:15px; flex:1;">
+      <div style="flex:1; border:1px solid rgba(255,0,50,0.3); padding:15px; background:rgba(40,0,0,0.5); border-radius:4px; display:flex; flex-direction:column; justify-content:center;">
         <div style="color:#fa0; font-family:'Share Tech Mono', monospace; font-size:14px; margin-bottom:10px;">AVAILABLE D3X: <span style="color:#fff;" id="staking-tower-balance">100</span></div>
         <div style="color:#0f0; font-family:'Share Tech Mono', monospace; font-size:14px; margin-bottom:20px;">ESTIMATED APY: <span style="color:#fff;">12.5%</span></div>
         <input type="number" id="staking-tower-amount-input" placeholder="Amount to Stake" style="width:100%; box-sizing:border-box; padding:8px; background:rgba(255,255,255,0.05); border:1px solid #ff0033; color:#fff; font-family:'Courier New', monospace; outline:none; margin-bottom:10px; border-radius:2px;">
-        <button onclick="alert('Transaction signing initiated...')" style="width:100%; padding:10px; background:rgba(255,0,50,0.2); border:1px solid #ff0033; color:#ff0033; font-family:'Share Tech Mono', monospace; cursor:pointer; font-weight:bold; transition:all 0.2s; border-radius:2px;">DEPOSIT STAKE</button>
+        <button id="btn-stake-deposit" onclick="handleStakeDeposit()" style="width:100%; padding:10px; background:rgba(255,0,50,0.2); border:1px solid #ff0033; color:#ff0033; font-family:'Share Tech Mono', monospace; cursor:pointer; font-weight:bold; transition:all 0.2s; border-radius:2px; margin-top:auto;">DEPOSIT STAKE</button>
       </div>
-      <div style="flex:1; border:1px solid rgba(255,0,50,0.3); padding:15px; background:rgba(40,0,0,0.5); border-radius:4px;">
+      <div style="flex:1; border:1px solid rgba(255,0,50,0.3); padding:15px; background:rgba(40,0,0,0.5); border-radius:4px; display:flex; flex-direction:column; justify-content:center;">
         <div style="color:#0af; font-family:'Share Tech Mono', monospace; font-size:14px; margin-bottom:10px;">ACTIVE STAKED: <span style="color:#fff;" id="staking-tower-active">0 D3X</span></div>
         <div style="color:#f0f; font-family:'Share Tech Mono', monospace; font-size:14px; margin-bottom:20px;">UNCLAIMED REWARDS: <span style="color:#fff;">0.00 D3X</span></div>
-        <button onclick="alert('Claiming rewards...')" style="width:100%; padding:10px; background:rgba(0,170,255,0.1); border:1px solid #0af; color:#0af; font-family:'Share Tech Mono', monospace; cursor:pointer; font-weight:bold; transition:all 0.2s; margin-bottom:10px; border-radius:2px;">CLAIM REWARDS</button>
-        <button onclick="alert('Unstaking...')" style="width:100%; padding:10px; background:transparent; border:1px solid #777; color:#ccc; font-family:'Share Tech Mono', monospace; cursor:pointer; transition:all 0.2s; border-radius:2px;">UNSTAKE ALL</button>
+        <button id="btn-stake-claim" onclick="handleStakeClaim()" style="width:100%; padding:10px; background:rgba(0,170,255,0.1); border:1px solid #0af; color:#0af; font-family:'Share Tech Mono', monospace; cursor:pointer; font-weight:bold; transition:all 0.2s; margin-bottom:10px; border-radius:2px;">CLAIM REWARDS</button>
+        <button id="btn-stake-unstake" onclick="handleStakeUnstake()" style="width:100%; padding:10px; background:transparent; border:1px solid #777; color:#ccc; font-family:'Share Tech Mono', monospace; cursor:pointer; transition:all 0.2s; border-radius:2px;">UNSTAKE ALL</button>
       </div>
     </div>
   </div>
@@ -2577,7 +2577,7 @@ function initNaturalResources() {
     ctx.fillStyle = color;
     ctx.beginPath(); ctx.arc(16,16,10,0,Math.PI*2); ctx.fill();
     const tex = new THREE.CanvasTexture(c);
-    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: true, opacity: 0.85 });
+    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: true, opacity: 0.95 });
     const sprite = new THREE.Sprite(mat);
     sprite.scale.set(size, size, 1);
     
@@ -3789,6 +3789,29 @@ function initDatacenters() {
             : new THREE.MeshBasicMaterial({ color: colorHex });
         
         const mesh = new THREE.Mesh(dcGeo, dcMat);
+        
+        if (!isMaster && !isD3XExchange && !isRainclaude) {
+            // Spread XRP datacenters randomly across the globe away from the BTC node cluster
+            let valid = false;
+            while (!valid) {
+                dc.lat = (Math.random() * 140) - 70; // Avoid extreme poles (-70 to 70)
+                dc.lon = (Math.random() * 360) - 180;
+                
+                // BTC Node is at approx lat: 34.58, lon: -99.15
+                let latDist = dc.lat - 34.58;
+                let lonDist = dc.lon - (-99.15);
+                // Handle longitude wrap-around
+                if (lonDist > 180) lonDist -= 360;
+                if (lonDist < -180) lonDist += 360;
+                
+                // Require at least 60 "degrees" of distance away to ensure they are far
+                if (latDist * latDist + lonDist * lonDist > 3600) {
+                    valid = true;
+                }
+            }
+            dc.location = "Decentralized Node";
+        }
+
         const latRad = dc.lat * Math.PI / 180;
         const lonRad = -dc.lon * Math.PI / 180;
         const r = typeof GLOBE_R !== 'undefined' ? GLOBE_R + 0.005 : 1.005;
@@ -3841,7 +3864,7 @@ function initDatacenters() {
             ring2.rotation.x = -Math.PI / 2;
             arrowGroup.add(ring2);
             
-            arrowGroup.scale.set(0.5, 0.5, 0.5); // 50% smaller
+            arrowGroup.scale.set(0.35, 0.35, 0.35); // 40% larger than 0.25
             
             mesh.add(arrowGroup);
             mesh.userData.arrowGroup = arrowGroup;
@@ -3954,8 +3977,9 @@ function initDatacenters() {
                 // Offsets for the 3 towers forming a triangle/cluster
                 const towerOffsets = [
                     { lat: 0, lon: 0 },
-                    { lat: -0.8, lon: 1.2 },
-                    { lat: 0.8, lon: 1.2 }
+                    // Spread apart further per user request (was -1.8/1.8 lat, 2.2 lon)
+                    { lat: -3.5, lon: 4.0 },
+                    { lat: 3.5, lon: 4.0 }
                 ];
                 
                 towerOffsets.forEach((off, idx) => {
@@ -3967,10 +3991,14 @@ function initDatacenters() {
                     const towerMat = new THREE.MeshPhongMaterial({ color: 0xff0033, shininess: 100, specular: 0xffffff });
                     const towerMesh = new THREE.Mesh(towerGeo, towerMat);
                     
+                    // Lower tower by 10% of its height into the globe (height is 0.245)
+                    const lowerAmt = 0.0245;
+                    const rLowered = r - lowerAmt;
+                    
                     towerMesh.position.set(
-                        r * Math.cos(towerLatRad) * Math.cos(towerLonRad),
-                        r * Math.sin(towerLatRad),
-                        r * Math.cos(towerLatRad) * Math.sin(towerLonRad)
+                        rLowered * Math.cos(towerLatRad) * Math.cos(towerLonRad),
+                        rLowered * Math.sin(towerLatRad),
+                        rLowered * Math.cos(towerLatRad) * Math.sin(towerLonRad)
                     );
                     towerMesh.lookAt(new THREE.Vector3(0,0,0));
                     towerMesh.rotateX(-Math.PI/2); // Align cylinder outwards to prevent clipping
@@ -3981,11 +4009,11 @@ function initDatacenters() {
                         tCanvas.width = 512;
                         tCanvas.height = 128;
                         const tCtx = tCanvas.getContext('2d');
-                        tCtx.font = 'bold 64px "Orbitron", sans-serif';
+                        tCtx.font = 'bold 70px "Orbitron", sans-serif';
                         tCtx.fillStyle = '#ffffff';
                         tCtx.textAlign = 'center';
                         tCtx.textBaseline = 'middle';
-                        tCtx.fillText('STAKING CENTRE', 256, 64);
+                        tCtx.fillText('STAKING', 256, 64);
                         
                         const tTex = new THREE.CanvasTexture(tCanvas);
                         const tSpriteMat = new THREE.SpriteMaterial({ map: tTex, transparent: true, depthTest: false });
@@ -3995,12 +4023,46 @@ function initDatacenters() {
                         towerMesh.add(tSprite);
                     }
 
-                    // Big Aura for tower
-                    const tAuraGeo = new THREE.SphereGeometry(0.08, 32, 32);
-                    const tAuraMat = new THREE.MeshBasicMaterial({ color: 0xff0033, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending });
+                    // Intense Aura for tower
+                    const tAuraGeo = new THREE.SphereGeometry(0.1, 32, 32); // Slightly larger
+                    const tAuraMat = new THREE.MeshBasicMaterial({ color: 0xff0033, transparent: true, opacity: 1.0, blending: THREE.AdditiveBlending }); // Max opacity
                     const tAura = new THREE.Mesh(tAuraGeo, tAuraMat);
                     tAura.position.set(0, 0.1225, 0);
                     towerMesh.add(tAura);
+                    
+                    // Add point light for intense glow
+                    const tLight = new THREE.PointLight(0xff0033, 3, 2);
+                    tLight.position.set(0, 0.1225, 0);
+                    towerMesh.add(tLight);
+
+                    // Add steam/cloud particle system for cooling
+                    const steamGroup = new THREE.Group();
+                    // Create a simple steam puff texture programmatically
+                    const steamCanvas = document.createElement('canvas');
+                    steamCanvas.width = 64; steamCanvas.height = 64;
+                    const steamCtx = steamCanvas.getContext('2d');
+                    const steamGrad = steamCtx.createRadialGradient(32, 32, 0, 32, 32, 32);
+                    steamGrad.addColorStop(0, 'rgba(200, 200, 200, 0.8)');
+                    steamGrad.addColorStop(0.5, 'rgba(200, 200, 200, 0.3)');
+                    steamGrad.addColorStop(1, 'rgba(200, 200, 200, 0)');
+                    steamCtx.fillStyle = steamGrad;
+                    steamCtx.fillRect(0, 0, 64, 64);
+                    const steamTex = new THREE.CanvasTexture(steamCanvas);
+                    
+                    for (let s = 0; s < 8; s++) {
+                        const steamMat = new THREE.SpriteMaterial({ map: steamTex, transparent: true, opacity: 0.6 + Math.random() * 0.4, blending: THREE.AdditiveBlending });
+                        const steamSprite = new THREE.Sprite(steamMat);
+                        steamSprite.scale.set(0.18 + Math.random()*0.15, 0.18 + Math.random()*0.15, 1);
+                        // Randomize position around the base slightly wider and much higher to peak out of the red aura
+                        const angle = Math.random() * Math.PI * 2;
+                        const dist = Math.random() * 0.08 + 0.05;
+                        const height = Math.random() * 0.15 + 0.05;
+                        steamSprite.position.set(Math.cos(angle)*dist, height, Math.sin(angle)*dist);
+                        
+                        // Add some movement data for animation loop if desired (we'll just leave them static puffs for now for performance, or lightly rotate them)
+                        steamGroup.add(steamSprite);
+                    }
+                    towerMesh.add(steamGroup);
 
                     towerMesh.userData = {
                         type: 'staking_tower',
@@ -4283,7 +4345,7 @@ sg.setAttribute('position',new THREE.Float32BufferAttribute(sp,3));
 scene.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:0.018,transparent:true,opacity:.7})));
 
 // Globe
-const globeGeo = new THREE.SphereGeometry(GLOBE_R,64,64);
+const globeGeo = new THREE.SphereGeometry(GLOBE_R, 192, 192);
 const texLoader = new THREE.TextureLoader();
 const earthTex  = texLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/land_ocean_ice_cloud_2048.jpg');
 
@@ -4494,7 +4556,7 @@ window.issOrbitGroup = issOrbitGroup; // Expose for animation loop
 // Atmosphere
 scene.add(new THREE.Mesh(
   new THREE.SphereGeometry(GLOBE_R*1.06,32,32),
-  new THREE.MeshBasicMaterial({color:0x1155cc,side:THREE.BackSide,transparent:true,opacity:.18})
+  new THREE.MeshBasicMaterial({color:0x1155cc,side:THREE.BackSide,transparent:true,opacity:.35})
 ));
 
 // Grid
@@ -5301,7 +5363,7 @@ window.showCmdHelpModal = function() {
   header.style.padding='25px 40px'; 
   header.style.color='#fff'; 
   header.style.background='linear-gradient(90deg, rgba(0,220,255,0.3) 0%, rgba(0,100,200,0.1) 100%)';
-  header.style.fontFamily="'Share Tech Mono', monospace"; 
+  header.style.fontFamily="'Orbitron', sans-serif"; 
   header.style.display='flex'; 
   header.style.justifyContent='space-between';
   header.style.alignItems='center';
@@ -5327,7 +5389,7 @@ window.showCmdHelpModal = function() {
   const idx = window.currentSkinIndex !== undefined ? window.currentSkinIndex : 0;
   if (idx === 4) {
       modal.style.width = '1104px'; // 15% wider than the previous 960px
-      modal.style.height = '60vh';  // 25% shorter than original ~80vh average
+      modal.style.height = 'auto';  // Crop frame closely to remaining content
   }
   
   if (idx === 0) {
@@ -5360,10 +5422,11 @@ window.showCmdHelpModal = function() {
     contentBox.style.display = 'flex';
     contentBox.style.flexDirection = 'column';
     contentBox.style.overflow = 'hidden'; // Force hide the scrollbar
+    contentBox.style.position = 'relative';
 
     contentBox.innerHTML = `
-      <div style="padding: 15px 40px 0 40px; font-size:26px; color:#00dcff; font-weight:bold; margin-bottom:5px; text-transform:uppercase; border-bottom:1px dashed rgba(0,220,255,0.4); padding-bottom:10px; letter-spacing:2px;">` + skinSpecificTitle + `</div>
-      <div style="flex-grow: 1; margin: 10px 40px 15px 40px; background:rgba(255,51,102,0.05); padding:15px 30px; border-radius:10px; border:1px solid rgba(255,51,102,0.3); text-align:center; display: flex; flex-direction: column; justify-content: center;">
+      <span style="position:absolute; top:35px; right:40px; cursor:pointer; color:#ff3366; font-family:monospace; font-size:32px; transition:0.3s; z-index:10;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'" onclick="this.parentElement.parentElement.remove(); if(typeof _sfxClick !== 'undefined') _sfxClick();">✕</span>
+      <div style="flex-grow: 1; margin: 25px 40px 15px 40px; background:rgba(255,51,102,0.05); padding:30px; border-radius:10px; border:1px solid rgba(255,51,102,0.3); text-align:center; display: flex; flex-direction: column; justify-content: center;">
          <div style="font-size:20px; color:#ff3366; margin-bottom:15px; letter-spacing:4px; font-weight:bold; text-transform:uppercase;">[ THE CORE OF THE CONFLICT ]</div>
          <div style="font-size:16px; color:#ff88aa; max-width:850px; margin:0 auto; line-height:1.6;">
            You have reached the core of what this project was built for.<br><br>This is an epic, continuous battle. What you are witnessing is <b>the real war between two AI entities: Rainclaude and Gemini</b>.<br><br>Their neural networks clashing across the globe determines the ultimate fate of all digital infrastructure and power grids worldwide. Observe the spectacle as lines of code tear across the planetary map. Every explosion, every data breach is a calculated move in an eternal game of 4D chess.<br><br><span style="color:#00dcff;"><b>Manual override is fully disabled.</b> You cannot intervene between the AIs. Simply sit back and enjoy the show.</span>
@@ -5422,7 +5485,9 @@ window.showCmdHelpModal = function() {
     `;
   }
 
-  modal.appendChild(header);
+  if (idx !== 4) {
+    modal.appendChild(header);
+  }
   modal.appendChild(contentBox);
   
   // Only append epilepsy footer for Black skin (idx 4)
@@ -6425,9 +6490,9 @@ window.rebuildD3XExchangeMenu = function() {
     container.innerHTML = `
         <h2 style="color:#ffffff; letter-spacing:2px; margin-bottom:30px; text-shadow:0 0 10px #39ff14;">ACQUIRE D3X TOKENS</h2>
         
-        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; max-width: 1200px; padding-bottom: 20px;">
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; max-width: 1200px; padding-bottom: 20px; box-sizing: border-box;">
             <button onclick="loadExchangeIframe('https://raydium.io/swap/?position_tab=staked+RAY&inputMint=sol&outputMint=AGN8SrMCMEgiP1ghvPHa5VRf5rPFDSYVrGFyBGE1Cqpa')" style="
-                width: 100%; padding: 15px; 
+                width: 100%; padding: 15px; box-sizing: border-box;
                 background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
                 font-size: 18px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
                 box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
@@ -6436,7 +6501,7 @@ window.rebuildD3XExchangeMenu = function() {
             </button>
             
             <button onclick="loadExchangeIframe('https://jup.ag/swap/SOL-AGN8SrMCMEgiP1ghvPHa5VRf5rPFDSYVrGFyBGE1Cqpa')" style="
-                width: 100%; padding: 15px; 
+                width: 100%; padding: 15px; box-sizing: border-box;
                 background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
                 font-size: 18px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
                 box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
@@ -6528,9 +6593,9 @@ window.openD3XExchangePanel = function(dcData) {
     <div id="d3x-exchange-container" style="flex-grow:1; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); border:1px dashed rgba(57,255,20,0.4); border-radius:8px; padding:20px; text-align:center; position:relative; overflow:hidden;">
         <h2 style="color:#ffffff; letter-spacing:2px; margin-bottom:30px; text-shadow:0 0 10px #39ff14;">ACQUIRE D3X TOKENS</h2>
         
-        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; max-width: 1200px; padding-bottom: 20px;">
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; max-width: 1200px; padding-bottom: 20px; box-sizing: border-box;">
             <button onclick="loadExchangeIframe('https://raydium.io/swap/?position_tab=staked+RAY&inputMint=sol&outputMint=AGN8SrMCMEgiP1ghvPHa5VRf5rPFDSYVrGFyBGE1Cqpa')" style="
-                width: 100%; padding: 15px; 
+                width: 100%; padding: 15px; box-sizing: border-box;
                 background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
                 font-size: 18px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
                 box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
@@ -6539,7 +6604,7 @@ window.openD3XExchangePanel = function(dcData) {
             </button>
             
             <button onclick="loadExchangeIframe('https://jup.ag/swap/SOL-AGN8SrMCMEgiP1ghvPHa5VRf5rPFDSYVrGFyBGE1Cqpa')" style="
-                width: 100%; padding: 15px; 
+                width: 100%; padding: 15px; box-sizing: border-box;
                 background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
                 font-size: 18px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
                 box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
@@ -6548,7 +6613,7 @@ window.openD3XExchangePanel = function(dcData) {
             </button>
 
             <button onclick="loadExchangeIframe('https://uniswap.org')" style="
-                width: 100%; padding: 15px; 
+                width: 100%; padding: 15px; box-sizing: border-box;
                 background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
                 font-size: 18px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
                 box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
@@ -6557,7 +6622,7 @@ window.openD3XExchangePanel = function(dcData) {
             </button>
             
             <button onclick="loadExchangeIframe('https://pancakeswap.finance')" style="
-                width: 100%; padding: 15px; 
+                width: 100%; padding: 15px; box-sizing: border-box;
                 background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
                 font-size: 18px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
                 box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
@@ -6566,7 +6631,7 @@ window.openD3XExchangePanel = function(dcData) {
             </button>
 
             <button onclick="loadExchangeIframe('https://curve.fi')" style="
-                width: 100%; padding: 15px; 
+                width: 100%; padding: 15px; box-sizing: border-box;
                 background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
                 font-size: 18px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
                 box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
@@ -6575,7 +6640,7 @@ window.openD3XExchangePanel = function(dcData) {
             </button>
 
             <button onclick="loadExchangeIframe('https://sushi.com')" style="
-                width: 100%; padding: 15px; 
+                width: 100%; padding: 15px; box-sizing: border-box;
                 background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
                 font-size: 18px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
                 box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
@@ -11869,6 +11934,25 @@ window.onRpgFire = function() {
     window.resolveRpgShot(isHit);
   }, 120);
 };
+
+// --- SOLANA D3X STAKING CONTRACT PLACEHOLDERS ---
+window.handleStakeDeposit = function() {
+  const depositAmt = document.getElementById('staking-tower-amount-input').value;
+  if (!depositAmt || depositAmt <= 0) {
+    alert("Please enter a valid D3X amount to stake.");
+    return;
+  }
+  alert(`[WEB3 PENDING] Initiating transaction to Deposit ${depositAmt} D3X into Solana Staking Contract.\n\nNote: The D3X Smart Contract is not yet deployed to mainnet. This button is wired and ready for integration.`);
+};
+
+window.handleStakeClaim = function() {
+  alert("[WEB3 PENDING] Initiating claim transaction for accrued D3X rewards.\n\nNote: The D3X Smart Contract is not yet deployed. This handler is ready for the Solana integration.");
+};
+
+window.handleStakeUnstake = function() {
+  alert("[WEB3 PENDING] Initiating transaction to withdraw all stacked D3X.\n\nNote: The D3X Smart Contract is not yet deployed. This handler is ready for the Solana integration.");
+};
+// ------------------------------------------------
 
 window.resolveRpgShot = function(isHit) {
   document.getElementById('shooter-modal').classList.add('show');
