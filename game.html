@@ -4265,9 +4265,9 @@ function initDatacenters() {
                     window.datacentersGroup.add(towerMesh);
                 });
 
-                // MOVED TESLA TOWERS HALFWAY TO D3X STAKING TOWERS
-                const npLat = 52; // Moved from 60 down to 52 (halfway to 44)
-                const npLon = -22; // Moved from 0 to -22 (halfway to -44)
+                // MOVED TESLA TOWERS TO TOP OF THE GLOBE
+                const npLat = 90; // Exactly on top of the globe
+                const npLon = 0;
                 
                 towerOffsets.forEach((off, idx) => {
                     const towerLatRad = (npLat + (off.lat * 0.5)) * Math.PI / 180; // Tighter cluster
