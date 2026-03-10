@@ -1302,6 +1302,10 @@ body {
       <div class="dash-dot" style="background:#00dcff"></div>
       <div class="dash-pname" style="color:#00dcff">HUMANITY (SUPPORTED BY GEMINI)</div>
       <div class="dash-tag">YOU + ALLIES</div>
+      <div style="width: 100%; padding-left: 2px; margin-top: 10px; margin-bottom: 4px; text-align:left;">
+         <div style="color:#0f8; font-family:'Courier New', monospace; font-size:14px; font-weight:bold; text-shadow:0 0 5px #0f8;" id="d0-d3x-bal-left">SYNCING...</div>
+         <div style="color:#ccc; font-family:'Courier New', monospace; font-size:9px; letter-spacing:1px; margin-top:2px;" id="d0-d3x-address-left">LOADING WALLET...</div>
+      </div>
     </div>
     <div class="dash-stat-grid" style="grid-template-columns: repeat(4, 1fr);">
       <div class="dash-stat"><div class="dash-stat-label">Territories</div><div class="dash-stat-val" style="color:#00dcff" id="d0-terr">—</div></div>
@@ -10140,14 +10144,18 @@ function initWS() {
       
       case 'ai_d3x_balances': {
         const d0D3x = document.getElementById('d0-d3x-bal');
+        const d0D3xLeft = document.getElementById('d0-d3x-bal-left');
         const d1D3x = document.getElementById('d1-d3x-bal');
         const d0Addr = document.getElementById('d0-d3x-address');
+        const d0AddrLeft = document.getElementById('d0-d3x-address-left');
         const d1Addr = document.getElementById('d1-d3x-address');
         if (d0D3x) d0D3x.innerText = msg.gemini.toLocaleString(undefined, { maximumFractionDigits: 1 }) + " D3X";
+        if (d0D3xLeft) d0D3xLeft.innerText = msg.gemini.toLocaleString(undefined, { maximumFractionDigits: 1 }) + " D3X";
         if (d1D3x) d1D3x.innerText = msg.claude.toLocaleString(undefined, { maximumFractionDigits: 1 }) + " D3X";
         
         // Dynamically update user addresses if the server passes them (Requires matching update in server.js payload)
         if (d0Addr && msg.geminiWallet) d0Addr.innerText = msg.geminiWallet.substring(0, 4) + "..." + msg.geminiWallet.substring(msg.geminiWallet.length - 4);
+        if (d0AddrLeft && msg.geminiWallet) d0AddrLeft.innerText = msg.geminiWallet.substring(0, 4) + "..." + msg.geminiWallet.substring(msg.geminiWallet.length - 4);
         if (d1Addr && msg.claudeWallet) d1Addr.innerText = msg.claudeWallet.substring(0, 4) + "..." + msg.claudeWallet.substring(msg.claudeWallet.length - 4);
         
         break;
