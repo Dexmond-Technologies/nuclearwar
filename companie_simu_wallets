@@ -3,3000 +3,3000 @@
     "name": "NVIDIA",
     "city": "Santa Clara CA",
     "walletAddress": "d3x_9r77MNwf5PZNsYSMi6aLUZ1xMBTFwX",
-    "d3xBalance": 750.39
+    "d3xBalance": 379063.63
   },
   {
     "name": "Apple",
     "city": "Cupertino CA",
     "walletAddress": "d3x_qkwNmyK7HtFV91FumHPsryKoJ5J65X",
-    "d3xBalance": 5189.52
+    "d3xBalance": 201248.41
   },
   {
     "name": "Alphabet (Google)",
     "city": "Mountain View CA",
     "walletAddress": "d3x_aLzfkFq3KhgF6Tm9cbhGPq7rJAd2ck",
-    "d3xBalance": 584.31
+    "d3xBalance": 365346.69
   },
   {
     "name": "Microsoft",
     "city": "Redmond WA",
     "walletAddress": "d3x_uAUDkTwY5x6wDDUsQEk2AutrYG1Fva",
-    "d3xBalance": 33.44
+    "d3xBalance": 133234.14
   },
   {
     "name": "Amazon",
     "city": "Seattle WA",
     "walletAddress": "d3x_SEnd9Amx5o9dhXdKmBkdtvFPwezMjC",
-    "d3xBalance": 7512.82
+    "d3xBalance": 35328.1
   },
   {
     "name": "TSMC",
     "city": "Hsinchu",
     "walletAddress": "d3x_GZSvB2oARDH8sZA15azoQuePEHu8v6",
-    "d3xBalance": 1316.61
+    "d3xBalance": 100770.83
   },
   {
     "name": "Saudi Aramco",
     "city": "Dhahran",
     "walletAddress": "d3x_myK25yoxGhNcJYNYLndHErifx6L9by",
-    "d3xBalance": 3267.38
+    "d3xBalance": 259497.63
   },
   {
     "name": "Meta Platforms",
     "city": "Menlo Park CA",
     "walletAddress": "d3x_f42sxkL71EbKSGxcumfRWt1XNzd5vq",
-    "d3xBalance": 2486.55
+    "d3xBalance": 327809.1
   },
   {
     "name": "Broadcom",
     "city": "San Jose CA",
     "walletAddress": "d3x_pg1opSjDaD8tLEQ1FQd55Q7x2qNxed",
-    "d3xBalance": 6797.65
+    "d3xBalance": 100014.29
   },
   {
     "name": "Tesla",
     "city": "Austin TX",
     "walletAddress": "d3x_rJRjA99goS5wE6WDjjDKKiofsxxPFn",
-    "d3xBalance": 8355.77
+    "d3xBalance": 435293.77
   },
   {
     "name": "Berkshire Hathaway",
     "city": "Omaha NE",
     "walletAddress": "d3x_2wGRDqtLLPvKVrFJZxrXakrYgco2Td",
-    "d3xBalance": 6255.47
+    "d3xBalance": 50626.95
   },
   {
     "name": "Walmart",
     "city": "Bentonville AR",
     "walletAddress": "d3x_qt1y35f7Hd1KZqT8vcVrBbqnr4RDC1",
-    "d3xBalance": 3625.51
+    "d3xBalance": 81771.47
   },
   {
     "name": "Eli Lilly",
     "city": "Indianapolis IN",
     "walletAddress": "d3x_4YdRbFaiKJi3u5bdTNXHgYpf811Bmv",
-    "d3xBalance": 20.5
+    "d3xBalance": 321667.85
   },
   {
     "name": "Samsung",
     "city": "Seoul",
     "walletAddress": "d3x_bdRJsPxvF42fskMaKbeVUVrErKV8Rv",
-    "d3xBalance": 5057.16
+    "d3xBalance": 136245.05
   },
   {
     "name": "JPMorgan Chase",
     "city": "New York NY",
     "walletAddress": "d3x_6nCn9NTKH7ituh8aXJk2qALDMkN4s6",
-    "d3xBalance": 4316.59
+    "d3xBalance": 174366.45
   },
   {
     "name": "Exxon Mobil",
     "city": "Irving TX",
     "walletAddress": "d3x_dW2ZiM3Q9DUsUtmHTvLnMaA3sMVnv1",
-    "d3xBalance": 4096.08
+    "d3xBalance": 49344.95
   },
   {
     "name": "Visa",
     "city": "San Francisco CA",
     "walletAddress": "d3x_gadcp86p9KfVzNs1ZhJniLPF4yNgNG",
-    "d3xBalance": 9504.05
+    "d3xBalance": 49363.08
   },
   {
     "name": "Tencent",
     "city": "Shenzhen",
     "walletAddress": "d3x_Uk4HXcU9dxKRwZDxVF9ymyBRKPE3mY",
-    "d3xBalance": 1662.18
+    "d3xBalance": 327378.44
   },
   {
     "name": "Johnson & Johnson",
     "city": "New Brunswick NJ",
     "walletAddress": "d3x_DM1PDATLNoGCfrWKKDuyrCeeodXaKJ",
-    "d3xBalance": 2013.44
+    "d3xBalance": 181718.76
   },
   {
     "name": "ASML",
     "city": "Veldhoven",
     "walletAddress": "d3x_5GfiVWYpxY5hnQ2RLjoMR6ovMKCwAS",
-    "d3xBalance": 193.22
+    "d3xBalance": 213893.85
   },
   {
     "name": "Mastercard",
     "city": "Purchase NY",
     "walletAddress": "d3x_8agdvxUxyrymgyfWG4EY7ha47izD6g",
-    "d3xBalance": 11220.95
+    "d3xBalance": 362672.71
   },
   {
     "name": "Costco",
     "city": "Issaquah WA",
     "walletAddress": "d3x_87H34oWxnXThY5zQwNibB4eJxJiFfC",
-    "d3xBalance": 10803.36
+    "d3xBalance": 112553.48
   },
   {
     "name": "Oracle",
     "city": "Austin TX",
     "walletAddress": "d3x_kGnHFLJ8uhpm9eytMqjxEQpaemFCWU",
-    "d3xBalance": 1398.75
+    "d3xBalance": 195944.46
   },
   {
     "name": "SK Hynix",
     "city": "Icheon",
     "walletAddress": "d3x_fERFnP3LRsPxUM7KgitfXv9bjtvwc4",
-    "d3xBalance": 2238.23
+    "d3xBalance": 282133.72
   },
   {
     "name": "Netflix",
     "city": "Los Gatos CA",
     "walletAddress": "d3x_KxZ2TUWLaRqTuENYg3CfFsz5HeiyP4",
-    "d3xBalance": 73.66
+    "d3xBalance": 148967.03
   },
   {
     "name": "Micron Technology",
     "city": "Boise ID",
     "walletAddress": "d3x_FLpnSoX1kTD4fmVMg9PAbsEZGNbELe",
-    "d3xBalance": 64.84
+    "d3xBalance": 454196.77
   },
   {
     "name": "AbbVie",
     "city": "North Chicago IL",
     "walletAddress": "d3x_rJ9TgijkGkXNeqWiU2X7GT55GkZsxr",
-    "d3xBalance": 2194.54
+    "d3xBalance": 475786.74
   },
   {
     "name": "Chevron",
     "city": "San Ramon CA",
     "walletAddress": "d3x_g19t7HAB2N99T16fiyySBYKCGT6wyg",
-    "d3xBalance": 3.36
+    "d3xBalance": 90748.74
   },
   {
     "name": "Palantir",
     "city": "Denver CO",
     "walletAddress": "d3x_ziH9CrR6ke1ESMXJamfAGvuqwoDrRE",
-    "d3xBalance": 336.68
+    "d3xBalance": 251507.27
   },
   {
     "name": "ICBC",
     "city": "Beijing",
     "walletAddress": "d3x_1c21uW4GMVeXeaC8QUZ6wnohb3XbhZ",
-    "d3xBalance": 1350.01
+    "d3xBalance": 295420.32
   },
   {
     "name": "Procter & Gamble",
     "city": "Cincinnati OH",
     "walletAddress": "d3x_okBWZS55K9hGEWQopvtDNqxbhrJ8Y4",
-    "d3xBalance": 7252.02
+    "d3xBalance": 7787.4
   },
   {
     "name": "Home Depot",
     "city": "Atlanta GA",
     "walletAddress": "d3x_DwXjkudt3pSuaWyNTBoGvD1iHp1Bua",
-    "d3xBalance": 103.33
+    "d3xBalance": 380428.24
   },
   {
     "name": "Bank of America",
     "city": "Charlotte NC",
     "walletAddress": "d3x_8m6FC7bt8RPEqz41WCFa7MRUkCJEnL",
-    "d3xBalance": 3.43
+    "d3xBalance": 361918.83
   },
   {
     "name": "Roche",
     "city": "Basel",
     "walletAddress": "d3x_LHZZoJPsyQxNxdwbQzJkY8ZbDHMJU1",
-    "d3xBalance": 3957.64
+    "d3xBalance": 64695.7
   },
   {
     "name": "General Electric",
     "city": "Boston MA",
     "walletAddress": "d3x_GgXSTGYgz6A2LzUyEbp8LeYPEZ43dq",
-    "d3xBalance": 7498.08
+    "d3xBalance": 276311.72
   },
   {
     "name": "China Construction Bank",
     "city": "Beijing",
     "walletAddress": "d3x_GvLWPV21CkdbynvCHfhhDuyt4z9qG2",
-    "d3xBalance": 9869.85
+    "d3xBalance": 464940.37
   },
   {
     "name": "Agricultural Bank of China",
     "city": "Beijing",
     "walletAddress": "d3x_R6mKNQS5cbPc4x1rEWLmYhxGM2F5Xw",
-    "d3xBalance": 1898.49
+    "d3xBalance": 196949.26
   },
   {
     "name": "Coca-Cola",
     "city": "Atlanta GA",
     "walletAddress": "d3x_FBa7A55wwsjXvS7SHSYhnHNc7mAM3A",
-    "d3xBalance": 8304.8
+    "d3xBalance": 398028.07
   },
   {
     "name": "PetroChina",
     "city": "Beijing",
     "walletAddress": "d3x_7jSFoecGtzjJYPt2s8fNAS2vhf541C",
-    "d3xBalance": 59.83
+    "d3xBalance": 257281.1
   },
   {
     "name": "Caterpillar",
     "city": "Peoria IL",
     "walletAddress": "d3x_HgV5p4yVEP3rqVrRoT2cdXdf5qvZSC",
-    "d3xBalance": 17.84
+    "d3xBalance": 243915.15
   },
   {
     "name": "AMD",
     "city": "Santa Clara CA",
     "walletAddress": "d3x_NtegXUj1F2Rr9VunFT6przboFF4Rhu",
-    "d3xBalance": 422.51
+    "d3xBalance": 445931.77
   },
   {
     "name": "Alibaba",
     "city": "Hangzhou",
     "walletAddress": "d3x_6mL1pLck5hRiETsisRbbBTK7fYiewy",
-    "d3xBalance": 7825.06
+    "d3xBalance": 229333.7
   },
   {
     "name": "Cisco",
     "city": "San Jose CA",
     "walletAddress": "d3x_v7atN4cnWug8TJY3zQAzM1QJj5ngbs",
-    "d3xBalance": 510.14
+    "d3xBalance": 477188.05
   },
   {
     "name": "Novartis",
     "city": "Basel",
     "walletAddress": "d3x_ehmWdU8y29XzJ4YU8jQzwVxnebyqrf",
-    "d3xBalance": 2327.44
+    "d3xBalance": 345045.9
   },
   {
     "name": "AstraZeneca",
     "city": "Cambridge",
     "walletAddress": "d3x_JsmEXAoWMdCuJgFGv9G5QYwSRbXKqg",
-    "d3xBalance": 187.73
+    "d3xBalance": 51941.05
   },
   {
     "name": "LVMH",
     "city": "Paris",
     "walletAddress": "d3x_sYWUxvrAi5tCfiX3YCxBWqbmHvSDB9",
-    "d3xBalance": 983.11
+    "d3xBalance": 222486.08
   },
   {
     "name": "HSBC",
     "city": "London",
     "walletAddress": "d3x_xy4W6muhB8LdqmFovV72pojRMumBqo",
-    "d3xBalance": 5847.57
+    "d3xBalance": 73250.86
   },
   {
     "name": "Merck",
     "city": "Rahway NJ",
     "walletAddress": "d3x_f8q2Ubi1fvbGdNxVZrLnDp544FiDHJ",
-    "d3xBalance": 6138.94
+    "d3xBalance": 377762.52
   },
   {
     "name": "Toyota",
     "city": "Toyota City",
     "walletAddress": "d3x_m6AdLWYJAhUWGzKyHSs45mcNga5EPr",
-    "d3xBalance": 7466
+    "d3xBalance": 373974.67
   },
   {
     "name": "RTX",
     "city": "Arlington VA",
     "walletAddress": "d3x_8WQs9eoBihzbHJTRY7663NUkBPd3Kt",
-    "d3xBalance": 209.66
+    "d3xBalance": 143194.23
   },
   {
     "name": "Nestlé",
     "city": "Vevey",
     "walletAddress": "d3x_p1JRRfJ3ejQywQN4Vdoy3DxkFJFnvz",
-    "d3xBalance": 331.45
+    "d3xBalance": 456119.94
   },
   {
     "name": "Philip Morris International",
     "city": "Stamford CT",
     "walletAddress": "d3x_DoSutrsbV8sVwxfyvWRJAwf7rKBRFY",
-    "d3xBalance": 137.98
+    "d3xBalance": 380013.43
   },
   {
     "name": "UnitedHealth",
     "city": "Minnetonka MN",
     "walletAddress": "d3x_7usdLyFsnDvQocsmxmLzicrsA8Cd9K",
-    "d3xBalance": 4897.8
+    "d3xBalance": 362359.32
   },
   {
     "name": "Applied Materials",
     "city": "Santa Clara CA",
     "walletAddress": "d3x_KJdmXTsXFN89u7mpxpErfSo3jRmo5d",
-    "d3xBalance": 1865
+    "d3xBalance": 297450.57
   },
   {
     "name": "Kweichow Moutai",
     "city": "Maotai Guizhou",
     "walletAddress": "d3x_iii5dvet3AoGZh9ooEdQgNYJJKKJfV",
-    "d3xBalance": 1538.61
+    "d3xBalance": 52469.53
   },
   {
     "name": "Morgan Stanley",
     "city": "New York NY",
     "walletAddress": "d3x_D3iUPt8ysRpnc6nYgjtGQVJ1CVXLqb",
-    "d3xBalance": 2067.49
+    "d3xBalance": 117727.89
   },
   {
     "name": "Wells Fargo",
     "city": "San Francisco CA",
     "walletAddress": "d3x_3CrxYxVwuz9kCKNm4bTKWS5876ae12",
-    "d3xBalance": 29.29
+    "d3xBalance": 358254.06
   },
   {
     "name": "Bank of China",
     "city": "Beijing",
     "walletAddress": "d3x_5MME1ufBoPUT3CMzSzoMSSEMiHtScM",
-    "d3xBalance": 169.58
+    "d3xBalance": 444329.64
   },
   {
     "name": "Lam Research",
     "city": "Fremont CA",
     "walletAddress": "d3x_qYUCPWZmomEw5os2nQTsMpv1gyZSCR",
-    "d3xBalance": 3916.42
+    "d3xBalance": 81847.31
   },
   {
     "name": "T-Mobile US",
     "city": "Bellevue WA",
     "walletAddress": "d3x_34fWXewbcKMrHsYkuLEM18sz2iqvp3",
-    "d3xBalance": 1633.44
+    "d3xBalance": 202211.65
   },
   {
     "name": "Goldman Sachs",
     "city": "New York NY",
     "walletAddress": "d3x_XSpbM2iTEU1obgoQLLhbNsZWM4uvLh",
-    "d3xBalance": 6212.79
+    "d3xBalance": 238653.85
   },
   {
     "name": "IBM",
     "city": "Armonk NY",
     "walletAddress": "d3x_L9AccwC5byvLCrQrRD16gXQG5cGigB",
-    "d3xBalance": 7310.04
+    "d3xBalance": 171547.69
   },
   {
     "name": "Shell",
     "city": "London",
     "walletAddress": "d3x_G2i1gxwQG75XjAqu8gx7HeuCK3fKUN",
-    "d3xBalance": 846.2
+    "d3xBalance": 162255.64
   },
   {
     "name": "CATL",
     "city": "Ningde",
     "walletAddress": "d3x_Xuddkj2AzzSYEU2DCvb8cez3Sx8Am5",
-    "d3xBalance": 7620.77
+    "d3xBalance": 190513.55
   },
   {
     "name": "SAP",
     "city": "Walldorf",
     "walletAddress": "d3x_gRm5WRDvGjo1rkrnsguiAE2pdSP4ge",
-    "d3xBalance": 10715.39
+    "d3xBalance": 311504.12
   },
   {
     "name": "McDonald's",
     "city": "Chicago IL",
     "walletAddress": "d3x_7cNZpGUzqZ5eb2rFGCggfqnSCGLoGt",
-    "d3xBalance": 7319.95
+    "d3xBalance": 330336.23
   },
   {
     "name": "International Holding Company",
     "city": "Abu Dhabi",
     "walletAddress": "d3x_LmxLXVg3iTBZie1UiUPtU1ZozZgteN",
-    "d3xBalance": 3980.7
+    "d3xBalance": 29991.84
   },
   {
     "name": "Hermès",
     "city": "Paris",
     "walletAddress": "d3x_6uLQEqwuMBf23KyFoEqPcSP2fdh9My",
-    "d3xBalance": 4119.92
+    "d3xBalance": 233133.42
   },
   {
     "name": "L'Oréal",
     "city": "Paris",
     "walletAddress": "d3x_9yJ6VpGXKu5Fm7amUUeF4WxTRv6FwQ",
-    "d3xBalance": 8526.48
+    "d3xBalance": 90864.65
   },
   {
     "name": "Royal Bank of Canada",
     "city": "Toronto",
     "walletAddress": "d3x_tDXZqJ9HbtsSyo7mKeaJFwH2V4KKXa",
-    "d3xBalance": 1847.84
+    "d3xBalance": 141128.78
   },
   {
     "name": "Linde",
     "city": "Guildford",
     "walletAddress": "d3x_46PLoyyZWs8jMDmj1WwZyqKWqCWfEi",
-    "d3xBalance": 2775.1
+    "d3xBalance": 108768.68
   },
   {
     "name": "China Mobile",
     "city": "Beijing",
     "walletAddress": "d3x_Y9gEeHp8HpRyLvfZXF97EEUiQ8RMc3",
-    "d3xBalance": 5.61
+    "d3xBalance": 179691.26
   },
   {
     "name": "Pepsico",
     "city": "Purchase NY",
     "walletAddress": "d3x_yk5ycpBW5MXkzmw67xEJg6GiRYt5PE",
-    "d3xBalance": 8252.87
+    "d3xBalance": 325713.51
   },
   {
     "name": "Intel",
     "city": "Santa Clara CA",
     "walletAddress": "d3x_YpW2a1zo5pudjMWTuhEtpc8uhgmbHv",
-    "d3xBalance": 9262.14
+    "d3xBalance": 142586.28
   },
   {
     "name": "Verizon",
     "city": "New York NY",
     "walletAddress": "d3x_bWBhiZVkteMJa1XebSWKVhfbd4Nxrs",
-    "d3xBalance": 1210.54
+    "d3xBalance": 400429.7
   },
   {
     "name": "GE Vernova",
     "city": "Cambridge MA",
     "walletAddress": "d3x_zy6q3bVmpJtuMiHonuT9gickCjnNGc",
-    "d3xBalance": 10589.98
+    "d3xBalance": 10835.61
   },
   {
     "name": "Prosus",
     "city": "Amsterdam",
     "walletAddress": "d3x_H9X1cavGyWZH31orxxTJNemXJm72Gy",
-    "d3xBalance": 9.05
+    "d3xBalance": 324245.47
   },
   {
     "name": "American Express",
     "city": "New York NY",
     "walletAddress": "d3x_MmESznboZBrJtNMnbfo5xoR8yxQvks",
-    "d3xBalance": 2226.71
+    "d3xBalance": 225516.03
   },
   {
     "name": "Reliance Industries",
     "city": "Mumbai",
     "walletAddress": "d3x_19JNQgUGGtjdY31NftrBBnB6TrPC7B",
-    "d3xBalance": 8721.93
+    "d3xBalance": 381827.6
   },
   {
     "name": "Siemens",
     "city": "Munich",
     "walletAddress": "d3x_t7oGwyCaVrNx3UGWTDe5nfPiCpVqNt",
-    "d3xBalance": 5357.45
+    "d3xBalance": 364234.21
   },
   {
     "name": "AT&T",
     "city": "Dallas TX",
     "walletAddress": "d3x_C6BxCPCd4e5nDHNYsFVEK1Age7jfo8",
-    "d3xBalance": 1629.16
+    "d3xBalance": 192758.59
   },
   {
     "name": "Commonwealth Bank",
     "city": "Sydney",
     "walletAddress": "d3x_CVn1eMWr7DzxPdicj9RwAGG2ADKPvx",
-    "d3xBalance": 167.57
+    "d3xBalance": 330646.39
   },
   {
     "name": "Amgen",
     "city": "Thousand Oaks CA",
     "walletAddress": "d3x_s4pFj9jU3zXB3UTqRF1kQnUxCMqTAm",
-    "d3xBalance": 2533.45
+    "d3xBalance": 384919.22
   },
   {
     "name": "Mitsubishi UFJ Financial",
     "city": "Tokyo",
     "walletAddress": "d3x_wRurn3BnEWFAwtgxsAR8NyNDSx27xV",
-    "d3xBalance": 4189.7
+    "d3xBalance": 395397.7
   },
   {
     "name": "Abbott Laboratories",
     "city": "Abbott Park IL",
     "walletAddress": "d3x_dDpTV5h2CDnghxpDWE3jTcbVRatKmB",
-    "d3xBalance": 2524.09
+    "d3xBalance": 282562.06
   },
   {
     "name": "NextEra Energy",
     "city": "Juno Beach FL",
     "walletAddress": "d3x_buvjQX9uaegKMPfaxxzM7gh6uMiA9d",
-    "d3xBalance": 111.69
+    "d3xBalance": 395965.05
   },
   {
     "name": "Salesforce",
     "city": "San Francisco CA",
     "walletAddress": "d3x_SfAWm6sptjb1CerMmmYZ6YoQ6os7Cs",
-    "d3xBalance": 11170.23
+    "d3xBalance": 138314.96
   },
   {
     "name": "Thermo Fisher Scientific",
     "city": "Waltham MA",
     "walletAddress": "d3x_Fr3VQn1A7wkvdYgV84zf7rU5UEGcQt",
-    "d3xBalance": 4278.58
+    "d3xBalance": 464870.85
   },
   {
     "name": "Inditex",
     "city": "Arteixo",
     "walletAddress": "d3x_TSuYBRYm1xJJwW1h9DZUJ8D5QkAiZz",
-    "d3xBalance": 9878.59
+    "d3xBalance": 223982.82
   },
   {
     "name": "Citigroup",
     "city": "New York NY",
     "walletAddress": "d3x_AGWeCLA5oaRVGXDD8JBMdkBi9HkQwG",
-    "d3xBalance": 580.21
+    "d3xBalance": 350641.98
   },
   {
     "name": "BHP Group",
     "city": "Melbourne",
     "walletAddress": "d3x_Q7VLFM7C9p8kHCf5kkyBLH3qdWFTs9",
-    "d3xBalance": 6895.47
+    "d3xBalance": 369650.21
   },
   {
     "name": "Deutsche Telekom",
     "city": "Bonn",
     "walletAddress": "d3x_AwEaxRG4S2prx7XeRAXJVAPhvaCCFq",
-    "d3xBalance": 930.6
+    "d3xBalance": 399541.72
   },
   {
     "name": "Boeing",
     "city": "Arlington VA",
     "walletAddress": "d3x_Br3sycxAgCoq4n9ZgmMFH3dptP2zFj",
-    "d3xBalance": 2308.86
+    "d3xBalance": 164346.05
   },
   {
     "name": "Walt Disney",
     "city": "Burbank CA",
     "walletAddress": "d3x_ECMQtFFP7pgXwXH7Zj19KoE1AUkBRh",
-    "d3xBalance": 6387.6
+    "d3xBalance": 172559.83
   },
   {
     "name": "Gilead Sciences",
     "city": "Foster City CA",
     "walletAddress": "d3x_NpzEt7Ld9tds5pLMJrStF3fRwBznBf",
-    "d3xBalance": 7007.96
+    "d3xBalance": 105750.03
   },
   {
     "name": "TJX Companies",
     "city": "Framingham MA",
     "walletAddress": "d3x_Z2upY3n2oJ55bbnm9XKhDKP7X8ASo9",
-    "d3xBalance": 8065.86
+    "d3xBalance": 94915.75
   },
   {
     "name": "KLA",
     "city": "Milpitas CA",
     "walletAddress": "d3x_3CeUQhh9npVpANu9Kyzqn5eLiK7sem",
-    "d3xBalance": 53.63
+    "d3xBalance": 265994.21
   },
   {
     "name": "Texas Instruments",
     "city": "Dallas TX",
     "walletAddress": "d3x_vELrgKTNBJMMZ7Ed5Axyfkd1N83kK6",
-    "d3xBalance": 7.31
+    "d3xBalance": 454714.12
   },
   {
     "name": "China Life Insurance",
     "city": "Beijing",
     "walletAddress": "d3x_ZFU2Uo5GMH1hYH1jcbETacpADQSj7s",
-    "d3xBalance": 2534.43
+    "d3xBalance": 463313.03
   },
   {
     "name": "Intuitive Surgical",
     "city": "Sunnyvale CA",
     "walletAddress": "d3x_myBPuVakaEs2wq8YgWx5usEbxKrfrb",
-    "d3xBalance": 3979.98
+    "d3xBalance": 484572.09
   },
   {
     "name": "Union Pacific",
     "city": "Omaha NE",
     "walletAddress": "d3x_EJZoricFxJ9PmwSUutTd9gMvCYeyT9",
-    "d3xBalance": 5318.41
+    "d3xBalance": 173659.38
   },
   {
     "name": "United Parcel Service (UPS)",
     "city": "Atlanta GA",
     "walletAddress": "d3x_EgKZsbQMR38JB4eGvQVy46SetWd6iD",
-    "d3xBalance": 15.2
+    "d3xBalance": 98795.39
   },
   {
     "name": "RTX Corp",
     "city": "Arlington VA",
     "walletAddress": "d3x_s4MUpqA5uXHzUSYtu65jvjcJ8vSNtp",
-    "d3xBalance": 3761.28
+    "d3xBalance": 3463.43
   },
   {
     "name": "Honeywell",
     "city": "Charlotte NC",
     "walletAddress": "d3x_F3Q3oKfD3t5HQ7T1vFPJZzEVJEd1rW",
-    "d3xBalance": 6.93
+    "d3xBalance": 223646.24
   },
   {
     "name": "Deere & Company",
     "city": "Moline IL",
     "walletAddress": "d3x_xvzSZdA4ABPk5Ei1cB8zt1K9Cvs5he",
-    "d3xBalance": 8060.37
+    "d3xBalance": 362940.52
   },
   {
     "name": "Elevance Health",
     "city": "Indianapolis IN",
     "walletAddress": "d3x_uGDxNBHBkitcZKaC5NbL6CryosEkyo",
-    "d3xBalance": 101.84
+    "d3xBalance": 159362.06
   },
   {
     "name": "CVS Health",
     "city": "Woonsocket RI",
     "walletAddress": "d3x_QFH5sGvvxNJGgc9M6hHN1SKfcJLve9",
-    "d3xBalance": 1179.04
+    "d3xBalance": 12920.36
   },
   {
     "name": "Cigna",
     "city": "Bloomfield CT",
     "walletAddress": "d3x_QfJAJPJbM8bpr21qag4eAW8PePjAyk",
-    "d3xBalance": 10084.71
+    "d3xBalance": 301365.25
   },
   {
     "name": "Centene",
     "city": "St. Louis MO",
     "walletAddress": "d3x_q1E776aZk7yntLxDh3DVfvLw49QPht",
-    "d3xBalance": 818.93
+    "d3xBalance": 6501.19
   },
   {
     "name": "Humana",
     "city": "Louisville KY",
     "walletAddress": "d3x_9BkV4UfBLQXVXzFgwpZgvzXMAPwFmT",
-    "d3xBalance": 5267.76
+    "d3xBalance": 342301.78
   },
   {
     "name": "McKesson",
     "city": "Irving TX",
     "walletAddress": "d3x_NUte41Mz7znJnZthXXLfj6u3KRb71c",
-    "d3xBalance": 3418.89
+    "d3xBalance": 393922.64
   },
   {
     "name": "Cardinal Health",
     "city": "Dublin OH",
     "walletAddress": "d3x_u9hdkuRW4Fogen66skkYptMyNzJdCo",
-    "d3xBalance": 296.87
+    "d3xBalance": 293029.69
   },
   {
     "name": "Cencora",
     "city": "Conshohocken PA",
     "walletAddress": "d3x_LzR69Wzrgy1r1W9WdDcNGm4E8ht5um",
-    "d3xBalance": 41.46
+    "d3xBalance": 417638.96
   },
   {
     "name": "Target",
     "city": "Minneapolis MN",
     "walletAddress": "d3x_nddye15g3b7kCy96zsCjm7EBZfZ3Kf",
-    "d3xBalance": 2674.56
+    "d3xBalance": 420942.97
   },
   {
     "name": "Lowe's",
     "city": "Mooresville NC",
     "walletAddress": "d3x_Ny6hgZMR6UyMtc5wD5mwNpZDzmo3h5",
-    "d3xBalance": 43.15
+    "d3xBalance": 28539.23
   },
   {
     "name": "Dollar General",
     "city": "Goodlettsville TN",
     "walletAddress": "d3x_P9DzwYihnVQCBaSkX2i37rVRiSsmnV",
-    "d3xBalance": 265.53
+    "d3xBalance": 144648.79
   },
   {
     "name": "O'Reilly Automotive",
     "city": "Springfield MO",
     "walletAddress": "d3x_yPv5NvuL8DD11ovM5DvyFyrb8sK4xu",
-    "d3xBalance": 7429
+    "d3xBalance": 234671.23
   },
   {
     "name": "AutoZone",
     "city": "Memphis TN",
     "walletAddress": "d3x_NnrzmPX1euQnWFmviZkyt62pHjZkK5",
-    "d3xBalance": 4364.51
+    "d3xBalance": 168274.69
   },
   {
     "name": "Chipotle",
     "city": "Newport Beach CA",
     "walletAddress": "d3x_6Uid6yqgsewnxGJ6GJTqo9N4EKRw2Y",
-    "d3xBalance": 5748.22
+    "d3xBalance": 234503.28
   },
   {
     "name": "Yum! Brands",
     "city": "Louisville KY",
     "walletAddress": "d3x_Y3h2qUriMCWdb4MycdmLMvjEqTyf3V",
-    "d3xBalance": 1376.65
+    "d3xBalance": 6606.81
   },
   {
     "name": "Darden Restaurants",
     "city": "Orlando FL",
     "walletAddress": "d3x_yE92wo2h63kZ2EoBQnx1ht2kdTMsTo",
-    "d3xBalance": 138.41
+    "d3xBalance": 282792.47
   },
   {
     "name": "Hilton Worldwide",
     "city": "McLean VA",
     "walletAddress": "d3x_r3K1CkF2vZhn3UfN4RPVsEk1usxTdp",
-    "d3xBalance": 2052.94
+    "d3xBalance": 227775.4
   },
   {
     "name": "Marriott International",
     "city": "Bethesda MD",
     "walletAddress": "d3x_ttKenbaXge6agnpYoa7scNnirz22UH",
-    "d3xBalance": 41.01
+    "d3xBalance": 208365.7
   },
   {
     "name": "Las Vegas Sands",
     "city": "Las Vegas NV",
     "walletAddress": "d3x_A4WAijwUVsxGELjjFQtutdjQhLam4m",
-    "d3xBalance": 7599.82
+    "d3xBalance": 327953.47
   },
   {
     "name": "MGM Resorts",
     "city": "Las Vegas NV",
     "walletAddress": "d3x_jUpku2nn96hTj3ZEBPA46h1AKhzYvQ",
-    "d3xBalance": 834.32
+    "d3xBalance": 66845.58
   },
   {
     "name": "Airbnb",
     "city": "San Francisco CA",
     "walletAddress": "d3x_FUPuaFJ7oeJR8Q7EHCEeFAptum5WzF",
-    "d3xBalance": 131.22
+    "d3xBalance": 411624.06
   },
   {
     "name": "Booking Holdings",
     "city": "Norwalk CT",
     "walletAddress": "d3x_LV1SWvYZbneRmbR6sG6N8rRKScchqN",
-    "d3xBalance": 1.29
+    "d3xBalance": 211248.57
   },
   {
     "name": "Sony Group",
     "city": "Tokyo",
     "walletAddress": "d3x_YixToLGjc6V78ShgzvLghbnaQAETfu",
-    "d3xBalance": 332.85
+    "d3xBalance": 466855.97
   },
   {
     "name": "Nintendo",
     "city": "Kyoto",
     "walletAddress": "d3x_3hLEp3XYYMn21EXXWAws5wgJYkTgpN",
-    "d3xBalance": 5925.64
+    "d3xBalance": 243969.08
   },
   {
     "name": "Electronic Arts (EA)",
     "city": "Redwood City CA",
     "walletAddress": "d3x_NPdvuMY8L2X6SPDVSR2rvNysh82W1P",
-    "d3xBalance": 6124.04
+    "d3xBalance": 296516.06
   },
   {
     "name": "Take-Two Interactive",
     "city": "New York NY",
     "walletAddress": "d3x_D3SbPZWynNsUcYHDaoHRiFbYf91joW",
-    "d3xBalance": 4324.22
+    "d3xBalance": 361695.29
   },
   {
     "name": "Ametek",
     "city": "Berwyn PA",
     "walletAddress": "d3x_NxcpNFRbg4yWLGUyNBnzsQDeRcXyGj",
-    "d3xBalance": 10726.38
+    "d3xBalance": 458832.42
   },
   {
     "name": "Eaton",
     "city": "Dublin",
     "walletAddress": "d3x_3sNTcUV1joQUcCzfifFadQaVDouiYj",
-    "d3xBalance": 3196.63
+    "d3xBalance": 161563
   },
   {
     "name": "Parker-Hannifin",
     "city": "Cleveland OH",
     "walletAddress": "d3x_DxbLoSULph2dv6P6WeaaBw7v1HxXbQ",
-    "d3xBalance": 5620.28
+    "d3xBalance": 407616.46
   },
   {
     "name": "Trane Technologies",
     "city": "Swords",
     "walletAddress": "d3x_PBqWnv53hNzE2UkYxrnQSCGVme8xCB",
-    "d3xBalance": 4208.65
+    "d3xBalance": 146420.72
   },
   {
     "name": "Carrier Global",
     "city": "Palm Beach Gardens FL",
     "walletAddress": "d3x_5V9UBovuLwHHie9CoXRDWmmZ8afEov",
-    "d3xBalance": 3226.02
+    "d3xBalance": 87128.08
   },
   {
     "name": "Johnson Controls",
     "city": "Cork",
     "walletAddress": "d3x_G82mi2nLmaZxqff2MwXnHJidCAZJfL",
-    "d3xBalance": 10449.21
+    "d3xBalance": 198665.14
   },
   {
     "name": "Waste Management",
     "city": "Houston TX",
     "walletAddress": "d3x_oD7eEaEa7gW9Ae1zFxtP28N3WCXwmJ",
-    "d3xBalance": 1551.63
+    "d3xBalance": 434634.81
   },
   {
     "name": "Republic Services",
     "city": "Phoenix AZ",
     "walletAddress": "d3x_EWrR76gFiGyS39VSWzZ6TYuaKD5QrZ",
-    "d3xBalance": 113.57
+    "d3xBalance": 226482.6
   },
   {
     "name": "Air Products and Chemicals",
     "city": "Allentown PA",
     "walletAddress": "d3x_wniqgQfXMvzjaTrgSD3cGLh9MnMYtJ",
-    "d3xBalance": 834.03
+    "d3xBalance": 181684.69
   },
   {
     "name": "Ecolab",
     "city": "St. Paul MN",
     "walletAddress": "d3x_jbtrQm62SCSzYXu2zsrzJ5iYJUhWDy",
-    "d3xBalance": 2034.2
+    "d3xBalance": 452463.34
   },
   {
     "name": "Sherwin-Williams",
     "city": "Cleveland OH",
     "walletAddress": "d3x_kxYR3eBJkKv2xNMHq9MqkZVxmrMQKa",
-    "d3xBalance": 910.61
+    "d3xBalance": 94317.51
   },
   {
     "name": "PPG Industries",
     "city": "Pittsburgh PA",
     "walletAddress": "d3x_etZotdYgHBNcU72cKkD1FRbM88oQom",
-    "d3xBalance": 902.58
+    "d3xBalance": 392699.05
   },
   {
     "name": "Dow",
     "city": "Midland MI",
     "walletAddress": "d3x_Jqk4gmtN2wZVkJaTfBvvFEbQYGK24P",
-    "d3xBalance": 721.2
+    "d3xBalance": 386522.37
   },
   {
     "name": "LyondellBasell",
     "city": "Houston TX",
     "walletAddress": "d3x_94AkoUQoZui3Q1LYq41E9M83PLtCiF",
-    "d3xBalance": 1260.27
+    "d3xBalance": 455806.58
   },
   {
     "name": "DuPont",
     "city": "Wilmington DE",
     "walletAddress": "d3x_a9oZYMBK2mjG6P7SJwMwtUCrUrC3sF",
-    "d3xBalance": 7.91
+    "d3xBalance": 8906.5
   },
   {
     "name": "Nucor",
     "city": "Charlotte NC",
     "walletAddress": "d3x_B6NidNmQQsp8hH8iCy6jMU3hdcvWEY",
-    "d3xBalance": 3159.48
+    "d3xBalance": 405525.1
   },
   {
     "name": "Freeport-McMoRan",
     "city": "Phoenix AZ",
     "walletAddress": "d3x_3s6nkqXcChHKm9XrAh8dyP8zcLVu9Y",
-    "d3xBalance": 113.12
+    "d3xBalance": 261958.99
   },
   {
     "name": "Newmont",
     "city": "Denver CO",
     "walletAddress": "d3x_4rVV2FMuayv8J3eTVYopAYUWtPmwkx",
-    "d3xBalance": 1964.88
+    "d3xBalance": 427500.81
   },
   {
     "name": "Barrick Gold",
     "city": "Toronto",
     "walletAddress": "d3x_jC9zQ2dTzZYRMRphHUGiMDQazrTPbP",
-    "d3xBalance": 9624.86
+    "d3xBalance": 43327.96
   },
   {
     "name": "Prologis",
     "city": "San Francisco CA",
     "walletAddress": "d3x_AbYsE5RzbgF7h9VfQhpQqbxuoAkuWs",
-    "d3xBalance": 4716.05
+    "d3xBalance": 3922
   },
   {
     "name": "American Tower",
     "city": "Boston MA",
     "walletAddress": "d3x_8mPz7bVAJGNepGb9V74AMbe6zQjhB8",
-    "d3xBalance": 4509.1
+    "d3xBalance": 282358.46
   },
   {
     "name": "Equinix",
     "city": "Redwood City CA",
     "walletAddress": "d3x_Lw9DC6ccqy6N5Xba1tBxFMBUfZpnBL",
-    "d3xBalance": 460.38
+    "d3xBalance": 400298.45
   },
   {
     "name": "Crown Castle",
     "city": "Houston TX",
     "walletAddress": "d3x_iqzL39ywA15QorqjWd98mPs6NzMDYh",
-    "d3xBalance": 6244.49
+    "d3xBalance": 189729.46
   },
   {
     "name": "Public Storage",
     "city": "Glendale CA",
     "walletAddress": "d3x_XvXbyN5yzfc94L9WaxSf4KuRtUvvZY",
-    "d3xBalance": 6206.17
+    "d3xBalance": 285876.13
   },
   {
     "name": "Simon Property Group",
     "city": "Indianapolis IN",
     "walletAddress": "d3x_7Joz7oUJTEPeHWgM3sSjjLFtQPNHwi",
-    "d3xBalance": 1454.32
+    "d3xBalance": 116042.68
   },
   {
     "name": "Realty Income",
     "city": "San Diego CA",
     "walletAddress": "d3x_JT2YxmoxUrwrLsVQdG115ZocEJDokV",
-    "d3xBalance": 6795.16
+    "d3xBalance": 197979.83
   },
   {
     "name": "Welltower",
     "city": "Toledo OH",
     "walletAddress": "d3x_EBZSpXKRRF1TpKrnvYZdida2eLL2Nr",
-    "d3xBalance": 5084.94
+    "d3xBalance": 432319.82
   },
   {
     "name": "AvalonBay Communities",
     "city": "Arlington VA",
     "walletAddress": "d3x_8JwVA1KyX25YZmZ8r9mG8dpifZooxt",
-    "d3xBalance": 7793.37
+    "d3xBalance": 455448.01
   },
   {
     "name": "Equity Residential",
     "city": "Chicago IL",
     "walletAddress": "d3x_VYTThRQtXWMSDzrXjE8DqS9zVBevRU",
-    "d3xBalance": 2323.81
+    "d3xBalance": 461511.59
   },
   {
     "name": "Constellation Energy",
     "city": "Baltimore MD",
     "walletAddress": "d3x_VPLbH8uJJppGTRNZ1pcc64Pmq1xagi",
-    "d3xBalance": 716.99
+    "d3xBalance": 234910.3
   },
   {
     "name": "Dominion Energy",
     "city": "Richmond VA",
     "walletAddress": "d3x_QzPyFiSjU1Ga6qfBcgzbrz7HVv2eN9",
-    "d3xBalance": 11104.16
+    "d3xBalance": 104521.27
   },
   {
     "name": "Sempra Energy",
     "city": "San Diego CA",
     "walletAddress": "d3x_zrChFrJn6VHnJCc97AhAiMB6yzKH5U",
-    "d3xBalance": 2882.85
+    "d3xBalance": 71907.48
   },
   {
     "name": "American Electric Power",
     "city": "Columbus OH",
     "walletAddress": "d3x_fJ7hW4FKbw9DM6Y5W4e7wB4b69NzNt",
-    "d3xBalance": 3333.98
+    "d3xBalance": 374383.83
   },
   {
     "name": "Exelon",
     "city": "Chicago IL",
     "walletAddress": "d3x_KB5gnBjDsR8FuLW5XuLmAyo9jcqbPf",
-    "d3xBalance": 6737.46
+    "d3xBalance": 311035.8
   },
   {
     "name": "Xcel Energy",
     "city": "Minneapolis MN",
     "walletAddress": "d3x_yAAPpmFLa7Lz7tBqGbs62tiNXzvDrt",
-    "d3xBalance": 90.78
+    "d3xBalance": 258025.94
   },
   {
     "name": "Consolidated Edison",
     "city": "New York NY",
     "walletAddress": "d3x_oZQmcmMdKPGa84iYVtjrS4mENjWX7o",
-    "d3xBalance": 128.49
+    "d3xBalance": 189323.91
   },
   {
     "name": "WEC Energy Group",
     "city": "Milwaukee WI",
     "walletAddress": "d3x_7etfu2WEsfD8KYitFhHWEWk1aV6i9t",
-    "d3xBalance": 10040.37
+    "d3xBalance": 15328.68
   },
   {
     "name": "Edison International",
     "city": "Rosemead CA",
     "walletAddress": "d3x_6zvchqPn9Q17a9PdhhkDarhT1uVahn",
-    "d3xBalance": 6121.93
+    "d3xBalance": 111225.89
   },
   {
     "name": "DTE Energy",
     "city": "Detroit MI",
     "walletAddress": "d3x_GYWzf8X2WxxwvK783Wyg3JcuVQQuix",
-    "d3xBalance": 218.83
+    "d3xBalance": 41668.83
   },
   {
     "name": "Entergy",
     "city": "New Orleans LA",
     "walletAddress": "d3x_awbw3nio5qL23ZetaDgHW7w19E31pe",
-    "d3xBalance": 860.43
+    "d3xBalance": 378566.6
   },
   {
     "name": "FirstEnergy",
     "city": "Akron OH",
     "walletAddress": "d3x_V6oW7x7Tq8W7d193LXV9L1D65JpLTU",
-    "d3xBalance": 7063.28
+    "d3xBalance": 389675.96
   },
   {
     "name": "PPL Corporation",
     "city": "Allentown PA",
     "walletAddress": "d3x_gXpjUVBQ3VaCptSmot9z162MhNqWRc",
-    "d3xBalance": 337.9
+    "d3xBalance": 102102.9
   },
   {
     "name": "Ameren",
     "city": "St. Louis MO",
     "walletAddress": "d3x_8bF9NrXwzUX3XbnwmDSx6bHcAMp4Rt",
-    "d3xBalance": 10293.17
+    "d3xBalance": 443657.87
   },
   {
     "name": "Eversource Energy",
     "city": "Springfield MA",
     "walletAddress": "d3x_9vEb9FRDjBWzan7KHa2yDDw4kMgTDy",
-    "d3xBalance": 770.37
+    "d3xBalance": 293109.73
   },
   {
     "name": "CenterPoint Energy",
     "city": "Houston TX",
     "walletAddress": "d3x_sc38ssLiu75vKfK8KJagwc6iMxbvY8",
-    "d3xBalance": 2136.04
+    "d3xBalance": 125040.94
   },
   {
     "name": "CMS Energy",
     "city": "Jackson MI",
     "walletAddress": "d3x_RsuaeFpGSQ8fQv3SSy6uWXChkyMGGX",
-    "d3xBalance": 106.82
+    "d3xBalance": 173699.49
   },
   {
     "name": "Alliant Energy",
     "city": "Madison WI",
     "walletAddress": "d3x_NXbzXoPcbsF8Lvpz9Q4PsV5BG5ChTi",
-    "d3xBalance": 781.98
+    "d3xBalance": 237099.02
   },
   {
     "name": "Evergy",
     "city": "Kansas City MO",
     "walletAddress": "d3x_qaDKzp3Not6oz5kqGMzKpYi4L7xN11",
-    "d3xBalance": 7114.84
+    "d3xBalance": 317849.43
   },
   {
     "name": "NiSource",
     "city": "Merrillville IN",
     "walletAddress": "d3x_Q75662KcCZ9PSR5Z8nA8hmRhcJd3ma",
-    "d3xBalance": 4151.46
+    "d3xBalance": 9057.61
   },
   {
     "name": "Pinnacle West",
     "city": "Phoenix AZ",
     "walletAddress": "d3x_RWKVvJ5xiJUeNGesbH94GHJSQ4vmG1",
-    "d3xBalance": 1642.26
+    "d3xBalance": 437151.74
   },
   {
     "name": "Vistra Corp",
     "city": "Irving TX",
     "walletAddress": "d3x_GCzXHg2m3KWL1tdfw1h93KcPN98shi",
-    "d3xBalance": 278.16
+    "d3xBalance": 278243.06
   },
   {
     "name": "NRG Energy",
     "city": "Houston TX",
     "walletAddress": "d3x_KzEkJsdU9zbvHYmP3FcRmN19JMyodn",
-    "d3xBalance": 280.06
+    "d3xBalance": 107765.88
   },
   {
     "name": "AES Corporation",
     "city": "Arlington VA",
     "walletAddress": "d3x_8HGftknjx84heCAN1AU12ukJtR6dVA",
-    "d3xBalance": 4260.53
+    "d3xBalance": 345371.36
   },
   {
     "name": "Atmos Energy",
     "city": "Dallas TX",
     "walletAddress": "d3x_QvhB6RzqjuaqqxC5bRZF6gM6brqWTE",
-    "d3xBalance": 9428.56
+    "d3xBalance": 407815.89
   },
   {
     "name": "UGI Corporation",
     "city": "King of Prussia PA",
     "walletAddress": "d3x_UEFbnBc9BmmUURQUm6VBz4wBiWJkfJ",
-    "d3xBalance": 11361.3
+    "d3xBalance": 100219.48
   },
   {
     "name": "National Grid",
     "city": "London",
     "walletAddress": "d3x_Vs6THzy78YEf1kjeDWPfnoExTqz7s3",
-    "d3xBalance": 728.55
+    "d3xBalance": 56573.08
   },
   {
     "name": "E.ON",
     "city": "Essen",
     "walletAddress": "d3x_Zo6NsFo6jMWYtUoLoatDZLASNZxeeT",
-    "d3xBalance": 7015.42
+    "d3xBalance": 115733.52
   },
   {
     "name": "RWE",
     "city": "Essen",
     "walletAddress": "d3x_S3E7wYxNtaQQT2iua6s8TRh2QqTrsb",
-    "d3xBalance": 1896.45
+    "d3xBalance": 208767.36
   },
   {
     "name": "Engie",
     "city": "Courbevoie",
     "walletAddress": "d3x_v6mmdcRD5EFwgVu9issbjYHWNVsAeE",
-    "d3xBalance": 3575.74
+    "d3xBalance": 140814.56
   },
   {
     "name": "SSE",
     "city": "Perth",
     "walletAddress": "d3x_uiioVTx19WPnZb8MmW4JbCni1MD3yy",
-    "d3xBalance": 3840.8
+    "d3xBalance": 120072.04
   },
   {
     "name": "Iberdrola",
     "city": "Bilbao",
     "walletAddress": "d3x_wbeKo3yv94vzK5yoocL2e5bob7fxqL",
-    "d3xBalance": 9075.13
+    "d3xBalance": 341797.37
   },
   {
     "name": "Enel",
     "city": "Rome",
     "walletAddress": "d3x_s2JcqDDofJ5Fgg8kRiVwgmafuL9oES",
-    "d3xBalance": 4509.38
+    "d3xBalance": 41604.07
   },
   {
     "name": "Orsted",
     "city": "Fredericia",
     "walletAddress": "d3x_gEA1TwPVRdiPQTF6jhSUDtCZYtgMz4",
-    "d3xBalance": 7063.69
+    "d3xBalance": 258742.45
   },
   {
     "name": "EDF",
     "city": "Paris",
     "walletAddress": "d3x_QQoPVyDtQ76LmR7KMCGqUtpqimf8J4",
-    "d3xBalance": 2915.06
+    "d3xBalance": 58597.69
   },
   {
     "name": "Terna",
     "city": "Rome",
     "walletAddress": "d3x_bqfCcyyA7UPxd4fwBpLyBEk3r7sTRC",
-    "d3xBalance": 6949.24
+    "d3xBalance": 323538.12
   },
   {
     "name": "Red Electrica",
     "city": "Alcobendas",
     "walletAddress": "d3x_z8BcyK5YLspsBqgkTZXnzaL2Ne8Z2L",
-    "d3xBalance": 9909
+    "d3xBalance": 407261.5
   },
   {
     "name": "Duke Energy",
     "city": "Charlotte NC",
     "walletAddress": "d3x_mGeacrPLCQ5TyF41SXra7e634kb62f",
-    "d3xBalance": 520.01
+    "d3xBalance": 151456.99
   },
   {
     "name": "Southern Company",
     "city": "Atlanta GA",
     "walletAddress": "d3x_DGftMdXWXp7jJnos4BrMBDpKhpDEQP",
-    "d3xBalance": 973.74
+    "d3xBalance": 34112.84
   },
   {
     "name": "NextEra Energy",
     "city": "Juno Beach FL",
     "walletAddress": "d3x_BqYG6XUHw11n2fdeigywKv5ELsVDrg",
-    "d3xBalance": 11364.17
+    "d3xBalance": 470925.38
   },
   {
     "name": "ServiceNow",
     "city": "Santa Clara, California",
     "walletAddress": "d3x_zQRVAPEJ1SS7J1EASu2fPEC8pWQdL3",
-    "d3xBalance": 2600.94
+    "d3xBalance": 106282.65
   },
   {
     "name": "Booking Holdings",
     "city": "Norwalk, Connecticut",
     "walletAddress": "d3x_NjNpryqZNRWxgD48E7cHbBoEB5WSmU",
-    "d3xBalance": 11437.4
+    "d3xBalance": 217521.99
   },
   {
     "name": "Schneider Electric",
     "city": "Rueil-Malmaison",
     "walletAddress": "d3x_VFb44KAvAVDSWsrGMBn6QYBTP8g8Vj",
-    "d3xBalance": 5360.62
+    "d3xBalance": 292349.2
   },
   {
     "name": "Airbus",
     "city": "Blagnac",
     "walletAddress": "d3x_VMP6iKbyc9hEXRGJxdN3KRBG8JS22u",
-    "d3xBalance": 11060.76
+    "d3xBalance": 468971.7
   },
   {
     "name": "Siemens",
     "city": "Munich",
     "walletAddress": "d3x_T81CHEFBJbbHcFQPGtnr419ysohMk4",
-    "d3xBalance": 1074.03
+    "d3xBalance": 485192.88
   },
   {
     "name": "HSBC Holdings",
     "city": "London",
     "walletAddress": "d3x_1R7z3nmJQ3CSVpMnLmQXg6B9pV3Rk1",
-    "d3xBalance": 9929.11
+    "d3xBalance": 242811.71
   },
   {
     "name": "L'Oréal",
     "city": "Clichy",
     "walletAddress": "d3x_EQ2tYhSFZ9pD7jUFMZW55t85J54XNT",
-    "d3xBalance": 1083.98
+    "d3xBalance": 322586.5
   },
   {
     "name": "Toyota Motor",
     "city": "Toyota City",
     "walletAddress": "d3x_PzjXTFuDu55FjJyya2JEDSg8chX3RZ",
-    "d3xBalance": 765.13
+    "d3xBalance": 466049.5
   },
   {
     "name": "Novartis",
     "city": "Basel",
     "walletAddress": "d3x_jEduwirvkDMjZmSW4wsEMM2spWK947",
-    "d3xBalance": 8641.28
+    "d3xBalance": 131156.88
   },
   {
     "name": "Alibaba Group",
     "city": "Hangzhou",
     "walletAddress": "d3x_Xt4UAeTHy5XoLkAHgmdzMdz7KH5SnQ",
-    "d3xBalance": 112.31
+    "d3xBalance": 258127.9
   },
   {
     "name": "Sony Group",
     "city": "Tokyo",
     "walletAddress": "d3x_8hXRwQcf3xmoBVB3etamgr7ZDcyWhD",
-    "d3xBalance": 3818.5
+    "d3xBalance": 475696.51
   },
   {
     "name": "Nestlé",
     "city": "Vevey",
     "walletAddress": "d3x_YK4a88qYbb7AvD9Tb9im6NJmEiC8G6",
-    "d3xBalance": 787.06
+    "d3xBalance": 316870.04
   },
   {
     "name": "Novo Nordisk",
     "city": "Bagsværd",
     "walletAddress": "d3x_9acxGfzarGdVitqmMGAiMduGhEBSNz",
-    "d3xBalance": 6107.29
+    "d3xBalance": 271184.07
   },
   {
     "name": "SAP",
     "city": "Walldorf",
     "walletAddress": "d3x_nRHNwU7x8Xec7wRVdJVUq494Zmx5cT",
-    "d3xBalance": 3244.02
+    "d3xBalance": 453557.17
   },
   {
     "name": "Reliance Industries",
     "city": "Mumbai",
     "walletAddress": "d3x_WxFtiwpwxzNt61b9ShzgMbjMS4swvH",
-    "d3xBalance": 12.09
+    "d3xBalance": 135037.98
   },
   {
     "name": "TotalEnergies",
     "city": "Courbevoie",
     "walletAddress": "d3x_8aSzrYXSpzJGJxm5fAuZwqnfJzfshJ",
-    "d3xBalance": 8424.84
+    "d3xBalance": 11015.12
   },
   {
     "name": "Deutsche Telekom",
     "city": "Bonn",
     "walletAddress": "d3x_i7PjhC5PXk1e5yGQp5pjyzEH1BnV83",
-    "d3xBalance": 10997.75
+    "d3xBalance": 274286.59
   },
   {
     "name": "BHP Group",
     "city": "Melbourne",
     "walletAddress": "d3x_boeDSbAPn1E1gyS7EhUyDDTpcj4QjU",
-    "d3xBalance": 3.36
+    "d3xBalance": 475345.03
   },
   {
     "name": "Rio TintoUK/",
     "city": "London",
     "walletAddress": "d3x_TV9rc9pgfH3unzxnQfEmfnsaMuerDy",
-    "d3xBalance": 8903.57
+    "d3xBalance": 103813.38
   },
   {
     "name": "Enel",
     "city": "Rome",
     "walletAddress": "d3x_LKMR7Y2C5ukGzEnUGXXMr2puJqna8L",
-    "d3xBalance": 7545.54
+    "d3xBalance": 404592.35
   },
   {
     "name": "Petrobras",
     "city": "Rio de Janeiro",
     "walletAddress": "d3x_uXxdTgobvLrUZbkeh7Johw7gptb1go",
-    "d3xBalance": 2421.39
+    "d3xBalance": 399964.07
   },
   {
     "name": "Vale",
     "city": "Rio de Janeiro",
     "walletAddress": "d3x_tiDSTcmjdrG4p1fwomiKe1J7tS4D6G",
-    "d3xBalance": 3093.74
+    "d3xBalance": 463014.84
   },
   {
     "name": "Infosys",
     "city": "Bengaluru",
     "walletAddress": "d3x_y9y5D38a7kESPCA2YktgwFmxgvo9M6",
-    "d3xBalance": 1607.37
+    "d3xBalance": 16962.44
   },
   {
     "name": "Tata Consultancy Services",
     "city": "Mumbai",
     "walletAddress": "d3x_GhuzXoYEDsJzvsTtK7QZy43EFdkFsE",
-    "d3xBalance": 2273.56
+    "d3xBalance": 190559.63
   },
   {
     "name": "China Mobile",
     "city": "Beijing",
     "walletAddress": "d3x_jJmoLFdaKRPt5torF6MtiXqqzbSSoY",
-    "d3xBalance": 6439.13
+    "d3xBalance": 484971.29
   },
   {
     "name": "Ping An Insurance",
     "city": "Shenzhen",
     "walletAddress": "d3x_w9XXAHVJ1U3ajHG3AV4PfkzH5Bbit6",
-    "d3xBalance": 986.31
+    "d3xBalance": 302517.13
   },
   {
     "name": "Banco Santander",
     "city": "Madrid",
     "walletAddress": "d3x_MdbQkGVosAhjHTCyzE7KLWmyiYwemp",
-    "d3xBalance": 1509.18
+    "d3xBalance": 423302.71
   },
   {
     "name": "BNP Paribas",
     "city": "Paris",
     "walletAddress": "d3x_5857YzmfXv8pWYb2ddSd4YgFMEUyaC",
-    "d3xBalance": 1777.76
+    "d3xBalance": 21888.6
   },
   {
     "name": "Mitsubishi UFJ Financial",
     "city": "Tokyo",
     "walletAddress": "d3x_ZpAaUV5xisgLH9Uv4Z8B6gLiRXSPsP",
-    "d3xBalance": 2909.05
+    "d3xBalance": 426058.68
   },
   {
     "name": "Itaú Unibanco",
     "city": "São Paulo",
     "walletAddress": "d3x_qDryy7jbjXSFUjGQiFkNg4tansFg4S",
-    "d3xBalance": 6921.46
+    "d3xBalance": 13567.78
   },
   {
     "name": "Uber Technologies",
     "city": "San Francisco, California",
     "walletAddress": "d3x_LFgfDochPzkBH7nRDATpFARQyG62mH",
-    "d3xBalance": 353.11
+    "d3xBalance": 462332.96
   },
   {
     "name": "Accenture",
     "city": "Dublin",
     "walletAddress": "d3x_z3Nwjgm95atAwFiQmwBg2BSWdMhfD1",
-    "d3xBalance": 3880.51
+    "d3xBalance": 141491.69
   },
   {
     "name": "Caterpillar",
     "city": "Irving, Texas",
     "walletAddress": "d3x_y8ALCdnv37h573Zr46G5FnH44noNjK",
-    "d3xBalance": 2236.06
+    "d3xBalance": 34454.15
   },
   {
     "name": "International Business Machines (IBM)",
     "city": "Armonk, New York",
     "walletAddress": "d3x_W82UNFBcyPqVUmwaHBJwxzQStBvJG2",
-    "d3xBalance": 9365.59
+    "d3xBalance": 256912.23
   },
   {
     "name": "American Express",
     "city": "New York, New York",
     "walletAddress": "d3x_83C1kC3Y7hv2bf5PNrXe8acPF8V3uN",
-    "d3xBalance": 9196.03
+    "d3xBalance": 64869
   },
   {
     "name": "Morgan Stanley",
     "city": "New York, New York",
     "walletAddress": "d3x_PezokjSLyFM2c6nq19bgedMaxQKezm",
-    "d3xBalance": 8417.07
+    "d3xBalance": 382566.84
   },
   {
     "name": "Goldman Sachs",
     "city": "New York, New York",
     "walletAddress": "d3x_NctQQi6HBqLZtmss5EpjNti4YRYefG",
-    "d3xBalance": 9258.64
+    "d3xBalance": 266545.43
   },
   {
     "name": "Lockheed Martin",
     "city": "Bethesda, Maryland",
     "walletAddress": "d3x_kceAcXAQ9oAMXJ5XPWBMeWqcRyD99K",
-    "d3xBalance": 348.08
+    "d3xBalance": 444368.52
   },
   {
     "name": "RTX (Raytheon Technologies)",
     "city": "Arlington, Virginia",
     "walletAddress": "d3x_uVubMJzsUWcH3vcj8vquqFXjpp73SP",
-    "d3xBalance": 3795.05
+    "d3xBalance": 89971.18
   },
   {
     "name": "Honeywell",
     "city": "Charlotte, North Carolina",
     "walletAddress": "d3x_ieKbphcVXh9ByyMokjrinWnT4ZUMtm",
-    "d3xBalance": 3564.64
+    "d3xBalance": 352882.55
   },
   {
     "name": "Deere & Company",
     "city": "Moline, Illinois",
     "walletAddress": "d3x_o2LaLWsAuJ9FUkvhc2pCKpVxoQF2aT",
-    "d3xBalance": 101.76
+    "d3xBalance": 390804.86
   },
   {
     "name": "Union Pacific",
     "city": "Omaha, Nebraska",
     "walletAddress": "d3x_bfbvby15xgyhbqyY9HYTG3YkBQm3pz",
-    "d3xBalance": 132.21
+    "d3xBalance": 397017.56
   },
   {
     "name": "BlackRock",
     "city": "New York, New York",
     "walletAddress": "d3x_axdqYfHmKNX3C6ZDiipWwDYTtZ3JkS",
-    "d3xBalance": 4015.04
+    "d3xBalance": 3962.99
   },
   {
     "name": "Chubb",
     "city": "Zurich",
     "walletAddress": "d3x_N6Yj3UtfT1vfCLVtZByLo77yfFzHXG",
-    "d3xBalance": 5363.14
+    "d3xBalance": 264911.27
   },
   {
     "name": "Zoetis",
     "city": "Parsippany, New Jersey",
     "walletAddress": "d3x_oQhabcrg4vYUMfgcWPA1agc4FMS8hd",
-    "d3xBalance": 381.94
+    "d3xBalance": 220917.06
   },
   {
     "name": "Regeneron Pharmaceuticals",
     "city": "Tarrytown, New York",
     "walletAddress": "d3x_WqN7EZ5jG1YrW4KjpbqHwZhaT93BLx",
-    "d3xBalance": 1943.53
+    "d3xBalance": 379650.49
   },
   {
     "name": "Gilead Sciences",
     "city": "Foster City, California",
     "walletAddress": "d3x_L7dD33fNLdBaXPqzFvphzD3zVmYt4r",
-    "d3xBalance": 7683.05
+    "d3xBalance": 132455.95
   },
   {
     "name": "Vertex Pharmaceuticals",
     "city": "Boston, Massachusetts",
     "walletAddress": "d3x_QSbg8EGh4W2wZUD2vE5xmkxvM59J2H",
-    "d3xBalance": 2212.65
+    "d3xBalance": 207789.87
   },
   {
     "name": "Amgen",
     "city": "Thousand Oaks, California",
     "walletAddress": "d3x_ye2rJuSXSvPWSWiWW8s3QrAUbZNeim",
-    "d3xBalance": 3479.3
+    "d3xBalance": 239030.62
   },
   {
     "name": "Intuitive Surgical",
     "city": "Sunnyvale, California",
     "walletAddress": "d3x_mRb9EYLfHh3sFcQ4NQ9C93R3uXZ6yw",
-    "d3xBalance": 503.67
+    "d3xBalance": 88580.83
   },
   {
     "name": "Stryker",
     "city": "Kalamazoo, Michigan",
     "walletAddress": "d3x_vu3vba8cUBy84BsfvBWjGopaZefttL",
-    "d3xBalance": 43.31
+    "d3xBalance": 441642.59
   },
   {
     "name": "Medtronic",
     "city": "Dublin",
     "walletAddress": "d3x_q6rEwkYVhoBwYTks1MCfBo9GihkxZe",
-    "d3xBalance": 4920.44
+    "d3xBalance": 89829.35
   },
   {
     "name": "Boston Scientific",
     "city": "Marlborough, Massachusetts",
     "walletAddress": "d3x_WTEiksiEHrLMagUPRVTWBjbGCu1jLd",
-    "d3xBalance": 2014.56
+    "d3xBalance": 248641.58
   },
   {
     "name": "Edwards Lifesciences",
     "city": "Irvine, California",
     "walletAddress": "d3x_uA4ArvoC7BcTo5V92FqMkPnEgGfqMG",
-    "d3xBalance": 3427.94
+    "d3xBalance": 455050.9
   },
   {
     "name": "Elevance Health",
     "city": "Indianapolis, Indiana",
     "walletAddress": "d3x_sSdeX3mp6BpgQrMSRARnrJBGyQvdGh",
-    "d3xBalance": 3200.16
+    "d3xBalance": 17886.64
   },
   {
     "name": "Cigna",
     "city": "Bloomfield, Connecticut",
     "walletAddress": "d3x_1eDGZByj6isFisCM4cpFYbuxq5E71M",
-    "d3xBalance": 2579.2
+    "d3xBalance": 139770.47
   },
   {
     "name": "Humana",
     "city": "Louisville, Kentucky",
     "walletAddress": "d3x_uVMw3ggxHkRJVwp2PZE2Bsm4JKo7UK",
-    "d3xBalance": 6364.21
+    "d3xBalance": 184714.03
   },
   {
     "name": "Centene",
     "city": "St. Louis, Missouri",
     "walletAddress": "d3x_cbEk7dQqTSLtfMJMbWAH5b99wfs4xP",
-    "d3xBalance": 4143.28
+    "d3xBalance": 351758.31
   },
   {
     "name": "CVS Health",
     "city": "Woonsocket, Rhode Island",
     "walletAddress": "d3x_VnQG2x1M5u6dpBRKzFGDVCUkpDasZw",
-    "d3xBalance": 1451.56
+    "d3xBalance": 299182.59
   },
   {
     "name": "McKesson",
     "city": "Irving, Texas",
     "walletAddress": "d3x_HAS99VzSYNN3sPRGDnzcQKCVHCAC2j",
-    "d3xBalance": 2084.33
+    "d3xBalance": 285182.02
   },
   {
     "name": "Cardinal Health",
     "city": "Dublin, Ohio",
     "walletAddress": "d3x_FRPToMfikf2gEwa4mPEr6Gi6KAkst4",
-    "d3xBalance": 2421.59
+    "d3xBalance": 265547.45
   },
   {
     "name": "AmerisourceBergen (Cencora)",
     "city": "Conshohocken, Pennsylvania",
     "walletAddress": "d3x_hzAKcj4RnspcTzocdBMp3btjETLKDE",
-    "d3xBalance": 3564.09
+    "d3xBalance": 234124.58
   },
   {
     "name": "Starbucks",
     "city": "Seattle, Washington",
     "walletAddress": "d3x_2a9zYdzxx6YbrjR4VfohDmrYfhksD8",
-    "d3xBalance": 1789.87
+    "d3xBalance": 40252.03
   },
   {
     "name": "McDonald's",
     "city": "Chicago, Illinois",
     "walletAddress": "d3x_e6JGC6XrsAPWXYVfR8rgxM54UkGQs2",
-    "d3xBalance": 8353.67
+    "d3xBalance": 133739.2
   },
   {
     "name": "Chipotle Mexican Grill",
     "city": "Newport Beach, California",
     "walletAddress": "d3x_uaxh4rjRdHpn2tSc4Y3NuQJD1A8McP",
-    "d3xBalance": 1125.19
+    "d3xBalance": 268841.64
   },
   {
     "name": "Yum! Brands",
     "city": "Louisville, Kentucky",
     "walletAddress": "d3x_Aqexiss7dsKCArHs1LcmaXzTbKxwk8",
-    "d3xBalance": 1514.08
+    "d3xBalance": 205051.31
   },
   {
     "name": "Restaurant Brands International",
     "city": "Toronto",
     "walletAddress": "d3x_7LtVS2TLb9ARwhQBsHxSrjYQujo1We",
-    "d3xBalance": 420.43
+    "d3xBalance": 127646.32
   },
   {
     "name": "Nike",
     "city": "Beaverton, Oregon",
     "walletAddress": "d3x_sW3jV5nP4PDbndvWDavjerkddBSm3w",
-    "d3xBalance": 2306.64
+    "d3xBalance": 77628.11
   },
   {
     "name": "Adidas",
     "city": "Herzogenaurach",
     "walletAddress": "d3x_6EJzoFehtLu33Zq3yHchpb7akF2zgS",
-    "d3xBalance": 719.09
+    "d3xBalance": 40572.73
   },
   {
     "name": "Puma",
     "city": "Herzogenaurach",
     "walletAddress": "d3x_U7cg3yMR2FM9JiRZHfeKQbPD41aiar",
-    "d3xBalance": 3356.89
+    "d3xBalance": 347903.64
   },
   {
     "name": "LVMH",
     "city": "Paris",
     "walletAddress": "d3x_hM72o93wT7AZVeaFw2QMRVhYVaMBmw",
-    "d3xBalance": 8211.1
+    "d3xBalance": 263792.1
   },
   {
     "name": "Hermès",
     "city": "Paris",
     "walletAddress": "d3x_iPaRWwQgEk1aSbgpoqSUcrho3gohcD",
-    "d3xBalance": 208.44
+    "d3xBalance": 10649.46
   },
   {
     "name": "Kering",
     "city": "Paris",
     "walletAddress": "d3x_4rhq7FbjQB2gNMWVfUf4z2VwbTGR6d",
-    "d3xBalance": 4789.89
+    "d3xBalance": 344577.97
   },
   {
     "name": "Richemont",
     "city": "Bellevue",
     "walletAddress": "d3x_Mw2T67B8nsNRg3fBjw8TwK3xsjqiNg",
-    "d3xBalance": 7301.67
+    "d3xBalance": 59648.68
   },
   {
     "name": "EssilorLuxottica",
     "city": "Charenton-le-Pont",
     "walletAddress": "d3x_mFxm8nthqYX8ihqJfx5bBy9Wd5rQkQ",
-    "d3xBalance": 9532.77
+    "d3xBalance": 443345.01
   },
   {
     "name": "Ferrari",
     "city": "Maranello",
     "walletAddress": "d3x_b1oUqEWtUE9VYkPAfaE4caASoAmnQ4",
-    "d3xBalance": 7346.91
+    "d3xBalance": 156477.31
   },
   {
     "name": "Stellantis",
     "city": "Hoogoorddreef",
     "walletAddress": "d3x_VmgAwYvw51MLxXFdeq2FzFLSLhy7Gj",
-    "d3xBalance": 1470.67
+    "d3xBalance": 381770.05
   },
   {
     "name": "Volkswagen",
     "city": "Wolfsburg",
     "walletAddress": "d3x_zKV71HonYuBciuNXCvSyt1Lwushg7a",
-    "d3xBalance": 5505.92
+    "d3xBalance": 332610.92
   },
   {
     "name": "BMW",
     "city": "Munich",
     "walletAddress": "d3x_5VcNEkkCxBovJgNL3VvURBwGy836tH",
-    "d3xBalance": 6910.05
+    "d3xBalance": 184820.53
   },
   {
     "name": "Mercedes-Benz Group",
     "city": "Stuttgart",
     "walletAddress": "d3x_wSiGaKpytzBX6gtaGQaqSEG8WU4YMz",
-    "d3xBalance": 2509.19
+    "d3xBalance": 409031.82
   },
   {
     "name": "Honda Motor",
     "city": "Tokyo",
     "walletAddress": "d3x_QqoALhQiXSPUqMgG94GqCoYzgvh9Uv",
-    "d3xBalance": 4537.81
+    "d3xBalance": 139392.96
   },
   {
     "name": "Hyundai Motor",
     "city": "Seoul",
     "walletAddress": "d3x_eiJpj8LT4iWBaSYEMkqkxhwvK8AF4k",
-    "d3xBalance": 1391.81
+    "d3xBalance": 296112.06
   },
   {
     "name": "BYD",
     "city": "Shenzhen",
     "walletAddress": "d3x_uhw1zHrdfiRMQ6zKzv2dC6QKCPS2Ru",
-    "d3xBalance": 9116.03
+    "d3xBalance": 118760.59
   },
   {
     "name": "Li Auto",
     "city": "Beijing",
     "walletAddress": "d3x_rd2WYXtVrTAhaZZWbpCMgmPFoB1yHg",
-    "d3xBalance": 2238.07
+    "d3xBalance": 134688.75
   },
   {
     "name": "NIO",
     "city": "Shanghai",
     "walletAddress": "d3x_snDNU7kDFpDs2YweicbhLC1FWodSqp",
-    "d3xBalance": 11004.23
+    "d3xBalance": 215862.65
   },
   {
     "name": "XPeng",
     "city": "Guangzhou",
     "walletAddress": "d3x_jxc5vJ9HWmsMErDcWEgmJHWAmMjnH1",
-    "d3xBalance": 1112.97
+    "d3xBalance": 36554.91
   },
   {
     "name": "Zeekr",
     "city": "Ningbo",
     "walletAddress": "d3x_pBD7CVSqQrqevwzvrHc5J55jVMGtuA",
-    "d3xBalance": 4651.51
+    "d3xBalance": 182755.22
   },
   {
     "name": "Rivian",
     "city": "Irvine, California",
     "walletAddress": "d3x_aygiGh4vuK3UnkMAavkZZndQ4qx8w6",
-    "d3xBalance": 548.53
+    "d3xBalance": 302733.73
   },
   {
     "name": "Lucid Group",
     "city": "Newark, California",
     "walletAddress": "d3x_QAREAyaWYxaAsqimRf1z3Qcwpwj78m",
-    "d3xBalance": 9891
+    "d3xBalance": 132106.47
   },
   {
     "name": "General Motors",
     "city": "Detroit, Michigan",
     "walletAddress": "d3x_umuVb5g7Z9d6VH8AfX6vjXgQxEjMWF",
-    "d3xBalance": 551.76
+    "d3xBalance": 230649.81
   },
   {
     "name": "Ford Motor",
     "city": "Dearborn, Michigan",
     "walletAddress": "d3x_G9pMzQLgjs8675UWXAyfLDYKdDc2PM",
-    "d3xBalance": 271.77
+    "d3xBalance": 420480.4
   },
   {
     "name": "Volkswagen Group",
     "city": "Wolfsburg",
     "walletAddress": "d3x_1Za67U7RDNyCfACEFEsEU2cgMWJKqq",
-    "d3xBalance": 8205.04
+    "d3xBalance": 91304.68
   },
   {
     "name": "Porsche",
     "city": "Stuttgart",
     "walletAddress": "d3x_kPGymZSkQ4FVNi3ZpbBDvk58EZNLhz",
-    "d3xBalance": 253.31
+    "d3xBalance": 195648.58
   },
   {
     "name": "Volvo Cars",
     "city": "Gothenburg",
     "walletAddress": "d3x_CqVjzgYDfDryQ9xzFs2WNHbiULFumz",
-    "d3xBalance": 5337.46
+    "d3xBalance": 166581.19
   },
   {
     "name": "Geely",
     "city": "Hangzhou",
     "walletAddress": "d3x_e4Q6C7yVyojqjXKAbsB57XoJz5pyBZ",
-    "d3xBalance": 8565.88
+    "d3xBalance": 465304.85
   },
   {
     "name": "JD.com",
     "city": "Beijing",
     "walletAddress": "d3x_yNk28nk6FQJa7bYiSxLys1XY3NtCu6",
-    "d3xBalance": 296.03
+    "d3xBalance": 169394.47
   },
   {
     "name": "PDD Holdings (Pinduoduo)",
     "city": "Shanghai",
     "walletAddress": "d3x_CiuLkEZUdhLhpLwqkAJsBerv5qgbJB",
-    "d3xBalance": 11225.65
+    "d3xBalance": 475206.55
   },
   {
     "name": "Meituan",
     "city": "Beijing",
     "walletAddress": "d3x_QBN13utfxyVARkH7Fr9wHTMUHsYhod",
-    "d3xBalance": 6092.67
+    "d3xBalance": 246823.93
   },
   {
     "name": "Baidu",
     "city": "Beijing",
     "walletAddress": "d3x_yti9VPQ2xd2FF7cHkn1xWopNVFjeha",
-    "d3xBalance": 4451.29
+    "d3xBalance": 384257.06
   },
   {
     "name": "NetEase",
     "city": "Hangzhou",
     "walletAddress": "d3x_G8sHWPf8xPi2hmad74BzwwrAYFcXTX",
-    "d3xBalance": 45.92
+    "d3xBalance": 33772.47
   },
   {
     "name": "Sea Limited",
     "city": "Singapore",
     "walletAddress": "d3x_9RnAB7rxiGPURoJSCsxcgAAFG43R7q",
-    "d3xBalance": 3703.41
+    "d3xBalance": 326203.63
   },
   {
     "name": "MercadoLibre",
     "city": "Montevideo (ops)",
     "walletAddress": "d3x_jD6QqRz7xHEuarM9GQtZccARnSDRMd",
-    "d3xBalance": 4879.61
+    "d3xBalance": 185614.85
   },
   {
     "name": "Coupang",
     "city": "Seoul",
     "walletAddress": "d3x_7kU85frcRf6RiDZ24t79H7ZdSWw4Cz",
-    "d3xBalance": 994.57
+    "d3xBalance": 72837.38
   },
   {
     "name": "Adyen",
     "city": "Amsterdam",
     "walletAddress": "d3x_x6e61uyJzqR7kBEUpo3ZThj2wdrUD8",
-    "d3xBalance": 5108.74
+    "d3xBalance": 396892.27
   },
   {
     "name": "Shopify",
     "city": "Ottawa",
     "walletAddress": "d3x_MGSes4w5d97e23jPPuAqJBScFatv3u",
-    "d3xBalance": 4257.24
+    "d3xBalance": 476393.87
   },
   {
     "name": "Snowflake",
     "city": "Bozeman, Montana",
     "walletAddress": "d3x_cGLrcuqVzwDwMqyMhCNBYDqPRQCLLL",
-    "d3xBalance": 5294.29
+    "d3xBalance": 103352.6
   },
   {
     "name": "CrowdStrike",
     "city": "Austin, Texas",
     "walletAddress": "d3x_sRdyzguCXkpecn6PPFtTkffcyw4e7C",
-    "d3xBalance": 1520.51
+    "d3xBalance": 129609.4
   },
   {
     "name": "Datadog",
     "city": "New York, New York",
     "walletAddress": "d3x_4gMXJNHwZdutn7XxxRYKgCjWmEAoHL",
-    "d3xBalance": 2828.06
+    "d3xBalance": 279494.49
   },
   {
     "name": "Palantir Technologies",
     "city": "Denver, Colorado",
     "walletAddress": "d3x_N5jfLZA5zcwNf5wNxJQDeMmkJWo3qV",
-    "d3xBalance": 2979.34
+    "d3xBalance": 345039.57
   },
   {
     "name": "The Trade Desk",
     "city": "Ventura, California",
     "walletAddress": "d3x_Ro5QMHXoXLNxn2VMkRnoomKNBmeZ9J",
-    "d3xBalance": 550.32
+    "d3xBalance": 82457.13
   },
   {
     "name": "Roblox",
     "city": "San Mateo, California",
     "walletAddress": "d3x_hSotD7137wi2byaX4oZPgBckgKQxGp",
-    "d3xBalance": 1908.57
+    "d3xBalance": 380921.08
   },
   {
     "name": "DoorDash",
     "city": "San Francisco, California",
     "walletAddress": "d3x_4mFmBZutbi8P7na7peDCQHxT9MDUAp",
-    "d3xBalance": 6997.78
+    "d3xBalance": 222735.91
   },
   {
     "name": "Fortinet",
     "city": "Sunnyvale, California",
     "walletAddress": "d3x_9pbTcSJhZpuoGY1tTRLb9TXAN32KXA",
-    "d3xBalance": 979.11
+    "d3xBalance": 369357.53
   },
   {
     "name": "Monolithic Power Systems",
     "city": "Kirkland, Washington",
     "walletAddress": "d3x_tbkRmMhQtTPH5pKJX237CoaweqGpAj",
-    "d3xBalance": 8861.91
+    "d3xBalance": 5781.61
   },
   {
     "name": "Axon Enterprise",
     "city": "Scottsdale, Arizona",
     "walletAddress": "d3x_yXmTd8kXBHkzyw8KxSpPgSKCPmTif4",
-    "d3xBalance": 840.15
+    "d3xBalance": 318737.96
   },
   {
     "name": "Copart",
     "city": "Dallas, Texas",
     "walletAddress": "d3x_gHFPakMzdmJJiNCh12ZzenJBZ4rYcd",
-    "d3xBalance": 9523.45
+    "d3xBalance": 464840.48
   },
   {
     "name": "MicroStrategy",
     "city": "Tysons, Virginia",
     "walletAddress": "d3x_yL9U9Pc2LUJNsqhF1DNfpkjz6KuPdF",
-    "d3xBalance": 1443.25
+    "d3xBalance": 416204.12
   },
   {
     "name": "Arista Networks",
     "city": "Santa Clara, California",
     "walletAddress": "d3x_nVn46h5CBbaLTGfCtmRUhkbGFp8Fy6",
-    "d3xBalance": 107.76
+    "d3xBalance": 215043.53
   },
   {
     "name": "KLA Corporation",
     "city": "Milpitas, California",
     "walletAddress": "d3x_8Q57BGwFBqbtxdwE4akYFy5mmPxvDf",
-    "d3xBalance": 5985.78
+    "d3xBalance": 210679.13
   },
   {
     "name": "Lam Research",
     "city": "Fremont, California",
     "walletAddress": "d3x_LNYvMGuvgYHmiXQ9e73m3FSwcqaUPv",
-    "d3xBalance": 1410.47
+    "d3xBalance": 39973.23
   },
   {
     "name": "Applied Materials",
     "city": "Santa Clara, California",
     "walletAddress": "d3x_SZcpzyBvL8pnchupt5NVCT5PwKFGT3",
-    "d3xBalance": 1871.45
+    "d3xBalance": 3164.04
   },
   {
     "name": "ASML Holding",
     "city": "Veldhoven",
     "walletAddress": "d3x_224ppCuGDyNfHFiJ6MqwiFnTs8ttHk",
-    "d3xBalance": 2331.63
+    "d3xBalance": 428170.71
   },
   {
     "name": "Tokyo Electron",
     "city": "Tokyo",
     "walletAddress": "d3x_eTb1bDFCjfKmNkrogtgAiNcKiyLRyn",
-    "d3xBalance": 4160.59
+    "d3xBalance": 108675.26
   },
   {
     "name": "Advantest",
     "city": "Tokyo",
     "walletAddress": "d3x_3pphAtxaZsmqJPwJ1hd9WxVWoiHfFL",
-    "d3xBalance": 9252.53
+    "d3xBalance": 104693.16
   },
   {
     "name": "Teradyne",
     "city": "North Reading, Massachusetts",
     "walletAddress": "d3x_AqeMSsQod5EuzzMhRVBBc6zA6qFWyp",
-    "d3xBalance": 2771.76
+    "d3xBalance": 148494.27
   },
   {
     "name": "Analog Devices",
     "city": "Norwood, Massachusetts",
     "walletAddress": "d3x_UXCRyNY8DwZG1apqjYQQ8SDEEMAaqF",
-    "d3xBalance": 4961.27
+    "d3xBalance": 247205.19
   },
   {
     "name": "Texas Instruments",
     "city": "Dallas, Texas",
     "walletAddress": "d3x_obxQNugSiwM5ZtukXHTiZ5pXdJuGjs",
-    "d3xBalance": 6523.16
+    "d3xBalance": 234528.98
   },
   {
     "name": "Qualcomm",
     "city": "San Diego, California",
     "walletAddress": "d3x_vRrp3pS7at1qheuwjK42nd6p4pikxh",
-    "d3xBalance": 5705.63
+    "d3xBalance": 53708.43
   },
   {
     "name": "Broadcom",
     "city": "San Jose, California",
     "walletAddress": "d3x_C5mgD7hkc5dtRo3pcHSxEQ7rR5Tfg7",
-    "d3xBalance": 2810.91
+    "d3xBalance": 198962.18
   },
   {
     "name": "AMD",
     "city": "Santa Clara, California",
     "walletAddress": "d3x_GFGHoCUp3tF9NkxP2X3YeKnxA87efx",
-    "d3xBalance": 8616.81
+    "d3xBalance": 289120.63
   },
   {
     "name": "Intel",
     "city": "Santa Clara, California",
     "walletAddress": "d3x_ZYFn3o49qCq18YjpVJzjcGK8UpUhef",
-    "d3xBalance": 7306.76
+    "d3xBalance": 91181.83
   },
   {
     "name": "Micron Technology",
     "city": "Boise, Idaho",
     "walletAddress": "d3x_eFy4iNsWy7pNrf6t4xVUzQoxewsdjD",
-    "d3xBalance": 455.7
+    "d3xBalance": 429574.81
   },
   {
     "name": "SK Hynix",
     "city": "Icheon",
     "walletAddress": "d3x_wiJAGk92u2kGw5TzKcEyCyaSFfYpWG",
-    "d3xBalance": 543.5
+    "d3xBalance": 436606.01
   },
   {
     "name": "Samsung Electronics",
     "city": "Suwon",
     "walletAddress": "d3x_njTtdGckAMbxeT5CAzNSgoyRf9L2ER",
-    "d3xBalance": 8229.23
+    "d3xBalance": 421349.65
   },
   {
     "name": "TSMC",
     "city": "Hsinchu",
     "walletAddress": "d3x_ouzLBH8UogfifeC3xk6PbnbYASrgZZ",
-    "d3xBalance": 108.97
+    "d3xBalance": 487616.11
   },
   {
     "name": "MediaTek",
     "city": "Hsinchu",
     "walletAddress": "d3x_Jv2v8dRpxWnMKmtZfMd3MPbsPwbzdZ",
-    "d3xBalance": 9460.45
+    "d3xBalance": 484812.38
   },
   {
     "name": "Arm Holdings",
     "city": "Cambridge",
     "walletAddress": "d3x_2TZtyPQfZkaMek5mbNsJwwE6w6yCK8",
-    "d3xBalance": 18.13
+    "d3xBalance": 263772.43
   },
   {
     "name": "Super Micro Computer",
     "city": "San Jose, California",
     "walletAddress": "d3x_dThRLCjLaRceQyb2r9v5GUZDCpTnFq",
-    "d3xBalance": 3546.11
+    "d3xBalance": 78076.89
   },
   {
     "name": "Dell Technologies",
     "city": "Round Rock, Texas",
     "walletAddress": "d3x_sWVtEY82bL5p5T9aF3eqDaS4K6b14Y",
-    "d3xBalance": 4063.38
+    "d3xBalance": 104200.43
   },
   {
     "name": "HP Inc.",
     "city": "Palo Alto, California",
     "walletAddress": "d3x_YhD85gtNokFLxeNd9UQE1V7mgbQihg",
-    "d3xBalance": 1776.4
+    "d3xBalance": 161322.6
   },
   {
     "name": "Lenovo",
     "city": "Beijing",
     "walletAddress": "d3x_yZxGtjfuReTGJMdpFLNx6KnDzzBezJ",
-    "d3xBalance": 4951.21
+    "d3xBalance": 362655.85
   },
   {
     "name": "Cisco Systems",
     "city": "San Jose, California",
     "walletAddress": "d3x_w4yoyqYacWcmmYLaUJsXP7jcZiHAzx",
-    "d3xBalance": 1391.67
+    "d3xBalance": 195026.71
   },
   {
     "name": "Juniper Networks",
     "city": "Sunnyvale, California",
     "walletAddress": "d3x_81t8ojajYmJ6LEFi9T9vREgWgqzP2d",
-    "d3xBalance": 1160.19
+    "d3xBalance": 236319.59
   },
   {
     "name": "F5",
     "city": "Seattle, Washington",
     "walletAddress": "d3x_w9JjN36wRHjA1AXra9EsStLhtwzTNb",
-    "d3xBalance": 8578.65
+    "d3xBalance": 340073.22
   },
   {
     "name": "Palo Alto Networks",
     "city": "Santa Clara, California",
     "walletAddress": "d3x_zgTnKS5RfBibfPUAcQYc9xpmsrCr1m",
-    "d3xBalance": 2299.84
+    "d3xBalance": 150600.18
   },
   {
     "name": "Zscaler",
     "city": "San Jose, California",
     "walletAddress": "d3x_o6s6DYDv43197c6YCaFkBiTSpvZR4p",
-    "d3xBalance": 5817.75
+    "d3xBalance": 435118.12
   },
   {
     "name": "Cloudflare",
     "city": "San Francisco, California",
     "walletAddress": "d3x_ATEuyzAePNhjTMbTqkGAu6pL9mgpMS",
-    "d3xBalance": 1328.19
+    "d3xBalance": 275400.67
   },
   {
     "name": "Okta",
     "city": "San Francisco, California",
     "walletAddress": "d3x_3wvZaazkjVfpMWEXfYNwU4z2suvfXC",
-    "d3xBalance": 1133.11
+    "d3xBalance": 283433.68
   },
   {
     "name": "Splunk (now Cisco)",
     "city": "San Francisco, California",
     "walletAddress": "d3x_fBVgcuerXLuxK34HcMr1pPs3nXcsFU",
-    "d3xBalance": 8081.72
+    "d3xBalance": 274662.58
   },
   {
     "name": "Adobe",
     "city": "San Jose, California",
     "walletAddress": "d3x_o1G7bt4tHTTAZffEnn2gnKAJyJBiaD",
-    "d3xBalance": 320.56
+    "d3xBalance": 490696.72
   },
   {
     "name": "Autodesk",
     "city": "San Rafael, California",
     "walletAddress": "d3x_hkQWc3GB5cHNCQMSnTFyC2Q8K4WFqA",
-    "d3xBalance": 6607.57
+    "d3xBalance": 307400.89
   },
   {
     "name": "Intuit",
     "city": "Mountain View, California",
     "walletAddress": "d3x_3qaMi4jxSwePbGjmazACmZnrGsorTa",
-    "d3xBalance": 2924.63
+    "d3xBalance": 323217.03
   },
   {
     "name": "PayPal",
     "city": "San Jose, California",
     "walletAddress": "d3x_z8JmrTsJE7ZVa61WY1ExHfmtEhKfzs",
-    "d3xBalance": 4018.52
+    "d3xBalance": 23678.09
   },
   {
     "name": "Block (Square)",
     "city": "Oakland, California",
     "walletAddress": "d3x_wcvP5r3nG6zFHWaYCND7urXW1x7uYK",
-    "d3xBalance": 3723.43
+    "d3xBalance": 198730.43
   },
   {
     "name": "Visa",
     "city": "San Francisco, California",
     "walletAddress": "d3x_Ufhhu6jifT6RpnadqA5hgbPQXETDWi",
-    "d3xBalance": 9024.11
+    "d3xBalance": 294998.35
   },
   {
     "name": "Mastercard",
     "city": "Purchase, New York",
     "walletAddress": "d3x_ewHajSrrVSCKVpfD9tcbjgkSDipTvs",
-    "d3xBalance": 4737.99
+    "d3xBalance": 292860.65
   },
   {
     "name": "Paychex",
     "city": "Rochester, New York",
     "walletAddress": "d3x_cHPttJDbqZp4YPbj42g8YsUATq1F5p",
-    "d3xBalance": 6429.42
+    "d3xBalance": 419865.04
   },
   {
     "name": "ADP",
     "city": "Roseland, New Jersey",
     "walletAddress": "d3x_HpBawR1Gduh7tdG4txL4SuyA5y77JR",
-    "d3xBalance": 10736.06
+    "d3xBalance": 203712.94
   },
   {
     "name": "S&P Global",
     "city": "New York, New York",
     "walletAddress": "d3x_J9ssJZQdzuZT7rTzWrzHvabcuxBTic",
-    "d3xBalance": 1062.19
+    "d3xBalance": 246240.22
   },
   {
     "name": "Moody's",
     "city": "New York, New York",
     "walletAddress": "d3x_G4KS8MuEVMybs5jt5iEBP86qZXt1eC",
-    "d3xBalance": 11172.45
+    "d3xBalance": 71875.67
   },
   {
     "name": "CME Group",
     "city": "Chicago, Illinois",
     "walletAddress": "d3x_sJxu4qZUjzSk16J79JBmkj9mCeNjWR",
-    "d3xBalance": 7199.54
+    "d3xBalance": 83251.5
   },
   {
     "name": "Intercontinental Exchange",
     "city": "Atlanta, Georgia",
     "walletAddress": "d3x_MWtQDFWwp1H9nk2VEPfZx6Es1r8zbw",
-    "d3xBalance": 7340.96
+    "d3xBalance": 469067.66
   },
   {
     "name": "Charles Schwab",
     "city": "Westlake, Texas",
     "walletAddress": "d3x_H7nbumB4byehtrwWxyFnzJnLdZkV9X",
-    "d3xBalance": 202.29
+    "d3xBalance": 413544.21
   },
   {
     "name": "Interactive Brokers",
     "city": "Greenwich, Connecticut",
     "walletAddress": "d3x_EjEokr8oNCrYoFtavmy1jKVPPt4H4A",
-    "d3xBalance": 5518.55
+    "d3xBalance": 348667.31
   },
   {
     "name": "Robinhood",
     "city": "Menlo Park, California",
     "walletAddress": "d3x_D6Vn6CB4z6f53iRFcvvd2qYKPaLAmF",
-    "d3xBalance": 4119.3
+    "d3xBalance": 81266.64
   },
   {
     "name": "Coinbase",
     "city": "Remote (HQ Denver ops)",
     "walletAddress": "d3x_9GSoX7L2Aei1J1jAuAY7o6FUeTaWdt",
-    "d3xBalance": 369.32
+    "d3xBalance": 71546.68
   },
   {
     "name": "Marathon Digital",
     "city": "Fort Lauderdale, Florida",
     "walletAddress": "d3x_Rmho1d4yRLGFX9BR2JDutbaj2Yo1t3",
-    "d3xBalance": 5390.98
+    "d3xBalance": 23939.55
   },
   {
     "name": "Riot Platforms",
     "city": "Castle Rock, Colorado",
     "walletAddress": "d3x_2x3socpx4UspV1KUwRBVt1aPgB6Ek4",
-    "d3xBalance": 10448.69
+    "d3xBalance": 399469.04
   },
   {
     "name": "CleanSpark",
     "city": "Henderson, Nevada",
     "walletAddress": "d3x_aJFM5ipU7YsKh8vaEjeqYhi3uP7TCv",
-    "d3xBalance": 9281.36
+    "d3xBalance": 121976.09
   },
   {
     "name": "Core Scientific",
     "city": "Austin, Texas",
     "walletAddress": "d3x_LpmSeUg3RVT5YmCRoPiumeUfht9Tcz",
-    "d3xBalance": 4563.51
+    "d3xBalance": 124622.99
   },
   {
     "name": "ConocoPhillips",
     "city": "Houston, Texas",
     "walletAddress": "d3x_QMqyTqnhREB4RHNL4YPLyxB4Wco9WJ",
-    "d3xBalance": 341.73
+    "d3xBalance": 416106.75
   },
   {
     "name": "ExxonMobil",
     "city": "Irving, Texas",
     "walletAddress": "d3x_As66c1PwqiVwJQGRa91vR1QFrb299e",
-    "d3xBalance": 190.11
+    "d3xBalance": 352171.03
   },
   {
     "name": "Chevron",
     "city": "San Ramon, California",
     "walletAddress": "d3x_1NaqSMLsojMAG7S7eoPw9CicEQsAAE",
-    "d3xBalance": 6029.07
+    "d3xBalance": 375290.18
   },
   {
     "name": "Occidental Petroleum",
     "city": "Houston, Texas",
     "walletAddress": "d3x_k3oPa3x4mr6K3BiB1qQWr5LV7tMyGX",
-    "d3xBalance": 10529.26
+    "d3xBalance": 378960.71
   },
   {
     "name": "EOG Resources",
     "city": "Houston, Texas",
     "walletAddress": "d3x_bBg9WAcg1msmKV5Agu397U6uniGMZv",
-    "d3xBalance": 693.24
+    "d3xBalance": 284589.4
   },
   {
     "name": "Devon Energy",
     "city": "Oklahoma City, Oklahoma",
     "walletAddress": "d3x_qhT4ZUQ6F9qY4825w5cY7JQAzM9v6J",
-    "d3xBalance": 2418.87
+    "d3xBalance": 277515.28
   },
   {
     "name": "Pioneer Natural Resources",
     "city": "Irving, Texas",
     "walletAddress": "d3x_DyqYRpbUqbLyYinjLAecWKdjfNcKkz",
-    "d3xBalance": 1160.46
+    "d3xBalance": 209963.97
   },
   {
     "name": "Schlumberger",
     "city": "Houston, Texas",
     "walletAddress": "d3x_gnT46TEnissEin38L97shwTkJU9yv6",
-    "d3xBalance": 5796.35
+    "d3xBalance": 444806.57
   },
   {
     "name": "Halliburton",
     "city": "Houston, Texas",
     "walletAddress": "d3x_TpwhioiMgjKRjb6UgwvnxnwN3679vZ",
-    "d3xBalance": 7701.73
+    "d3xBalance": 293171.27
   },
   {
     "name": "Baker Hughes",
     "city": "Houston, Texas",
     "walletAddress": "d3x_ANgTqMytSjNfCtujE4QV3mtaAifYcY",
-    "d3xBalance": 1658.02
+    "d3xBalance": 210025.74
   },
   {
     "name": "Saudi Aramco",
     "city": "Dhahran",
     "walletAddress": "d3x_Wx4XwgDvejvX15Shcjot1EGCkzSfxw",
-    "d3xBalance": 416.26
+    "d3xBalance": 109414.54
   },
   {
     "name": "PetroChina",
     "city": "Beijing",
     "walletAddress": "d3x_G3wYr6NDodSzCZhZmaoGFUeFHfh9C2",
-    "d3xBalance": 4867.02
+    "d3xBalance": 161165.48
   },
   {
     "name": "Sinopec",
     "city": "Beijing",
     "walletAddress": "d3x_DZBab1V9y39i1wdQ5KLeCmAnJx8N9c",
-    "d3xBalance": 200.35
+    "d3xBalance": 53421.45
   },
   {
     "name": "CNOOC",
     "city": "Beijing",
     "walletAddress": "d3x_KijCf9jKqbrDtTbXYN7SXZ6fPwYDci",
-    "d3xBalance": 11128.17
+    "d3xBalance": 96460.92
   },
   {
     "name": "Equinor",
     "city": "Stavanger",
     "walletAddress": "d3x_L8vM3WeCPNnzoCYM1DtzHotqjMRb6M",
-    "d3xBalance": 10405.18
+    "d3xBalance": 338877.74
   },
   {
     "name": "Shell",
     "city": "London",
     "walletAddress": "d3x_JKxmv7Wd1zTSFMFP1D3wLycJJYMubj",
-    "d3xBalance": 222.83
+    "d3xBalance": 60385.61
   },
   {
     "name": "BP",
     "city": "London",
     "walletAddress": "d3x_vZaVmQxyJcjQZrZUoKKjoCPjjHsoX7",
-    "d3xBalance": 2438.48
+    "d3xBalance": 45055.83
   },
   {
     "name": "Eni",
     "city": "Rome",
     "walletAddress": "d3x_E29FT7JX3WH43YzpECN6339fQ5vNYR",
-    "d3xBalance": 9408.5
+    "d3xBalance": 68902.31
   },
   {
     "name": "Woodside Energy",
     "city": "Perth",
     "walletAddress": "d3x_q1f6r9iEQeZz1DzL2SXqxH1pGJHVX8",
-    "d3xBalance": 2992.47
+    "d3xBalance": 226043.6
   },
   {
     "name": "Santos",
     "city": "Adelaide",
     "walletAddress": "d3x_BavKFu9ZYo74oyBXNiEKPFBSidZXNn",
-    "d3xBalance": 201.78
+    "d3xBalance": 159248.41
   },
   {
     "name": "Newmont",
     "city": "Denver, Colorado",
     "walletAddress": "d3x_LMWKip3dHtoPkkZsbvbDH2avFKGMn2",
-    "d3xBalance": 9046.13
+    "d3xBalance": 313827.58
   },
   {
     "name": "Barrick Gold",
     "city": "Toronto",
     "walletAddress": "d3x_8pJis7TAJJ197W9ir9gBAHq4TG7XvW",
-    "d3xBalance": 2295.38
+    "d3xBalance": 52975.36
   },
   {
     "name": "Agnico Eagle Mines",
     "city": "Toronto",
     "walletAddress": "d3x_Ro5mpxSFQtpgLFk5sViaC6Q8Zdh3XZ",
-    "d3xBalance": 466.62
+    "d3xBalance": 273223.8
   },
   {
     "name": "Zijin Mining",
     "city": "Longyan",
     "walletAddress": "d3x_x7xbHywLUapEuGFFLiyLp3BcdGbUue",
-    "d3xBalance": 4048.38
+    "d3xBalance": 402613.21
   },
   {
     "name": "Southern Copper",
     "city": "Phoenix, Arizona",
     "walletAddress": "d3x_8XwSJuCqCvvoAYGJVpX81H6nTGofww",
-    "d3xBalance": 1222.72
+    "d3xBalance": 298537.72
   },
   {
     "name": "Freeport-McMoRan",
     "city": "Phoenix, Arizona",
     "walletAddress": "d3x_Scf4361bRkSNviNSVv4V5HtxmjtEFC",
-    "d3xBalance": 1911.27
+    "d3xBalance": 56518.46
   },
   {
     "name": "Glencore",
     "city": "Baar",
     "walletAddress": "d3x_VmELDVwVGfCYFBaXUyLyUvnegZb7sw",
-    "d3xBalance": 2449.47
+    "d3xBalance": 67750.93
   },
   {
     "name": "Anglo American",
     "city": "London",
     "walletAddress": "d3x_jqaKaWxVFDnFcgVqebfasrjut4EcVY",
-    "d3xBalance": 7019.49
+    "d3xBalance": 198600.67
   },
   {
     "name": "Fortescue",
     "city": "Perth",
     "walletAddress": "d3x_KPmX4VUKxBWavRUYfQrAr7G23aEa3A",
-    "d3xBalance": 939.17
+    "d3xBalance": 366015.15
   },
   {
     "name": "Vale",
     "city": "Rio de Janeiro",
     "walletAddress": "d3x_1xL7PRer7eN7xCX5RP1TMaGkRKz7sx",
-    "d3xBalance": 8447.95
+    "d3xBalance": 407253.69
   },
   {
     "name": "Procter & Gamble",
     "city": "Cincinnati, Ohio",
     "walletAddress": "d3x_opyrYKTend1TEK1ntoHcAtTd8zDm9V",
-    "d3xBalance": 905.79
+    "d3xBalance": 102653.08
   },
   {
     "name": "Unilever",
     "city": "London",
     "walletAddress": "d3x_1veEiV42vfULw92LZkBwJGoW4Huo7m",
-    "d3xBalance": 8492.24
+    "d3xBalance": 182588.88
   },
   {
     "name": "Colgate-Palmolive",
     "city": "New York, New York",
     "walletAddress": "d3x_MyDvAJ6YHWgauzndwfqaXiQK49dpnH",
-    "d3xBalance": 1515.11
+    "d3xBalance": 12493.21
   },
   {
     "name": "Kimberly-Clark",
     "city": "Irving, Texas",
     "walletAddress": "d3x_hdFVfjZAhvv6vZk1H23YYdtGmrsokF",
-    "d3xBalance": 7800.94
+    "d3xBalance": 74940.07
   },
   {
     "name": "Estée Lauder",
     "city": "New York, New York",
     "walletAddress": "d3x_c83sfkJmQRB6vgDKz8SxGazLGHHcyo",
-    "d3xBalance": 8552.2
+    "d3xBalance": 104852.45
   },
   {
     "name": "Coca-Cola",
     "city": "Atlanta, Georgia",
     "walletAddress": "d3x_ZmLzPzXzRcbbWXv4R1SLMxX4epUPvZ",
-    "d3xBalance": 6200.72
+    "d3xBalance": 90825.6
   },
   {
     "name": "PepsiCo",
     "city": "Purchase, New York",
     "walletAddress": "d3x_DBSfPuoNxdcHzV1HybmGCfVZyymp8k",
-    "d3xBalance": 9446.56
+    "d3xBalance": 4555.08
   },
   {
     "name": "Monster Beverage",
     "city": "Corona, California",
     "walletAddress": "d3x_3bJMmfJsPKvyKhbaoQnbz3kE9kNcCH",
-    "d3xBalance": 3198.12
+    "d3xBalance": 393482.94
   },
   {
     "name": "Keurig Dr Pepper",
     "city": "Burlington, Massachusetts",
     "walletAddress": "d3x_tYLh4uqpzMc6A8ikSgfnTSwP4BdJz5",
-    "d3xBalance": 36.91
+    "d3xBalance": 489559.7
   },
   {
     "name": "Diageo",
     "city": "London",
     "walletAddress": "d3x_9DDS1ce3KG6zghtRQVVKjzsa3QUfq2",
-    "d3xBalance": 3271.66
+    "d3xBalance": 234676.68
   },
   {
     "name": "Anheuser-Busch InBev",
     "city": "Leuven",
     "walletAddress": "d3x_ZZnUJTQq8nxWcMvdAXnbZFdCcCREQ9",
-    "d3xBalance": 5387.83
+    "d3xBalance": 49102.11
   },
   {
     "name": "Heineken",
     "city": "Amsterdam",
     "walletAddress": "d3x_xHqX9vETbp3R9c2L3fHE8z43aec5hU",
-    "d3xBalance": 3538.27
+    "d3xBalance": 165858.74
   },
   {
     "name": "Constellation Brands",
     "city": "Victor, New York",
     "walletAddress": "d3x_NGBkv9dSPPFb2eofktWTX8BwbJCcH6",
-    "d3xBalance": 5241.65
+    "d3xBalance": 348246.84
   },
   {
     "name": "Philip Morris International",
     "city": "Stamford, Connecticut",
     "walletAddress": "d3x_ubfE9vafByz681WC3vBRRFtpbUjMBd",
-    "d3xBalance": 10478.27
+    "d3xBalance": 393344.66
   },
   {
     "name": "Altria Group",
     "city": "Richmond, Virginia",
     "walletAddress": "d3x_6VXx8mNv7FTtsLGuUBeH46msFmKWLS",
-    "d3xBalance": 131.29
+    "d3xBalance": 295302.41
   },
   {
     "name": "British American Tobacco",
     "city": "London",
     "walletAddress": "d3x_RzZKQvFzFkmzMYmjmz7gr8nnpmdmJG",
-    "d3xBalance": 3883.68
+    "d3xBalance": 125072.82
   },
   {
     "name": "Imperial Brands",
     "city": "Bristol",
     "walletAddress": "d3x_QBhecGver8Hqv155CmxxbBFUF1XodH",
-    "d3xBalance": 2674.1
+    "d3xBalance": 139989.42
   },
   {
     "name": "Johnson & Johnson",
     "city": "New Brunswick, New Jersey",
     "walletAddress": "d3x_rWsH772VhFT7vtSBYVEQt25fWNrfWg",
-    "d3xBalance": 343.86
+    "d3xBalance": 408391.42
   },
   {
     "name": "Merck & Co.",
     "city": "Rahway, New Jersey",
     "walletAddress": "d3x_4W3JNPMGWzx8nZHVFedoTNCpH4p85H",
-    "d3xBalance": 10122.92
+    "d3xBalance": 407929.97
   },
   {
     "name": "Pfizer",
     "city": "New York, New York",
     "walletAddress": "d3x_hjfano5aodJUmmH7sdwjGqD8QWMcLF",
-    "d3xBalance": 8760.86
+    "d3xBalance": 36653.92
   },
   {
     "name": "AbbVie",
     "city": "North Chicago, Illinois",
     "walletAddress": "d3x_6FaaaBbdAzeQQsamnWgPR9KC9FMV3G",
-    "d3xBalance": 183.71
+    "d3xBalance": 459859.56
   },
   {
     "name": "Bristol-Myers Squibb",
     "city": "New York, New York",
     "walletAddress": "d3x_NrhusRmnCEjw7opsjsYpGRtnTR5siZ",
-    "d3xBalance": 633.62
+    "d3xBalance": 18682.06
   },
   {
     "name": "Eli Lilly",
     "city": "Indianapolis, Indiana",
     "walletAddress": "d3x_4ymSwT4RB4v8aDJfFE1GsHs5Gbyjza",
-    "d3xBalance": 113.72
+    "d3xBalance": 301414.36
   },
   {
     "name": "AstraZeneca",
     "city": "Cambridge",
     "walletAddress": "d3x_rgxncxACyKi4xNh3JWNbhKkdPGvSig",
-    "d3xBalance": 8860.33
+    "d3xBalance": 70155.8
   },
   {
     "name": "Sanofi",
     "city": "Paris",
     "walletAddress": "d3x_A5Rw8xgjX3j22UHX7Np66pwUK2XyZZ",
-    "d3xBalance": 363.2
+    "d3xBalance": 362257.46
   },
   {
     "name": "Roche",
     "city": "Basel",
     "walletAddress": "d3x_Sg9eHU23gUG14jSpDg1SSz6JU8qeqC",
-    "d3xBalance": 7594.5
+    "d3xBalance": 99422.24
   },
   {
     "name": "GlaxoSmithKline (GSK)",
     "city": "Brentford",
     "walletAddress": "d3x_1w9ugfnuRcgxHLHr5jLRbHmGrdU2QK",
-    "d3xBalance": 397.74
+    "d3xBalance": 187605.38
   },
   {
     "name": "Takeda Pharmaceutical",
     "city": "Tokyo",
     "walletAddress": "d3x_t1Hs9nPZYWqiJPHREajinZzRfRDwho",
-    "d3xBalance": 1570.39
+    "d3xBalance": 137250.79
   },
   {
     "name": "Daiichi Sankyo",
     "city": "Tokyo",
     "walletAddress": "d3x_fvxsDaX5YzCtmG7QjNncBNyZ9PMx26",
-    "d3xBalance": 341.86
+    "d3xBalance": 355452.67
   },
   {
     "name": "Walmart",
     "city": "Bentonville, Arkansas",
     "walletAddress": "d3x_MSma1eDN8gt24i1s5uXyDqxkivw6sX",
-    "d3xBalance": 8731.38
+    "d3xBalance": 101514.6
   },
   {
     "name": "Costco Wholesale",
     "city": "Issaquah, Washington",
     "walletAddress": "d3x_ep9iByhgbWhcYSD9tUHowmPfnmYzHh",
-    "d3xBalance": 6807.04
+    "d3xBalance": 364371.33
   },
   {
     "name": "Target",
     "city": "Minneapolis, Minnesota",
     "walletAddress": "d3x_Sf2yqqQW4UCRL3JffJDJ1rBpLrKgKW",
-    "d3xBalance": 36.85
+    "d3xBalance": 321423.08
   },
   {
     "name": "Home Depot",
     "city": "Atlanta, Georgia",
     "walletAddress": "d3x_EzQuTKC1ap9V14GSPBsPYf7Wx5q8X7",
-    "d3xBalance": 2456.35
+    "d3xBalance": 194677.32
   },
   {
     "name": "Lowe's",
     "city": "Mooresville, North Carolina",
     "walletAddress": "d3x_aBNtGei3Lnnrmu1R4HPX6dwUTW75LB",
-    "d3xBalance": 871.66
+    "d3xBalance": 352369.13
   },
   {
     "name": "TJX Companies",
     "city": "Framingham, Massachusetts",
     "walletAddress": "d3x_xTNoSfNfxXJscC746xbcPTPKCBMwTZ",
-    "d3xBalance": 9131.05
+    "d3xBalance": 244404.02
   },
   {
     "name": "Ross Stores",
     "city": "Dublin, California",
     "walletAddress": "d3x_iqxbJgjk5wG9pwYv4yFjivWYewsvhh",
-    "d3xBalance": 129.71
+    "d3xBalance": 373260.29
   },
   {
     "name": "Dollar General",
     "city": "Goodlettsville, Tennessee",
     "walletAddress": "d3x_Ys1zMczjZ7Dstf1CoQcqamRjq3fLQY",
-    "d3xBalance": 5535.81
+    "d3xBalance": 216893.45
   },
   {
     "name": "Dollar Tree",
     "city": "Chesapeake, Virginia",
     "walletAddress": "d3x_3xPNAvDGA7WzFwZtqG8vpipKFCsma1",
-    "d3xBalance": 5048.56
+    "d3xBalance": 190259.68
   },
   {
     "name": "Alibaba",
     "city": "Hangzhou",
     "walletAddress": "d3x_jyZmjGs5FYpggeWYcEaAfycBY2sLyq",
-    "d3xBalance": 7399.68
+    "d3xBalance": 5164.46
   },
   {
     "name": "Tencent",
     "city": "Shenzhen",
     "walletAddress": "d3x_HSKGRitjrBPSPoWRKpmtyExBsbHv1U",
-    "d3xBalance": 8692.69
+    "d3xBalance": 95975.05
   },
   {
     "name": "ICBC",
     "city": "Beijing",
     "walletAddress": "d3x_772nix1uGWhXa4MWwXK8fjacbTodXP",
-    "d3xBalance": 21.74
+    "d3xBalance": 436884.69
   },
   {
     "name": "China Construction Bank",
     "city": "Beijing",
     "walletAddress": "d3x_hC69X3x4swqqLo5gtDhr8zUPLLVTrx",
-    "d3xBalance": 8460.64
+    "d3xBalance": 381204.5
   },
   {
     "name": "Agricultural Bank of China",
     "city": "Beijing",
     "walletAddress": "d3x_hg3QFzDcicD7omhwPD44ucby9QUEG4",
-    "d3xBalance": 1203.21
+    "d3xBalance": 367638.15
   },
   {
     "name": "Bank of China",
     "city": "Beijing",
     "walletAddress": "d3x_cMGJWtDW24s85hbAogAM6dGMAdrQiq",
-    "d3xBalance": 8104.98
+    "d3xBalance": 451355.83
   },
   {
     "name": "JPMorgan Chase",
     "city": "New York, New York",
     "walletAddress": "d3x_uWf1UCYMixvmKT87LRTV2tYoevTGSh",
-    "d3xBalance": 11650.91
+    "d3xBalance": 407695.96
   },
   {
     "name": "Bank of America",
     "city": "Charlotte, North Carolina",
     "walletAddress": "d3x_eHUh1XiZLCRDJUQwDHcD7PjoE7nfWg",
-    "d3xBalance": 10015.85
+    "d3xBalance": 246252.22
   },
   {
     "name": "Wells Fargo",
     "city": "San Francisco, California",
     "walletAddress": "d3x_PeWk3b6tXfYDFydWsKRgjEqPyUAdNj",
-    "d3xBalance": 1790.28
+    "d3xBalance": 173075.96
   },
   {
     "name": "Citigroup",
     "city": "New York, New York",
     "walletAddress": "d3x_RbmE3ozh6VYpYdJrWwNjr1UHjqkW91",
-    "d3xBalance": 930.08
+    "d3xBalance": 515.93
   },
   {
     "name": "Royal Bank of Canada",
     "city": "Toronto",
     "walletAddress": "d3x_X9ErZg2t18sAPDu2Dz6WheQwUiMLE1",
-    "d3xBalance": 3228.8
+    "d3xBalance": 67647.11
   },
   {
     "name": "Toronto-Dominion Bank",
     "city": "Toronto",
     "walletAddress": "d3x_ic5Yv7YB7UqNmv56k2p7QvdqUCRpLi",
-    "d3xBalance": 3665.6
+    "d3xBalance": 421954.93
   },
   {
     "name": "HDFC Bank",
     "city": "Mumbai",
     "walletAddress": "d3x_vNiesNeD3PT3hH4yz2s2FQmp3tJhsz",
-    "d3xBalance": 5096.36
+    "d3xBalance": 265133.63
   },
   {
     "name": "State Bank of India",
     "city": "Mumbai",
     "walletAddress": "d3x_SDdBqwGyHTqq2v8JQNyHHB2LwE9mp6",
-    "d3xBalance": 56.58
+    "d3xBalance": 444390.51
   },
   {
     "name": "DBS Group",
     "city": "Singapore",
     "walletAddress": "d3x_5cH6XHt5RUyePo1NgAhidbfQzomkGW",
-    "d3xBalance": 4774.79
+    "d3xBalance": 15782.97
   },
   {
     "name": "Commonwealth Bank of Australia",
     "city": "Sydney",
     "walletAddress": "d3x_s4MAzFZLTwvdbKP1vDSMpdz7ckqWak",
-    "d3xBalance": 6872.16
+    "d3xBalance": 24350.19
   },
   {
     "name": "UBS Group",
     "city": "Zurich",
     "walletAddress": "d3x_cCeCEXAnL818UnaH8JKscf4vGxhPwL",
-    "d3xBalance": 6.27
+    "d3xBalance": 219887.45
   },
   {
     "name": "Allianz",
     "city": "Munich",
     "walletAddress": "d3x_tiF82LtSu6u7yxATdnRLftFjhvDj8b",
-    "d3xBalance": 4778.42
+    "d3xBalance": 265163.79
   },
   {
     "name": "AXA",
     "city": "Paris",
     "walletAddress": "d3x_yycHnrcxmL73cbESRBYKGaNLEpq4hy",
-    "d3xBalance": 4042.78
+    "d3xBalance": 189871.76
   },
   {
     "name": "Zurich Insurance",
     "city": "Zurich",
     "walletAddress": "d3x_hZuETrYxFKUpiP4bRjUqnxZ2VWM6X1",
-    "d3xBalance": 719.87
+    "d3xBalance": 89857.01
   },
   {
     "name": "Berkshire Hathaway",
     "city": "Omaha, Nebraska",
     "walletAddress": "d3x_WNDgttgwqUQXGDMVTbs1GX6Mv22nWN",
-    "d3xBalance": 291.06
+    "d3xBalance": 359802.59
   },
   {
     "name": "Meta Platforms",
     "city": "Menlo Park, California",
     "walletAddress": "d3x_DBpwDy7KaJddenDffNZoFWiC6VtCdD",
-    "d3xBalance": 9267.1
+    "d3xBalance": 269925.64
   },
   {
     "name": "Tesla",
     "city": "Austin, Texas",
     "walletAddress": "d3x_TtMTcYMXrHxGG3XoZDrx5T7WMQizRD",
-    "d3xBalance": 125.86
+    "d3xBalance": 37105.72
   },
   {
     "name": "Netflix",
     "city": "Los Gatos, California",
     "walletAddress": "d3x_NUtwCes6yunzwse6VyUEbznLMjFLZd",
-    "d3xBalance": 6311.49
+    "d3xBalance": 381092.25
   },
   {
     "name": "Walt Disney",
     "city": "Burbank, California",
     "walletAddress": "d3x_QrxoT9r5NToovfJDvfX5VqY6UZA59C",
-    "d3xBalance": 2354.45
+    "d3xBalance": 175436.3
   },
   {
     "name": "Comcast",
     "city": "Philadelphia, Pennsylvania",
     "walletAddress": "d3x_spSha4pWr98nTxHSwC7tpey2Ja4oJk",
-    "d3xBalance": 4246.01
+    "d3xBalance": 480334.95
   },
   {
     "name": "Warner Bros. Discovery",
     "city": "New York, New York",
     "walletAddress": "d3x_dBwdU7HdF1QtmDEQMrgLUa5L97kiWA",
-    "d3xBalance": 226.07
+    "d3xBalance": 264243.85
   },
   {
     "name": "Paramount Global",
     "city": "New York, New York",
     "walletAddress": "d3x_FiXVfxrE51nNs1cJVkcFpnm2iow3s5",
-    "d3xBalance": 1198.34
+    "d3xBalance": 187156.11
   },
   {
     "name": "Verizon Communications",
     "city": "New York, New York",
     "walletAddress": "d3x_bapgLSHeRckZQyPfq8nc4tCiKiz13f",
-    "d3xBalance": 1799.56
+    "d3xBalance": 385158.4
   },
   {
     "name": "AT&T",
     "city": "Dallas, Texas",
     "walletAddress": "d3x_v5QyvSmiixFLQBuSRUbcGnvTnKsXJL",
-    "d3xBalance": 5768.47
+    "d3xBalance": 407822.35
   },
   {
     "name": "T-Mobile US",
     "city": "Bellevue, Washington",
     "walletAddress": "d3x_xDJCr7sz9LfqSwiZiwYTiDtEfjmsZC",
-    "d3xBalance": 62.09
+    "d3xBalance": 424242.42
   },
   {
     "name": "Orange",
     "city": "Paris",
     "walletAddress": "d3x_MBCh14RcSg2eD8LpTfcArfoQhHrRka",
-    "d3xBalance": 8331.21
+    "d3xBalance": 485943.97
   },
   {
     "name": "Vodafone",
     "city": "Newbury",
     "walletAddress": "d3x_NmeM1u61uVwQtcVw7XW1toEtUKEiQf",
-    "d3xBalance": 3458.51
+    "d3xBalance": 386715.63
   },
   {
     "name": "América MóvilMexico",
     "city": "City",
     "walletAddress": "d3x_5ZhMJzGx2HLvLHsXwcx34gQVxPvkk7",
-    "d3xBalance": 11565.63
+    "d3xBalance": 290856.95
   },
   {
     "name": "Bharti Airtel",
     "city": "New Delhi",
     "walletAddress": "d3x_U2NTgnkH61yEnJinUP4FNUwSpfWQ7S",
-    "d3xBalance": 4418.29
+    "d3xBalance": 123415.98
   },
   {
     "name": "Saudi Telecom",
     "city": "Riyadh",
     "walletAddress": "d3x_DnG2mCA11r1KBUrUhCiZVXFvwwc5Ym",
-    "d3xBalance": 743.67
+    "d3xBalance": 402597.08
   },
   {
     "name": "NVIDIA",
     "city": "Santa Clara, California",
     "walletAddress": "d3x_Bo78WmFcWr8n9tejyCib2soAonUrqg",
-    "d3xBalance": 6730.12
+    "d3xBalance": 336235.54
   },
   {
     "name": "Apple",
     "city": "Cupertino, California",
     "walletAddress": "d3x_Yoh43gBZXkGsP1zT4jsKofzmrah9Jr",
-    "d3xBalance": 9062.94
+    "d3xBalance": 398446.36
   },
   {
     "name": "Alphabet",
     "city": "Mountain View, California",
     "walletAddress": "d3x_XR3xuTqxPEtyskxhBzMZ48mNNW6uZj",
-    "d3xBalance": 11562.24
+    "d3xBalance": 69847.42
   },
   {
     "name": "Microsoft",
     "city": "Redmond, Washington",
     "walletAddress": "d3x_8r9W2AcvomwRyuBVk8F1JHgPSquWSj",
-    "d3xBalance": 493.8
+    "d3xBalance": 174518.28
   },
   {
     "name": "Amazon",
     "city": "Seattle, Washington",
     "walletAddress": "d3x_vrQhzpVmT5w1HNPLnqcpdZMNr3wVXh",
-    "d3xBalance": 4011.51
+    "d3xBalance": 265253.14
   },
   {
     "name": "Broadcom",
     "city": "San Jose, California",
     "walletAddress": "d3x_GR7jL8Re5k4WyFFGh8E5odG4DsFKF3",
-    "d3xBalance": 11672.93
+    "d3xBalance": 14746.09
   },
   {
     "name": "Eli Lilly",
     "city": "Indianapolis, Indiana",
     "walletAddress": "d3x_uE5tB6bvnQTBzN7nQB4AeUVVwjdXn7",
-    "d3xBalance": 817.92
+    "d3xBalance": 206742.41
   },
   {
     "name": "Oracle",
     "city": "Austin, Texas",
     "walletAddress": "d3x_UBjXnM4S1fnDS9wQTE4yDWy8UZs7AF",
-    "d3xBalance": 2779.83
+    "d3xBalance": 379011.24
   },
   {
     "name": "Salesforce",
     "city": "San Francisco, California",
     "walletAddress": "d3x_KTbDvgPcwqg93dhcQg7DqL9Y31o1cB",
-    "d3xBalance": 2713.91
+    "d3xBalance": 282135.39
   },
   {
     "name": "Thermo Fisher Scientific",
     "city": "Waltham, Massachusetts",
     "walletAddress": "d3x_DVmntTEJ54ioz1dezXfE9DFJQi8Qgg",
-    "d3xBalance": 2524.72
+    "d3xBalance": 438519.89
   },
   {
     "name": "Danaher",
     "city": "Washington, D.C.",
     "walletAddress": "d3x_25pKKoifmgA8g7qG4X4ag4knE1ybhc",
-    "d3xBalance": 2026.87
+    "d3xBalance": 112977.11
   },
   {
     "name": "Abbott Laboratories",
     "city": "Abbott Park, Illinois",
     "walletAddress": "d3x_uDWWoNzyDx2yti9DdgyAJsABvFwCHY",
-    "d3xBalance": 5126.45
+    "d3xBalance": 424412.44
   },
   {
     "name": "NextEra Energy",
     "city": "Juno Beach, Florida",
     "walletAddress": "d3x_uG5qvHukyx8YbQzLTwi5NC1ievLoLa",
-    "d3xBalance": 11574.07
+    "d3xBalance": 417000.37
   },
   {
     "name": "Southern Company",
     "city": "Atlanta, Georgia",
     "walletAddress": "d3x_2ihxmQieKYErRjRJCE8Mfc1kUcBbzu",
-    "d3xBalance": 11591.7
+    "d3xBalance": 417994.05
   },
   {
     "name": "Duke Energy",
     "city": "Charlotte, North Carolina",
     "walletAddress": "d3x_bAJsddc1EJ2zs6NoArB71XCGy3H4LJ",
-    "d3xBalance": 1391.67
+    "d3xBalance": 377339.27
   },
   {
     "name": "Iberdrola",
     "city": "Bilbao",
     "walletAddress": "d3x_WyLVEN5hcN7nPzZNX7iJptvhc2Jjfa",
-    "d3xBalance": 2906.72
+    "d3xBalance": 123102.95
   },
   {
     "name": "Enbridge",
     "city": "Calgary",
     "walletAddress": "d3x_3y89fBjFM12rSKg9rddegRb4PTqSrd",
-    "d3xBalance": 82.81
+    "d3xBalance": 164004.2
   },
   {
     "name": "TransCanada (TC Energy)",
     "city": "Calgary",
     "walletAddress": "d3x_VUFi4MjaUSBg1qRKQEf2KZZwDovJYp",
-    "d3xBalance": 3203.06
+    "d3xBalance": 269337.1
   },
   {
     "name": "Kinder Morgan",
     "city": "Houston, Texas",
     "walletAddress": "d3x_VvN1UXmYbfNiwrHgZSXHyEmxJ3THYT",
-    "d3xBalance": 10362.08
+    "d3xBalance": 128015.81
   },
   {
     "name": "Williams Companies",
     "city": "Tulsa, Oklahoma",
     "walletAddress": "d3x_z7RfhCqyckma35CK9rD6Nz2QQDDuq5",
-    "d3xBalance": 5643.14
+    "d3xBalance": 61209.04
   },
   {
     "name": "ONEOK",
     "city": "Tulsa, Oklahoma",
     "walletAddress": "d3x_MKMkzLXM3XUhnajkV5P2fNxT25g4tk",
-    "d3xBalance": 12.93
+    "d3xBalance": 490210.02
   },
   {
     "name": "Enterprise Products Partners",
     "city": "Houston, Texas",
     "walletAddress": "d3x_QUGzTvLX7SaM1jbpRNBeni3kV28WJc",
-    "d3xBalance": 27.71
+    "d3xBalance": 404817.64
   },
   {
     "name": "Energy Transfer",
     "city": "Dallas, Texas",
     "walletAddress": "d3x_2uK19sKqznmTArScjuxz32MzDoz4Ee",
-    "d3xBalance": 2609.44
+    "d3xBalance": 249998.06
   },
   {
     "name": "Plains All American Pipeline",
     "city": "Houston, Texas",
     "walletAddress": "d3x_ZPrna3V3UkoPjdpbQxpoDLgrWTggxG",
-    "d3xBalance": 4237.56
+    "d3xBalance": 109479.47
   },
   {
     "name": "Cheniere Energy",
     "city": "Houston, Texas",
     "walletAddress": "d3x_N2p3ocrm3zrV46ahkAAkKUbrBfkJqx",
-    "d3xBalance": 0
+    "d3xBalance": 296446.86
   },
   {
     "name": "Sempra Energy",
     "city": "San Diego, California",
     "walletAddress": "d3x_mtNtWhU5Z3HadKCq3VUzPT6QPH8o7t",
-    "d3xBalance": 8727.81
+    "d3xBalance": 189752.41
   }
 ]
