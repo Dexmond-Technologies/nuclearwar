@@ -4643,66 +4643,71 @@ function initWorldBank() {
 initWorldBank();
 
 function initDexmondHub() {
-  const hubColor = 0xffffff; 
-  const mat = new THREE.MeshPhongMaterial({ color: hubColor, shininess: 50, specular: 0x555555 });
-  const roofMat = new THREE.MeshPhongMaterial({ color: 0x00aaff, shininess: 10 }); // Blue roof
-
   const building = new THREE.Group();
 
-  // 1. Base (Steps)
-  const baseGeo = new THREE.BoxGeometry(0.18, 0.02, 0.12);
-  const base = new THREE.Mesh(baseGeo, mat);
-  base.position.y = 0.01;
-  building.add(base);
-  
-  const base2Geo = new THREE.BoxGeometry(0.16, 0.02, 0.1);
-  const base2 = new THREE.Mesh(base2Geo, mat);
-  base2.position.y = 0.03;
-  building.add(base2);
+  // Create the 2D 'D' Shape
+  const shape = new THREE.Shape();
+  shape.moveTo(0, -0.15); // Bottom Left tail
+  shape.lineTo(0, 0.15);  // Top Left tail
+  shape.lineTo(0.1, 0.15); // Top straight start of curve
+  // Outer bezier curve forming the rounded front of the D
+  shape.quadraticCurveTo(0.25, 0.15, 0.25, 0); 
+  shape.quadraticCurveTo(0.25, -0.15, 0.1, -0.15);
+  shape.lineTo(0, -0.15); // Connect back to bottom left
 
-  // 2. Columns
-  for(let x=-0.06; x<=0.06; x+=0.04) {
-    for(let z=-0.035; z<=0.035; z+=0.07) {
-      const colGeo = new THREE.CylinderGeometry(0.006, 0.006, 0.08, 16);
-      const col = new THREE.Mesh(colGeo, mat);
-      col.position.set(x, 0.08, z);
-      building.add(col);
-    }
-  }
+  // Hollow out the center of the 'D'
+  const hole = new THREE.Path();
+  hole.moveTo(0.06, -0.05);
+  hole.lineTo(0.06, 0.05);
+  hole.lineTo(0.1, 0.05);
+  hole.quadraticCurveTo(0.15, 0.05, 0.15, 0);
+  hole.quadraticCurveTo(0.15, -0.05, 0.1, -0.05);
+  hole.lineTo(0.06, -0.05);
+  shape.holes.push(hole);
 
-  // 3. Top Platform
-  const topGeo = new THREE.BoxGeometry(0.16, 0.02, 0.1);
-  const top = new THREE.Mesh(topGeo, mat);
-  top.position.y = 0.13;
-  building.add(top);
+  const extrudeSettings = {
+    depth: 0.1,
+    bevelEnabled: true,
+    bevelSegments: 2,
+    steps: 2,
+    bevelSize: 0.01,
+    bevelThickness: 0.01
+  };
+  const dGeometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
 
-  // 4. Triangular Roof
-  const roofGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.17, 3);
-  const roof = new THREE.Mesh(roofGeo, roofMat);
-  roof.rotation.z = Math.PI / 2;
-  roof.rotation.x = Math.PI / 2; 
-  roof.position.y = 0.17;
-  building.add(roof);
-  
-  const light = new THREE.PointLight(0x00aaff, 5, 3);
-  light.position.set(0, 0.08, 0);
-  building.add(light);
-  
-  // DEXMOND.png Sprite
+  // Center the geometry bounds
+  dGeometry.computeBoundingBox();
+  const box = dGeometry.boundingBox;
+  const xOffset = -0.5 * (box.max.x - box.min.x);
+  const yOffset = -0.5 * (box.max.y - box.min.y);
+  const zOffset = -0.5 * (box.max.z - box.min.z);
+  dGeometry.translate(xOffset, yOffset, zOffset);
+
+  // Apply the DEXMOND.png texture wrapper
   const texLoader = new THREE.TextureLoader();
+  const dMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2, metalness: 0.8 });
+  
   texLoader.load('DEXMOND.png', function(tex) {
-      const spriteMat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
-      const sprite = new THREE.Sprite(spriteMat);
-      sprite.scale.set(0.2, 0.2, 1);
-      sprite.position.set(0, 0.35, 0);
-      building.add(sprite);
+      // Repeat the logo across the geometry organically
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(5, 5); 
+      dMat.map = tex;
+      dMat.needsUpdate = true;
   });
+
+  const dMesh = new THREE.Mesh(dGeometry, dMat);
+  building.add(dMesh);
+
+  // Add an interior blue glow core
+  const glowLight = new THREE.PointLight(0x00aaff, 5, 1);
+  building.add(glowLight);
 
   building.scale.set(1.5, 1.5, 1.5);
 
-  // Position at bottom left of start camera view (approx lat=-20, lon=-80)
-  const lat = -20;
-  const lon = -80;
+  // Position precisely at the user's Micronesia screenshot target
+  const lat = 5;
+  const lon = 150;
   const r = typeof GLOBE_R !== 'undefined' ? GLOBE_R + 0.005 : 1.005;
   const latRad = lat * Math.PI / 180;
   const lonRad = -lon * Math.PI / 180;
@@ -4714,11 +4719,12 @@ function initDexmondHub() {
   );
   
   building.lookAt(new THREE.Vector3(0,0,0));
-  building.rotateX(-Math.PI/2); 
-  
-  // Add to the same group as World Bank or directly to scene
-  window.worldBankGroup.add(building);
-  console.log("Dexmond Hub Initialized.");
+  building.rotateX(Math.PI / 2); // Stand it upright
+  building.rotateY(Math.PI / 2); // Face it outward
+
+  // Add the building directly to the global scene so it ignores conditional skin rendering
+  scene.add(building);
+  console.log("3D Extruded Dexmond Hub Initialized at Micronesia.");
 }
 initDexmondHub();
 
