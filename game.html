@@ -6486,6 +6486,10 @@ let satHackProgress = 0;
 let satHackTimeLeft = 10.0;
 
 function openSatelliteHackMinigame() {
+  if (window.activeSkin === 'green') {
+    setLog(`⚠ SATELLITE HACK IS INCOMPATIBLE WITH GREEN MARKET SKIN. SWITCH TO RED.`);
+    return;
+  }
   document.getElementById('sat-hack-modal').classList.add('show');
   satHackProgress = 0;
   satHackTimeLeft = 10.0;
@@ -8462,6 +8466,11 @@ function executeAttackPreset(type) {
       triggerNewsEvent("ELECTRONIC WARFARE SHATTERS ENEMY COORDINATION");
     }
     else if (type === 15) { // Satellite Hack
+      if (window.activeSkin === 'green') {
+        setLog(`⚠ SATELLITE HACK IS INCOMPATIBLE WITH GREEN MARKET SKIN. SWITCH TO RED.`);
+        GS.players[0].budget += cost; // Refund cost
+        return;
+      }
       if (GS.AI_STATE) GS.AI_STATE.intelligenceLevel = Math.max(1, (GS.AI_STATE.intelligenceLevel || 2) - 1);
       setLog(`✓ SATELLITE HACK SUCCESS: Rainclaude Intelligence permanently reduced. (-$${cost}B)`);
       triggerNewsEvent("ORBITAL RECONNAISSANCE GRID BLINDED VIRTUALLY");
