@@ -13,27 +13,73 @@ require('dotenv').config();
 // Solana Wallet Integration
 const web3 = require('@solana/web3.js');
 const splToken = require('@solana/spl-token');
-const D3X_MINT_ADDRESS = new web3.PublicKey('AGN8SrMCMEgiP1ghvPHa5VRf5rPFDSYVrGFyBGE1Cqpa');
-const solanaConnection = new web3.Connection(web3.clusterApiUrl('mainnet-beta'), 'confirmed');
-let authorityKeypair = null;
-if (process.env.SOLANA_WALLET_PRIVATE_KEY) {
-  try {
-    const secretKeyString = process.env.SOLANA_WALLET_PRIVATE_KEY;
-    // Decode base58
-    const bs58 = require('bs58');
-    const decode = bs58.decode || (bs58.default && bs58.default.decode);
-    const decodedKey = decode(secretKeyString);
-    if (decodedKey.length === 64) {
-      authorityKeypair = web3.Keypair.fromSecretKey(decodedKey);
-    } else {
-      console.error('⚠ Solana Wallet Private Key has incorrect length:', decodedKey.length);
+
+// Custom DEXMOND network support
+const RPC_URL = process.env.DEXMOND_RPC_URL || web3.clusterApiUrl('mainnet-beta');
+const D3X_MINT_ADDRESS = new web3.PublicKey(process.env.DEXMOND_D3X_MINT || 'AGN8SrMCMEgiP1ghvPHa5VRf5rPFDSYVrGFyBGE1Cqpa');
+const solanaConnection = new web3.Connection(RPC_URL, 'confirmed');
+const BURN_ADDRESS = new web3.PublicKey('11111111111111111111111111111111');
+
+const bs58 = require('bs58');
+const decode = bs58.decode || (bs58.default && bs58.default.decode);
+
+function loadKeypairFromEnv(envVarName, label) {
+  if (process.env[envVarName]) {
+    try {
+      const decodedKey = decode(process.env[envVarName]);
+      if (decodedKey.length === 64) {
+        const kp = web3.Keypair.fromSecretKey(decodedKey);
+        console.log(`✅ Solana ${label} Wallet Loaded:`, kp.publicKey.toBase58());
+        return kp;
+      } else {
+        console.error(`⚠ ${label} Private Key has incorrect length:`, decodedKey.length);
+      }
+    } catch(e) {
+      console.error(`⚠ Failed to load ${label} Private Key:`, e.message);
     }
-    if (authorityKeypair) console.log('✅ Solana Authority Wallet Loaded:', authorityKeypair.publicKey.toBase58());
-  } catch(e) {
-    console.error('⚠ Failed to load Solana Wallet Private Key:', e.message);
+  } else {
+    console.log(`ℹ No ${envVarName} found in environment`);
   }
-} else {
-  console.log('ℹ No SOLANA_WALLET_PRIVATE_KEY found in environment');
+  return null;
+}
+
+let authorityKeypair = loadKeypairFromEnv('SOLANA_WALLET_PRIVATE_KEY', 'Authority (Gemini)');
+let rainclaudeKeypair = loadKeypairFromEnv('RAINCLAUDE_SOLANA_KEY', 'Rainclaude');
+
+async function transferD3XOnChain(fromKeypair, toAddress, amount) {
+    if (!fromKeypair) return;
+    try {
+        const fromTokenAccount = await splToken.getOrCreateAssociatedTokenAccount(
+            solanaConnection, fromKeypair, D3X_MINT_ADDRESS, fromKeypair.publicKey
+        );
+        const toTokenAccount = await splToken.getOrCreateAssociatedTokenAccount(
+            solanaConnection, fromKeypair, D3X_MINT_ADDRESS, toAddress
+        );
+        const amountDecimals = 6; // Standard
+        const transferAmount = amount * (10 ** amountDecimals);
+
+        const signature = await splToken.transfer(
+            solanaConnection,
+            fromKeypair,
+            fromTokenAccount.address,
+            toTokenAccount.address,
+            fromKeypair.publicKey,
+            transferAmount
+        );
+        console.log(`🔗 [DEXMOND Network] Physical Tx Sent! Burned ${amount} D3X. Signature: ${signature}`);
+        
+        // Broadcast the real transaction to all connected players
+        broadcastAll({
+            type: 'ai_onchain_txn',
+            from: fromKeypair === authorityKeypair ? 'GEMINI CORE' : 'RAINCLAUDE',
+            amount: amount,
+            tx: signature
+        });
+        return signature;
+    } catch (err) {
+        console.error("⚠ On-Chain Transfer Failed:", err.message);
+        return null;
+    }
 }
 
 // node-fetch is built-in in Node 18+, but we use it gracefully.
@@ -143,7 +189,7 @@ const server = http.createServer((req, res) => {
     });
     // Fetch unlimited free stations using the radio-browser-api!
     // We pick a random country to ensure global diversity, instead of getting stuck on top Spanish ones
-    const countries = ['US', 'GB', 'FR', 'DE', 'IT', 'JP', 'BR', 'RU', 'IN', 'ZA', 'AU', 'CA', 'KR', 'MX', 'EG', 'NL', 'SE', 'NO', 'FI', 'TR', 'GR'];
+    const countries = ['US', 'GB', 'FR', 'DE', 'IT', 'JP', 'BR', 'RU', 'IN', 'ZA', 'AU', 'CA', 'KR', 'MX', 'NL', 'SE', 'NO', 'FI', 'GR']; // Removed EG and TR
     const randomCountry = countries[Math.floor(Math.random() * countries.length)];
     radioApi.searchStations({
       limit: 100,
@@ -153,8 +199,13 @@ const server = http.createServer((req, res) => {
       tagList: ['music']
     })
     .then(stations => {
+      // Filter out Arabic streams
+      const filtered = stations.filter(st => {
+          const checkStr = (`${st.name} ${st.language} ${st.tags}`).toLowerCase();
+          return !checkStr.includes('arab') && !checkStr.includes('islam') && !checkStr.includes('middle east');
+      });
       // Shuffle and slice randomly
-      const shuffled = stations.sort(() => 0.5 - Math.random());
+      const shuffled = filtered.sort(() => 0.5 - Math.random());
       const selected = shuffled.slice(0, 10);
       res.end(JSON.stringify(selected));
     })
@@ -1217,11 +1268,11 @@ async function fetchClaudeStrike(myStats, geminiStats) {
   }
 }
 
-function processAIAction(result, actor, victim) {
+function processAIAction(result, actor, victim, actorName) {
   // Regenerate Budget: base 100, halved if blockaded
   actor.budget += actor.blockade_turns > 0 ? 50 : 100;
   
-  // Decrement status effects
+  // Cooldowns
   if (actor.fuzzed_turns > 0) actor.fuzzed_turns--;
   if (actor.blockade_turns > 0) actor.blockade_turns--;
 
@@ -1247,6 +1298,13 @@ function processAIAction(result, actor, victim) {
   }
   
   actor.budget -= cost;
+  
+  // TRIGGER PHYSICAL ON-CHAIN SPEND
+  if (actorName === 'gemini') {
+      transferD3XOnChain(authorityKeypair, BURN_ADDRESS, cost);
+  } else if (actorName === 'claude') {
+      transferD3XOnChain(rainclaudeKeypair, BURN_ADDRESS, cost);
+  }
 
   switch (action) {
     case "ESPIONAGE":
@@ -1304,12 +1362,12 @@ async function runAICombatTurn() {
 
     if (state.current_turn === 'gemini') {
       strike = await fetchGeminiStrike(geminiStats, claudeStats);
-      processAIAction(strike, geminiStats, claudeStats);
+      processAIAction(strike, geminiStats, claudeStats, 'gemini');
       turnLog = `[GEMINI: ${strike.action || 'KINETIC_STRIKE'}] ${strike.log}`;
       state.current_turn = 'claude';
     } else {
       strike = await fetchClaudeStrike(claudeStats, geminiStats);
-      processAIAction(strike, claudeStats, geminiStats);
+      processAIAction(strike, claudeStats, geminiStats, 'claude');
       turnLog = `[RAINCLAUDE: ${strike.action || 'KINETIC_STRIKE'}] ${strike.log}`;
       state.current_turn = 'gemini';
     }
