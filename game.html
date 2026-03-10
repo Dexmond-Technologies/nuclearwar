@@ -1065,13 +1065,8 @@ body {
     <!-- Authentication Section: Google | Wallet | Override Code -->
     <div id="auth-container-flex" style="display:flex; flex-direction:column; justify-content:center; align-items:center; gap:16px; margin:20px auto 0; min-height:50px; position:relative; z-index:1; opacity: 1; transition: opacity 0.5s ease-out;">
       
-      <!-- Connect Wait Timer -->
-      <div id="auth-countdown-container" style="text-align:center; font-family:'Share Tech Mono', monospace; font-size:68px; color:#ffb; letter-spacing:2px; height:75px; line-height:75px; margin-top:-30px; margin-bottom:60px; text-shadow:0 0 10px #ff0000; transition: opacity 0.3s; opacity:1;">
-          <span id="auth-countdown-val">3</span>
-      </div>
-
       <!-- Row 1: Google | Wallet | Override Code -->
-      <div id="auth-buttons-container" style="display:flex; justify-content:center; align-items:center; gap:40px; pointer-events:none; opacity:0.5; transition:all 0.5s;">
+      <div id="auth-buttons-container" style="display:flex; justify-content:center; align-items:center; gap:40px; transition:all 0.5s;">
         <!-- Google Sign-In -->
         <div style="margin-top: 15px;">
           <div id="g_id_onload"
@@ -1592,25 +1587,7 @@ body {
 </style>
 
 <script>
-// Auth Button 3-Second Wait Initialization Hook
-let authWaitVal = 3;
 
-const authWaitInterval = setInterval(() => {
-    authWaitVal--;
-    const elWaitVal = document.getElementById('auth-countdown-val');
-    if(elWaitVal) elWaitVal.innerText = authWaitVal;
-    
-    if (authWaitVal <= 0) {
-        clearInterval(authWaitInterval);
-        const container = document.getElementById('auth-countdown-container');
-        const buttons = document.getElementById('auth-buttons-container');
-        if (container) container.style.opacity = '0';
-        if (buttons) {
-            buttons.style.pointerEvents = 'auto';
-            buttons.style.opacity = '1';
-        }
-    }
-}, 1000);
 </script>
 
 <style>
