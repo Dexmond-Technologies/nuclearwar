@@ -1,9 +1,9 @@
 {
   "name": "Rainclaude",
   "faction": "Adversary AI",
-  "walletAddress": "d3x_RAINCLAUDE_0000000000000000",
+  "walletAddress": "5rdrJ46YJbtVHEx7xRgURGm49Cwf1WikLhU71VnS8",
   "balances": {
-    "D3X": 10000000.0
+    "D3X": 0.0
   },
   "commodities": {
     "Metals": {

@@ -1442,20 +1442,21 @@ async function runAICombatTurn() {
 
 // --- Periodic D3X Balance Fetcher ---
 async function fetchAndBroadcastAIBalances() {
-    if (!authorityKeypair || !rainclaudeKeypair) return;
     try {
         let geminiBalance = 0;
         let claudeBalance = 0;
         
         try {
-            const accounts = await solanaConnection.getParsedTokenAccountsByOwner(
-                authorityKeypair.publicKey, 
-                { mint: D3X_MINT_ADDRESS }
-            );
-            if (accounts.value.length > 0) {
-                geminiBalance = accounts.value[0].account.data.parsed.info.tokenAmount.uiAmount || 0;
-            } else {
-                geminiBalance = 0;
+            if (authorityKeypair) {
+                const accounts = await solanaConnection.getParsedTokenAccountsByOwner(
+                    authorityKeypair.publicKey, 
+                    { mint: D3X_MINT_ADDRESS }
+                );
+                if (accounts.value.length > 0) {
+                    geminiBalance = accounts.value[0].account.data.parsed.info.tokenAmount.uiAmount || 0;
+                } else {
+                    geminiBalance = 0;
+                }
             }
         } catch(e) { console.error('Gemini balance error:', e.message); geminiBalance = 0; }
         
@@ -1463,8 +1464,10 @@ async function fetchAndBroadcastAIBalances() {
             // Add a small delay between requests to avoid bursting the RPC node rate limits
             await new Promise(r => setTimeout(r, 2000));
 
+            // Use the real, hardcoded public key for Rainclaude
+            const rainclaudePubkey = new web3.PublicKey("5rdrJ46YJbtVHEx7xRgURGm49Cwf1WikLhU71VnS8");
             const accounts = await solanaConnection.getParsedTokenAccountsByOwner(
-                rainclaudeKeypair.publicKey, 
+                rainclaudePubkey, 
                 { mint: D3X_MINT_ADDRESS }
             );
              if (accounts.value.length > 0) {
@@ -1472,6 +1475,17 @@ async function fetchAndBroadcastAIBalances() {
             } else {
                 claudeBalance = 0;
             }
+            
+            // Persist the real-time balance back into the RAINCLAUDE_ACCOUNT file
+            const fs = require('fs');
+            const path = require('path');
+            const rcPath = path.join(__dirname, 'RAINCLAUDE_ACCOUNT');
+            if (fs.existsSync(rcPath)) {
+                let rcData = JSON.parse(fs.readFileSync(rcPath, 'utf8'));
+                rcData.balances.D3X = claudeBalance;
+                fs.writeFileSync(rcPath, JSON.stringify(rcData, null, 2));
+            }
+
         } catch(e) { console.error('Claude balance error:', e.message); claudeBalance = 0; }
 
         broadcastAll({
