@@ -3727,6 +3727,36 @@ function initDatacenters() {
     }
 ];
 
+    // Create global XRP logo texture for Gemini nodes
+    const xrpCanvas = document.createElement('canvas');
+    xrpCanvas.width = 128;
+    xrpCanvas.height = 128;
+    const xCtx = xrpCanvas.getContext('2d');
+    
+    // Draw XRP Logo (white X with curved arms)
+    xCtx.fillStyle = '#ffffff';
+    xCtx.beginPath();
+    // Top-left to bottom-right curve
+    xCtx.moveTo(20, 20);
+    xCtx.lineTo(45, 20);
+    xCtx.quadraticCurveTo(64, 45, 83, 20);
+    xCtx.lineTo(108, 20);
+    xCtx.lineTo(76, 58);
+    xCtx.closePath();
+    xCtx.fill();
+    // Bottom-left to top-right curve
+    xCtx.beginPath();
+    xCtx.moveTo(20, 108);
+    xCtx.lineTo(45, 108);
+    xCtx.quadraticCurveTo(64, 83, 83, 108);
+    xCtx.lineTo(108, 108);
+    xCtx.lineTo(76, 70);
+    xCtx.closePath();
+    xCtx.fill();
+    
+    const xrpTex = new THREE.CanvasTexture(xrpCanvas);
+    const xrpSpriteMat = new THREE.SpriteMaterial({ map: xrpTex, transparent: true, depthTest: false });
+
     const dcGeo = new THREE.SphereGeometry(0.025, 32, 32); 
 
     dcData.forEach(dc => {
@@ -3882,6 +3912,15 @@ function initDatacenters() {
             // Add a dynamic point light to make it actually emit light
             const light = new THREE.PointLight(0xaa00ff, 2, 2);
             mesh.add(light);
+        } else if (!isRainclaude) {
+            // Apply XRP logo to Gemini nodes
+            const xrpSprite = new THREE.Sprite(xrpSpriteMat);
+            xrpSprite.scale.set(0.04, 0.04, 1);
+            xrpSprite.position.set(0, 0, 0.03); // Just slightly outside the sphere radius (which is 0.025)
+            
+            // To make sure it always faces the camera from the right perspective we can just leave it as a billboard sprite at high Z depth priority. 
+            // SpriteMaterial with depthTest:false renders it perfectly on top.
+            mesh.add(xrpSprite);
         }
         
             mesh.userData = { 
