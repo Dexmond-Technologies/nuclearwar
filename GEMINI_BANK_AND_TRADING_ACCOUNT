@@ -3,20 +3,21 @@
   "faction": "Humanity (Allied)",
   "walletAddress": "2hF5Z3JPa5Feo4zdHWhcgdQv8RerDcBAk1LkhoYW8TBj",
   "balances": {
-    "D3X": 200000000
+    "D3X": 99999375.522
   },
   "commodities": {
     "Metals": {
-      "Copper": 0,
+      "Copper": 4,
       "Lithium": 0,
       "Rare Earth Elements": 0,
       "Iron ore": 0,
       "Gold": 0,
-      "Nickel": 0,
+      "Nickel": 5,
       "Tin": 0,
       "Aluminum (Bauxite)": 0,
       "Aluminum": 0,
-      "Cobalt": 0
+      "Cobalt": 5,
+      "Aluminium": 2
     },
     "Natural Resources": {
       "Lumber (Wood)": 0,
@@ -36,6 +37,16 @@
       "Titanium Grade PSUs (2000W)": 0,
       "Direct-to-Chip Liquid Cooling Units": 0,
       "Networking Switches (400GbE)": 0
+    },
+    "Tech": {
+      "SSD Storage (1TB)": 4
+    },
+    "Agriculture": {
+      "Soy Beans": 3,
+      "Wheat": 4
+    },
+    "Energy": {
+      "Coal": 4
     }
   }
 }

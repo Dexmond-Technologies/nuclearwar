@@ -3,7 +3,7 @@
   "faction": "Adversary AI",
   "walletAddress": "5rdrJ46YJbtVHEx7xRgURGm49Cwf1WikLhU71VnS8",
   "balances": {
-    "D3X": 80000000
+    "D3X": 100000000
   },
   "commodities": {
     "Metals": {
@@ -11,12 +11,13 @@
       "Lithium": 0,
       "Rare Earth Elements": 0,
       "Iron ore": 0,
-      "Gold": 0,
+      "Gold": 7,
       "Nickel": 0,
       "Tin": 0,
       "Aluminum (Bauxite)": 0,
       "Aluminum": 0,
-      "Cobalt": 0
+      "Cobalt": 0,
+      "Silver": 4
     },
     "Natural Resources": {
       "Lumber (Wood)": 0,
@@ -36,6 +37,14 @@
       "Titanium Grade PSUs (2000W)": 0,
       "Direct-to-Chip Liquid Cooling Units": 0,
       "Networking Switches (400GbE)": 0
+    },
+    "Agriculture": {
+      "Cotton": 8,
+      "Rice": 4,
+      "Soy Beans": 1
+    },
+    "Tech": {
+      "RAM (64GB)": 5
     }
   }
 }

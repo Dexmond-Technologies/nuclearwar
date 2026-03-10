@@ -1337,7 +1337,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   
   <div id="right-hud-group" style="position:absolute; bottom:55px; right:calc(25px + 25vw); display:flex; flex-direction:column; gap:8px; width:115px; z-index:100; align-items:stretch; pointer-events:none;">
       
-      <button id="btn-reinvest-d3x" onclick="toggleReinvest()" style="display:block; width:100%; pointer-events:auto; padding:6px 0; background:rgba(0,255,136,0.15); border:1px solid #0f8; color:#0f8; font-family:'Courier New', monospace; font-size:10px; font-weight:bold; text-align:center; cursor:pointer; border-radius:4px; transition:all 0.2s; box-shadow:0 0 10px rgba(0,255,136,0.2); box-sizing:border-box;">♻️ REINVEST: OFF</button>
+      <button id="btn-reinvest-d3x" onclick="toggleReinvest()" style="display:block; width:100%; pointer-events:auto; padding:12px 0; margin-bottom:500px; background:rgba(0,255,136,0.15); border:1px solid #0f8; color:#0f8; font-family:'Courier New', monospace; font-size:10px; font-weight:bold; text-align:center; cursor:pointer; border-radius:4px; transition:all 0.2s; box-shadow:0 0 10px rgba(0,255,136,0.2); box-sizing:border-box;">♻️ REINVEST: OFF<br/>AIRDROP 1X</button>
       <div id="skin-hint-arrow" style="position:absolute; top:35px; left:-40px; font-size:32px; color:#ff5577; text-shadow:0 0 15px rgba(255,-85,119,0.8); opacity:0; pointer-events:none; z-index:9999; transition:opacity 0.5s; animation:bounceRight 0.5s infinite alternate;">➔</div>
       <button id="btn-toggle-skin" onclick="toggleRedSkin()">🔴 RED SKIN</button>
       
@@ -2085,18 +2085,19 @@ Type 'help' for available commands.
 <div id="d3x-mining-modal" style="position:absolute;inset:0;background:rgba(0,15,5,.95);display:none;align-items:center;justify-content:center;z-index:1060;backdrop-filter:blur(8px);">
   <div class="rep-card" style="width:500px; max-width:95vw; border-color:#0f8; box-shadow:0 0 40px rgba(0,255,136,.2);">
     <div class="rep-title" style="color:#0f8; text-shadow:0 0 15px rgba(0,255,136,.8);" id="mining-cave-title">D3X MINING CAVE</div>
-    <div class="rep-desc" style="color:#aaffd0;">Burn 1 D3X to mine for rewards. Fill the internal meter to 1.0 D3X to automatically withdraw to your wallet.</div>
+    <div class="rep-desc" style="color:#aaffd0;">Initiate the heavy drill to extract D3X directly from the planetary core. Completes in exactly 1 hour.</div>
     
     <div style="background:rgba(0,255,136,.05); border:1px solid rgba(0,255,136,.3); padding:20px; text-align:center; margin-bottom:20px; border-radius:8px;">
-        <div style="font-size:12px; color:#0af; letter-spacing:2px; margin-bottom:10px;">MINING PROGRESS (<span id="internal-mining-amount">0.00</span> / 1.00 D3X)</div>
+        <div id="mining-timer-display" style="font-size:32px; font-family:monospace; color:#0af; font-weight:bold; letter-spacing:4px; margin-bottom:10px; text-shadow:0 0 10px rgba(0,170,255,0.5);">01:00:00</div>
+        <div style="font-size:12px; color:#aaa; letter-spacing:2px; margin-bottom:10px;">MINING IN PROGRESS</div>
         <div style="width:100%; height:8px; background:rgba(0,255,136,.1); margin:0 auto; border-radius:4px; overflow:hidden;">
-            <div id="mining-progress-bar" style="height:100%; width:0%; background:#0f8; transition:0.3s; box-shadow:0 0 10px #0f8;"></div>
+            <div id="mining-progress-bar" style="height:100%; width:0%; background:#0f8; transition:1s linear; box-shadow:0 0 10px #0f8;"></div>
         </div>
     </div>
 
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <div style="font-size:14px; font-weight:bold; color:#f55; letter-spacing:1px;">COST: 1 D3X</div>
-        <button id="btn-mine-d3x" class="sp-btn" onclick="mineD3XCoin()" style="background:rgba(0,255,136,.2); border:1px solid #0f8; color:#0f8; padding:15px 30px; font-size:16px;">MINE DEPOSITS</button>
+        <div style="font-size:14px; font-weight:bold; color:#0f0; letter-spacing:1px;">REWARD: 10 D3X</div>
+        <button id="btn-mine-d3x" class="sp-btn" onclick="startOneHourMining()" style="background:rgba(0,255,136,.2); border:1px solid #0f8; color:#0f8; padding:15px 30px; font-size:16px;">START MINING</button>
     </div>
     
     <div id="mining-log" style="height:100px; overflow-y:auto; background:rgba(0,255,136,0.05); border:1px solid rgba(0,255,136,0.2); padding:10px; font-size:11px; display:flex; flex-direction:column; gap:4px; text-align:left;">
@@ -9952,6 +9953,24 @@ function initWS() {
           if (typeof updateD3XDisplay === 'function') updateD3XDisplay();
         }
         break;
+      case 'mining_sync':
+        if (typeof window.syncMiningState === 'function') {
+            window.syncMiningState(msg.secondsLeft);
+        }
+        break;
+      case 'mining_complete':
+        if (typeof window.syncMiningState === 'function') {
+            window.syncMiningState(0); // reset UI
+        }
+        if (typeof setLog === 'function') setLog(`💎 D3X MINING COMPLETE: +${msg.amount} D3X extracted!`);
+        if (typeof SFX !== 'undefined' && SFX.playSiren) SFX.playSiren();
+        
+        const ml = document.getElementById('mining-log');
+        if (ml) {
+            ml.innerHTML += `<div style="color:#ffcc00; font-weight:bold; font-size:14px; margin-top:10px;">💎 EXTRACTION COMPLETE 💎<br/>${msg.amount} D3X Deposited into Wallet!</div>`;
+            ml.scrollTop = ml.scrollHeight;
+        }
+        break;
       case 'd3x_multiplier_active':
         const multBadge = document.getElementById('d3x-multiplier-badge');
         if (multBadge) multBadge.style.display = 'block';
@@ -10330,11 +10349,11 @@ function toggleReinvest() {
     window.autoReinvest = !window.autoReinvest;
     const btn = document.getElementById('btn-reinvest-d3x');
     if (window.autoReinvest) {
-        btn.textContent = '♻️ REINVEST: ON';
+        btn.innerHTML = '♻️ REINVEST: ON<br/>AIRDROP 2X';
         btn.style.background = 'rgba(0,255,136,0.4)';
         if (typeof setLog === 'function') setLog('♻️ AUTO-REINVEST ENABLED (2X AIRDROP ACTIVE)');
     } else {
-        btn.textContent = '♻️ REINVEST: OFF';
+        btn.innerHTML = '♻️ REINVEST: OFF<br/>AIRDROP 1X';
         btn.style.background = 'rgba(0,255,136,0.15)';
         if (typeof setLog === 'function') setLog('♻️ AUTO-REINVEST DISABLED (1X AIRDROP)');
     }
@@ -14833,10 +14852,102 @@ window.openD3XMiningCave = function(caveName) {
     document.getElementById('mining-progress-bar').style.width = (window.internalD3XMiningAmount * 100) + '%';
     document.getElementById('mining-log').innerHTML = '<div style="opacity:0.7;">Cave accessed. Awaiting mining directive...</div>';
     document.getElementById('d3x-mining-modal').style.display = 'flex';
+    
+    // Sync mining state on modal open
+    if (window.ws && window.ws.readyState === WebSocket.OPEN) {
+        window.ws.send(JSON.stringify({ type: 'get_mining_state', callsign: window.myCallsign || window.PLAYER_NAME }));
+    }
 };
 
 window.lastMiningTime = 0;
 const MINING_COOLDOWN_MS = 15000; // 15 Seconds Cooldown
+
+window.miningRemainingSeconds = 0;
+window.miningInterval = null;
+
+window.startOneHourMining = function() {
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+    
+    // Check if already mining
+    if (window.miningRemainingSeconds > 0) return;
+
+    if (typeof SFX !== 'undefined' && SFX.playLaser) SFX.playLaser(); // Drilling sound
+    
+    // Send request to server to start mining
+    ws.send(JSON.stringify({
+        type: 'start_mining',
+        callsign: window.myCallsign || window.PLAYER_NAME
+    }));
+
+    // Optimistically start UI
+    window.startMiningUI(3600); 
+    
+    const log = document.getElementById('mining-log');
+    if (log) {
+        log.innerHTML += `<div><span style="color:#0f8">Drill sequence initiated. Deep-core extraction will complete in 1 hour.</span></div>`;
+        log.scrollTop = log.scrollHeight;
+    }
+};
+
+window.startMiningUI = function(secondsRemaining) {
+    if (window.miningInterval) clearInterval(window.miningInterval);
+    
+    window.miningRemainingSeconds = secondsRemaining;
+    const btn = document.getElementById('btn-mine-d3x');
+    const timerDisplay = document.getElementById('mining-timer-display');
+    const progressBar = document.getElementById('mining-progress-bar');
+    
+    if (btn) {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.innerHTML = 'MINING...';
+    }
+
+    window.miningInterval = setInterval(() => {
+        window.miningRemainingSeconds--;
+        
+        if (window.miningRemainingSeconds <= 0) {
+            clearInterval(window.miningInterval);
+            window.miningRemainingSeconds = 0;
+            if (timerDisplay) timerDisplay.innerText = "00:00:00";
+            if (progressBar) progressBar.style.width = "100%";
+        } else {
+            if (timerDisplay) {
+                const h = Math.floor(window.miningRemainingSeconds / 3600).toString().padStart(2, '0');
+                const m = Math.floor((window.miningRemainingSeconds % 3600) / 60).toString().padStart(2, '0');
+                const s = (window.miningRemainingSeconds % 60).toString().padStart(2, '0');
+                timerDisplay.innerText = `${h}:${m}:${s}`;
+            }
+            if (progressBar) {
+                const percentDone = ((3600 - window.miningRemainingSeconds) / 3600) * 100;
+                progressBar.style.width = percentDone + "%";
+            }
+        }
+    }, 1000);
+};
+
+// Also listen for mining syncs from backend (e.g. on rejoin)
+window.syncMiningState = function(secondsLeft) {
+    if (secondsLeft > 0) {
+        window.startMiningUI(secondsLeft);
+    } else {
+        // Reset UI
+        if (window.miningInterval) clearInterval(window.miningInterval);
+        window.miningRemainingSeconds = 0;
+        
+        const btn = document.getElementById('btn-mine-d3x');
+        if (btn) {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.innerHTML = 'START MINING';
+        }
+        const timerDisplay = document.getElementById('mining-timer-display');
+        if (timerDisplay) timerDisplay.innerText = "01:00:00";
+        
+        const progressBar = document.getElementById('mining-progress-bar');
+        if (progressBar) progressBar.style.width = "0%";
+    }
+}
 
 window.mineD3XCoin = function() {
     const log = document.getElementById('mining-log');

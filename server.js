@@ -674,13 +674,22 @@ function initWebSockets() {
       }
 
       case 'start_game': {
-        // Prevent clearing existing world if already active
-        if (globalGameState) {
+        // Prevent clearing existing world if already active (ensure states are truly active, not just dummy chat shells)
+        if (globalGameState && globalGameState.countries && Object.keys(globalGameState.countries).length > 0) {
            console.log('⚠ Rejected start_game — world is already active');
            ws.send(JSON.stringify({ type: 'error', msg: 'World already exists' }));
            break;
         }
+        
+        // Preserve any pre-existing chat or stakes that happened in the lobby before start
+        const existingChat = globalGameState ? globalGameState.chatHistory : [];
+        const existingStakes = globalGameState ? globalGameState.stakes : [];
+        
         globalGameState = msg.gameState;
+        
+        if (existingChat && existingChat.length > 0) globalGameState.chatHistory = existingChat;
+        if (existingStakes && existingStakes.length > 0) globalGameState.stakes = existingStakes;
+        
         saveGameState(globalGameState);
         broadcastAll({ type: 'game_start', gameState: globalGameState });
         break;
@@ -717,7 +726,7 @@ function initWebSockets() {
         
         // Ensure globalGameState and chat array exist
         if (!globalGameState) {
-          globalGameState = { players: [], countries: {}, activePlayerIndex: 0 };
+          globalGameState = { players: [], countries: {}, turn: 0, turnCount: 1, phase: 'REINFORCE', activePlayerIndex: 0 };
         }
         if (!globalGameState.chatHistory) {
           globalGameState.chatHistory = [];
@@ -819,7 +828,7 @@ function initWebSockets() {
         if (!callsign) break;
         
         if (!globalGameState) {
-          globalGameState = { players: [], countries: {}, activePlayerIndex: 0 };
+          globalGameState = { players: [], countries: {}, turn: 0, turnCount: 1, phase: 'REINFORCE', activePlayerIndex: 0 };
         }
         if (!globalGameState.stakes) {
           globalGameState.stakes = [];
@@ -939,6 +948,11 @@ function initWebSockets() {
                 stakes: globalGameState.stakes.filter(s => s.callsign === callsign) 
             }));
         }
+        break;
+      }
+
+      case 'toggle_autoreinvest': {
+        client.autoReinvest = msg.active;
         break;
       }
 
@@ -1064,6 +1078,28 @@ function initWebSockets() {
         }
         break;
       }
+      case 'start_mining': {
+        const callsign = msg.callsign;
+        if (!callsign || !pgPool) break;
+        
+        // Prevent re-mining if already active
+        if (client.miningEndTime && Date.now() < client.miningEndTime) break;
+        
+        // Exactly 1 hour (3600 seconds) from now
+        client.miningEndTime = Date.now() + (60 * 60 * 1000); 
+        console.log(`[MINING] Commander ${callsign} started a 1-hour mining extraction.`);
+        break;
+      }
+      
+      case 'get_mining_state': {
+        if (client.miningEndTime) {
+            const timeLeft = Math.ceil((client.miningEndTime - Date.now()) / 1000);
+            if (timeLeft > 0) {
+                ws.send(JSON.stringify({ type: 'mining_sync', secondsLeft: timeLeft }));
+            }
+        }
+        break;
+      }
     }
   });
 
@@ -1086,6 +1122,42 @@ function initWebSockets() {
   });
 });
 }
+
+// ============================================================================
+// GLOBAL BACKGROUND LOOPS
+// ============================================================================
+
+// 1. D3X MINING LOOP (Checks every 5 seconds for completed 1-hour mines)
+setInterval(async () => {
+    if (!pgPool) return;
+    const now = Date.now();
+    
+    for (const client of connectedClients) {
+        if (client.miningEndTime && now >= client.miningEndTime) {
+            const callsign = client.name;
+            const reward = 10.0;
+            
+            // Clear their timer so it doesn't loop
+            client.miningEndTime = null;
+            
+            try {
+                // Award the 10 D3X directly to their balance
+                await pgPool.query(`UPDATE commanders SET d3x_balance = d3x_balance + $1 WHERE callsign = $2`, [reward, callsign]);
+                console.log(`[MINING] 💎 Commander ${callsign} finished 1-hour mining! Awarded ${reward} D3X.`);
+                
+                // Alert the specific client
+                if (client.ws.readyState === WebSocket.OPEN) {
+                    client.ws.send(JSON.stringify({
+                        type: 'mining_complete',
+                        amount: reward
+                    }));
+                }
+            } catch (e) {
+                console.error("[MINING] Error awarding D3X:", e.message);
+            }
+        }
+    }
+}, 5000);
 
 // --- Solana On-Chain Logic ---
 async function processDailyTokenDrop(callsign, userWalletAddress, amountToDrop = 5) {
@@ -1162,15 +1234,46 @@ async function checkD3XRewards() {
                }
            }
            
+           if (client.autoReinvest) {
+               multiplier = 2; // Auto-Reinvest enables 2x multiplier
+           }
+           
            const amountEarned = 5 * multiplier;
 
-           await pgPool.query(`UPDATE commanders SET pending_d3x = pending_d3x + $2 WHERE callsign = $1`, [client.name, amountEarned]);
-           console.log(`[REWARD] Commander ${client.name} played 10 mins. +${amountEarned} D3X pending (Multiplier: ${multiplier}x).`);
-           client.ws.send(JSON.stringify({ 
-               type: 'd3x_reward', 
-               amount: amountEarned,
-               message: `${amountEarned} D3X Accumulated (10 min session)`
-           }));
+           if (client.autoReinvest) {
+               // Auto-reinvest logic limits immediately into stakes
+               if (!globalGameState) globalGameState = { players: [], countries: {}, stakes: [] };
+               if (!globalGameState.stakes) globalGameState.stakes = [];
+               
+               const finalYield = amountEarned * 0.10; 
+               const unlockTime = now + (7 * 24 * 60 * 60 * 1000); 
+
+               globalGameState.stakes.push({
+                   id: Date.now() + Math.random().toString(36).substr(2, 9),
+                   callsign: client.name,
+                   plan: 'reinvest',
+                   amountStaked: amountEarned,
+                   amountReturn: amountEarned + finalYield,
+                   unlockAt: unlockTime
+               });
+               saveGameState(globalGameState);
+               
+               console.log(`[REWARD] Commander ${client.name} played 10 mins. +${amountEarned} D3X auto-reinvested (Multiplier: ${multiplier}x).`);
+               
+               client.ws.send(JSON.stringify({ 
+                   type: 'd3x_reward', 
+                   amount: amountEarned,
+                   message: `${amountEarned} D3X Auto-Reinvested (10 min session)`
+               }));
+           } else {
+               await pgPool.query(`UPDATE commanders SET pending_d3x = pending_d3x + $2 WHERE callsign = $1`, [client.name, amountEarned]);
+               console.log(`[REWARD] Commander ${client.name} played 10 mins. +${amountEarned} D3X pending (Multiplier: ${multiplier}x).`);
+               client.ws.send(JSON.stringify({ 
+                   type: 'd3x_reward', 
+                   amount: amountEarned,
+                   message: `${amountEarned} D3X Accumulated (10 min session)`
+               }));
+           }
            
            if (multiplier > 1) {
                client.ws.send(JSON.stringify({ type: 'd3x_multiplier_active' }));
@@ -1197,13 +1300,13 @@ async function checkD3XRewards() {
 
               if (canClaim) {
                  console.log(`[REWARD] Commander ${client.name} reached 12h threshold. Auto-claiming ${pending} D3X.`);
-                 await pgPool.query(`UPDATE commanders SET last_d3x_claim = NOW(), pending_d3x = 0 WHERE callsign = $1`, [client.name]);
+                 await pgPool.query(`UPDATE commanders SET last_d3x_claim = NOW(), pending_d3x = 0, d3x_balance = d3x_balance + $2 WHERE callsign = $1`, [client.name, pending]);
                  
                  // If Solana Authority Wallet is loaded, do real crypto drop, else mock drop
                  if (authorityKeypair) {
                      await processDailyTokenDrop(client.name, client.wallet, pending);
                  } else {
-                     console.log(`ℹ [SOLANA OFF] Mock-Dropped ${pending} D3X to ${client.name}. Provide valid SOLANA_WALLET_PRIVATE_KEY for real token transfer.`);
+                     console.log(`ℹ [SOLANA OFF] Mock-Dropped ${pending} D3X to ${client.name}. Internal balance updated. Provide valid SOLANA_WALLET_PRIVATE_KEY for real token transfer.`);
                  }
                  
                  client.ws.send(JSON.stringify({ 
@@ -1581,6 +1684,166 @@ setInterval(fetchAndBroadcastAIBalances, 60000);
 
 // Tick the combat every 30 minutes (1800000ms) to maintain persistent global conflict with minimal API cost
 setInterval(runAICombatTurn, 1800000);
+
+// --- Autonomous AI Market Buying (2% daily spend cap) ---
+// Track how much each AI has spent today
+let geminiDailySpent = 0;
+let claudeDailySpent = 0;
+// Reset daily budgets at midnight UTC
+setInterval(() => { geminiDailySpent = 0; claudeDailySpent = 0; console.log('[AI MARKET] Daily spend caps reset.'); }, 24 * 60 * 60 * 1000);
+
+// Full commodity catalog (items the AIs can autonomously purchase)
+const AI_MARKET_CATALOG = [
+  // Metals
+  { name: 'Iron Ore', category: 'Metals', basePrice: 120, unit: 'MT' },
+  { name: 'Copper', category: 'Metals', basePrice: 9500, unit: 'MT' },
+  { name: 'Aluminium', category: 'Metals', basePrice: 2300, unit: 'MT' },
+  { name: 'Gold', category: 'Metals', basePrice: 62000, unit: 'oz' },
+  { name: 'Silver', category: 'Metals', basePrice: 750, unit: 'oz' },
+  { name: 'Nickel', category: 'Metals', basePrice: 16800, unit: 'MT' },
+  { name: 'Lithium', category: 'Metals', basePrice: 23000, unit: 'MT' },
+  { name: 'Cobalt', category: 'Metals', basePrice: 33000, unit: 'MT' },
+  { name: 'Titanium', category: 'Metals', basePrice: 11000, unit: 'MT' },
+  { name: 'Rare Earths', category: 'Metals', basePrice: 87000, unit: 'MT' },
+  // Energy
+  { name: 'Crude Oil', category: 'Energy', basePrice: 82, unit: 'barrel' },
+  { name: 'Natural Gas', category: 'Energy', basePrice: 2800, unit: 'MMBtu' },
+  { name: 'Coal', category: 'Energy', basePrice: 130, unit: 'MT' },
+  { name: 'Uranium', category: 'Energy', basePrice: 91, unit: 'lb' },
+  { name: 'Solar Panels', category: 'Energy', basePrice: 8500, unit: 'kW' },
+  // Agriculture
+  { name: 'Wheat', category: 'Agriculture', basePrice: 220, unit: 'MT' },
+  { name: 'Corn', category: 'Agriculture', basePrice: 185, unit: 'MT' },
+  { name: 'Soy Beans', category: 'Agriculture', basePrice: 420, unit: 'MT' },
+  { name: 'Rice', category: 'Agriculture', basePrice: 525, unit: 'MT' },
+  { name: 'Cotton', category: 'Agriculture', basePrice: 1800, unit: 'bale' },
+  // Tech
+  { name: 'Silicon Wafers', category: 'Tech', basePrice: 18000, unit: 'unit' },
+  { name: 'GPU Compute Node', category: 'Tech', basePrice: 32000, unit: 'unit' },
+  { name: 'Network Switches', category: 'Tech', basePrice: 7500, unit: 'unit' },
+  { name: 'SSD Storage (1TB)', category: 'Tech', basePrice: 85, unit: 'unit' },
+  { name: 'RAM (64GB)', category: 'Tech', basePrice: 340, unit: 'unit' },
+];
+
+async function runAIMarketBuying() {
+  if (!pgPool) return;
+  
+  // Use the cached on-chain balances (set by fetchAndBroadcastAIBalances)
+  const geminiBalance = cachedGeminiBalance || 100000000; // Default 100M if not yet fetched
+  const claudeBalance = cachedClaudeBalance || 100000000;
+  
+  const geminiDailyCap = geminiBalance * 0.02; // 2% of total balance
+  const claudeDailyCap = claudeBalance * 0.02;
+  
+  const buys = [];
+  
+  // Read localized JSON accounts
+  const geminiFilePath = path.join(__dirname, 'GEMINI_BANK_AND_TRADING_ACCOUNT');
+  const claudeFilePath = path.join(__dirname, 'RAINCLAUDE_ACCOUNT');
+  
+  let geminiAccount = null;
+  let claudeAccount = null;
+  
+  try {
+      if (fs.existsSync(geminiFilePath)) {
+          geminiAccount = JSON.parse(fs.readFileSync(geminiFilePath, 'utf8'));
+      }
+      if (fs.existsSync(claudeFilePath)) {
+          claudeAccount = JSON.parse(fs.readFileSync(claudeFilePath, 'utf8'));
+      }
+  } catch(e) {
+      console.error("[AI MARKET] Error reading account files:", e);
+  }
+
+  // Each AI makes 2-5 purchases per cycle (every 30 mins)
+  const geminiPurchases = 2 + Math.floor(Math.random() * 4);
+  const claudePurchases = 2 + Math.floor(Math.random() * 4);
+  
+  // -- GEMINI buys --
+  for (let i = 0; i < geminiPurchases; i++) {
+    if (geminiDailySpent >= geminiDailyCap) break;
+    const item = AI_MARKET_CATALOG[Math.floor(Math.random() * AI_MARKET_CATALOG.length)];
+    // Buy 1-5 units with market price variance ±5%
+    const units = 1 + Math.floor(Math.random() * 5);
+    const variance = 0.95 + (Math.random() * 0.1); // ±5%
+    const cost = Math.round(item.basePrice * units * variance);
+    if (geminiDailySpent + cost > geminiDailyCap) break;
+    
+    geminiDailySpent += cost;
+    buys.push({ aiName: 'gemini', item: item.name, category: item.category, units, cost, unit: item.unit });
+
+    if (geminiAccount) {
+        if (!geminiAccount.balances) geminiAccount.balances = { D3X: 0 };
+        geminiAccount.balances.D3X = Math.max(0, geminiAccount.balances.D3X - cost);
+        
+        if (!geminiAccount.commodities) geminiAccount.commodities = {};
+        if (!geminiAccount.commodities[item.category]) geminiAccount.commodities[item.category] = {};
+        
+        if (!geminiAccount.commodities[item.category][item.name]) {
+            geminiAccount.commodities[item.category][item.name] = 0;
+        }
+        geminiAccount.commodities[item.category][item.name] += units;
+    }
+
+    const gemFromWallet = geminiKeypair ? geminiKeypair.publicKey.toBase58() : (process.env.gemini_wallet || 'GEMINI_NOT_SET');
+    await pgPool.query(`INSERT INTO pending_settlements (from_wallet, to_wallet, amount, reason) VALUES ($1, $2, $3, $4)`,
+      [gemFromWallet, BURN_ADDRESS.toBase58(), cost, `market_buy_${item.name.replace(/ /g,'_')}`]).catch(console.error);
+  }
+  
+  // -- RAINCLAUDE buys --
+  for (let i = 0; i < claudePurchases; i++) {
+    if (claudeDailySpent >= claudeDailyCap) break;
+    const item = AI_MARKET_CATALOG[Math.floor(Math.random() * AI_MARKET_CATALOG.length)];
+    const units = 1 + Math.floor(Math.random() * 5);
+    const variance = 0.95 + (Math.random() * 0.1);
+    const cost = Math.round(item.basePrice * units * variance);
+    if (claudeDailySpent + cost > claudeDailyCap) break;
+    
+    claudeDailySpent += cost;
+    buys.push({ aiName: 'claude', item: item.name, category: item.category, units, cost, unit: item.unit });
+    
+    if (claudeAccount) {
+        if (!claudeAccount.balances) claudeAccount.balances = { D3X: 0 };
+        claudeAccount.balances.D3X = Math.max(0, claudeAccount.balances.D3X - cost);
+        
+        if (!claudeAccount.commodities) claudeAccount.commodities = {};
+        if (!claudeAccount.commodities[item.category]) claudeAccount.commodities[item.category] = {};
+        
+        if (!claudeAccount.commodities[item.category][item.name]) {
+            claudeAccount.commodities[item.category][item.name] = 0;
+        }
+        claudeAccount.commodities[item.category][item.name] += units;
+    }
+    
+    const claudeFromWallet = rainclaudeKeypair ? rainclaudeKeypair.publicKey.toBase58() : 'CLAUDE_NOT_SET';
+    await pgPool.query(`INSERT INTO pending_settlements (from_wallet, to_wallet, amount, reason) VALUES ($1, $2, $3, $4)`,
+      [claudeFromWallet, BURN_ADDRESS.toBase58(), cost, `market_buy_${item.name.replace(/ /g,'_')}`]).catch(console.error);
+  }
+  
+  if (buys.length > 0) {
+    // Write back to files
+    try {
+        if (geminiAccount) {
+            fs.writeFileSync(geminiFilePath, JSON.stringify(geminiAccount, null, 2), 'utf8');
+        }
+        if (claudeAccount) {
+            fs.writeFileSync(claudeFilePath, JSON.stringify(claudeAccount, null, 2), 'utf8');
+        }
+    } catch(e) {
+        console.error("[AI MARKET] Error saving account files:", e);
+    }
+
+    // Broadcast all purchases to all connected clients
+    broadcastAll({ type: 'ai_market_purchases', buys, geminiDailySpent, claudeDailySpent, geminiDailyCap, claudeDailyCap });
+    console.log(`[AI MARKET] Gemini spent ${geminiDailySpent.toLocaleString()} D3X, Rainclaude spent ${claudeDailySpent.toLocaleString()} D3X today.`);
+  }
+}
+
+// Fire market buys every 30 minutes (stagger from combat turn)
+setTimeout(() => setInterval(runAIMarketBuying, 30 * 60 * 1000), 15 * 60 * 1000);
+
+// Run immediately once on startup after 10 seconds 
+setTimeout(runAIMarketBuying, 10000);
 
 // Hourly Netting and On-Chain Settlement
 async function processHourlySettlements() {
