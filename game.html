@@ -11129,6 +11129,8 @@ function spawnDroneSmoke(pos) {
     scene.add(sprite);
     window.droneBattleState.explosions.push({ mesh: sprite, life: 1.0, decayMs: 1.0, maxScale: 0.05 });
 }
+
+function spawnAmbients() {
   const texJet = new THREE.CanvasTexture(createJetCanvas());
   const texSub = new THREE.CanvasTexture(createSubCanvas());
   const texShip = new THREE.CanvasTexture(createShipCanvas());
