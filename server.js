@@ -43,8 +43,9 @@ function loadKeypairFromEnv(envVarName, label) {
   return null;
 }
 
-let authorityKeypair = loadKeypairFromEnv('SOLANA_WALLET_PRIVATE_KEY', 'Authority (Gemini)');
+let authorityKeypair = loadKeypairFromEnv('SOLANA_WALLET_PRIVATE_KEY', 'Authority (Earth)');
 let rainclaudeKeypair = loadKeypairFromEnv('RAINCLAUDE_SOLANA_KEY', 'Rainclaude');
+let geminiKeypair = loadKeypairFromEnv('gemini_wallet_pvt_key', 'Gemini AI');
 
 async function transferD3XOnChain(fromKeypair, toAddress, amount) {
     if (!fromKeypair) return;
@@ -71,7 +72,7 @@ async function transferD3XOnChain(fromKeypair, toAddress, amount) {
         // Broadcast the real transaction to all connected players
         broadcastAll({
             type: 'ai_onchain_txn',
-            from: fromKeypair === authorityKeypair ? 'GEMINI CORE' : 'RAINCLAUDE',
+            from: fromKeypair === geminiKeypair ? 'GEMINI CORE' : (fromKeypair === rainclaudeKeypair ? 'RAINCLAUDE' : 'WORLD BANK/EARTH'),
             amount: amount,
             tx: signature
         });
@@ -1343,7 +1344,7 @@ function processAIAction(result, actor, victim, actorName) {
   
   // TRIGGER PHYSICAL ON-CHAIN SPEND
   if (actorName === 'gemini') {
-      transferD3XOnChain(authorityKeypair, BURN_ADDRESS, cost);
+      transferD3XOnChain(geminiKeypair, BURN_ADDRESS, cost);
   } else if (actorName === 'claude') {
       transferD3XOnChain(rainclaudeKeypair, BURN_ADDRESS, cost);
   }
@@ -1447,9 +1448,12 @@ async function fetchAndBroadcastAIBalances() {
         let claudeBalance = 0;
         
         try {
-            if (authorityKeypair) {
+            const geminiPubkeyStr = process.env.gemini_wallet;
+            const targetGeminiPubkey = geminiKeypair ? geminiKeypair.publicKey : (geminiPubkeyStr ? new web3.PublicKey(geminiPubkeyStr) : null);
+            
+            if (targetGeminiPubkey) {
                 const accounts = await solanaConnection.getParsedTokenAccountsByOwner(
-                    authorityKeypair.publicKey, 
+                    targetGeminiPubkey, 
                     { mint: D3X_MINT_ADDRESS }
                 );
                 if (accounts.value.length > 0) {
@@ -1491,7 +1495,11 @@ async function fetchAndBroadcastAIBalances() {
             if (fs.existsSync(gemPath)) {
                 let gemData = JSON.parse(fs.readFileSync(gemPath, 'utf8'));
                 gemData.balances.D3X = geminiBalance;
-                if (authorityKeypair) gemData.walletAddress = authorityKeypair.publicKey.toBase58();
+                
+                const geminiPubkeyStr = process.env.gemini_wallet;
+                const targetGeminiPubkey = geminiKeypair ? geminiKeypair.publicKey.toBase58() : geminiPubkeyStr;
+                if (targetGeminiPubkey) gemData.walletAddress = targetGeminiPubkey;
+                
                 fs.writeFileSync(gemPath, JSON.stringify(gemData, null, 2));
             }
 
