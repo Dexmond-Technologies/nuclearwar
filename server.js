@@ -660,6 +660,20 @@ function initWebSockets() {
       case 'get_my_d3x_balance': {
           const walletAddr = msg.wallet;
           if (!walletAddr) break;
+          // 1. Check if the user has a saved off-chain ledger balance from previous G-Market trades
+          try {
+              if (pgPool) {
+                  const res = await pgPool.query(`SELECT portfolio FROM commanders WHERE callsign = $1`, [walletAddr]);
+                  if (res.rows.length > 0 && res.rows[0].portfolio && res.rows[0].portfolio.localD3XBalance !== undefined) {
+                      ws.send(JSON.stringify({ type: 'my_d3x_balance', amount: res.rows[0].portfolio.localD3XBalance }));
+                      break; // internal balance is found and prioritized
+                  }
+              }
+          } catch(e) {
+              console.error('get_my_d3x_balance DB Error:', e.message);
+          }
+          
+          // 2. Fallback to on-chain SOL SPL query for new sign-ins
           try {
               const pub = new web3.PublicKey(walletAddr);
               const ta = await splToken.getAssociatedTokenAddress(D3X_MINT_ADDRESS, pub);

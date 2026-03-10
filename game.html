@@ -7719,7 +7719,8 @@ window.tradeGreenMetal = function(metalName, amount) {
           callsign: window.myCallsign || GS.playerCallsign,
           portfolio: {
               commodities: window.greenMarket.commodities,
-              tradeLogs: window.greenMarket.tradeLogs
+              tradeLogs: window.greenMarket.tradeLogs,
+              localD3XBalance: window.localD3XBalance
           }
       }));
   }
