@@ -846,13 +846,14 @@ function initWebSockets() {
           if (!pgPool) break;
           try {
               const res = await pgPool.query(`SELECT d3x_balance, portfolio FROM commanders WHERE callsign = 'WORLD BANK'`);
-              if (res.rows.length > 0) {
-                  ws.send(JSON.stringify({
-                      type: 'world_bank_stats',
-                      d3xBalance: res.rows[0].d3x_balance || 0,
-                      portfolio: res.rows[0].portfolio || {}
-                  }));
-              }
+              const row = res.rows[0];
+              const portfolio = row.portfolio || {};
+              ws.send(JSON.stringify({
+                  type: 'world_bank_stats',
+                  d3x: row.d3x_balance || 0,
+                  portfolio: portfolio,
+                  commodities: portfolio.commodities || {}
+              }));
           } catch(e) {
               console.error('get_world_bank_stats DB Error:', e.message);
           }
@@ -1343,7 +1344,24 @@ function initWebSockets() {
             }
             
             await pgPool.query(`UPDATE commanders SET portfolio = $1 WHERE callsign = $2`, [finalPortfolio, callsign]);
-            // console.log(`[MARKET] Saved updated portfolio for Commander ${callsign}`);
+            
+            // If World Bank is trading, broadcast the updated inventory to everyone immediately
+            if (callsign === 'WORLD BANK') {
+                const wbRes = await pgPool.query(`SELECT d3x_balance, portfolio FROM commanders WHERE callsign = 'WORLD BANK'`);
+                if (wbRes.rows.length > 0) {
+                    const row = wbRes.rows[0];
+                    const wbPort = row.portfolio || {};
+                    const msgOut = JSON.stringify({
+                        type: 'world_bank_stats',
+                        d3x: row.d3x_balance || 0,
+                        portfolio: wbPort,
+                        commodities: wbPort.commodities || {}
+                    });
+                    wss.clients.forEach(c => {
+                        if (c.readyState === WebSocket.OPEN) c.send(msgOut);
+                    });
+                }
+            }
         } catch (e) {
             console.error('DB Error on save_portfolio:', e.message);
         }

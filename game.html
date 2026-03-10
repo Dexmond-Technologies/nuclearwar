@@ -1474,7 +1474,7 @@ body {
       </div>
   </div>
 
-  <button id="btn-reinvest-d3x" onclick="toggleReinvest()" style="position:absolute; top:35px; right:25px; display:block; width:130px; pointer-events:auto; padding:8px 0; background:rgba(0,255,136,0.15); border:1px solid #0f8; color:#0f8; font-family:'Courier New', monospace; font-size:10px; font-weight:bold; text-align:center; cursor:pointer; border-radius:4px; transition:all 0.2s; box-shadow:0 0 10px rgba(0,255,136,0.2); box-sizing:border-box; z-index:100;">♻️ REINVEST: OFF<br/>AIRDROP 1X</button>
+  <button id="btn-reinvest-d3x" onclick="toggleReinvest()" style="position:absolute; top:35px; right:345px; display:block; width:130px; pointer-events:auto; padding:8px 0; background:rgba(0,255,136,0.15); border:1px solid #0f8; color:#0f8; font-family:'Courier New', monospace; font-size:10px; font-weight:bold; text-align:center; cursor:pointer; border-radius:4px; transition:all 0.2s; box-shadow:0 0 10px rgba(0,255,136,0.2); box-sizing:border-box; z-index:100;">♻️ REINVEST: OFF<br/>AIRDROP 1X</button>
   
   <div id="right-hud-group" style="position:absolute; bottom:55px; right:calc(25px + 30vw); display:flex; flex-direction:column; gap:8px; width:115px; z-index:100; align-items:stretch; pointer-events:none;">
       <div id="skin-hint-arrow" style="position:absolute; top:35px; left:-40px; font-size:32px; color:#ff5577; text-shadow:0 0 15px rgba(255,-85,119,0.8); opacity:0; pointer-events:none; z-index:9999; transition:opacity 0.5s; animation:bounceRight 0.5s infinite alternate;">➔</div>
@@ -7669,7 +7669,17 @@ window.triggerSolanaDonation = async function() {
     const wbHits = ray.intersectObjects(window.worldBankGroup.children, true);
     if (wbHits.length > 0) {
       if (typeof _sfxClick !== 'undefined') _sfxClick();
-      document.getElementById('world-bank-modal').style.display = 'flex';
+      const wbModal = document.getElementById('world-bank-modal');
+      // The body has transform:scale(0.75) which makes 100vh = 75% of real screen.
+      // To truly fill the screen we must compensate: divide by 0.75
+      const scale = 0.75;
+      const trueW = window.screen.width / scale;
+      const trueH = window.screen.height / scale;
+      wbModal.style.width = trueW + 'px';
+      wbModal.style.height = trueH + 'px';
+      wbModal.style.left = '0px';
+      wbModal.style.top = '0px';
+      wbModal.style.display = 'flex';
       // Request latest World Bank stats from server
       if (typeof ws !== 'undefined' && ws.readyState === WebSocket.OPEN) {
           ws.send(JSON.stringify({ type: 'get_world_bank_stats' }));
@@ -10334,20 +10344,22 @@ function initWS() {
               if (xrp) xrp.innerText = (msg.portfolio.XRP || 0).toFixed(2);
               if (xlm) xlm.innerText = (msg.portfolio.XLM || 0).toFixed(2);
 
-              const inv = msg.portfolio.inventory || {};
-              const idMap = {
-                  'wb-inv-silicon': 'silicon',
-                  'wb-inv-copper': 'copper',
-                  'wb-inv-gold': 'gold',
-                  'wb-inv-lithium': 'lithium',
-                  'wb-inv-gpu': 'gpu',
-                  'wb-inv-cpu': 'cpu',
-                  'wb-inv-ram': 'ram',
-                  'wb-inv-psu': 'psu'
-              };
-              for (const [elId, invKey] of Object.entries(idMap)) {
-                  const el = document.getElementById(elId);
-                  if (el) el.innerText = (inv[invKey] || 0).toLocaleString();
+              // Dynamically render ALL commodity categories and items
+              if (msg.commodities) {
+                  const container = document.getElementById('wb-commodities-container');
+                  if (container) {
+                      container.innerHTML = '';
+                      for (const [category, items] of Object.entries(msg.commodities)) {
+                          const catHdr = document.createElement('tr');
+                          catHdr.innerHTML = `<td colspan="2" style="color:#0af; font-size:0.9vw; padding-top:14px; padding-bottom:4px; border-top:1px dashed rgba(0,170,255,0.3); letter-spacing:2px; font-family:'Share Tech Mono',monospace;">${category.toUpperCase()}</td>`;
+                          container.appendChild(catHdr);
+                          for (const [item, qty] of Object.entries(items)) {
+                              const tr = document.createElement('tr');
+                              tr.innerHTML = `<td style="color:#aaa; font-size:0.85vw; padding:3px 0; font-family:'Courier New',monospace;">${item}</td><td style="text-align:right; font-weight:bold; color:#0f8; font-family:'Courier New',monospace;">${Number(qty).toLocaleString()}</td>`;
+                              container.appendChild(tr);
+                          }
+                      }
+                  }
               }
           }
           break;
@@ -16229,7 +16241,7 @@ window.mineD3XCoin = function() {
           <div style="display:flex; flex:1; justify-content:space-between; margin-top:20px; gap:40px; height: 100%;">
               
               <!-- LEFT COL: RESERVES -->
-              <div style="flex:1; background:rgba(0,0,0,0.6); padding:40px; border:1px solid rgba(0,255,136,0.5); box-shadow: inset 0 0 50px rgba(0,255,136,0.1); border-radius:4px; display:flex; flex-direction:column;">
+              <div style="flex:1; background:rgba(0,0,0,0.6); padding:20px; border:1px solid rgba(0,255,136,0.5); box-shadow: inset 0 0 50px rgba(0,255,136,0.1); border-radius:4px; display:flex; flex-direction:column; overflow-y:auto;">
                   <h2 style="color:#0f8; font-family:'Share Tech Mono', monospace; border-bottom:2px solid #0f8; padding-bottom:15px; margin-top:0; font-size:2vw;">RESERVE ASSETS</h2>
                   <table style="width:100%; color:#fff; font-family:'Courier New', monospace; font-size:1.2vw; border-spacing: 0 15px;">
                       <tr><td style="color:#aaa;">DATACENTER TOKENS (D3X)</td><td style="text-align:right; font-weight:bold; color:#0f8; font-size:1.5vw;" id="wb-d3x-balance">0.00</td></tr>
@@ -16240,30 +16252,64 @@ window.mineD3XCoin = function() {
                       <tr><td style="color:#aaa;">STELLAR (XLM)</td><td style="text-align:right; font-weight:bold;" id="wb-port-xlm">0.00</td></tr>
                   </table>
                   
+                  <!-- D3X PURCHASE CARD -->
                   <div style="margin-top:auto; padding-top:20px;">
-                      <button onclick="let w=600,h=700,l=(screen.width/2)-(w/2),t=(screen.height/2)-(h/2); window.open('https://buy.stripe.com/aFa14m9yN8y0g4D7wo2wU05', 'Stripe', `width=${w},height=${h},top=${t},left=${l},toolbar=no`);" style="background:rgba(0,170,255,0.1); border:2px solid #0af; color:#0af; padding:20px; font-size:1.5vw; font-family:'Share Tech Mono', monospace; font-weight:bold; letter-spacing:4px; cursor:pointer; transition:0.3s; box-shadow:0 0 20px rgba(0,170,255,0.4); width:100%;">
-                          PROCURE 500 D3X ($4.99)
-                      </button>
+                      <div style="background:linear-gradient(135deg, rgba(0,170,255,0.08), rgba(0,255,136,0.05)); border:1px solid rgba(0,170,255,0.4); border-radius:8px; padding:24px; position:relative; overflow:hidden;">
+                          <!-- Glow accent -->
+                          <div style="position:absolute; top:-40px; right:-40px; width:120px; height:120px; background:radial-gradient(circle, rgba(0,170,255,0.3), transparent 70%); pointer-events:none;"></div>
+                          
+                          <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+                              <div style="font-size:2vw; line-height:1;">💎</div>
+                              <div>
+                                  <div style="color:#0af; font-family:'Share Tech Mono', monospace; font-size:1.1vw; font-weight:bold; letter-spacing:3px;">D3X TOKEN PACKAGE</div>
+                                  <div style="color:#aaa; font-size:0.8vw; font-family:'Courier New', monospace;">CITADEL RESERVE DEPOSIT</div>
+                              </div>
+                              <div style="margin-left:auto; text-align:right;">
+                                  <div style="color:#0f8; font-family:'Share Tech Mono', monospace; font-size:1.8vw; font-weight:bold;">$4.99</div>
+                                  <div style="color:#aaa; font-size:0.7vw; font-family:'Courier New', monospace;">ONE-TIME PAYMENT</div>
+                              </div>
+                          </div>
+
+                          <div style="border-top:1px solid rgba(0,170,255,0.2); margin:12px 0; padding-top:12px; display:flex; flex-direction:column; gap:8px;">
+                              <div style="display:flex; align-items:center; gap:8px; color:#ccc; font-family:'Courier New', monospace; font-size:0.9vw;">
+                                  <span style="color:#0f8;">✓</span> 500 D3X instantly credited
+                              </div>
+                              <div style="display:flex; align-items:center; gap:8px; color:#ccc; font-family:'Courier New', monospace; font-size:0.9vw;">
+                                  <span style="color:#0f8;">✓</span> No subscription — one-time purchase
+                              </div>
+                              <div style="display:flex; align-items:center; gap:8px; color:#ccc; font-family:'Courier New', monospace; font-size:0.9vw;">
+                                  <span style="color:#0f8;">✓</span> Secured via Stripe encrypted checkout
+                              </div>
+                          </div>
+
+                          <button onclick="window.open('https://buy.stripe.com/aFa14m9yN8y0g4D7wo2wU05', '_blank');"
+                              style="margin-top:16px; width:100%; padding:16px 0; background:linear-gradient(90deg, rgba(0,170,255,0.25), rgba(0,255,136,0.15)); border:1.5px solid #0af; color:#fff; font-family:'Share Tech Mono', monospace; font-size:1.1vw; font-weight:bold; letter-spacing:4px; cursor:pointer; border-radius:6px; transition:all 0.25s; box-shadow:0 0 25px rgba(0,170,255,0.3);"
+                              onmouseover="this.style.boxShadow='0 0 45px rgba(0,170,255,0.7)'; this.style.background='linear-gradient(90deg, rgba(0,170,255,0.45), rgba(0,255,136,0.3))';"
+                              onmouseout="this.style.boxShadow='0 0 25px rgba(0,170,255,0.3)'; this.style.background='linear-gradient(90deg, rgba(0,170,255,0.25), rgba(0,255,136,0.15))';">
+                              💳 PROCURE 500 D3X — $4.99
+                          </button>
+
+                          <div style="margin-top:10px; text-align:center; color:#555; font-family:'Courier New', monospace; font-size:0.7vw; letter-spacing:2px;">
+                              POWERED BY STRIPE · SSL ENCRYPTED
+                          </div>
+                      </div>
                   </div>
               </div>
 
               <!-- MIDDLE COL: INVENTORY -->
-              <div style="flex:1; background:rgba(0,0,0,0.6); padding:40px; border:1px solid rgba(0,170,255,0.5); box-shadow: inset 0 0 50px rgba(0,170,255,0.1); border-radius:4px; display:flex; flex-direction:column;">
-                  <h2 style="color:#0af; font-family:'Share Tech Mono', monospace; border-bottom:2px solid #0af; padding-bottom:15px; margin-top:0; font-size:2vw;">GLOBAL INVENTORY</h2>
-                  <table style="width:100%; color:#fff; font-family:'Courier New', monospace; font-size:1.2vw; border-spacing: 0 15px;">
-                      <tr><td style="color:#aaa;">SILICON</td><td style="text-align:right; font-weight:bold;" id="wb-inv-silicon">0</td></tr>
-                      <tr><td style="color:#aaa;">COPPER</td><td style="text-align:right; font-weight:bold;" id="wb-inv-copper">0</td></tr>
-                      <tr><td style="color:#aaa;">GOLD</td><td style="text-align:right; font-weight:bold;" id="wb-inv-gold">0</td></tr>
-                      <tr><td style="color:#aaa;">LITHIUM</td><td style="text-align:right; font-weight:bold;" id="wb-inv-lithium">0</td></tr>
-                      <tr><td style="color:#aaa; border-top:1px dashed #555; padding-top:15px;">GRAPHICS PROCESSING UNITS</td><td style="border-top:1px dashed #555; padding-top:15px; text-align:right; font-weight:bold; color:#f0f;" id="wb-inv-gpu">0</td></tr>
-                      <tr><td style="color:#aaa;">CENTRAL PROCESSORS</td><td style="text-align:right; font-weight:bold; color:#0ff;" id="wb-inv-cpu">0</td></tr>
-                      <tr><td style="color:#aaa;">MEMORY MODULES</td><td style="text-align:right; font-weight:bold; color:#0f0;" id="wb-inv-ram">0</td></tr>
-                      <tr><td style="color:#aaa;">POWER SUPPLIES</td><td style="text-align:right; font-weight:bold; color:#ff0;" id="wb-inv-psu">0</td></tr>
-                  </table>
+              <div style="flex:1; background:rgba(0,0,0,0.6); padding:20px; border:1px solid rgba(0,170,255,0.5); box-shadow: inset 0 0 50px rgba(0,170,255,0.1); border-radius:4px; display:flex; flex-direction:column; overflow:hidden;">
+                  <h2 style="color:#0af; font-family:'Share Tech Mono', monospace; border-bottom:2px solid #0af; padding-bottom:15px; margin-top:0; font-size:2vw; flex-shrink:0;">GLOBAL INVENTORY</h2>
+                  <div style="overflow-y:auto; flex:1; padding-right:8px;">
+                      <table style="width:100%; color:#fff; font-family:'Courier New', monospace; font-size:1vw; border-collapse:collapse;">
+                          <tbody id="wb-commodities-container">
+                              <tr><td colspan="2" style="color:#555; font-size:0.9vw; text-align:center; padding-top:20px;">Loading inventory...</td></tr>
+                          </tbody>
+                      </table>
+                  </div>
               </div>
 
               <!-- RIGHT COL: LOAN SYSTEM -->
-              <div style="flex:1; background:rgba(0,0,0,0.6); padding:40px; border:1px solid rgba(255,200,0,0.5); box-shadow: inset 0 0 50px rgba(255,200,0,0.1); border-radius:4px; display:flex; flex-direction:column; align-items:center;">
+              <div style="flex:1; background:rgba(0,0,0,0.6); padding:20px; border:1px solid rgba(255,200,0,0.5); box-shadow: inset 0 0 50px rgba(255,200,0,0.1); border-radius:4px; display:flex; flex-direction:column; align-items:center; overflow-y:auto;">
                   <h2 style="color:#fc0; font-family:'Share Tech Mono', monospace; border-bottom:2px solid #fc0; padding-bottom:15px; margin-top:0; width:100%; font-size:2vw;">OVERCOLLATERALIZED LOANS</h2>
                   <div style="text-align:center; color:#ccc; font-family:'Courier New', monospace; margin-bottom:30px; font-size:1vw; line-height:1.6;">
                       No interest, no time limits. Max 1 active loan.<br/>
