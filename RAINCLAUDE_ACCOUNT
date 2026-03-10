@@ -3,7 +3,7 @@
   "faction": "Adversary AI",
   "walletAddress": "5rdrJ46YJbtVHEx7xRgURGm49Cwf1WikLhU71VnS8",
   "balances": {
-    "D3X": 0.0
+    "D3X": 80000000
   },
   "commodities": {
     "Metals": {

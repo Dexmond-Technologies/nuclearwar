@@ -1449,9 +1449,14 @@ async function fetchAndBroadcastAIBalances() {
     try {
         let geminiBalance = 0;
         let claudeBalance = 0;
-        const geminiPubkeyStr = process.env.gemini_wallet;
+        
+        // Use SOLANA_WALLET_ADDRESS (the old Authority/Earth wallet) as fallback for Gemini if gemini_wallet is missing
+        const geminiPubkeyStr = process.env.gemini_wallet || process.env.SOLANA_WALLET_ADDRESS;
         const targetGeminiPubkey = geminiKeypair ? geminiKeypair.publicKey : (geminiPubkeyStr ? new web3.PublicKey(geminiPubkeyStr) : null);
-        const rainclaudePubkey = new web3.PublicKey("5rdrJ46YJbtVHEx7xRgURGm49Cwf1WikLhU71VnS8");
+        
+        // Use RAINCLAUDE_SOLANA_WALLET from env, fallback to hardcoded if missing
+        const rainclaudePubkeyStr = process.env.RAINCLAUDE_SOLANA_WALLET || "5rdrJ46YJbtVHEx7xRgURGm49Cwf1WikLhU71VnS8zk3";
+        const rainclaudePubkey = new web3.PublicKey(rainclaudePubkeyStr);
         
         try {
             if (targetGeminiPubkey) {
@@ -1491,12 +1496,15 @@ async function fetchAndBroadcastAIBalances() {
                 rcData.balances.D3X = claudeBalance;
                 fs.writeFileSync(rcPath, JSON.stringify(rcData, null, 2));
             }
+        } catch(e) { console.error('Claude balance fetch error:', e.message); claudeBalance = 0; }
             
+        try {
+            const fs = require('fs');
+            const path = require('path');
             const gemPath = path.join(__dirname, 'GEMINI_BANK_AND_TRADING_ACCOUNT');
             if (fs.existsSync(gemPath)) {
                 let gemData = JSON.parse(fs.readFileSync(gemPath, 'utf8'));
                 gemData.balances.D3X = geminiBalance;
-                
                 
                 const trgPubKeyStr = targetGeminiPubkey ? (typeof targetGeminiPubkey === 'string' ? targetGeminiPubkey : targetGeminiPubkey.toBase58()) : geminiPubkeyStr;
                 if (trgPubKeyStr) gemData.walletAddress = trgPubKeyStr;
@@ -1504,13 +1512,13 @@ async function fetchAndBroadcastAIBalances() {
                 fs.writeFileSync(gemPath, JSON.stringify(gemData, null, 2));
             }
 
-        } catch(e) { console.error('Claude balance error:', e.message); claudeBalance = 0; }
+        } catch(e) { console.error('Claude/Gemini JSON save error:', e.message); }
 
         broadcastAll({
             type: 'ai_d3x_balances',
             gemini: geminiBalance,
             claude: claudeBalance,
-            geminiWallet: targetGeminiPubkey ? (typeof targetGeminiPubkey === 'string' ? targetGeminiPubkey : targetGeminiPubkey.toBase58()) : process.env.gemini_wallet || "NOT_SET",
+            geminiWallet: targetGeminiPubkey ? (typeof targetGeminiPubkey === 'string' ? targetGeminiPubkey : targetGeminiPubkey.toBase58()) : (geminiPubkeyStr || "NOT_SET"),
             claudeWallet: rainclaudePubkey.toBase58()
         });
     } catch (err) {
