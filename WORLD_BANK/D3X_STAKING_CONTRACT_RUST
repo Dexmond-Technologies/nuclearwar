@@ -1,0 +1,318 @@
+use anchor_lang::prelude::*;
+use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
+
+// Determine your program ID here
+declare_id!("D3xStake11111111111111111111111111111111111");
+
+const SECONDS_IN_YEAR: u64 = 31_536_000;
+const APY_BPS: u64 = 1200; // 12% APY (in basis points)
+const ACC_REWARD_PRECISION: u128 = 1_000_000_000_000; // 1e12
+
+#[program]
+pub mod d3x_staking {
+    use super::*;
+
+    pub fn initialize(ctx: Context<Initialize>, _bump: u8) -> Result<()> {
+        let vault = &mut ctx.accounts.vault_state;
+        vault.reward_mint = ctx.accounts.reward_mint.key();
+        vault.total_staked = 0;
+        vault.acc_reward_per_share = 0; // Initialize accumulator
+        vault.last_reward_timestamp = Clock::get()?.unix_timestamp;
+        vault.bump = _bump;
+        Ok(())
+    }
+
+    /// Admin instruction to fund the vault with reward D3X
+    pub fn fund_reward_vault(ctx: Context<FundRewardVault>, amount: u64) -> Result<()> {
+        let cpi_accounts = Transfer {
+            from: ctx.accounts.funder_token_account.to_account_info(),
+            to: ctx.accounts.vault_token_account.to_account_info(),
+            authority: ctx.accounts.funder.to_account_info(),
+        };
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
+        token::transfer(cpi_ctx, amount)?;
+
+        Ok(())
+    }
+
+    /// Explicitly initialize user account to prevent init_if_needed wiping exploit
+    pub fn initialize_user(_ctx: Context<InitializeUser>) -> Result<()> {
+        Ok(()) // Space and state are automatically zeroed by Anchor
+    }
+
+    pub fn stake(ctx: Context<Stake>, amount: u64) -> Result<()> {
+        update_vault_rewards(&mut ctx.accounts.vault_state)?;
+
+        let user_info = &mut ctx.accounts.user_info;
+        let vault = &mut ctx.accounts.vault_state;
+
+        // Calculate pending rewards to current block
+        if user_info.amount_staked > 0 {
+            let pending = calculate_pending_reward(
+                user_info.amount_staked,
+                vault.acc_reward_per_share,
+                user_info.reward_debt,
+            );
+            user_info.pending_rewards = user_info.pending_rewards.checked_add(pending).unwrap();
+        }
+
+        if amount > 0 {
+            // Transfer tokens from User to Vault
+            let cpi_accounts = Transfer {
+                from: ctx.accounts.user_token_account.to_account_info(),
+                to: ctx.accounts.vault_token_account.to_account_info(),
+                authority: ctx.accounts.user.to_account_info(),
+            };
+            let cpi_program = ctx.accounts.token_program.to_account_info();
+            let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
+            token::transfer(cpi_ctx, amount)?;
+
+            user_info.amount_staked = user_info.amount_staked.checked_add(amount).unwrap();
+            vault.total_staked = vault.total_staked.checked_add(amount).unwrap();
+        }
+
+        // Reset reward debt based on new current shares
+        user_info.reward_debt = (user_info.amount_staked as u128)
+            .checked_mul(vault.acc_reward_per_share).unwrap()
+            .checked_div(ACC_REWARD_PRECISION).unwrap() as u64;
+
+        Ok(())
+    }
+
+    pub fn unstake(ctx: Context<Unstake>, amount: u64) -> Result<()> {
+        update_vault_rewards(&mut ctx.accounts.vault_state)?;
+
+        let user_info = &mut ctx.accounts.user_info;
+        let vault = &mut ctx.accounts.vault_state;
+
+        require!(user_info.amount_staked >= amount, StakingError::InsufficientStake);
+
+        // Calculate pending rewards
+        let pending = calculate_pending_reward(
+            user_info.amount_staked,
+            vault.acc_reward_per_share,
+            user_info.reward_debt,
+        );
+        user_info.pending_rewards = user_info.pending_rewards.checked_add(pending).unwrap();
+
+        // Calculate total to send back: requested principal + all accumulated pending rewards
+        let total_reward = user_info.pending_rewards;
+        let total_payout = amount.checked_add(total_reward).unwrap();
+
+        require!(
+            ctx.accounts.vault_token_account.amount >= total_payout,
+            StakingError::InsufficientVaultFunds
+        );
+
+        if total_payout > 0 {
+            // Signer seeds for the vault PDA
+            let bump = vault.bump;
+            let seeds = &["vault".as_bytes(), &[bump]];
+            let signer = &[&seeds[..]];
+
+            // Transfer tokens from Vault back to User
+            let cpi_accounts = Transfer {
+                from: ctx.accounts.vault_token_account.to_account_info(),
+                to: ctx.accounts.user_token_account.to_account_info(),
+                authority: vault.to_account_info(), // The PDA itself is the authority over its token account
+            };
+            let cpi_program = ctx.accounts.token_program.to_account_info();
+            let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
+            token::transfer(cpi_ctx, total_payout)?;
+            
+            // Deduct paid rewards
+            user_info.pending_rewards = 0;
+            
+            // Deduct principal
+            user_info.amount_staked = user_info.amount_staked.checked_sub(amount).unwrap();
+            vault.total_staked = vault.total_staked.checked_sub(amount).unwrap();
+        }
+
+        // Reset debt based on what remains
+        user_info.reward_debt = (user_info.amount_staked as u128)
+            .checked_mul(vault.acc_reward_per_share).unwrap()
+            .checked_div(ACC_REWARD_PRECISION).unwrap() as u64;
+
+        Ok(())
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Mathematical Helpers
+// ----------------------------------------------------------------------------
+
+fn update_vault_rewards(vault: &mut Account<VaultState>) -> Result<()> {
+    let clock = Clock::get()?;
+    let current_timestamp = clock.unix_timestamp;
+
+    if current_timestamp <= vault.last_reward_timestamp {
+        return Ok(());
+    }
+
+    if vault.total_staked == 0 {
+        vault.last_reward_timestamp = current_timestamp;
+        return Ok(());
+    }
+
+    let time_elapsed = current_timestamp.saturating_sub(vault.last_reward_timestamp);
+
+    // time_elapsed * APY_BPS * ACC_REWARD_PRECISION / (10000 * SECONDS_IN_YEAR)
+    let reward_factor = (time_elapsed as u128)
+        .checked_mul(APY_BPS as u128).unwrap()
+        .checked_mul(ACC_REWARD_PRECISION).unwrap()
+        .checked_div(10000).unwrap()
+        .checked_div(SECONDS_IN_YEAR as u128).unwrap();
+
+    vault.acc_reward_per_share = vault.acc_reward_per_share.checked_add(reward_factor).unwrap();
+    vault.last_reward_timestamp = current_timestamp;
+
+    Ok(())
+}
+
+fn calculate_pending_reward(amount_staked: u64, acc_reward_per_share: u128, reward_debt: u64) -> u64 {
+    let accumulated_total = (amount_staked as u128)
+        .checked_mul(acc_reward_per_share).unwrap()
+        .checked_div(ACC_REWARD_PRECISION).unwrap() as u64;
+
+    accumulated_total.saturating_sub(reward_debt)
+}
+
+// ----------------------------------------------------------------------------
+// Account Contexts
+// ----------------------------------------------------------------------------
+
+#[derive(Accounts)]
+pub struct Initialize<'info> {
+    #[account(
+        init, 
+        payer = authority, 
+        space = 8 + 32 + 8 + 16 + 8 + 1, 
+        seeds = [b"vault"], 
+        bump
+    )]
+    pub vault_state: Account<'info, VaultState>,
+    pub reward_mint: Account<'info, Mint>,
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct FundRewardVault<'info> {
+    #[account(mut)]
+    pub funder: Signer<'info>,
+
+    #[account(mut, seeds = [b"vault"], bump = vault_state.bump)]
+    pub vault_state: Account<'info, VaultState>,
+
+    #[account(mut, constraint = funder_token_account.mint == vault_state.reward_mint @ StakingError::InvalidMint)]
+    pub funder_token_account: Account<'info, TokenAccount>,
+    
+    #[account(
+        mut, 
+        constraint = vault_token_account.mint == vault_state.reward_mint @ StakingError::InvalidMint,
+        constraint = vault_token_account.owner == vault_state.key() @ StakingError::InvalidVaultAuthority
+    )]
+    pub vault_token_account: Account<'info, TokenAccount>,
+    
+    pub token_program: Program<'info, Token>,
+}
+
+#[derive(Accounts)]
+pub struct InitializeUser<'info> {
+    #[account(mut)]
+    pub user: Signer<'info>,
+    
+    #[account(
+        init,
+        payer = user,
+        space = 8 + 8 + 8 + 8,
+        seeds = [b"user_info", user.key().as_ref()],
+        bump
+    )]
+    pub user_info: Account<'info, UserInfo>,
+
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct Stake<'info> {
+    #[account(mut)]
+    pub user: Signer<'info>,
+    
+    #[account(mut, seeds = [b"user_info", user.key().as_ref()], bump)]
+    pub user_info: Account<'info, UserInfo>,
+
+    #[account(mut, seeds = [b"vault"], bump = vault_state.bump)]
+    pub vault_state: Account<'info, VaultState>,
+
+    #[account(mut, constraint = user_token_account.mint == vault_state.reward_mint @ StakingError::InvalidMint)]
+    pub user_token_account: Account<'info, TokenAccount>,
+    
+    #[account(
+        mut, 
+        constraint = vault_token_account.mint == vault_state.reward_mint @ StakingError::InvalidMint,
+        constraint = vault_token_account.owner == vault_state.key() @ StakingError::InvalidVaultAuthority
+    )]
+    pub vault_token_account: Account<'info, TokenAccount>,
+    
+    pub token_program: Program<'info, Token>,
+}
+
+#[derive(Accounts)]
+pub struct Unstake<'info> {
+    #[account(mut)]
+    pub user: Signer<'info>,
+    
+    // We no longer close this account automatically unless user explicitly calls a separate close_account fn
+    #[account(mut, seeds = [b"user_info", user.key().as_ref()], bump)]
+    pub user_info: Account<'info, UserInfo>,
+
+    #[account(mut, seeds = [b"vault"], bump = vault_state.bump)]
+    pub vault_state: Account<'info, VaultState>,
+
+    #[account(mut, constraint = user_token_account.mint == vault_state.reward_mint @ StakingError::InvalidMint)]
+    pub user_token_account: Account<'info, TokenAccount>,
+    
+    #[account(
+        mut, 
+        constraint = vault_token_account.mint == vault_state.reward_mint @ StakingError::InvalidMint,
+        constraint = vault_token_account.owner == vault_state.key() @ StakingError::InvalidVaultAuthority
+    )]
+    pub vault_token_account: Account<'info, TokenAccount>,
+    
+    pub token_program: Program<'info, Token>,
+}
+
+// ----------------------------------------------------------------------------
+// State Encodings
+// ----------------------------------------------------------------------------
+
+#[account]
+pub struct VaultState {
+    pub reward_mint: Pubkey,
+    pub total_staked: u64,
+    pub acc_reward_per_share: u128,
+    pub last_reward_timestamp: i64,
+    pub bump: u8,
+}
+
+#[account]
+pub struct UserInfo {
+    pub amount_staked: u64,
+    pub reward_debt: u64,
+    pub pending_rewards: u64,
+}
+
+#[error_code]
+pub enum StakingError {
+    #[msg("Not enough active stake to withdraw this amount.")]
+    InsufficientStake,
+    #[msg("The vault does not have enough funds to pay out the principal and rewards. Ask admin to fund it.")]
+    InsufficientVaultFunds,
+    #[msg("Provided token account does not match the vault reward mint.")]
+    InvalidMint,
+    #[msg("Provided vault token account is not owned by the vault PDA.")]
+    InvalidVaultAuthority,
+}

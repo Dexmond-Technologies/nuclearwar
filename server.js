@@ -460,6 +460,69 @@ const server = http.createServer((req, res) => {
       console.error('OpenWebcamDB individual stream error:', err);
       handleFallback();
     });
+  } else if (req.url === '/api/webhook/stripe' && req.method === 'POST') {
+    const stripe = require('stripe')(process.env.STRIPE_API);
+    let bodyData = '';
+    req.on('data', chunk => {
+        bodyData += chunk.toString();
+    });
+    req.on('end', async () => {
+        const sig = req.headers['stripe-signature'];
+        let event;
+
+        try {
+            // Need a webhook secret to verify signature securely. Falling back to basic event parsing for now if no secret
+            if (process.env.STRIPE_WEBHOOK_SECRET) {
+                event = stripe.webhooks.constructEvent(bodyData, sig, process.env.STRIPE_WEBHOOK_SECRET);
+            } else {
+                console.warn('⚠ No STRIPE_WEBHOOK_SECRET provided, bypassing signature verification.');
+                event = JSON.parse(bodyData);
+            }
+        } catch (err) {
+            console.error(`Webhook Error: ${err.message}`);
+            res.writeHead(400);
+            return res.end(`Webhook Error: ${err.message}`);
+        }
+
+        // Handle the checkout.session.completed event
+        if (event.type === 'checkout.session.completed') {
+            const session = event.data.object;
+            // Get the user's wallet address from custom fields or metadata
+            // Assuming the user entered it in a custom field named "solana_wallet"
+            let userWallet = session.metadata?.solana_wallet;
+            
+            if (!userWallet && session.custom_fields) {
+               const walletField = session.custom_fields.find(f => 
+                   (f.key && f.key.toUpperCase() === 'SOLANA_WALLET') || 
+                   (f.label && f.label.custom && f.label.custom.toUpperCase() === 'SOLANA_WALLET')
+               );
+               if (walletField && walletField.text) {
+                   userWallet = walletField.text.value;
+               }
+            }
+
+            if (userWallet) {
+                console.log(`[STRIPE] Successful $4.99 purchase by ${session.customer_details?.email}. Transferring 500 D3X to ${userWallet}`);
+                
+                // Execute the on-chain transfer from World Bank wallet
+                if (worldBankKeypair) {
+                    const txSig = await transferD3XOnChain(worldBankKeypair, new web3.PublicKey(userWallet), 500);
+                    if (txSig && pgPool) {
+                        try {
+                            await pgPool.query(`UPDATE commanders SET d3x_balance = d3x_balance + 500 WHERE callsign = $1`, [userWallet]);
+                        } catch(e) { console.error('DB Update error for stripe purchase:', e.message); }
+                    }
+                } else {
+                    console.error('[STRIPE] World Bank wallet not configured! Cannot send 500 D3X.');
+                }
+            } else {
+                console.warn('[STRIPE] Purchase successful, but no Solana Wallet address was provided by the user in the checkout session.');
+            }
+        }
+
+        res.writeHead(200);
+        res.end(JSON.stringify({received: true}));
+    });
   } else {
     res.writeHead(404);
     res.end('Not found');
@@ -687,6 +750,98 @@ function initWebSockets() {
         
         break;
       }
+      
+      case 'request_loan': {
+        const walletAddr = msg.wallet;
+        const collateral = parseInt(msg.collateral);
+        if (!walletAddr || !pgPool) break;
+        
+        const validCollaterals = [5000, 10000, 20000];
+        if (!validCollaterals.includes(collateral)) {
+            ws.send(JSON.stringify({ type: 'loan_error', msg: 'Invalid collateral amount. Must be 5000, 10000, or 20000 D3X.' }));
+            break;
+        }
+        
+        try {
+            const res = await pgPool.query(`SELECT d3x_balance, portfolio FROM commanders WHERE callsign = $1`, [walletAddr]);
+            if (res.rows.length > 0) {
+                let currentBalance = res.rows[0].d3x_balance || 0;
+                let portfolio = res.rows[0].portfolio || {};
+                
+                if (currentBalance < collateral) {
+                    ws.send(JSON.stringify({ type: 'loan_error', msg: 'Insufficient D3X balance for collateral.' }));
+                    break;
+                }
+                if (portfolio.active_loan) {
+                    ws.send(JSON.stringify({ type: 'loan_error', msg: 'You already have an active loan. Repay it first.' }));
+                    break;
+                }
+                
+                const borrowedAmount = Math.floor(collateral * 0.60);
+                
+                // Subtract collateral and add borrowed amount = net change is subtract 40%
+                const netBalanceChange = borrowedAmount - collateral; 
+                
+                portfolio.active_loan = {
+                    collateral: collateral,
+                    borrowed: borrowedAmount,
+                    timestamp: Date.now()
+                };
+                
+                await pgPool.query(`UPDATE commanders SET d3x_balance = d3x_balance + $1, portfolio = $2 WHERE callsign = $3`, [netBalanceChange, portfolio, walletAddr]);
+                console.log(`[BANK] ${walletAddr} took loan: ${borrowedAmount} D3X (Collateral: ${collateral} D3X)`);
+                
+                ws.send(JSON.stringify({ type: 'loan_success', borrowed: borrowedAmount, collateral: collateral }));
+            }
+        } catch(e) {
+            console.error('request_loan error:', e.message);
+        }
+        break;
+      }
+
+      case 'repay_loan': {
+        const walletAddr = msg.wallet;
+        const repayment = parseInt(msg.repayment);
+        if (!walletAddr || !pgPool) break;
+        
+        try {
+            const res = await pgPool.query(`SELECT d3x_balance, portfolio FROM commanders WHERE callsign = $1`, [walletAddr]);
+            if (res.rows.length > 0) {
+                let currentBalance = res.rows[0].d3x_balance || 0;
+                let portfolio = res.rows[0].portfolio || {};
+                
+                if (!portfolio.active_loan) {
+                    ws.send(JSON.stringify({ type: 'loan_error', msg: 'You do not have an active loan.' }));
+                    break;
+                }
+                
+                if (repayment !== portfolio.active_loan.borrowed) {
+                    ws.send(JSON.stringify({ type: 'loan_error', msg: `You must repay EXACTLY the borrowed amount (${portfolio.active_loan.borrowed} D3X).` }));
+                    break;
+                }
+                
+                if (currentBalance < repayment) {
+                    ws.send(JSON.stringify({ type: 'loan_error', msg: 'Insufficient D3X balance to repay loan.' }));
+                    break;
+                }
+                
+                const collateralToReturn = portfolio.active_loan.collateral;
+                
+                // Subtract repayment, add collateral back = net change
+                const netBalanceChange = collateralToReturn - repayment;
+                
+                delete portfolio.active_loan;
+                
+                await pgPool.query(`UPDATE commanders SET d3x_balance = d3x_balance + $1, portfolio = $2 WHERE callsign = $3`, [netBalanceChange, portfolio, walletAddr]);
+                console.log(`[BANK] ${walletAddr} repaid loan of ${repayment} D3X. Returned ${collateralToReturn} D3X collateral.`);
+                
+                ws.send(JSON.stringify({ type: 'loan_repaid_success', returned: collateralToReturn }));
+            }
+        } catch(e) {
+            console.error('repay_loan error:', e.message);
+        }
+        break;
+      }
       case 'get_world_bank_stats': {
           if (!pgPool) break;
           try {
@@ -752,7 +907,7 @@ function initWebSockets() {
                       port.localD3XBalance = localLedger;
                       await pgPool.query(`UPDATE commanders SET portfolio = $1 WHERE callsign = $2`, [port, walletAddr]);
                       
-                      ws.send(JSON.stringify({ type: 'my_d3x_balance', amount: localLedger }));
+                      ws.send(JSON.stringify({ type: 'my_d3x_balance', amount: localLedger, activeLoan: port.active_loan || null }));
                       break; 
                   }
               }
@@ -761,7 +916,7 @@ function initWebSockets() {
           }
           
           // Fallback if no portfolio exists yet
-          ws.send(JSON.stringify({ type: 'my_d3x_balance', amount: liveOnChainBal }));
+          ws.send(JSON.stringify({ type: 'my_d3x_balance', amount: liveOnChainBal, activeLoan: null }));
           
           break;
       }

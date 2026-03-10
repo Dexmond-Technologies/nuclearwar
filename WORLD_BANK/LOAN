@@ -1,0 +1,48 @@
+You are helping implement features for a simple browser/text-based game with a virtual bank system.
+
+Current bank already has:
+
+- User accounts with a "coins" balance (integer)
+- Ability to buy coins via Stripe (already implemented)
+- Basic methods like: add_coins(user_id, amount), subtract_coins(user_id, amount), get_balance(user_id)
+
+Now implement a collateral-based loan system with these exact rules:
+
+1. Allowed collateral amounts (exact only): 5000, 10000, 20000 coins
+2. Loan amount = exactly 60% of collateral (integer division, no rounding up)
+   → 5000 collateral → 3000 loan
+   → 10000 collateral → 6000 loan
+   → 20000 collateral → 12000 loan
+3. No interest, no fees, no time limit
+4. A user can have at most ONE active loan at a time
+5. When taking a loan:
+   - Check user has enough coins
+   - Check requested collateral is one of the three allowed values
+   - Lock/remove the collateral coins from user's available balance
+   - Add the loan amount (60%) to user's available balance
+   - Record the loan: collateral_amount, borrowed_amount, user_id, timestamp
+6. When repaying:
+   - User must repay EXACTLY the borrowed amount
+   - If repayment == borrowed_amount → return the FULL original collateral to user's balance
+   - Clear the active loan record
+   - If repayment < borrowed → error (partial payments not allowed)
+   - If repayment > borrowed → error (overpayment not allowed)
+7. Error cases to handle and return clear messages for:
+   - Insufficient balance for collateral
+   - Invalid collateral amount (not 5k/10k/20k)
+   - User already has an active loan
+   - Trying to repay wrong amount
+   - No active loan when trying to repay
+   - Trying to take loan with 0 coins etc.
+
+Please provide:
+• Suggested new database fields / schema additions (simple key-value or document style is fine)
+• New methods you would add to the Bank class/service, for example:
+
+- request_loan(user_id, collateral_amount)
+- repay_loan(user_id, repayment_amount)
+- get_active_loan(user_id) // to show status
+  • Clear pseudocode or real Python code (whichever is clearer) showing the logic inside those methods
+  • Example usage / flow for both taking and repaying a loan
+
+Keep the implementation as simple and safe as possible — no interest, no automatic liquidation, no complex math.

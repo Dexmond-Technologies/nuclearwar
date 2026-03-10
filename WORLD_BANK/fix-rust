@@ -1,0 +1,28 @@
+ve reviewed the Rust staking contract (D3X_STAKING_CONTRACT_RUST), and being completely honest, there is a critical security vulnerability and a precision issue in the current code:
+
+1. The Anchor init_if_needed Reinitialization Vulnerability (CRITICAL)
+In your Stake context, you are using init_if_needed for the user_info account:
+
+rust
+#[account(
+        init_if_needed,
+        payer = user,
+        space = 8 + 8 + 8 + 8,
+        seeds = [b"user_info", user.key().as_ref()],
+        bump
+    )]
+Because your UserInfo account has no fields added outside of the struct definition (it's exactly 32 bytes), there is an Anchor vulnerability where if an attacker can somehow wipe the discriminator (or if they pass a newly funded, but zeroed-out account that matches the seeds), init_if_needed will overwrite the existing account. This means a malicious user could reset their last_stake_timestamp and reward_debt to zero, or worse, overwrite someone else's PDA if the seed derivations are flawed. Fix: You should use a regular init in a separate initialize_user instruction, or carefully safeguard the init_if_needed by checking the discriminator manually and using Anchor 0.28.0+ which mitigates some of this, but separate initialization is much safer.
+
+2. Time Elapsed Multiplication Overflow / Precision Loss
+In the calculate_reward function:
+
+rust
+let reward = (amount_staked as u128)
+        .checked_mul(APY_BPS as u128).unwrap()
+        .checked_mul(time_elapsed_seconds as u128).unwrap()
+        .checked_div(10000).unwrap()
+        .checked_div(SECONDS_IN_YEAR as u128).unwrap();
+If time_elapsed_seconds is small (e.g., a few minutes), the resulting numerator (amount * APY * time) might be smaller than (10000 * SECONDS_IN_YEAR), causing the integer division to evaluate to 0. This means users who stake and unstake frequently will lose all their fractional rewards due to truncation. Fix: You need to maintain a "reward per share" accumulator scaled up by a large factor (like 1e12), similar to how MasterChef contracts work in Solidity, rather than calculating it linearly on the fly like this.
+
+3. Missing Unstake Partial Amounts
+The unstake instruction currently unstakes everything and closes the account (close = user). A user cannot unstake just a portion of their D3X. They must withdraw 100% of their principal and rewards all at once.
