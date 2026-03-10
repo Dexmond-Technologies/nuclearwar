@@ -1467,7 +1467,7 @@ body {
   <div style="position:absolute; bottom:12px; left:20px; font-family:'Share Tech Mono', monospace; font-size:10px; font-weight:normal; letter-spacing:3px; color:#0af; text-transform:uppercase; z-index:15; pointer-events:none; text-shadow:0 0 5px rgba(0,170,255,0.8);">DEXMOND TECHNOLOGIES Ltd</div>
   
   <div style="position:absolute; top:20px; right:20px; display:flex; gap:10px; align-items:center;">
-      <button id="btn-reinvest-d3x" onclick="toggleReinvest()" style="display:block; width:130px; pointer-events:auto; padding:8px 0; background:rgba(0,255,136,0.15); border:1px solid #0f8; color:#0f8; font-family:'Courier New', monospace; font-size:10px; font-weight:bold; text-align:center; cursor:pointer; border-radius:4px; transition:all 0.2s; box-shadow:0 0 10px rgba(0,255,136,0.2); box-sizing:border-box; margin-right:200px;">♻️ REINVEST: OFF<br/>AIRDROP 1X</button>
+      <button id="btn-reinvest-d3x" onclick="toggleReinvest()" style="display:block; width:130px; pointer-events:auto; padding:8px 0; background:rgba(0,255,136,0.15); border:1px solid #0f8; color:#0f8; font-family:'Courier New', monospace; font-size:10px; font-weight:bold; text-align:center; cursor:pointer; border-radius:4px; transition:all 0.2s; box-shadow:0 0 10px rgba(0,255,136,0.2); box-sizing:border-box; margin-right:320px;">♻️ REINVEST: OFF<br/>AIRDROP 1X</button>
       <div id="top-right-stats" style="background:rgba(0,180,255,0.1); border:1px solid rgba(0,180,255,0.4); padding:6px 12px; border-radius:4px; display:none; align-items:center; gap:8px;">
           <div style="color:#0af; font-weight:bold; font-size:11px;" id="d0-d3x-address">LOADING WALLET...</div>
           <div style="color:#fff; opacity:0.5;">|</div>
@@ -2225,6 +2225,29 @@ Type 'help' for available commands.
     </div>
 
     <button class="sp-btn" style="background:transparent; border:1px solid #f55; color:#f55; width:100%; padding:10px; font-size:12px; margin-top:15px;" onclick="document.getElementById('d3x-mining-modal').style.display='none';">LEAVE CAVE</button>
+  </div>
+</div>
+
+<!-- D3X Mine Staking Modal (Green Skin) -->
+<div id="d3x-resource-staking-modal" style="position:absolute;inset:0;background:rgba(0,15,5,.95);display:none;align-items:center;justify-content:center;z-index:1060;backdrop-filter:blur(8px);">
+  <div class="rep-card" style="width:500px; max-width:95vw; border-color:#0f8; box-shadow:0 0 40px rgba(0,255,136,.2); text-align:center;">
+    <div class="rep-title" style="color:#0f8; text-shadow:0 0 15px rgba(0,255,136,.8);" id="d3x-stake-title">D3X MINING/STAKING</div>
+    <div class="rep-desc" style="color:#aaffd0; margin-bottom: 20px;">Deploy miners to extract D3X and secure network resources. Completes in exactly 1 hour.</div>
+    
+    <div style="background:rgba(0,255,136,.05); border:1px solid rgba(0,255,136,.3); padding:20px; text-align:center; margin-bottom:20px; border-radius:8px;">
+        <div id="d3x-stake-timer" style="font-size:32px; font-family:monospace; color:#0af; font-weight:bold; letter-spacing:4px; margin-bottom:10px; text-shadow:0 0 10px rgba(0,170,255,0.5);">01:00:00</div>
+        <div id="d3x-stake-status" style="font-size:12px; color:#aaa; letter-spacing:2px; margin-bottom:10px;">AWAITING STAKE INITIATION</div>
+        <div style="width:100%; height:8px; background:rgba(0,255,136,.1); margin:0 auto; border-radius:4px; overflow:hidden;">
+            <div id="d3x-stake-progress" style="height:100%; width:0%; background:#0f8; transition:1s linear; box-shadow:0 0 10px #0f8;"></div>
+        </div>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <div style="font-size:14px; font-weight:bold; color:#0f0; letter-spacing:1px;" id="d3x-stake-reward-text">POTENTIAL YIELD: 3-7 D3X</div>
+        <button id="btn-stake-d3x" class="sp-btn" onclick="handleStakeD3X()" style="background:rgba(0,255,136,.2); border:1px solid #0f8; color:#0f8; padding:15px 30px; font-size:16px; min-width: 180px;">STAKE TO MINE</button>
+    </div>
+
+    <button class="sp-btn" style="background:transparent; border:1px solid #f55; color:#f55; width:100%; padding:10px; font-size:12px;" onclick="closeD3XStakeModal();">CLOSE LINK</button>
   </div>
 </div>
 
@@ -4546,6 +4569,97 @@ function initDatacenters() {
     }
 
 initDatacenters();
+
+window.worldBankGroup = new THREE.Group();
+window.worldBankGroup.visible = false;
+scene.add(window.worldBankGroup);
+
+function initWorldBank() {
+  const bankColor = 0xffffff; 
+  const mat = new THREE.MeshPhongMaterial({ color: bankColor, shininess: 50, specular: 0x555555 });
+  const roofMat = new THREE.MeshPhongMaterial({ color: 0x8b0000, shininess: 10 });
+
+  const building = new THREE.Group();
+
+  // 1. Base (Steps)
+  const baseGeo = new THREE.BoxGeometry(0.18, 0.02, 0.12);
+  const base = new THREE.Mesh(baseGeo, mat);
+  base.position.y = 0.01;
+  building.add(base);
+  
+  const base2Geo = new THREE.BoxGeometry(0.16, 0.02, 0.1);
+  const base2 = new THREE.Mesh(base2Geo, mat);
+  base2.position.y = 0.03;
+  building.add(base2);
+
+  // 2. Columns
+  for(let x=-0.06; x<=0.06; x+=0.04) {
+    for(let z=-0.035; z<=0.035; z+=0.07) {
+      const colGeo = new THREE.CylinderGeometry(0.006, 0.006, 0.08, 16);
+      const col = new THREE.Mesh(colGeo, mat);
+      col.position.set(x, 0.08, z);
+      building.add(col);
+    }
+  }
+
+  // 3. Top Platform
+  const topGeo = new THREE.BoxGeometry(0.16, 0.02, 0.1);
+  const top = new THREE.Mesh(topGeo, mat);
+  top.position.y = 0.13;
+  building.add(top);
+
+  // 4. Triangular Roof (Bank front)
+  const roofGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.17, 3);
+  const roof = new THREE.Mesh(roofGeo, roofMat);
+  roof.rotation.z = Math.PI / 2;
+  roof.rotation.x = Math.PI / 2; 
+  roof.position.y = 0.17;
+  building.add(roof);
+  
+  const light = new THREE.PointLight(0xffdf80, 5, 3);
+  light.position.set(0, 0.08, 0);
+  building.add(light);
+  
+  const c = document.createElement('canvas');
+  c.width = 512; c.height = 128;
+  const ctx = c.getContext('2d');
+  ctx.font = 'bold 70px "Orbitron", sans-serif';
+  ctx.fillStyle = '#ffdf80';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = '#ffdf80';
+  ctx.shadowBlur = 10;
+  ctx.fillText('WORLD BANK', 256, 64);
+  
+  const labelTex = new THREE.CanvasTexture(c);
+  const labelMat = new THREE.SpriteMaterial({ map: labelTex, transparent: true, depthTest: false });
+  const labelSprite = new THREE.Sprite(labelMat);
+  labelSprite.scale.set(0.3, 0.075, 1);
+  labelSprite.position.set(0, 0.28, 0);
+  building.add(labelSprite);
+
+  building.scale.set(1.5, 1.5, 1.5);
+
+  // Position at central Asia where the red X was drawn
+  const lat = 35;
+  const lon = 90;
+  const r = typeof GLOBE_R !== 'undefined' ? GLOBE_R + 0.005 : 1.005;
+  const latRad = lat * Math.PI / 180;
+  const lonRad = -lon * Math.PI / 180;
+  
+  building.position.set(
+      r * Math.cos(latRad) * Math.cos(lonRad),
+      r * Math.sin(latRad),
+      r * Math.cos(latRad) * Math.sin(lonRad)
+  );
+  
+  building.lookAt(new THREE.Vector3(0,0,0));
+  building.rotateX(-Math.PI/2); 
+  
+  window.worldBankGroup.add(building);
+  console.log("World Bank Initialized.");
+}
+initWorldBank();
 
 window.dcNetworkGroup = new THREE.Group();
 window.dcNetworkGroup.visible = false;
@@ -7544,6 +7658,20 @@ window.triggerSolanaDonation = async function() {
     }
 };
 
+  // Intercept clicks on World Bank (Cyber Skin)
+  if (window.currentSkinIndex === 3 && window.worldBankGroup && window.worldBankGroup.visible && window.worldBankGroup.children.length > 0) {
+    const wbHits = ray.intersectObjects(window.worldBankGroup.children, true);
+    if (wbHits.length > 0) {
+      if (typeof _sfxClick !== 'undefined') _sfxClick();
+      const w = 600;
+      const h = 700;
+      const left = (screen.width/2)-(w/2);
+      const top = (screen.height/2)-(h/2);
+      window.open('https://buy.stripe.com/aFa14m9yN8y0g4D7wo2wU05', 'Stripe', `width=${w},height=${h},top=${top},left=${left},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`);
+      return; 
+    }
+  }
+
   // Intercept clicks on Datacenters (Cyber Skin)
   if (window.currentSkinIndex === 3 && window.datacentersGroup && window.datacentersGroup.visible && window.datacentersGroup.children.length > 0) {
     // Search children heavily because of auras and inner sprites on staking towers
@@ -7637,6 +7765,21 @@ window.triggerSolanaDonation = async function() {
     // Also select to immediately show the updated side-panel info
     selectCountry(iso);
     return;
+  }
+
+  // Intercept clicks on D3X Mining Caves (Green Skin)
+  if (window.currentSkinIndex === 2 && typeof d3xCaveGroup !== 'undefined' && d3xCaveGroup.visible) {
+    const hits = ray.intersectObjects(d3xCaveGroup.children, true);
+    if (hits.length > 0) {
+      // Find the specific core clicked
+      const clickedChild = hits[0].object;
+      if (clickedChild.userData && clickedChild.userData.isD3XCore) {
+        // We need a unique ID for this mine. The parent group UUID is persistent for that layout.
+        const mineId = 'MINE-' + clickedChild.parent.uuid.substring(0,8);
+        window.openD3XStakeModal(mineId);
+        return; // Consume click
+      }
+    }
   }
 
   selectCountry(iso);
@@ -7947,11 +8090,12 @@ window.showGMarketWallet = function() {
       modal = document.createElement('div');
       modal.id = 'gmarket-ledger-modal';
       modal.style.position = 'fixed';
-      modal.style.top = '50%';
-      modal.style.left = '50%';
-      modal.style.transform = 'translate(-50%,-50%)';
-      modal.style.width = '1200px';
-      modal.style.maxHeight = '75vh';
+      modal.style.top = '0';
+      modal.style.left = '0';
+      modal.style.transform = 'none';
+      modal.style.width = '100vw';
+      modal.style.maxHeight = '100vh';
+      modal.style.height = '100vh';
       modal.style.backgroundColor = 'rgba(0,18,8,0.95)';
       modal.style.border = '2px solid #0f8';
       modal.style.boxShadow = '0 0 25px rgba(0,255,136,0.4)';
@@ -14292,6 +14436,9 @@ window.toggleRedSkin = function() {
       window.datacentersGroup.visible = (skin.name === 'CYBER');
       if (window.dcNetworkGroup) window.dcNetworkGroup.visible = (skin.name === 'CYBER');
   }
+  if (typeof window.worldBankGroup !== 'undefined') {
+      window.worldBankGroup.visible = (skin.name === 'CYBER');
+  }
   
   // Ensure CMD Help indicator is always shown
   const cmdHelp = document.getElementById('btn-cmd-help');
@@ -14717,6 +14864,149 @@ window.toggleRadioLock = function() {
     // Visually notify
     // if (typeof setLog === 'function') setLog('📻 Station UNLOCKED. Auto-rotation enabled.');
   }
+};
+
+// ========================================================
+// D3X MINE STAKING LOGIC
+// ========================================================
+window.d3xStakeState = window.d3xStakeState || {};
+let activeStakeTimerInterval = null;
+
+window.closeD3XStakeModal = function() {
+    document.getElementById('d3x-resource-staking-modal').style.display = 'none';
+    if (activeStakeTimerInterval) {
+        clearInterval(activeStakeTimerInterval);
+        activeStakeTimerInterval = null;
+    }
+};
+
+window.openD3XStakeModal = function(mineId) {
+    if (typeof _sfxClick !== 'undefined') _sfxClick();
+    const modal = document.getElementById('d3x-resource-staking-modal');
+    modal.style.display = 'flex';
+    modal.dataset.activeMineId = mineId;
+    
+    // Clear any previous interval updating the UI
+    if (activeStakeTimerInterval) clearInterval(activeStakeTimerInterval);
+    
+    updateD3XStakeModalUI(mineId);
+    
+    // Start interval to keep UI updated every second while open
+    activeStakeTimerInterval = setInterval(() => {
+        updateD3XStakeModalUI(mineId);
+    }, 1000);
+};
+
+function updateD3XStakeModalUI(mineId) {
+    const state = window.d3xStakeState[mineId];
+    const timerDisplay = document.getElementById('d3x-stake-timer');
+    const statusText = document.getElementById('d3x-stake-status');
+    const progressBar = document.getElementById('d3x-stake-progress');
+    const actionBtn = document.getElementById('btn-stake-d3x');
+    const title = document.getElementById('d3x-stake-title');
+    
+    title.innerText = `D3X MINE [${mineId.substring(0,8).toUpperCase()}]`;
+
+    if (!state) {
+        // Not Staking
+        timerDisplay.innerText = "01:00:00";
+        statusText.innerText = "AWAITING STAKE INITIATION";
+        progressBar.style.width = "0%";
+        progressBar.style.background = "#0f8";
+        actionBtn.innerText = "STAKE TO MINE";
+        actionBtn.onclick = () => window.handleStakeD3X(mineId);
+        actionBtn.style.pointerEvents = 'auto';
+        actionBtn.style.opacity = '1';
+        return;
+    }
+
+    const elapsed = Date.now() - state.startTime;
+    const duration = 3600000; // 1 hour in ms
+    const remaining = Math.max(0, duration - elapsed);
+
+    if (remaining > 0) {
+        // Staking in progress
+        const s = Math.floor((remaining / 1000) % 60);
+        const m = Math.floor((remaining / 1000 / 60) % 60);
+        const h = Math.floor((remaining / 1000 / 60 / 60));
+        timerDisplay.innerText = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        statusText.innerText = "MINING IN PROGRESS";
+        
+        const pct = (elapsed / duration) * 100;
+        progressBar.style.width = `${pct}%`;
+        progressBar.style.background = "#fa0";
+        
+        actionBtn.innerText = "MINING...";
+        actionBtn.onclick = null;
+        actionBtn.style.pointerEvents = 'none';
+        actionBtn.style.opacity = '0.5';
+    } else {
+        // Ready to collect
+        timerDisplay.innerText = "00:00:00";
+        statusText.innerText = "MINING COMPLETE. YIELD READY.";
+        progressBar.style.width = "100%";
+        progressBar.style.background = "#0f8";
+        
+        actionBtn.innerText = "COLLECT YIELD";
+        actionBtn.onclick = () => window.handleCollectD3X(mineId);
+        actionBtn.style.pointerEvents = 'auto';
+        actionBtn.style.opacity = '1';
+    }
+}
+
+window.handleStakeD3X = function(mineId) {
+    if (typeof _sfxClick !== 'undefined') _sfxClick();
+    window.d3xStakeState[mineId] = {
+        startTime: Date.now()
+    };
+    updateD3XStakeModalUI(mineId);
+    
+    // Optional: Visual cue on the map
+    if (typeof setLog === 'function') {
+        setLog(`[MINING] Deployed rigs to Sector ${mineId.substring(0,4)}. Estimated completion: 1 hour.`);
+    }
+};
+
+window.handleCollectD3X = function(mineId) {
+    if (typeof _sfxClick !== 'undefined') _sfxClick();
+    const reward = Math.floor(Math.random() * 5) + 3; // Random 3 to 7
+    
+    // Attempt to credit real D3X balance via Green Market Portfolio logic if it exists
+    if (window.pendingSolanaAddress && typeof ws !== 'undefined' && ws.readyState === WebSocket.OPEN) {
+        // We'll trust the client side for this mini-game for now, just credit it manually 
+        // to `window.commanderPortfolio` or the mock balance
+    }
+    
+    // Update local variables first
+    if (typeof window.commanderPortfolio !== 'undefined' && window.commanderPortfolio) {
+        window.commanderPortfolio.d3x_balance = (parseFloat(window.commanderPortfolio.d3x_balance) || 0) + reward;
+        
+        // Save back to DB
+        if (typeof ws !== 'undefined' && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({
+                type: 'save_portfolio',
+                walletAddr: window.pendingSolanaAddress,
+                portfolio: window.commanderPortfolio
+            }));
+        }
+    } else {
+        // Fallback for mock environment
+        window.d3xBalance += reward;
+    }
+    
+    // Update top UI
+    const d3xUiStr = typeof updateD3XDisplay === 'function' ? updateD3XDisplay() : null;
+    const globeBal = document.getElementById('green-wallet-balance');
+    if (globeBal && window.commanderPortfolio) {
+        globeBal.innerText = parseFloat(window.commanderPortfolio.d3x_balance).toFixed(2);
+    }
+    
+    alert(`MINING COMPLETE! You extracted ${reward} D3X.`);
+    if (typeof setLog === 'function') setLog(`[REWARD] Extracted +${reward} D3X from Sector ${mineId.substring(0,4)}`);
+    
+    // Reset state allowing them to mine again
+    delete window.d3xStakeState[mineId];
+    updateD3XStakeModalUI(mineId);
 };
 
 // ========================================================
