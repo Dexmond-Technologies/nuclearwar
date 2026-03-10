@@ -2951,7 +2951,14 @@ function initCompanies() {
     const tex = new THREE.CanvasTexture(c);
     const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: true, opacity: 1.0 });
     const sprite = new THREE.Sprite(mat);
-    sprite.scale.set(0.24, 0.06, 1); // Twice as big
+    
+    const isWorldBank = company.name === "WORLD BANK";
+    
+    if (isWorldBank) {
+      sprite.scale.set(0.36, 0.09, 1); // 1.5x bigger
+    } else {
+      sprite.scale.set(0.24, 0.06, 1); // Twice as big
+    }
     
     // Position further above ground to be clearly visible
     const pos = ll2v(company.lat, company.lon, GLOBE_R + 0.055);
@@ -2963,15 +2970,24 @@ function initCompanies() {
     sprite.userData = company;
 
     // Draw Logo (Stylized Square with First Letter)
-    ctx.fillStyle = color;
-    ctx.fillRect(18, 14, 36, 36);
+    ctx.fillStyle = isWorldBank ? '#ffd700' : color;
+    if (isWorldBank) {
+        // Shiny gold box for World Bank
+        ctx.shadowColor = '#ffd700';
+        ctx.shadowBlur = 10;
+        ctx.fillRect(18, 14, 36, 36);
+        ctx.shadowBlur = 0;
+    } else {
+        ctx.fillRect(18, 14, 36, 36);
+    }
+    
     ctx.fillStyle = '#000000';
     ctx.font = 'bold 24px "Courier New", monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(displayName.charAt(0).toUpperCase(), 36, 34);
     
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = isWorldBank ? '#ffd700' : '#ffffff';
     ctx.font = 'bold 20px "Courier New", monospace';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
@@ -2982,14 +2998,18 @@ function initCompanies() {
     // Also add a glowing pinpoint dot
     const dotC = document.createElement('canvas'); dotC.width=64; dotC.height=64;
     const dotCtx = dotC.getContext('2d');
-    dotCtx.fillStyle = color;
-    dotCtx.shadowBlur = 20;
-    dotCtx.shadowColor = color;
+    dotCtx.fillStyle = isWorldBank ? '#ffffff' : color;
+    dotCtx.shadowBlur = isWorldBank ? 30 : 20;
+    dotCtx.shadowColor = isWorldBank ? '#ffd700' : color;
     dotCtx.beginPath(); dotCtx.arc(32,32,16,0,Math.PI*2); dotCtx.fill();
     const dotTex = new THREE.CanvasTexture(dotC);
     const dotMat = new THREE.SpriteMaterial({ map: dotTex, transparent: true, depthTest: true, blending: THREE.AdditiveBlending });
     const dotSprite = new THREE.Sprite(dotMat);
-    dotSprite.scale.set(0.08, 0.08, 1); // Twice as big
+    if (isWorldBank) {
+        dotSprite.scale.set(0.12, 0.12, 1); // 1.5x bigger
+    } else {
+        dotSprite.scale.set(0.08, 0.08, 1); // Twice as big
+    }
     dotSprite.position.copy(ll2v(company.lat, company.lon, GLOBE_R + 0.05));
     dotSprite.userData = company;
     window.companiesGroup.add(dotSprite);
@@ -3212,7 +3232,7 @@ window.africaCompaniesGroup.visible = false;
 scene.add(window.africaCompaniesGroup);
 
 function initAfricaCompanies() {
-  const africaCompaniesData = [{"name":"Naspers","city":"Cape Town","lat":-33.9249,"lon":18.4241},{"name":"FirstRand","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Standard Bank Group","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Gold Fields","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Capitec Bank","city":"Stellenbosch","lat":-33.9321,"lon":18.8602},{"name":"Anglogold Ashanti","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Attijariwafa Bank","city":"Casablanca","lat":33.5731,"lon":-7.5898},{"name":"Vodacom Group","city":"Midrand","lat":-25.9965,"lon":28.1269},{"name":"MTN Group","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Maroc Telecom","city":"Rabat","lat":34.0209,"lon":-6.8416},{"name":"Anglo American Platinum","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Sanlam","city":"Bellville","lat":-33.8963,"lon":18.6294},{"name":"Harmony Gold Mining","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Shoprite","city":"Cape Town","lat":-33.9249,"lon":18.4241},{"name":"Absa Group","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Bid Corporation","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Airtel Africa","city":"Lagos","lat":6.5244,"lon":3.3792},{"name":"Discovery","city":"Sandton","lat":-26.1076,"lon":28.0567},{"name":"Nedbank Group","city":"Sandton","lat":-26.1076,"lon":28.0567},{"name":"Impala Platinum","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Managem","city":"Casablanca","lat":33.5731,"lon":-7.5898},{"name":"Banque Centrale Populaire","city":"Casablanca","lat":33.5731,"lon":-7.5898},{"name":"OUTsurance Group","city":"Centurion","lat":-25.8603,"lon":28.1894},{"name":"Marsa Maroc","city":"Casablanca","lat":33.5731,"lon":-7.5898},{"name":"Safaricom","city":"Nairobi","lat":-1.2921,"lon":36.8219},{"name":"TAQA Morocco","city":"Casablanca","lat":33.5731,"lon":-7.5898},{"name":"Kumba Iron Ore","city":"Centurion","lat":-25.8603,"lon":28.1894},{"name":"Dangote Cement","city":"Lagos","lat":6.5244,"lon":3.3792},{"name":"Pepkor","city":"Cape Town","lat":-33.9249,"lon":18.4241},{"name":"Com. Inter. Bank – Egypt (CIB)","city":"Cairo","lat":30.0444,"lon":31.2357},{"name":"BUA Foods","city":"Lagos","lat":6.5244,"lon":3.3792},{"name":"Reinet Investments","city":"Stellenbosch","lat":-33.9321,"lon":18.8602},{"name":"LafargeHolcim Maroc","city":"Casablanca","lat":33.5731,"lon":-7.5898},{"name":"Remgro","city":"Stellenbosch","lat":-33.9321,"lon":18.8602}];
+  const africaCompaniesData = [{"name":"Naspers","city":"Cape Town","lat":-33.9249,"lon":18.4241},{"name":"FirstRand","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Standard Bank Group","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Gold Fields","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Capitec Bank","city":"Stellenbosch","lat":-33.9321,"lon":18.8602},{"name":"Anglogold Ashanti","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Attijariwafa Bank","city":"Casablanca","lat":33.5731,"lon":-7.5898},{"name":"Vodacom Group","city":"Midrand","lat":-25.9965,"lon":28.1269},{"name":"MTN Group","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Maroc Telecom","city":"Rabat","lat":34.0209,"lon":-6.8416},{"name":"Anglo American Platinum","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Sanlam","city":"Bellville","lat":-33.8963,"lon":18.6294},{"name":"Harmony Gold Mining","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Shoprite","city":"Cape Town","lat":-33.9249,"lon":18.4241},{"name":"Absa Group","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Bid Corporation","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Airtel Africa","city":"Lagos","lat":6.5244,"lon":3.3792},{"name":"Discovery","city":"Sandton","lat":-26.1076,"lon":28.0567},{"name":"Nedbank Group","city":"Sandton","lat":-26.1076,"lon":28.0567},{"name":"Impala Platinum","city":"Johannesburg","lat":-26.2041,"lon":28.0473},{"name":"Managem","city":"Casablanca","lat":33.5731,"lon":-7.5898},{"name":"Banque Centrale Populaire","city":"Casablanca","lat":33.5731,"lon":-7.5898},{"name":"OUTsurance Group","city":"Centurion","lat":-25.8603,"lon":28.1894},{"name":"Marsa Maroc","city":"Casablanca","lat":33.5731,"lon":-7.5898},{"name":"Safaricom","city":"Nairobi","lat":-1.2921,"lon":36.8219},{"name":"TAQA Morocco","city":"Casablanca","lat":33.5731,"lon":-7.5898},{"name":"Kumba Iron Ore","city":"Centurion","lat":-25.8603,"lon":28.1894},{"name":"Dangote Cement","city":"Lagos","lat":6.5244,"lon":3.3792},{"name":"Pepkor","city":"Cape Town","lat":-33.9249,"lon":18.4241},{"name":"Com. Inter. Bank – Egypt (CIB)","city":"Cairo","lat":30.0444,"lon":31.2357},{"name":"BUA Foods","city":"Lagos","lat":6.5244,"lon":3.3792},{"name":"Reinet Investments","city":"Stellenbosch","lat":-33.9321,"lon":18.8602},{"name":"LafargeHolcim Maroc","city":"Casablanca","lat":33.5731,"lon":-7.5898},{"name":"Remgro","city":"Stellenbosch","lat":-33.9321,"lon":18.8602},{"name":"WORLD BANK","city":"Black Skin HQ","lat":0.0000,"lon":15.0000}];
   
   africaCompaniesData.forEach(company => {
     const color = '#a020f0'; // Purple
@@ -14137,6 +14157,54 @@ window.launchCyberAttack = function() {
     if (typeof _sfxError !== 'undefined' && Math.random() < 0.3) _sfxError();
 };
 
+window.simulateCompanyD3XTrading = function() {
+    if (window.currentSkinIndex !== 2) return; // Only process on Black Skin
+
+    const groups = [window.companiesGroup, window.mediumCompaniesGroup, window.africaCompaniesGroup, window.microCompaniesGroup, window.russiaAsiaCompaniesGroup];
+    const allCompanies = [];
+    
+    groups.forEach(group => {
+        if (group && group.children) {
+            allCompanies.push(...group.children.filter(mesh => mesh.visible && mesh.userData && mesh.userData.name));
+        }
+    });
+
+    if (allCompanies.length < 2) return;
+
+    // Pick 5 random transactions per interval
+    for (let i = 0; i < 5; i++) {
+        const sender = allCompanies[Math.floor(Math.random() * allCompanies.length)].userData;
+        const receiver = allCompanies[Math.floor(Math.random() * allCompanies.length)].userData;
+        
+        if (sender.name === receiver.name) continue;
+        
+        // Ensure they have pseudo-wallets
+        if (typeof sender.d3xBalance === 'undefined') sender.d3xBalance = 100 + Math.random() * 900;
+        if (typeof receiver.d3xBalance === 'undefined') receiver.d3xBalance = 100 + Math.random() * 900;
+        
+        const txAmount = parseFloat((Math.random() * (sender.d3xBalance * 0.05)).toFixed(2));
+        if (txAmount <= 0) continue;
+        
+        sender.d3xBalance -= txAmount;
+        receiver.d3xBalance += txAmount;
+        
+        // 10% chance to log to the terminal to show market velocity
+        if (Math.random() < 0.1) {
+            const termBox = document.getElementById('d1-reasoning');
+            if (termBox) {
+                const div = document.createElement('div');
+                div.innerHTML = `> [NET] <span style="color:#0f0">${sender.name}</span> swapped <span style="color:#0f8">${txAmount.toFixed(2)} D3X</span> to <span style="color:#0f0">${receiver.name}</span>`;
+                termBox.appendChild(div);
+                if (termBox.childElementCount > 30) termBox.removeChild(termBox.firstChild);
+                termBox.scrollTop = termBox.scrollHeight;
+            }
+        }
+    }
+};
+
+// Hook it into the global loop
+setInterval(window.simulateCompanyD3XTrading, 3000);
+
 // =====================================================================
 // BLACK SKIN 5-MINUTE CYBER WARFARE POPUP
 // =====================================================================
@@ -14526,7 +14594,35 @@ window.mineD3XCoin = function() {
     if (typeof SFX !== 'undefined' && SFX.playLaser) SFX.playLaser(); // Drilling sound
     window.internalD3XMiningAmount += 0.1; // 10% reward yield
     
+    // -- MARKET IMPACT: Mining consumes Compute Hardware and Energy --
+    let hardwareCost = 0;
+    let energyCost = 0;
+    if (window.greenMarket && window.greenMarket.commodities) {
+        // Buy 10 units of Compute Hardware and 50 units of Energy from market
+        const hwDef = window.greenMarket.commodities['Tech & Compute Hardware'];
+        const enDef = window.greenMarket.commodities['Energy'];
+        
+        if (hwDef && hwDef.items && hwDef.items.length > 0) {
+            // Pick a random hardware to consume
+            const hwItem = hwDef.items[Math.floor(Math.random() * hwDef.items.length)];
+            hardwareCost = hwItem.currentPrice * 2; // Consume 2 units
+            // Market impact (Demand goes up)
+            hwItem.currentPrice *= (1 + (Math.random() * 0.005)); 
+        }
+        
+        if (enDef && enDef.items && enDef.items.length > 0) {
+            // Pick a random energy to consume
+            const enItem = enDef.items[Math.floor(Math.random() * enDef.items.length)];
+            energyCost = enItem.currentPrice * 5; // Consume 5 units
+            // Market impact (Demand goes up)
+            enItem.currentPrice *= (1 + (Math.random() * 0.002));
+        }
+    }
+    
     log.innerHTML += `<div><span style="color:#aaa">1.0 D3X Consumed.</span> Drill fired! Yielded <span style="color:#0f8">+0.10 D3X</span> progress.</div>`;
+    if (hardwareCost > 0 || energyCost > 0) {
+        log.innerHTML += `<div><span style="color:#88f; font-size:11px;">System load: Bought Hardware ($${hardwareCost.toLocaleString()}) & Energy ($${energyCost.toLocaleString()}) from Market.</span></div>`;
+    }
     
     // Check if we hit 1.0 total
     if (window.internalD3XMiningAmount >= 0.99) { // Using 0.99 to avoid float precision bugs around 1.0
