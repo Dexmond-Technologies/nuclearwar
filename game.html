@@ -1181,6 +1181,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     <div id="sp-info"></div>
     <div id="sp-actions">
       <button class="sp-btn" id="btn-add">+ ADD TROOPS</button>
+      <button class="sp-btn" id="btn-buy-nuke">☢ BUY NUKE ($30K B)</button>
       <button class="sp-btn" id="btn-atk">⚔ ATTACK</button>
       <button class="sp-btn" id="btn-nuke">☢ NUKE STRIKE</button>
       <button class="sp-btn" id="btn-fort">→ FORTIFY FROM</button>
@@ -6122,7 +6123,24 @@ function showTurnAnnounce(playerIndex, cb) {
     reinforceAmount = hReinforce;
   } else { // Rainclaude Reinforcements
     const owned = Object.values(GS.countries).filter(c=>c.owner===playerIndex).length;
-    reinforceAmount = Math.max(3, Math.floor(owned/3));
+    let rReinforce = Math.max(3, Math.floor(owned/3));
+    
+    // Fix 6: AI Reinforcement Penalties
+    if (GS.globalMetrics.commJamTurns > 0) {
+      let penalty = Math.max(1, Math.floor(rReinforce * 0.3));
+      rReinforce -= penalty;
+      setLog(`⚠ RAINCLAUDE COMMS JAMMED: Reinforcements penalized by ${penalty}.`);
+    }
+    // High average instability penalty
+    const aiInstability = Object.values(GS.countries)
+        .filter(c=>c.owner===playerIndex)
+        .reduce((sum, c) => sum + (c.instabilityLevel || 0), 0) / (owned || 1);
+    if (aiInstability > 50) {
+      let penalty = Math.max(1, Math.floor(rReinforce * 0.2));
+      rReinforce -= penalty;
+      setLog(`⚠ RAINCLAUDE INTERNAL DISSENT: Reinforcements penalized by ${penalty}.`);
+    }
+    reinforceAmount = Math.max(1, rReinforce);
   }
   GS.reinforceLeft = reinforceAmount;
 
@@ -6256,7 +6274,7 @@ function startTurn(playerIndex) {
       if (c.owner === playerIndex && c.income) {
         let inc = c.income;
         if (c.infrastructure) inc = Math.round(inc * (0.6 + c.infrastructure * 0.08));
-        if (c.nuked > 0) inc = Math.round(inc * 0.3); // Nuked territories lose 70% income
+        if (c.nuked > 0) inc = Math.round(inc * 0.1); // Fix 10: Nuked territories lose 90% income
         gdpIncome += inc;
       }
     });
@@ -7960,6 +7978,7 @@ function selectCountry(iso) {
   // Enable/disable actions based on phase
   const phase = GS.phase;
   document.getElementById('btn-add').disabled = !(myTurn && isMine && phase==='REINFORCE' && GS.reinforceLeft>0);
+  document.getElementById('btn-buy-nuke').disabled = !(myTurn && isMine && GS.players[GS.myIndex].budget >= 30000);
   document.getElementById('btn-atk').disabled = !(myTurn && isMine && phase==='ATTACK');
   document.getElementById('btn-nuke').disabled = !(myTurn && isMine && phase==='ATTACK' && GS.players[GS.myIndex].nukes>0);
   document.getElementById('btn-fort').disabled = !(myTurn && isMine && phase==='FORTIFY');
@@ -8008,7 +8027,12 @@ function tryAttack(targetIso) {
   if (atk.troops < 2) { setLog('⚠ Need at least 2 troops to attack!'); attackingFrom=null; return; }
 
   const atkDice = Math.min(3, atk.troops-1) + (def.cas ? 1 : 0);
-  const defDice = def.shocked ? 1 : Math.min(2, def.troops);
+  let defDice = def.shocked ? 1 : Math.min(2, def.troops);
+  
+  // Fix 11: Defender's Advantage for max infrastructure
+  if (def.infrastructure && def.infrastructure >= 5) {
+    defDice += 1;
+  }
 
   const aRolls = Array.from({length:atkDice},()=>1+Math.floor(Math.random()*6)).sort((a,b)=>b-a);
   const dRolls = Array.from({length:defDice},()=>1+Math.floor(Math.random()*6)).sort((a,b)=>b-a);
@@ -8036,7 +8060,8 @@ function tryAttack(targetIso) {
 
       if (def.troops <= 0) {
         // Conquer!
-        const moveTroops = Math.min(atk.troops-1, atkDice);
+        // Fix 9: Move all available troops forward to allow blitzing, instead of capping at 3
+        const moveTroops = atk.troops - 1;
         def.owner = GS.myIndex;
         def.troops = moveTroops;
         atk.troops -= moveTroops;
@@ -8056,12 +8081,23 @@ function tryAttack(targetIso) {
   );
 }
 
+// BUY NUKE
+document.getElementById('btn-buy-nuke').onclick = () => {
+  if (!GS.selected || GS.players[GS.myIndex].budget < 30000) return;
+  GS.players[GS.myIndex].budget -= 30000;
+  GS.players[GS.myIndex].nukes++;
+  SFX.playClick();
+  setLog(`☢ PURCHASED 1 NUCLEAR WARHEAD FOR $30,000B.`);
+  updateDashboard();
+  if (GS.isOnline) syncState();
+};
+
 // NUKE STRIKE
 document.getElementById('btn-nuke').onclick = () => {
   if (!GS.selected || GS.players[GS.myIndex].nukes <= 0) return;
   const from = GS.selected;
   document.getElementById('side-panel').classList.remove('open');
-  setLog(`☢ SELECT nuclear target country (1 nuke remaining after this)`);
+  setLog(`☢ SELECT nuclear target country (${GS.players[GS.myIndex].nukes} nukes remaining)`);
   GS.selected = null;
   window._nukeFrom = from;
 };
@@ -8088,7 +8124,7 @@ function tryNuke(targetIso) {
   }
   
   def.troops = Math.max(0, def.troops - nukeStr);
-  def.nuked  = 3;
+  def.nuked  = 6; // Fix 10: 6 turns of fallout
   GS.players[GS.myIndex].nukes--;
   spawnExplosion3D(countryData[targetIso]?.lat, countryData[targetIso]?.lon, PLAYER_COLORS[GS.myIndex].int);
   triggerNewsEvent("GLOBAL MARKETS CRASH AMIDST NUCLEAR TENSIONS");
@@ -9471,7 +9507,7 @@ async function aiTurn() {
       const [tIso]=bigTargets[0];
       GS.players[pi].nukes--;
       GS.countries[tIso].troops=Math.max(0,GS.countries[tIso].troops-Math.floor(6+Math.random()*5));
-      GS.countries[tIso].nuked=3;
+      GS.countries[tIso].nuked=6; // Fix 10
       spawnExplosion3D(countryData[tIso]?.lat,countryData[tIso]?.lon,PLAYER_COLORS[1].int);
       triggerRedAlert("NUCLEAR LAUNCH DETECTED");
       aiLog(`<span style="color:#ffaa00">NUCLEAR LAUNCH: ${countryData[tIso]?.name.toUpperCase()}</span>`);
@@ -9483,9 +9519,17 @@ async function aiTurn() {
   }
 
   // --- REINFORCE ---
-  let reinforce=Math.max(3,Math.floor(myCountries.length/3));
-  let highestThreat = -1;
-  let reinforceTgt = myCountries[0][0];
+  let reinforce = Math.max(3, Math.floor(myCountries.length/3));
+  if (GS.globalMetrics.commJamTurns > 0) {
+      reinforce = Math.max(1, reinforce - Math.max(1, Math.floor(reinforce * 0.3)));
+  }
+  const aiInst = myCountries.reduce((sum, [iso, c]) => sum + (c.instabilityLevel || 0), 0) / (myCountries.length || 1);
+  if (aiInst > 50) {
+      reinforce = Math.max(1, reinforce - Math.max(1, Math.floor(reinforce * 0.2)));
+  }
+  
+  // Fix 8: Split reinforcements across top threatened territories instead of just one
+  let threatenedNodes = [];
   
   for(const [iso, c] of myCountries) {
     const cd = countryData[iso]; if(!cd) continue;
@@ -9496,13 +9540,27 @@ async function aiTurn() {
         if(dist < 30) threat += ec.troops;
       }
     });
-    if(threat > highestThreat) { highestThreat = threat; reinforceTgt = iso; }
+    threatenedNodes.push({iso, threat});
   }
   
-  GS.countries[reinforceTgt].troops += reinforce;
-  updateTroopSprite(reinforceTgt);
-  aiLog(`REINFORCE: <b>${countryData[reinforceTgt]?.name.toUpperCase()}</b> (+${reinforce})`);
-  setLog(`⚙ RAINCLAUDE reinforce +${reinforce} → ${countryData[reinforceTgt]?.name}`);
+  threatenedNodes.sort((a,b) => b.threat - a.threat);
+  const targets = threatenedNodes.slice(0, Math.min(3, threatenedNodes.length));
+  
+  if (targets.length > 0) {
+      let rPerNode = Math.floor(reinforce / targets.length);
+      let rRemainder = reinforce % targets.length;
+      
+      for (let i = 0; i < targets.length; i++) {
+          const tIso = targets[i].iso;
+          const rAmount = rPerNode + (i === 0 ? rRemainder : 0);
+          if (rAmount > 0) {
+              GS.countries[tIso].troops += rAmount;
+              updateTroopSprite(tIso);
+              aiLog(`REINFORCE: <b>${countryData[tIso]?.name.toUpperCase()}</b> (+${rAmount})`);
+              setLog(`⚙ RAINCLAUDE reinforce +${rAmount} → ${countryData[tIso]?.name}`);
+          }
+      }
+  }
   await wait(800);
 
   // --- WEIGHTED SCORING ATTACKS ---
@@ -9523,7 +9581,8 @@ async function aiTurn() {
     Object.entries(GS.countries).forEach(([toIso, toC])=>{
       // INCREASED RANGE: Allow targetting further away to maintain pressure
       if(toC.owner===0 && Math.abs(toC.lat-(cd.lat||0))<40 && Math.abs(toC.lon-(cd.lon||0))<55) {
-        if(fromC.troops > toC.troops) { 
+        // Fix 7: Attack equal strength targets if Aggression is high
+        if(fromC.troops > toC.troops || (ai.aggressionLevel > 2 && fromC.troops === toC.troops)) { 
           const score = 10 + ((fromC.troops - toC.troops) * 5) + ((toC.instabilityLevel || 0) * 0.5) + (myCountries.length < 5 ? 20 : 0);
           potentialMoves.push({score, fromIso, toIso, fromC, toC});
         }
@@ -9540,7 +9599,7 @@ async function aiTurn() {
     if(move.fromC.troops < 2) continue;
     
     aiLog(`ENGAGING: <b>${countryData[move.toIso]?.name.toUpperCase()}</b> (Score: ${move.score.toFixed(0)})`);
-    const atkD=Math.min(3,move.fromC.troops-1),defD=Math.min(2,move.toC.troops);
+    const atkD=Math.min(3,move.fromC.troops-1),defD=Math.min(2,move.toC.troops) + (move.toC.infrastructure >= 5 ? 1 : 0); // Fix 11
     const aR=Array.from({length:atkD},()=>1+Math.floor(Math.random()*6)).sort((a,b)=>b-a);
     const dR=Array.from({length:defD},()=>1+Math.floor(Math.random()*6)).sort((a,b)=>b-a);
     let al=0,dl=0;
@@ -9551,7 +9610,8 @@ async function aiTurn() {
     if(move.toC.troops<=0){
       aiLog(`<span style="color:#fff">SECURED: <b>${countryData[move.toIso]?.name.toUpperCase()}</b></span>`);
       setLog(`⚙ RAINCLAUDE seizes ${countryData[move.toIso]?.name}!`);
-      move.toC.owner=1; move.toC.troops=Math.min(move.fromC.troops-1,atkD);
+      // Fix 9: Move all troops on conquest for faster AI blitzing
+      move.toC.owner=1; move.toC.troops=move.fromC.troops-1;
       move.fromC.troops-=move.toC.troops; if(move.fromC.troops<1)move.fromC.troops=1;
       refreshBorder(move.toIso);
     }
