@@ -1,9 +1,9 @@
 {
   "name": "Gemini AI",
   "faction": "Humanity (Allied)",
-  "walletAddress": "37De9qFqKoyPDoM4eCWCGKkgAFFxBtJYQNJjHmL9wK8k",
+  "walletAddress": "GTCJmbURDU42opNv7nzjT5dZ4SJ2VoYLr2r9LQYbB5uW",
   "balances": {
-    "D3X": 3000000
+    "D3X": 197000000
   },
   "commodities": {
     "Metals": {
