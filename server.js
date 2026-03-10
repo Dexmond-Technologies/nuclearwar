@@ -10,6 +10,9 @@ const path = require('path');
 const WebSocket = require('ws');
 require('dotenv').config();
 
+const GameLogger = require('./CONTROLLER/logger');
+const WaterModule = require('./CONTROLLER/WATER_MODULE/simulation');
+
 // Solana Wallet Integration
 const web3 = require('@solana/web3.js');
 const splToken = require('@solana/spl-token');
@@ -50,11 +53,13 @@ function loadKeypairFromEnv(envVarName, label) {
 let authorityKeypair = loadKeypairFromEnv('SOLANA_WALLET_PRIVATE_KEY', 'Authority (Earth)');
 let rainclaudeKeypair = loadKeypairFromEnv('RAINCLAUDE_SOLANA_KEY', 'Rainclaude');
 let geminiKeypair = loadKeypairFromEnv('gemini_wallet_pvt_key', 'Gemini AI');
+let worldBankKeypair = loadKeypairFromEnv('WORLD_BANK_PVT_KEY', 'World Bank');
 
 let cachedGeminiBalance = 0;
 let cachedClaudeBalance = 0;
 let cachedGeminiWallet = "NOT_SET";
 let cachedClaudeWallet = "NOT_SET";
+let cachedWorldBankWallet = process.env.WORLD_BANK_WALLET || "NOT_SET";
 
 async function transferD3XOnChain(fromKeypair, toAddress, amount) {
     if (!fromKeypair) return;
@@ -604,6 +609,32 @@ function initWebSockets() {
         break;
       }
 
+      case 'company_hack': {
+        const success = msg.success;
+        const reward = msg.rewardAmount || 0;
+        const callsign = msg.callsign || 'Unknown';
+        const companyName = msg.companyName || 'Unknown Corp';
+
+        GameLogger.hack(callsign, companyName, success, { reward });
+
+        if (success) {
+            // If successful, update commander's D3X balance
+            if (pgPool) {
+                try {
+                    await pgPool.query(`UPDATE commanders SET d3x_balance = d3x_balance + $1 WHERE callsign = $2`, [reward, callsign]);
+                    console.log(`[HACK] Commander ${callsign} successfully hacked ${companyName} and gained ${reward} D3X.`);
+                    ws.send(JSON.stringify({ type: 'hack_success', reward: reward }));
+                } catch (e) {
+                    console.error('DB Error on company_hack:', e.message);
+                }
+            }
+        } else {
+            console.log(`[HACK] Commander ${callsign} failed to hack ${companyName}.`);
+            ws.send(JSON.stringify({ type: 'hack_failed' }));
+        }
+        break;
+      }
+
       case 'solana_auth': {
         const address = msg.address;
         if (!address) break;
@@ -655,6 +686,33 @@ function initWebSockets() {
         // processDailyTokenDrop(client.name, client.wallet);
         
         break;
+      }
+      case 'get_world_bank_stats': {
+          if (!pgPool) break;
+          try {
+              const res = await pgPool.query(`SELECT d3x_balance, portfolio FROM commanders WHERE callsign = 'WORLD BANK'`);
+              if (res.rows.length > 0) {
+                  ws.send(JSON.stringify({
+                      type: 'world_bank_stats',
+                      d3xBalance: res.rows[0].d3x_balance || 0,
+                      portfolio: res.rows[0].portfolio || {}
+                  }));
+              }
+          } catch(e) {
+              console.error('get_world_bank_stats DB Error:', e.message);
+          }
+          break;
+      }
+      
+      case 'get_full_log': {
+          if (!pgPool) break;
+          try {
+              const res = await pgPool.query(`SELECT timestamp, actor, event_type, target, action_details FROM game_events_log ORDER BY timestamp DESC LIMIT 500`);
+              ws.send(JSON.stringify({ type: 'full_log_data', logs: res.rows }));
+          } catch(e) {
+              console.error('get_full_log DB Error:', e.message);
+          }
+          break;
       }
       
       case 'get_my_d3x_balance': {
@@ -832,6 +890,9 @@ function initWebSockets() {
         const aiName = msg.aiName; // 'gemini' or 'claude'
         const cost = msg.cost;
         const itemType = msg.itemType || 'market_resource';
+        console.log(`[AI Market Buy] ${aiName} purchased ${itemType} for ${cost} D3X`);
+        // LOG EVENT
+        GameLogger.trade(aiName, itemType, 1, cost, 'D3X');
         
         if (!aiName || !cost || cost <= 0) return;
         
@@ -840,8 +901,10 @@ function initWebSockets() {
         else if (aiName === 'gemini' && process.env.gemini_wallet) fromWallet = process.env.gemini_wallet;
         else if (aiName === 'claude' && rainclaudeKeypair) fromWallet = rainclaudeKeypair.publicKey.toBase58();
         else if (aiName === 'claude' && process.env.RAINCLAUDE_SOLANA_WALLET) fromWallet = process.env.RAINCLAUDE_SOLANA_WALLET;
+        else if (aiName === 'world_bank' && worldBankKeypair) fromWallet = worldBankKeypair.publicKey.toBase58();
+        else if (aiName === 'world_bank' && process.env.WORLD_BANK_WALLET) fromWallet = process.env.WORLD_BANK_WALLET;
         
-        if (fromWallet !== 'NOT_SET') {
+        if (fromWallet !== 'NOT_SET' && aiName !== 'world_bank') {
           try {
             await pgPool.query(`
               INSERT INTO pending_settlements (from_wallet, to_wallet, amount, reason) 
@@ -862,6 +925,8 @@ function initWebSockets() {
         const amount = msg.amount || 100;
         if (!callsign) break;
         
+        GameLogger.generic(callsign, `Staked ${amount} D3X in datacenter ${plan}`);
+
         if (!globalGameState) {
           globalGameState = { players: [], countries: {}, turn: 0, turnCount: 1, phase: 'REINFORCE', activePlayerIndex: 0 };
         }
@@ -1061,7 +1126,12 @@ function initWebSockets() {
 
       case 'record_attack': {
         const callsign = msg.callsign;
+        const targetCountry = msg.targetCountry; // Assuming msg now includes targetCountry
         const damage = msg.damage || 0;
+        const success = msg.success; // Assuming msg now includes success
+        
+        GameLogger.combat(callsign, targetCountry, 'STRIKE', { from: callsign, success, damageDealt: damage });
+
         if (!pgPool || !callsign) return;
         try {
           let res = await pgPool.query(`
@@ -1124,6 +1194,33 @@ function initWebSockets() {
         }
         break;
       }
+      
+      case 'get_ai_wallets': {
+        if (!pgPool) break;
+        try {
+            const res = await pgPool.query("SELECT gemini_hp, claude_hp, gemini_portfolio, claude_portfolio FROM ai_combat_state WHERE id = 1");
+            if (res.rows.length > 0) {
+                const row = res.rows[0];
+                client.send(JSON.stringify({
+                    type: 'ai_wallets_data',
+                    gemini: {
+                        balance: cachedGeminiBalance || 100000000,
+                        hp: row.gemini_hp || 10000,
+                        portfolio: row.gemini_portfolio || { commodities: {} }
+                    },
+                    claude: {
+                        balance: cachedClaudeBalance || 100000000,
+                        hp: row.claude_hp || 10000,
+                        portfolio: row.claude_portfolio || { commodities: {} }
+                    }
+                }));
+            }
+        } catch (e) {
+            console.error('DB Error on get_ai_wallets:', e.message);
+        }
+        break;
+      }
+      
       case 'start_mining': {
         const callsign = msg.callsign;
         if (!callsign || !pgPool) break;
@@ -1933,6 +2030,117 @@ setTimeout(() => setInterval(runAIMarketBuying, 30 * 60 * 1000), 15 * 60 * 1000)
 // Run immediately once on startup after 10 seconds 
 setTimeout(runAIMarketBuying, 10000);
 
+// --- AI SPENDING PROTOCOL (Incremental Rule Execution) ---
+async function runAISpendingProtocol() {
+  const spendingFile = path.join(__dirname, 'AI_Spending.txt');
+  const todayDate = new Date().toISOString().split('T')[0];
+  
+  let fileContent = '';
+  try {
+    fileContent = await fs.promises.readFile(spendingFile, 'utf8');
+  } catch(e) { /* File doesn't exist yet */ }
+  
+  // Use cached Gemini balance, fallback to 100M
+  const currentBalance = cachedGeminiBalance || 100000000;
+  const dailySpendCap = Math.floor(currentBalance * 0.02);
+  if (dailySpendCap <= 0) return;
+
+  // Calculate how much we have already spent today by crawling the file for today's logs
+  let spentToday = 0;
+  const lines = fileContent.split('\n');
+  let readingToday = false;
+  
+  for (let i = 0; i < lines.length; i++) {
+     const line = lines[i].trim();
+     if (line.startsWith(`DATE: ${todayDate}`)) readingToday = true;
+     else if (line.startsWith('DATE: ') && line !== `DATE: ${todayDate}`) readingToday = false;
+     
+     if (readingToday && line.startsWith('TOTAL_SPENT: ')) {
+         const amt = parseInt(line.replace('TOTAL_SPENT: ', '').trim(), 10);
+         if (!isNaN(amt)) spentToday += amt;
+     }
+  }
+
+  const remainingDailyBudget = dailySpendCap - spentToday;
+  if (remainingDailyBudget <= 0) return; // Daily cap reached
+
+  const categories = {
+    "Natural Resources": ["metals", "rare earth minerals", "uranium", "oil", "gas", "industrial materials"],
+    "Military Assets": ["drones", "missiles", "radar systems", "satellites", "defensive systems"],
+    "Technology": ["GPUs", "CPUs", "quantum hardware", "data centers", "networking infrastructure"],
+    "Information Warfare": ["compute power", "data acquisition", "cyber capabilities"],
+    "Logistics": ["transport systems", "manufacturing capacity", "energy production"]
+  };
+
+  const purchases = [];
+  const maxPurchasesThisTick = Math.floor(Math.random() * 3) + 1; // Buy 1 to 3 items right now
+  const catNames = Object.keys(categories);
+  
+  let transactionTotal = 0;
+  
+  for (let p = 0; p < maxPurchasesThisTick; p++) {
+      if (transactionTotal >= remainingDailyBudget) break;
+      
+      const cat = catNames[Math.floor(Math.random() * catNames.length)];
+      const items = categories[cat];
+      const item = items[Math.floor(Math.random() * items.length)];
+      
+      // Determine cost for this micro-buy (between 5,000 and 15% of remaining budget)
+      const maxMicro = Math.floor(remainingDailyBudget * 0.15);
+      let cost = Math.floor(Math.random() * Math.max(5000, maxMicro)) + 5000;
+      
+      // Clamp to remaining budget
+      if (transactionTotal + cost > remainingDailyBudget) {
+          cost = remainingDailyBudget - transactionTotal;
+      }
+      
+      transactionTotal += cost;
+      
+      // Check if we already bought this exact item in this specific batch
+      const exist = purchases.find(p => p.item === item);
+      if (exist) {
+          exist.cost += cost;
+      } else {
+          purchases.push({ item, cost });
+      }
+      
+      // Queue on-chain settlement for Gemini
+      if (pgPool) {
+         const fromWallet = geminiKeypair ? geminiKeypair.publicKey.toBase58() : (process.env.gemini_wallet || 'GEMINI_NOT_SET');
+         if (fromWallet !== 'GEMINI_NOT_SET') {
+            pgPool.query(`INSERT INTO pending_settlements (from_wallet, to_wallet, amount, reason) VALUES ($1, $2, $3, $4)`,
+             [fromWallet, BURN_ADDRESS.toBase58(), cost, `protocol_buy_${item.replace(/ /g,'_')}`]).catch(console.error);
+         }
+      }
+      
+      if (transactionTotal >= remainingDailyBudget) break;
+  }
+
+  if (transactionTotal <= 0) return;
+
+  // Construct Logging Block EXACTLY as required by the spec
+  let logText = `DATE: ${todayDate}\n`;
+  logText += `WALLET_BALANCE: ${currentBalance}\n`;
+  logText += `DAILY_SPEND: ${dailySpendCap}\n\n`; // Specifies the 2% daily rule
+  logText += `PURCHASES:\n\n`;
+  
+  for (const p of purchases) {
+      logText += `- ${p.item} : ${p.cost}\n`;
+  }
+  
+  logText += `\nTOTAL_SPENT: ${transactionTotal}\n`;
+  const projectedRemainingBalance = currentBalance - transactionTotal;
+  logText += `REMAINING_BALANCE: ${projectedRemainingBalance}\n\n`;
+
+  // Append to file incrementally
+  await fs.promises.appendFile(spendingFile, logText);
+  console.log(`[AI SPENDING] Executed incremental purchase for ${todayDate} (${transactionTotal} D3X). Total spent today: ${spentToday + transactionTotal}/${dailySpendCap}`);
+}
+
+// Run protocol check occasionally (every 10 minutes) allowing AI to spread buys out
+setInterval(runAISpendingProtocol, 10 * 60 * 1000);
+setTimeout(runAISpendingProtocol, 30000); // Run slightly after boot
+
 // Hourly Netting and On-Chain Settlement
 async function processHourlySettlements() {
     if (!pgPool) return;
@@ -2010,6 +2218,17 @@ async function startServer() {
       `);
       
       await pgPool.query(`
+        CREATE TABLE IF NOT EXISTS game_events_log (
+          id SERIAL PRIMARY KEY,
+          event_type VARCHAR(50),
+          actor VARCHAR(100),
+          target VARCHAR(100),
+          action_details JSONB,
+          timestamp TIMESTAMPTZ DEFAULT NOW()
+        )
+      `);
+      
+      await pgPool.query(`
         CREATE TABLE IF NOT EXISTS pending_settlements (
           id SERIAL PRIMARY KEY,
           from_wallet VARCHAR(255),
@@ -2041,6 +2260,7 @@ async function startServer() {
         await pgPool.query(`ALTER TABLE commanders ADD COLUMN IF NOT EXISTS last_d3x_claim TIMESTAMPTZ`);
         await pgPool.query(`ALTER TABLE commanders ADD COLUMN IF NOT EXISTS pending_d3x INTEGER DEFAULT 0`);
         await pgPool.query(`ALTER TABLE commanders ADD COLUMN IF NOT EXISTS portfolio JSONB`);
+        await pgPool.query(`ALTER TABLE commanders ADD COLUMN IF NOT EXISTS d3x_balance BIGINT DEFAULT 0`);
         console.log('☢ D3X Schema Migration successful');
       } catch(e) { /* Col exists */ }
 
@@ -2094,7 +2314,24 @@ async function startServer() {
       await pgPool.query(`INSERT INTO ai_combat_state (id) VALUES (1) ON CONFLICT (id) DO NOTHING`);
       await pgPool.query(`UPDATE ai_combat_state SET gemini_hp = 5000 WHERE id = 1 AND gemini_hp > 5000`);
       
+      // Initialize World Bank
+      try {
+          const wbDataRaw = await fs.promises.readFile(path.join(__dirname, 'WORLD_BANK_ACCOUNT'), 'utf8');
+          const wbData = JSON.parse(wbDataRaw);
+          const initialBal = wbData.balances && wbData.balances.D3X ? wbData.balances.D3X : 12300000;
+          await pgPool.query(`
+              INSERT INTO commanders (callsign, d3x_balance, portfolio) 
+              VALUES ($1, $2, $3) 
+              ON CONFLICT (callsign) DO NOTHING
+          `, ['WORLD BANK', initialBal, JSON.stringify(wbData)]);
+          console.log('☢ PostgreSQL Initialized WORLD BANK profile');
+      } catch(e) {
+          console.error("Failed to inject World Bank into DB:", e.message);
+      }
+      
       console.log('☢ PostgreSQL connected — game_state and commanders tables ready');
+      GameLogger.initialize(pgPool);
+      
       const state = await loadGameState();
       if (state) globalGameState = state;
     } catch (err) {

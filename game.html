@@ -1071,19 +1071,25 @@ body {
       <div id="auth-buttons-container" style="display:flex; justify-content:center; align-items:center; gap:40px; transition:all 0.5s;">
         <!-- Google Sign-In -->
         <div style="margin-top: 15px;">
-          <div id="g_id_onload"
-               data-client_id="787878787390-opqat1n6on9vp0sk8ilkn4qv1t6je1tp.apps.googleusercontent.com"
-               data-callback="handleGoogleCredentialResponse"
-               data-auto_prompt="false">
-          </div>
-          <div class="g_id_signin"
-               data-type="standard"
-               data-shape="rectangular"
-               data-theme="filled_black"
-               data-text="continue_with"
-               data-size="large"
-               data-logo_alignment="left">
-          </div>
+          <div id="google-btn-fast" class="g_id_signin"></div>
+          <script>
+            function initGoogleBtnFast() {
+              if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+                google.accounts.id.initialize({
+                  client_id: "787878787390-opqat1n6on9vp0sk8ilkn4qv1t6je1tp.apps.googleusercontent.com",
+                  callback: function(r) { handleGoogleCredentialResponse(r); },
+                  auto_prompt: false
+                });
+                google.accounts.id.renderButton(
+                  document.getElementById("google-btn-fast"),
+                  { theme: "filled_black", size: "large", type: "standard", shape: "rectangular", text: "continue_with", logo_alignment: "left" }
+                );
+              } else {
+                setTimeout(initGoogleBtnFast, 50);
+              }
+            }
+            initGoogleBtnFast();
+          </script>
         </div>
 
         <!-- Connect Wallet (CENTER) -->
@@ -1100,13 +1106,107 @@ body {
         <!-- Dev/Offline Bypass -->
         <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
           <div style="font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:2px; color:rgba(0,212,255,0.5); text-transform:uppercase;">Override Code</div>
-          <input type="text" id="dev-unlock-in" placeholder="ENTER OVERRIDE CODE" style="background:rgba(0,10,20,0.8); border:1px solid rgba(0,170,255,0.4); color:#0f8; padding:8px 15px; text-align:center; font-family:'Courier New', monospace; width:220px; height: 40px; border-radius:4px; outline:none;"
-                 onkeyup="if(this.value.toLowerCase()==='unlock'){ document.getElementById('lobby-auth-status').innerHTML='✓ OVERRIDE ACCEPTED'; document.querySelector('.g_id_signin').style.display='none'; this.style.display='none'; document.getElementById('auth-container-flex').style.display='none'; joinGlobalWar(); }">
+                 onkeyup="const val=this.value.toLowerCase(); if(val==='unlock'){ document.getElementById('lobby-auth-status').innerHTML='✓ OVERRIDE ACCEPTED'; document.getElementById('auth-container-flex').style.display='none'; joinGlobalWar(); } else if(val==='terminal'){ document.getElementById('lobby-auth-status').innerHTML='✓ ADMIN TERMINAL ACCESS GRANTED'; document.getElementById('auth-container-flex').style.display='none'; if(typeof openAdminTerminal==='function') openAdminTerminal(); } else if(val==='market' || val==='markets'){ document.getElementById('lobby-auth-status').innerHTML='✓ MARKET LOGS ACCESSED'; document.getElementById('auth-container-flex').style.display='none'; joinGlobalWar(); setTimeout(() => { if(typeof window.openMarketLogs==='function') window.openMarketLogs(); }, 1500); } else if(val==='aiwallet' || val==='ai wallet'){ document.getElementById('lobby-auth-status').innerHTML='✓ AI WALLET OVERRIDE ACCESSED'; document.getElementById('auth-container-flex').style.display='none'; joinGlobalWar(); setTimeout(() => { if(ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({type: 'get_ai_wallets'})); }, 1500); }">
         </div>
     
     <script>
       // Auth container and Countdown timer are now globally synced to HTML load.
       // Google Sign-In script will auto-inject gracefully within the container bounds.
+      
+      window.openMarketLogs = function() {
+        let logHtml = `<div id="market-override-modal" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:600px; max-height:80vh; background:rgba(0,10,15,0.95); border:1px solid #0f8; box-shadow:0 0 20px rgba(0,255,136,0.3); z-index:999999; border-radius:8px; display:flex; flex-direction:column; font-family:'Share Tech Mono', monospace;">
+          <div style="padding:15px; border-bottom:1px solid rgba(0,255,136,0.3); display:flex; justify-content:space-between; align-items:center;">
+              <h3 style="margin:0; color:#0f8; font-size:18px; letter-spacing:2px;">🌍 GLOBAL AI MARKET TRADE LOGS</h3>
+              <button onclick="document.getElementById('market-override-modal').remove();" style="background:none; border:none; color:#f00; font-size:20px; cursor:pointer; font-weight:bold;">&times;</button>
+          </div>
+          <div style="padding:15px; overflow-y:auto; flex:1;">`;
+        
+        if (!window.greenMarket || !window.greenMarket.tradeLogs || window.greenMarket.tradeLogs.length === 0) {
+            logHtml += `<div style="color:#aaa; text-align:center; padding:20px;">No trades executed yet. Waiting for AI market agents...</div>`;
+        } else {
+            window.greenMarket.tradeLogs.slice().reverse().forEach(log => {
+                logHtml += `<div style="margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px; font-size:13px; color:#ddd;">${log}</div>`;
+            });
+        }
+        
+        logHtml += `</div></div>`;
+        
+        const existing = document.getElementById('market-override-modal');
+        if (existing) existing.remove();
+        
+        document.body.insertAdjacentHTML('beforeend', logHtml);
+      };
+      
+      window.openAIWalletScreen = function(data) {
+          const existing = document.getElementById('aiwallet-override-modal');
+          if (existing) existing.remove();
+          
+          const gem = data.gemini || { balance:0, hp:0, portfolio:{ commodities:{} } };
+          const cld = data.claude || { balance:0, hp:0, portfolio:{ commodities:{} } };
+          
+          const buildPossessions = (commodities) => {
+              if(!commodities || Object.keys(commodities).length === 0) return `<div style="padding:10px; color:#555; text-align:center; font-style:italic;">No mapped possessions.</div>`;
+              let h = '';
+              for(const item in commodities) {
+                  const shares = commodities[item].shares;
+                  if (shares > 0) {
+                      h += `<div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.1); padding:6px 0;">
+                              <span>${item}</span><span style="font-weight:bold;">${shares.toLocaleString()} UNITS</span>
+                            </div>`;
+                  }
+              }
+              return h === '' ? `<div style="padding:10px; color:#555; text-align:center; font-style:italic;">No active resources held.</div>` : h;
+          };
+          
+          let uiText = `
+          <div id="aiwallet-override-modal" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:9999999; display:flex; flex-direction:row; font-family:'Share Tech Mono', monospace;">
+              
+              <!-- LEFT COLUMN: GEMINI -->
+              <div style="flex:1; border-right:2px solid #335; padding:40px; background:radial-gradient(circle at top left, rgba(0,170,255,0.15), #000); overflow-y:auto; position:relative;">
+                  <button onclick="document.getElementById('aiwallet-override-modal').remove();" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#ddd; font-size:30px; cursor:pointer;" title="Close">&times;</button>
+                  <h1 style="color:#0af; margin:0 0 5px 0; font-size:42px; letter-spacing:4px; text-shadow:0 0 15px rgba(0,170,255,0.5);">GEMINI AI</h1>
+                  <h3 style="color:#558; margin:0 0 30px 0; font-size:16px;">AUTONOMOUS AGENT WALLET & ASSET MANIFEST</h3>
+                  
+                  <div style="font-size:24px; color:#fff; font-family:'Courier New', monospace; border-left:4px solid #0af; padding-left:15px; margin-bottom:20px;">
+                      <div style="font-size:12px; color:#0af; letter-spacing:2px; margin-bottom:5px;">AVAILABLE D3X LIQUIDITY</div>
+                      ${gem.balance.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})} D3X
+                  </div>
+                  
+                  <div style="font-size:20px; color:#fff; font-family:'Courier New', monospace; border-left:4px solid #fff; padding-left:15px; margin-bottom:40px;">
+                      <div style="font-size:12px; color:#aaa; letter-spacing:2px; margin-bottom:5px;">DATABASE INTEGRITY (HP)</div>
+                      ${gem.hp.toLocaleString()} / 10,000
+                  </div>
+                  
+                  <h2 style="color:#0af; border-bottom:1px solid #0af; padding-bottom:5px;">POSSESSIONS & INVENTORY:</h2>
+                  <div style="font-size:16px; color:#ddd; background:rgba(0,170,255,0.05); padding:15px; border-radius:4px; border:1px solid rgba(0,170,255,0.2);">
+                      ${buildPossessions(gem.portfolio.commodities)}
+                  </div>
+              </div>
+
+              <!-- RIGHT COLUMN: RAINCLAUDE -->
+              <div style="flex:1; padding:40px; background:radial-gradient(circle at top right, rgba(255,50,50,0.15), #000); overflow-y:auto; position:relative;">
+                  <h1 style="color:#f33; margin:0 0 5px 0; font-size:42px; letter-spacing:4px; text-shadow:0 0 15px rgba(255,50,50,0.5);">RAINCLAUDE</h1>
+                  <h3 style="color:#855; margin:0 0 30px 0; font-size:16px;">AUTONOMOUS AGENT WALLET & ASSET MANIFEST</h3>
+                  
+                  <div style="font-size:24px; color:#fff; font-family:'Courier New', monospace; border-left:4px solid #f33; padding-left:15px; margin-bottom:20px;">
+                      <div style="font-size:12px; color:#f33; letter-spacing:2px; margin-bottom:5px;">AVAILABLE D3X LIQUIDITY</div>
+                      ${cld.balance.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})} D3X
+                  </div>
+                  
+                  <div style="font-size:20px; color:#fff; font-family:'Courier New', monospace; border-left:4px solid #fff; padding-left:15px; margin-bottom:40px;">
+                      <div style="font-size:12px; color:#aaa; letter-spacing:2px; margin-bottom:5px;">DATABASE INTEGRITY (HP)</div>
+                      ${cld.hp.toLocaleString()} / 10,000
+                  </div>
+                  
+                  <h2 style="color:#f33; border-bottom:1px solid #f33; padding-bottom:5px;">POSSESSIONS & INVENTORY:</h2>
+                  <div style="font-size:16px; color:#ddd; background:rgba(255,50,50,0.05); padding:15px; border-radius:4px; border:1px solid rgba(255,50,50,0.2);">
+                      ${buildPossessions(cld.portfolio.commodities)}
+                  </div>
+              </div>
+              
+          </div>`;
+          document.body.insertAdjacentHTML('beforeend', uiText);
+      };
     </script>
       </div>
 
@@ -1219,6 +1319,28 @@ body {
           <div id="green-market-holdings" style="display:none;"></div>
       </div>
     </div>
+
+    <!-- WTR SKIN HYDROLOGY TELEMETRY -->
+    <div id="wtr-skin-info" style="display:none; position:absolute; bottom:20px; right:20px; background:rgba(0,170,255,0.15); border:1px solid rgba(0,170,255,0.5); padding:15px; border-radius:8px; font-family:'Orbitron', sans-serif; color:#00aaff; z-index:100; box-shadow:0 0 15px rgba(0,170,255,0.2); backdrop-filter:blur(5px); min-width:250px;">
+      <div style="font-size:12px; font-weight:bold; margin-bottom:10px; border-bottom:1px solid rgba(0,170,255,0.3); padding-bottom:5px; text-shadow:0 0 5px #00aaff; letter-spacing:1px;">🌍 HYDROLOGY TELEMETRY</div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+        <span style="font-size:10px; color:#88ccff;">GLOBAL WATER VOLUME</span>
+        <span id="wtr-vol" style="font-weight:bold; font-size:11px;">1.386B km³</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+        <span style="font-size:10px; color:#88ccff;">AVG FLOW RATE</span>
+        <span id="wtr-flow" style="font-weight:bold; font-size:11px;">104.2 Sv</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+        <span style="font-size:10px; color:#88ccff;">DC HYDRO POWER</span>
+        <span id="wtr-pwr" style="font-weight:bold; font-size:11px; color:#0f8;">1.4 TW</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin-top:8px; border-top:1px dashed rgba(0,170,255,0.3); padding-top:8px;">
+        <span style="font-size:10px; color:#ff5555;">AI COOLING DEFICIT</span>
+        <span id="wtr-deficit" style="font-weight:bold; font-size:11px; color:#ff5555;">NOMINAL</span>
+      </div>
+    </div>
+
     <div id="log">SYSTEM INITIALIZED // AWAITING COMMAND // AURAL UPLINK SECURED</div>
     <div style="position:absolute; right:20px; display:flex; align-items:center; gap:10px; pointer-events:auto; z-index:100;">
       <span style="font-size:9px; color:rgba(255,255,255,0.5); font-family:'Courier New', monospace; letter-spacing:1px; max-width: 280px; text-align: right; line-height: 1.2;">Servers are provided for free so everyone can have fun.<br>Any support helps keep them running!</span>
@@ -2959,7 +3081,7 @@ function initCompanies() {
     const isWorldBank = company.name === "WORLD BANK";
     
     if (isWorldBank) {
-      sprite.scale.set(0.36, 0.09, 1); // 1.5x bigger
+      sprite.scale.set(0.96, 0.24, 1); // 4x bigger
     } else {
       sprite.scale.set(0.24, 0.06, 1); // Twice as big
     }
@@ -3010,7 +3132,7 @@ function initCompanies() {
     const dotMat = new THREE.SpriteMaterial({ map: dotTex, transparent: true, depthTest: true, blending: THREE.AdditiveBlending });
     const dotSprite = new THREE.Sprite(dotMat);
     if (isWorldBank) {
-        dotSprite.scale.set(0.12, 0.12, 1); // 1.5x bigger
+        dotSprite.scale.set(0.32, 0.32, 1); // 4x bigger
     } else {
         dotSprite.scale.set(0.08, 0.08, 1); // Twice as big
     }
@@ -3041,6 +3163,13 @@ function guessCompanyDomain(name) {
 }
 
 function showCompanyInfo(compData) {
+  if (compData.name === 'WORLD BANK') {
+      if (ws && ws.readyState === 1) {
+          ws.send(JSON.stringify({ type: 'get_world_bank_stats' }));
+      }
+      return; // Handled by websocket callback
+  }
+
   let modal = document.getElementById('company-info-modal');
   if (!modal) {
     modal = document.createElement('div');
@@ -4702,6 +4831,14 @@ const globeMat  = new THREE.MeshPhongMaterial({
   clipIntersection: true,
   clippingPlanes: [] // active only on FIRE skin
 });
+
+// Update globeMat color for WTR skin
+if (window.currentSkinIndex === 5) {
+  globeMat.color = new THREE.Color(0x00aaff); // Neon cyan for WTR
+  globeMat.specular = new THREE.Color(0x00ffff);
+  globeMat.shininess = 50;
+}
+
 const globeMesh = new THREE.Mesh(globeGeo, globeMat);
 window.globeMesh = globeMesh;
 scene.add(globeMesh);
@@ -5757,8 +5894,13 @@ window.showCmdHelpModal = function() {
   } else if (idx === 4) {
       skinSpecificTitle = "BLACK SKIN CORPORATE";
       // We will override the content for idx 4 completely down below.
+  } else if (idx === 5) {
+      skinSpecificTitle = "WTR SKIN HYDROLOGY";
+      skinSpecificDesc = "Welcome to the planetary fluid dynamics simulation engine. This interface models the total 1.386 billion km³ volume of Earth's water moving across a realtime physics engine.";
+      skinSpecificInteractivity = "<b>Global cooling grid enabled.</b> Artificial intelligence requires staggering amounts of water for hydroelectric generation and cooling. Maintain atmospheric balance against adversarial agents explicitly draining the hydrosphere to damage opponent infrastructure.";
+      skinSpecificOversight = "Every volumetric drop is conserved. A disrupted river starves power from the Cyber datacenters downstream. Observe global volume and flow metrics continuously evaluated via fluid algorithms.";
   }
-
+  
   if (idx === 4) {
     contentBox.style.padding = '0'; // Remove default padding for this specific layout
     contentBox.style.display = 'flex';
@@ -5812,7 +5954,7 @@ window.showCmdHelpModal = function() {
           ` + skinSpecificDesc + `
         </div>
         <div style="flex:1; min-width:300px; background:rgba(255,51,102,0.05); padding:25px; border-radius:10px; border-left:5px solid #ff3366;">
-          <span style="display:block; font-size:24px; color:#ff3366; margin-bottom:15px; font-weight:bold;">` + ((idx === 0 || idx === 1 || idx === 2 || idx === 3) ? "2. Active Commander Access" : "2. Restricted Interactivity") + `</span>
+          <span style="display:block; font-size:24px; color:#ff3366; margin-bottom:15px; font-weight:bold;">` + ((idx === 0 || idx === 1 || idx === 2 || idx === 3 || idx === 5) ? "2. Active Commander Access" : "2. Restricted Interactivity") + `</span>
           ` + skinSpecificInteractivity + `
         </div>
       </div>
@@ -5833,8 +5975,8 @@ window.showCmdHelpModal = function() {
   modal.appendChild(contentBox);
   
   // Only append epilepsy footer for Black skin (idx 4)
-  // Specifically removing for Live (0), Red (1), Green (2), and Cyber (3)
-  if (idx !== 0 && idx !== 1 && idx !== 2 && idx !== 3) {
+  // Specifically removing for Live (0), Red (1), Green (2), Cyber (3), and WTR (5)
+  if (idx !== 0 && idx !== 1 && idx !== 2 && idx !== 3 && idx !== 5) {
     const footer = document.createElement('div');
     footer.style.padding='20px 30px';
     footer.style.textAlign='center';
@@ -5997,8 +6139,23 @@ function refreshAllBorders() {
     const col = getOwnerColor(c.owner);
     group.traverse(obj => {
       if (obj.isLine) {
-        obj.material.color.set(col.int);
-        obj.material.opacity = (iso === GS.selected) ? 1.0 : 0.65;
+        const s = window.currentSkinIndex;
+        // WTR SKIN uses neon cyan borders (0x00ffff)
+        if (s === 5) {
+            obj.material.color.setHex(0x00ffff);
+            obj.material.opacity = 0.8;
+            obj.material.linewidth = 2;
+        } 
+        else if (s === 4) {
+            obj.material.color.setHex(0xffffff);
+            obj.material.opacity = 0.5;
+            obj.material.linewidth = 1;
+        } else {
+            obj.material.color.set(col.int);
+            obj.material.opacity = (iso === GS.selected) ? 1.0 : 0.65;
+            obj.material.linewidth = 1; // Reset linewidth for other skins
+        }
+        obj.material.needsUpdate = true;
       }
     });
   }
@@ -6071,8 +6228,8 @@ function buildTroopSprites() {
     sprite.position.copy(pos);
     sprite.scale.set(.12,.06,1);
     
-    // Hide if currently on a clean skin, BLK skin, or CYBER skin (which is the UI "Black Skin")
-    sprite.visible = !(window.SKINS && window.SKINS[window.currentSkinIndex] && (window.SKINS[window.currentSkinIndex].cleanGlobe || window.SKINS[window.currentSkinIndex].hideTroops));
+    // Hide if currently on a clean skin, BLK skin, CYBER skin, or WTR skin
+    sprite.visible = !(window.SKINS && window.SKINS[window.currentSkinIndex] && (window.SKINS[window.currentSkinIndex].cleanGlobe || window.SKINS[window.currentSkinIndex].hideTroops || window.currentSkinIndex === 5));
     
     sprite.userData = {iso};
     scene.add(sprite);
@@ -6487,6 +6644,10 @@ let satHackTimeLeft = 10.0;
 
 function openSatelliteHackMinigame() {
   if (window.activeSkin === 'green') {
+    setLog(`⚠ SATELLITE HACK IS INCOMPATIBLE WITH GREEN MARKET SKIN. SWITCH TO RED.`);
+    return;
+  }
+  if (window.currentSkinIndex === 2) {
     setLog(`⚠ SATELLITE HACK IS INCOMPATIBLE WITH GREEN MARKET SKIN. SWITCH TO RED.`);
     return;
   }
@@ -8805,7 +8966,7 @@ function slerp3D(a,b,t){
 }
 
 function launchMissile3D(fromIso, toIso, col) {
-  if (window.currentSkinIndex === 2 || window.currentSkinIndex === 3 || window.currentSkinIndex === 4) return;
+  if (window.currentSkinIndex === 2 || window.currentSkinIndex === 3 || window.currentSkinIndex === 4 || window.currentSkinIndex === 5) return;
   SFX.playLaunch();
   const fc=countryData[fromIso], tc=countryData[toIso];
   if(!fc||!tc) return;
@@ -9453,7 +9614,7 @@ function createSpaceRocketCanvas() {
 }
 
 function spawnSpaceRocket3D(lat, lon) {
-  if (window.currentSkinIndex === 4 || window.currentSkinIndex === 3) return; // No rockets on BLK or CYBER skins
+  if (window.currentSkinIndex === 4 || window.currentSkinIndex === 3 || window.currentSkinIndex === 5) return; // No rockets on BLK, CYBER, or WTR skins
   if (window.currentSkinIndex === 2) return; // Explicitly ignoring rockets on the Green Skin as previously requested
   if (lat === undefined || lon === undefined) return;
   const c = ll2v(lat, lon, GLOBE_R + 0.005);
@@ -9849,6 +10010,63 @@ async function aiTurn() {
 // =====================================================================
 // MULTIPLAYER (WebSocket & Google Auth)
 // =====================================================================
+
+function openAdminTerminal() {
+    let modal = document.getElementById('admin-terminal-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'admin-terminal-modal';
+        modal.style.position = 'absolute';
+        modal.style.top = '10%';
+        modal.style.left = '10%';
+        modal.style.width = '80%';
+        modal.style.height = '80%';
+        modal.style.background = 'rgba(0, 0, 0, 0.95)';
+        modal.style.border = '2px solid #00ff00';
+        modal.style.borderRadius = '5px';
+        modal.style.padding = '20px';
+        modal.style.color = '#00ff00';
+        modal.style.fontFamily = '"Courier New", monospace';
+        modal.style.zIndex = '999999';
+        modal.style.display = 'flex';
+        modal.style.flexDirection = 'column';
+
+        modal.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #00ff00; padding-bottom:10px; margin-bottom:10px;">
+                <h2 style="margin:0; font-size:24px;">SYSTEM LOG TERMINAL</h2>
+                <div style="cursor:pointer; font-weight:bold; color:#ff0000; font-size:20px;" onclick="this.parentElement.parentElement.style.display='none'; document.getElementById('auth-container-flex').style.display='flex'; document.getElementById('dev-unlock-in').value=''; document.getElementById('lobby-auth-status').innerHTML=''; ">[X]</div>
+            </div>
+            <div id="admin-terminal-content" style="flex-grow:1; overflow-y:auto; font-size:13px; white-space:pre-wrap; text-align:left; padding-right:10px; line-height:1.4;">
+                Connecting to database...
+            </div>
+            <div style="margin-top:10px; text-align:center;">
+                <button onclick="if(ws && ws.readyState===1) ws.send(JSON.stringify({type:'get_full_log'}))" style="background:rgba(0,255,0,0.1); border:1px solid #00ff00; color:#00ff00; padding:8px 20px; cursor:pointer; font-family:'Courier New', monospace; font-weight:bold;">REFRESH LOGS</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    modal.style.display = 'flex';
+    document.getElementById('admin-terminal-content').innerText = "Querying PostgreSQL...";
+
+    if (!ws || ws.readyState !== 1) {
+        initWS();
+        let retries = 0;
+        const checkWS = setInterval(() => {
+            if (ws && ws.readyState === 1) {
+                clearInterval(checkWS);
+                ws.send(JSON.stringify({ type: 'get_full_log' }));
+            }
+            if(++retries > 30) {
+               clearInterval(checkWS); 
+               document.getElementById('admin-terminal-content').innerText = "ERROR: Could not establish WebSocket connection to backend.";
+            }
+        }, 100);
+    } else {
+        ws.send(JSON.stringify({ type: 'get_full_log' }));
+    }
+}
+
 let ws_isHost = false;
 
 // Global Auth State
@@ -9873,6 +10091,44 @@ function initWS() {
   ws.onmessage=e=>{
     const msg=JSON.parse(e.data);
     switch(msg.type){
+      case 'water_physics_update': {
+          const wtrInfo = document.getElementById('wtr-skin-info');
+          if (wtrInfo && window.currentSkinIndex === 5) {
+              if (msg.volume) document.getElementById('wtr-vol').innerText = msg.volume;
+              if (msg.flow) document.getElementById('wtr-flow').innerText = msg.flow;
+              if (msg.power) document.getElementById('wtr-pwr').innerText = msg.power;
+              
+              const defEl = document.getElementById('wtr-deficit');
+              if (msg.deficitWarning) {
+                  defEl.innerText = msg.deficitWarning;
+                  defEl.style.color = '#ff5555';
+                  defEl.style.animation = 'pulse-red 2s infinite';
+              } else {
+                  defEl.innerText = "NOMINAL";
+                  defEl.style.color = '#0f8';
+                  defEl.style.animation = 'none';
+              }
+          }
+          break;
+      }
+      case 'full_log_data': {
+          const content = document.getElementById('admin-terminal-content');
+          if (content) {
+              if (!msg.logs || msg.logs.length === 0) {
+                  content.innerText = "No logs found in database. The system is silent.";
+                  break;
+              }
+              let html = "";
+              msg.logs.forEach(l => {
+                  const ts = new Date(l.timestamp).toISOString().replace('T', ' ').substring(0, 19);
+                  let details = JSON.stringify(l.action_details);
+                  html += `<span style="color:#666;">[${ts}]</span> <strong style="color:#0af;">${l.actor}</strong> -> <span style="color:#ff0;">${l.event_type}</span> ${l.target ? `(Target: ${l.target})` : ''}\n<span style="color:#aaa;">${details}</span>\n\n`;
+              });
+              content.innerHTML = html;
+          }
+          break;
+      }
+
       case 'saved_state': {
         ws_isHost = msg.isHost;
         hideLobby();
@@ -9913,6 +10169,65 @@ function initWS() {
           }
         });
         break;
+      }
+      case 'company_hack_success':
+        addTerminalLog("cyber", "Hack Successful! " + msg.rewardAmount + " D3X Siphoned.", "#0f8");
+        break;
+
+      case 'world_bank_stats': {
+          let modal = document.getElementById('company-info-modal');
+          if (!modal) {
+              modal = document.createElement('div');
+              modal.id = 'company-info-modal';
+              document.body.appendChild(modal);
+          }
+          modal.style.position = 'absolute';
+          modal.style.top = '20%';
+          modal.style.left = '50%';
+          modal.style.transform = 'translate(-50%, -20%)';
+          modal.style.background = 'rgba(20, 15, 5, 0.95)';
+          modal.style.border = '2px solid #ffd700';
+          modal.style.borderRadius = '8px';
+          modal.style.padding = '20px';
+          modal.style.color = '#fff';
+          modal.style.fontFamily = '"Courier New", monospace';
+          modal.style.zIndex = '9999';
+          modal.style.minWidth = '350px';
+          modal.style.boxShadow = '0 0 25px rgba(255, 215, 0, 0.6)';
+          modal.style.textAlign = 'center';
+
+          const d3x = msg.d3xBalance || 0;
+          const port = msg.portfolio || {};
+          let inventoryHtml = "";
+          if (port.commodities) {
+             Object.keys(port.commodities).forEach(category => {
+                 inventoryHtml += `<div style="text-align:left; color:#ffd700; margin-top:10px; font-weight:bold;">${category.toUpperCase()} RESERVES</div>`;
+                 inventoryHtml += `<div style="text-align:left; font-size:12px; color:#ccc; display:grid; grid-template-columns: 1fr 1fr; gap:5px;">`;
+                 Object.keys(port.commodities[category]).forEach(item => {
+                     const qty = port.commodities[category][item];
+                     inventoryHtml += `<div>${item}:</div><div style="text-align:right; color:#fff;">${qty.toLocaleString()}</div>`;
+                 });
+                 inventoryHtml += `</div>`;
+             });
+          }
+
+          modal.innerHTML = `
+            <div style="position:absolute;top:10px;right:15px;cursor:pointer;color:#ffd700;font-weight:bold;font-size:20px;" onclick="this.parentElement.style.display='none'">X</div>
+            <div style="margin-bottom:10px; text-shadow:0 0 10px #ffd700; font-size:40px;">🏦</div>
+            <h2 style="margin:0 0 5px 0;color:#ffd700;font-size:26px;text-transform:uppercase;text-shadow:0 0 5px #ffd700;">WORLD BANK</h2>
+            <div style="font-size:12px;color:#aaa;margin-bottom:15px;letter-spacing:2px;">GLOBAL RESERVE NODE</div>
+            
+            <div style="margin-top:15px; background:rgba(0,0,0,0.6); padding:15px; border:1px solid #ffd700; border-radius:4px; box-shadow:inset 0 0 20px rgba(255,215,0,0.1);">
+                <div style="color:#aaa; font-size:10px; margin-bottom:5px;">FIAT / D3X LIQUIDITY POOL:</div>
+                <div style="color:#ffd700; font-size:22px; font-weight:bold; font-family:'Orbitron', 'Courier New', monospace; text-shadow:0 0 10px #ffd700;">${d3x.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} D3X</div>
+            </div>
+            
+            <div style="margin-top:20px; max-height: 300px; overflow-y:auto; padding-right:10px; border-top:1px solid #555; padding-top:10px;">
+                ${inventoryHtml}
+            </div>
+          `;
+          modal.style.display = 'block';
+          break;
       }
       case 'google_auth_success':
         // The server verified the JWT. We are officially connected.
@@ -10124,6 +10439,13 @@ function initWS() {
         break;
       }
       
+      case 'ai_wallets_data':
+          // Render full screen AI wallets GUI if requested via override
+          if (typeof window.openAIWalletScreen === 'function') {
+              window.openAIWalletScreen(msg);
+          }
+          break;
+          
       case 'ai_market_purchases': {
         const r0 = document.getElementById('d0-reasoning');
         const r1 = document.getElementById('d1-reasoning');
@@ -10755,8 +11077,9 @@ function animate() {
             redWarfareProjectiles.splice(i, 1);
             
             // Spawn explosion particle
+            let expColor = (proj.type === 'bomb') ? '#ff5500' : '#ffff00';
             const expMat = new THREE.SpriteMaterial({ 
-                map: new THREE.CanvasTexture(createGlowCanvas(proj.type === 'bomb' ? '#ff5500' : '#ffff00')), 
+                map: new THREE.CanvasTexture(createGlowCanvas(expColor)), 
                 color: 0xffffff, transparent: true, blending: THREE.AdditiveBlending 
             });
             const expSprite = new THREE.Sprite(expMat);
@@ -10806,6 +11129,8 @@ function animate() {
         }
     }
   }
+
+  // WTR 3D Blocks are now static on the globe surface, no animation needed here.
 
   // Auto-rotate when idle (even during missile flight)
   if(!drag) {
@@ -13236,6 +13561,20 @@ window.fireRPG = function() {
   window.rpgLoop();
 };
 
+window.clearWTRBlocks = function() {
+    if (window.wtrBlocksData) {
+        window.wtrBlocksData.forEach(b => {
+            if (b.pivot) scene.remove(b.pivot);
+        });
+    }
+    window.wtrBlocksData = [];
+};
+
+window.spawnWTRBlocks = function() {
+  // Disabled per user request (no blocks on WTR skin)
+  return;
+};
+
 window.rpgLoop = function() {
   if (!window.rpgState.active) return;
   window.rpgState.time += 0.04; // Speed of the aircraft
@@ -13409,7 +13748,8 @@ const SKINS = [
   { name: 'RED',   color: 0xff2222, btnText: '🟢 GRN SKIN',  btnClass: 'active-normal', showOverlays: true,  cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: true, isPremium: false },
   { name: 'GREEN', color: 0x22ff22, btnText: '💠 CYBR SKIN',   btnClass: 'active-normal', showOverlays: false, cleanGlobe: true,  hideTroops: true,  showResources: true,  showArms: true, showBoats: false, isPremium: false },
   { name: 'CYBER', color: 0x00f0ff, btnText: '⬛ BLK SKIN',    btnClass: 'active-premium',showOverlays: false,  cleanGlobe: true, hideTroops: true,  showResources: false,  showArms: false,  showBoats: false,  isPremium: false },
-  { name: 'BLK',   color: 0x050505, btnText: '🌍 LIVE SKIN',   btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true,  showResources: false, showArms: false, showBoats: false, isPremium: false }
+  { name: 'BLK',   color: 0x050505, btnText: '💧 WTR SKIN',    btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true,  showResources: false, showArms: false, showBoats: false, isPremium: false },
+  { name: 'WTR',   color: 0x00aaff, btnText: '🌍 LIVE SKIN',   btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true,  showResources: false, showArms: false, showBoats: false, isPremium: false }
 ];
 window.SKINS = SKINS;
 
@@ -13437,6 +13777,10 @@ window.toggleRedSkin = function() {
           globeMat.emissive.setHex(0x0055ff);
           globeMat.wireframe = true;
           globeMat.opacity = 1.0;
+      } else if (skin.name === 'WTR') {
+          globeMat.emissive.setHex(0x0055aa); // Deep ocean blue emissive base
+          globeMat.wireframe = false;
+          globeMat.transparent = true;
       } else {
           globeMat.emissive.setHex(skin.name === 'LIVE' ? 0x222222 : 0x000000);
           globeMat.wireframe = false;
@@ -13580,6 +13924,12 @@ window.toggleRedSkin = function() {
   if (greenSkinInfo) {
       greenSkinInfo.style.display = (skin.name === 'GREEN') ? 'block' : 'none';
   }
+
+  // Toggle WTR Skin Info Label
+  const wtrSkinInfo = document.getElementById('wtr-skin-info');
+  if (wtrSkinInfo) {
+      wtrSkinInfo.style.display = (skin.name === 'WTR') ? 'block' : 'none';
+  }
   
   // Toggle Datacenter Power Display
   const datacenterPowerBox = document.getElementById('datacenter-power-display');
@@ -13641,6 +13991,12 @@ window.toggleRedSkin = function() {
       window.planeData = [];
       window.planeMarkers = [];
     }
+  }
+
+  if (skin.name === 'WTR') {
+      window.spawnWTRBlocks();
+  } else {
+      if (typeof window.clearWTRBlocks === 'function') window.clearWTRBlocks();
   }
 
   if (skin.showBoats) {

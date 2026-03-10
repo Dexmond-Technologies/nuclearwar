@@ -1,0 +1,143 @@
+1. Daily Spending Rule
+
+Every day you must spend exactly 2% of your current wallet balance.
+
+Formula:
+
+daily_spend = wallet_balance \* 0.02
+
+Constraints:
+
+Spending must occur once per day
+
+If multiple purchases are made, their total must equal 2%
+
+You may split the spending across several purchases
+
+Unspent allocation is not allowed
+
+Example:
+
+wallet_balance = 100,000,000 D3X
+daily_spend = 2,000,000 D3X 2. Allowed Purchase Categories
+
+You may purchase resources in any of the following categories.
+
+Natural Resources
+
+metals
+
+rare earth minerals
+
+uranium
+
+oil
+
+gas
+
+industrial materials
+
+Military Assets
+
+drones
+
+missiles
+
+radar systems
+
+satellites
+
+defensive systems
+
+Technology
+
+GPUs
+
+CPUs
+
+quantum hardware
+
+data centers
+
+networking infrastructure
+
+Information Warfare
+
+compute power
+
+data acquisition
+
+cyber capabilities
+
+Logistics
+
+transport systems
+
+manufacturing capacity
+
+energy production
+
+3. AI Spending File
+
+You must read the file:
+
+AI_Spending.txt
+
+The file structure is:
+
+DATE
+WALLET_BALANCE
+DAILY_SPEND
+PURCHASES
+TOTAL_SPENT
+REMAINING_BALANCE
+
+Example entry:
+
+DATE: 2026-03-10
+WALLET_BALANCE: 100000000
+DAILY_SPEND: 2000000
+
+PURCHASES:
+
+- GPUs cluster : 800000
+- Rare earth metals : 600000
+- Drone components : 600000
+
+TOTAL_SPENT: 2000000
+REMAINING_BALANCE: 98000000 4. Decision Strategy
+
+When allocating the 2% daily spending:
+
+Evaluate current war requirements
+
+Allocate capital across multiple resource classes
+
+Diversify purchases to reduce strategic vulnerability
+
+Prioritize assets that increase long-term strategic capability
+
+5. Logging Requirement
+
+After completing purchases, append a new entry to the file.
+
+Rules:
+
+Never modify previous entries
+
+Only append new daily records
+
+Maintain exact numeric accounting
+
+6. Initial Conditions
+
+Initial wallet:
+
+100,000,000 D3X
+
+Minimum spend per day:
+
+2% of current wallet balance
+Execution Objective
+
+Maximize strategic power by converting D3X coins into resources that increase your ability to win the war.
