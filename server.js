@@ -1869,8 +1869,9 @@ async function runAIMarketBuying() {
   const geminiBalance = cachedGeminiBalance || 100000000; // Default 100M if not yet fetched
   const claudeBalance = cachedClaudeBalance || 100000000;
   
-  const geminiDailyCap = geminiBalance * 0.01; // 1% of total balance
-  const claudeDailyCap = claudeBalance * 0.01;
+  const dailyCapMultiplier = (parseFloat(process.env.PERCENTAGE_DAILY_WALLET) || 1) / 100;
+  const geminiDailyCap = geminiBalance * dailyCapMultiplier; 
+  const claudeDailyCap = claudeBalance * dailyCapMultiplier;
   
   const buys = [];
   
@@ -2031,8 +2032,10 @@ async function runAIMarketBuying() {
   }
 }
 
-// Fire market buys every 30 minutes (stagger from combat turn)
-setTimeout(() => setInterval(runAIMarketBuying, 30 * 60 * 1000), 15 * 60 * 1000);
+// Fire market buys dynamically based on env config
+const marketBuyIntervalMins = parseFloat(process.env.MINUTE_MINIMUM_TRADING) || 30;
+const marketBuyIntervalMs = marketBuyIntervalMins * 60 * 1000;
+setInterval(runAIMarketBuying, marketBuyIntervalMs);
 
 // Run immediately once on startup after 10 seconds 
 setTimeout(runAIMarketBuying, 10000);
@@ -2049,7 +2052,8 @@ async function runAISpendingProtocol() {
   
   // Use cached Gemini balance, fallback to 100M
   const currentBalance = cachedGeminiBalance || 100000000;
-  const dailySpendCap = Math.floor(currentBalance * 0.01);
+  const dailyCapMultiplier = (parseFloat(process.env.PERCENTAGE_DAILY_WALLET) || 1) / 100;
+  const dailySpendCap = Math.floor(currentBalance * dailyCapMultiplier);
   if (dailySpendCap <= 0) return;
 
   // Calculate how much we have already spent today by crawling the file for today's logs
