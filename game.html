@@ -5978,7 +5978,9 @@ function updateDashboard() {
     // Update players line for Human side
     if(pi===0){
       const pEl=document.getElementById('d0-players');
-      if(pEl) pEl.textContent=`⚡ ${GS.players[0].name.toUpperCase()} IN COMMAND`;
+      // Only set text if the turn timer is not currently commandeering this element
+      if(pEl && !window._turnTimer) pEl.textContent=`⚡ ${GS.players[0].name.toUpperCase()} IN COMMAND`;
+      
       // Update User Stats box name if not already authenticated
       const usName = document.getElementById('us-name');
       const inputName = document.getElementById('player-name')?.value;
