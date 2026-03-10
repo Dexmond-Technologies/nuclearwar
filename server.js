@@ -1422,16 +1422,28 @@ async function fetchAndBroadcastAIBalances() {
         let claudeBalance = 0;
         
         try {
-            const geminiTa = await splToken.getAssociatedTokenAddress(D3X_MINT_ADDRESS, authorityKeypair.publicKey);
-            const geminiInfo = await solanaConnection.getTokenAccountBalance(geminiTa);
-            geminiBalance = geminiInfo.value.uiAmount || 0;
-        } catch(e) {} // Account might not exist or be empty
+            const accounts = await solanaConnection.getParsedTokenAccountsByOwner(
+                authorityKeypair.publicKey, 
+                { mint: D3X_MINT_ADDRESS }
+            );
+            if (accounts.value.length > 0) {
+                geminiBalance = accounts.value[0].account.data.parsed.info.tokenAmount.uiAmount || 0;
+            } else {
+                geminiBalance = 0;
+            }
+        } catch(e) { console.error('Gemini balance error:', e.message); geminiBalance = 0; }
         
         try {
-            const claudeTa = await splToken.getAssociatedTokenAddress(D3X_MINT_ADDRESS, rainclaudeKeypair.publicKey);
-            const claudeInfo = await solanaConnection.getTokenAccountBalance(claudeTa);
-            claudeBalance = claudeInfo.value.uiAmount || 0;
-        } catch(e) {}
+            const accounts = await solanaConnection.getParsedTokenAccountsByOwner(
+                rainclaudeKeypair.publicKey, 
+                { mint: D3X_MINT_ADDRESS }
+            );
+             if (accounts.value.length > 0) {
+                claudeBalance = accounts.value[0].account.data.parsed.info.tokenAmount.uiAmount || 0;
+            } else {
+                claudeBalance = 0;
+            }
+        } catch(e) { console.error('Claude balance error:', e.message); claudeBalance = 0; }
 
         broadcastAll({
             type: 'ai_d3x_balances',

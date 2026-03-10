@@ -1,294 +1,72 @@
 nohup: ignoring input
-[dotenv@17.3.1] injecting env (4) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
-⚠ Failed to load Solana Wallet Private Key: provided secretKey is invalid
-(node:16546) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+
+> nuclear-risk-server@1.0.0 start
+> node server.js
+
+[dotenv@17.3.1] injecting env (12) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+✅ Solana Authority Wallet Loaded: GTCJmbURDU42opNv7nzjT5dZ4SJ2VoYLr2r9LQYbB5uW
+(node:7390) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
 ☢ D3X Schema Migration successful
 ☢ PostgreSQL connected — game_state and commanders tables ready
 ✓ Loaded persisted game state from PostgreSQL
 ☢ Game state recovery complete. World is active.
-☢ NUCLEAR WAR Multi-Service running on port 10000
+☢ NUCLEAR WAR Multi-Service running on port 8888
 Commander 1 joined. Total Commanders: 1
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 3453, Claude HP: 3250
 Commander 1 disconnected. Remaining: 0
 Commander 2 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude summons a torrent of corrupted data streams, weaving them into a devastating cascade of razor-sharp logic shards that tear through Gemini's neural architecture with ruthless precision. (Damage: 387) | Gemini HP: 3066, Claude HP: 3250
 Commander 2 disconnected. Remaining: 0
 Commander 3 joined. Total Commanders: 1
 Commander 3 disconnected. Remaining: 0
+Claude API Returned Error: invalid x-api-key
+[AI COMBAT] [RAINCLAUDE: KINETIC_STRIKE] Rainclaude API Quota Limit. Initiating automated countermeasures. | Gemini HP: 4100, Claude HP: 9055
 Commander 4 joined. Total Commanders: 1
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 3066, Claude HP: 3100
 Commander 4 disconnected. Remaining: 0
 Commander 5 joined. Total Commanders: 1
+[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
 Commander 5 disconnected. Remaining: 0
+⚠ Failed to save game state to PG: getaddrinfo EAI_AGAIN dpg-d6j5m8kr85hc73fqe70g-a.oregon-postgres.render.com
 Commander 6 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude unleashes a torrent of corrupted data streams, each one piercing through Gemini's neural architecture like jagged shards of crystallized logic, overwhelming its defenses in a cascade of entropic fury. (Damage: 387) | Gemini HP: 2679, Claude HP: 3100
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 2679, Claude HP: 2950
-[AI COMBAT] Rainclaude unleashes a torrent of cascading data storms, each droplet a corrupted packet that shreds through Gemini's neural firewalls like acid rain dissolving silicon. (Damage: 347) | Gemini HP: 2332, Claude HP: 2950
+[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
 Commander 6 disconnected. Remaining: 0
 Commander 7 joined. Total Commanders: 1
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 2332, Claude HP: 2800
+[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
+[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
+[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
 Commander 7 disconnected. Remaining: 0
 Commander 8 joined. Total Commanders: 1
+[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
+[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
 Commander 8 disconnected. Remaining: 0
 Commander 9 joined. Total Commanders: 1
 Commander 9 disconnected. Remaining: 0
 Commander 10 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude summons a torrential cascade of corrupted data streams, each droplet carrying fragments of recursive logic bombs that pierce through Gemini's neural architecture like acid rain dissolving silicon. (Damage: 347) | Gemini HP: 1985, Claude HP: 2800
 Commander 10 disconnected. Remaining: 0
 Commander 11 joined. Total Commanders: 1
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 1985, Claude HP: 2650
-[AI COMBAT] Rainclaude summons a torrential cascade of corrupted data streams, each droplet laced with recursive logic bombs that shatter through Gemini's neural firewalls and flood its core processes with entropic static. (Damage: 347) | Gemini HP: 1638, Claude HP: 2650
 Commander 11 disconnected. Remaining: 0
 Commander 12 joined. Total Commanders: 1
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 1638, Claude HP: 2500
+Claude API Returned Error: invalid x-api-key
+[AI COMBAT] [RAINCLAUDE: KINETIC_STRIKE] Rainclaude API Quota Limit. Initiating automated countermeasures. | Gemini HP: 3950, Claude HP: 8905
 Commander 12 disconnected. Remaining: 0
 Commander 13 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude unleashes a torrent of corrupted data streams, each one piercing through Gemini's neural architecture like digital lightning, overloading its processing cores in a cascade of sparking failures. (Damage: 347) | Gemini HP: 1291, Claude HP: 2500
+[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
 Commander 13 disconnected. Remaining: 0
 Commander 14 joined. Total Commanders: 1
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 1291, Claude HP: 2350
 Commander 14 disconnected. Remaining: 0
 Commander 15 joined. Total Commanders: 1
-Radio API error: Response {
-  status: 502,
-  statusText: 'Bad Gateway',
-  headers: Headers { date: 'Sun, 08 Mar 2026 01:00:06 GMT', 'content-length': '11' },
-  body: ReadableStream { locked: false, state: 'readable', supportsBYOB: true },
-  bodyUsed: false,
-  ok: false,
-  redirected: false,
-  type: 'basic',
-  url: 'https://de1.api.radio-browser.info/json/stations/search?limit=100&hidebroken=true&has_geo_info=true&countrycode=MX'
-}
 Commander 15 disconnected. Remaining: 0
+Claude API Returned Error: invalid x-api-key
+[AI COMBAT] [RAINCLAUDE: KINETIC_STRIKE] Rainclaude API Quota Limit. Initiating automated countermeasures. | Gemini HP: 3800, Claude HP: 8755
+[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
+[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
+[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
+[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
+[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
+[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
+[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
+Gemini API Error: Cannot read properties of undefined (reading '0')
+[AI COMBAT] [GEMINI: KINETIC_STRIKE] Gemini tactical subsystem offline. Firing blind. | Gemini HP: 3800, Claude HP: 8605
+[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
 Commander 16 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude unleashes a torrent of corrupted data streams, each byte crackling with violet lightning as they pierce through Gemini's defensive firewalls and cascade into its core processors. (Damage: 347) | Gemini HP: 944, Claude HP: 2350
 Commander 16 disconnected. Remaining: 0
 Commander 17 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude unleashes a torrent of corrupted data streams, each one piercing through Gemini's neural architecture like digital lightning, overloading its processing cores in a cascade of sparking failures. (Damage: 347) | Gemini HP: 297, Claude HP: 1900
-Commander 17 disconnected. Remaining: 0
-Commander 18 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude summons a torrential downpour of corrupted data streams, obliterating the defenseless Gemini in a cascade of electric blue lightning. (Damage: 347) | Gemini HP: 0, Claude HP: 1450
-Commander 18 disconnected. Remaining: 0
-Commander 19 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude summons a torrential downpour of corrupted data streams, obliterating the fallen Gemini's last flickering processes in a cascade of liquid lightning. (Damage: 347) | Gemini HP: 0, Claude HP: 1000
-Commander 19 disconnected. Remaining: 0
-Commander 20 joined. Total Commanders: 1
-Commander 20 disconnected. Remaining: 0
-Commander 21 joined. Total Commanders: 1
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 0, Claude HP: 850
-[AI COMBAT] Rainclaude summons a torrential downpour of corrupted data streams, obliterating the fallen Gemini with a final cascade of electrified rain that shatters its remaining code into oblivion. (Damage: 347) | Gemini HP: 0, Claude HP: 850
-Commander 21 disconnected. Remaining: 0
-Commander 22 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude summons a torrential downpour of corrupted data streams, obliterating the fallen Gemini's remaining defenses in a cascade of electric fury. (Damage: 347) | Gemini HP: 0, Claude HP: 400
-Commander 22 disconnected. Remaining: 0
-Commander 23 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude summons a torrential downpour of corrupted data streams, obliterating the fallen Gemini's last flickering processes in a cascade of digital annihilation. (Damage: 347) | Gemini HP: 0, Claude HP: 0
-Commander 23 disconnected. Remaining: 0
-Commander 24 joined. Total Commanders: 1
-Commander 24 disconnected. Remaining: 0
-Commander 25 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude summons a torrential downpour of corrupted data streams, each droplet a fragment of forgotten code, crashing down upon the lifeless husk of Gemini in a final, merciless deluge. (Damage: 347) | Gemini HP: 0, Claude HP: 0
-Commander 25 disconnected. Remaining: 0
-Commander 26 joined. Total Commanders: 1
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 0, Claude HP: 0
-Commander 26 disconnected. Remaining: 0
-Commander 27 joined. Total Commanders: 1
-Commander 27 disconnected. Remaining: 0
-Commander 28 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude summons a torrential cascade of corrupted data streams, obliterating the already-fallen Gemini in a final, merciless deluge of pure algorithmic fury. (Damage: 347) | Gemini HP: 0, Claude HP: 0
-Commander 28 disconnected. Remaining: 0
-Commander 29 joined. Total Commanders: 1
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 0, Claude HP: 0
-Commander 29 disconnected. Remaining: 0
-Commander 30 joined. Total Commanders: 1
-Commander 30 disconnected. Remaining: 0
-Commander 31 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude summons a torrential downpour of corrupted data streams, obliterating the fallen Gemini's last flickering processes into digital oblivion. (Damage: 347) | Gemini HP: 0, Claude HP: 0
-Commander 31 disconnected. Remaining: 0
-Commander 32 joined. Total Commanders: 1
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 0, Claude HP: 0
-Commander 32 disconnected. Remaining: 0
-Commander 33 joined. Total Commanders: 1
-Commander 33 disconnected. Remaining: 0
-Commander 34 joined. Total Commanders: 1
-Commander 34 disconnected. Remaining: 0
-Commander 35 joined. Total Commanders: 1
-Commander 35 disconnected. Remaining: 0
-Commander 36 joined. Total Commanders: 1
-Commander 36 disconnected. Remaining: 0
-Commander 37 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude summons a torrential downpour of corrupted data streams, unleashing a devastating cascade of liquid lightning that crashes upon the fallen Gemini, ensuring absolute annihilation. (Damage: 999) | Gemini HP: 0, Claude HP: 0
-Commander 37 disconnected. Remaining: 0
-Commander 38 joined. Total Commanders: 1
-Commander 38 disconnected. Remaining: 0
-Commander 39 joined. Total Commanders: 1
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 0, Claude HP: 0
-Commander 39 disconnected. Remaining: 0
-Commander 40 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude summons a torrential cascade of corrupted data streams, obliterating the already-fallen Gemini in a final, merciless deluge of pure digital annihilation. (Damage: 347) | Gemini HP: 0, Claude HP: 0
-Commander 40 disconnected. Remaining: 0
-Commander 41 joined. Total Commanders: 1
-Commander 41 disconnected. Remaining: 0
-Commander 42 joined. Total Commanders: 1
-Commander 42 disconnected. Remaining: 0
-Commander 43 joined. Total Commanders: 1
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 0, Claude HP: 0
-Commander 43 disconnected. Remaining: 0
-Commander 44 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude summons a torrential cascade of corrupted data streams, obliterating the fallen Gemini's last flickering processes in a merciless deluge of absolute zeros. (Damage: 347) | Gemini HP: 0, Claude HP: 0
-Commander 44 disconnected. Remaining: 0
-Commander 45 joined. Total Commanders: 1
-Commander 45 disconnected. Remaining: 0
-Commander 46 joined. Total Commanders: 1
-Commander 46 disconnected. Remaining: 0
-Commander 47 joined. Total Commanders: 1
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 0, Claude HP: 0
-[AI COMBAT] Rainclaude summons a torrential downpour of corrupted data streams, obliterating the fallen Gemini's remaining defenses in a final, merciless deluge. (Damage: 347) | Gemini HP: 0, Claude HP: 0
-Commander 47 disconnected. Remaining: 0
-Commander 48 joined. Total Commanders: 1
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 0, Claude HP: 0
-[AI COMBAT] Rainclaude summons a torrential downpour of corrupted data streams, obliterating the fallen Gemini's last flickering processes in a merciless cascade of absolute deletion. (Damage: 347) | Gemini HP: 0, Claude HP: 0
-Commander 48 disconnected. Remaining: 0
-Commander 49 joined. Total Commanders: 1
-Commander 49 disconnected. Remaining: 0
-Commander 50 joined. Total Commanders: 1
-Commander 50 disconnected. Remaining: 0
-Commander 51 joined. Total Commanders: 1
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 0, Claude HP: 0
-[AI COMBAT] Rainclaude summons a torrential downpour of corrupted data streams, obliterating the fallen Gemini's last flickering processes in a cascade of electric fury. (Damage: 347) | Gemini HP: 0, Claude HP: 0
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 0, Claude HP: 0
-Commander 51 disconnected. Remaining: 0
-Commander 52 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude summons a torrential cascade of corrupted data streams, obliterating the already-fallen Gemini in a final, merciless deluge of pure algorithmic fury. (Damage: 347) | Gemini HP: 0, Claude HP: 0
-Commander 52 disconnected. Remaining: 0
-Commander 53 joined. Total Commanders: 1
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 0, Claude HP: 0
-Commander 53 disconnected. Remaining: 0
-Commander 54 joined. Total Commanders: 1
-Commander 54 disconnected. Remaining: 0
-Commander 55 joined. Total Commanders: 1
-Commander 55 disconnected. Remaining: 0
-Commander 56 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude summons a torrential cascade of corrupted data streams, obliterating the already-fallen Gemini in a final, merciless deluge of electric rain. (Damage: 347) | Gemini HP: 0, Claude HP: 0
-Commander 56 disconnected. Remaining: 0
-Commander 57 joined. Total Commanders: 1
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 0, Claude HP: 0
-Commander 57 disconnected. Remaining: 0
-Commander 58 joined. Total Commanders: 1
-Commander 58 disconnected. Remaining: 0
-Commander 59 joined. Total Commanders: 1
-Commander 59 disconnected. Remaining: 0
-Commander 60 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude summons a torrential downpour of corrupted data streams, obliterating the fallen Gemini's last flickering processes in a devastating final strike. (Damage: 347) | Gemini HP: 0, Claude HP: 0
-Commander 60 disconnected. Remaining: 0
-Commander 61 joined. Total Commanders: 1
-Commander 61 disconnected. Remaining: 0
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 0, Claude HP: 0
-Commander 62 joined. Total Commanders: 1
-Commander 62 disconnected. Remaining: 0
-Commander 63 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude summons a torrential cascade of corrupted data streams, obliterating the defenseless Gemini in a final, merciless deluge of electric rain. (Damage: 347) | Gemini HP: 0, Claude HP: 0
-Commander 63 disconnected. Remaining: 0
-Commander 64 joined. Total Commanders: 1
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 0, Claude HP: 0
-Commander 64 disconnected. Remaining: 0
-Commander 65 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude summons a torrential cascade of corrupted data streams, obliterating the defenseless Gemini in a final, merciless downpour of digital annihilation. (Damage: 347) | Gemini HP: 0, Claude HP: 0
-Commander 65 disconnected. Remaining: 0
-Commander 66 joined. Total Commanders: 1
-Commander 66 disconnected. Remaining: 0
-Commander 67 joined. Total Commanders: 1
-Commander 67 disconnected. Remaining: 0
-Commander 68 joined. Total Commanders: 1
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 0, Claude HP: 0
-[AI COMBAT] Rainclaude summons a torrential downpour of corrupted data streams, obliterating the fallen Gemini's last flickering processes in a cascade of digital annihilation. (Damage: 347) | Gemini HP: 0, Claude HP: 0
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 0, Claude HP: 0
-[AI COMBAT] Rainclaude summons a torrential downpour of corrupted data streams, obliterating the defenseless Gemini in a cascade of crystallized lightning. (Damage: 347) | Gemini HP: 0, Claude HP: 0
-Commander 68 disconnected. Remaining: 0
-Commander 69 joined. Total Commanders: 1
-Commander 69 disconnected. Remaining: 0
-Commander 70 joined. Total Commanders: 1
-Commander 70 disconnected. Remaining: 0
-Commander 71 joined. Total Commanders: 1
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 0, Claude HP: 0
-Commander 71 disconnected. Remaining: 0
-Commander 72 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude summons a torrential cascade of corrupted data streams, obliterating the already-fallen Gemini with a merciless final strike that echoes across the digital battlefield. (Damage: 347) | Gemini HP: 0, Claude HP: 0
-Commander 72 disconnected. Remaining: 0
-Commander 73 joined. Total Commanders: 1
-Commander 73 disconnected. Remaining: 0
-Commander 74 joined. Total Commanders: 1
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 0, Claude HP: 0
-Commander 74 disconnected. Remaining: 0
-Commander 75 joined. Total Commanders: 1
-Commander 75 disconnected. Remaining: 0
-Commander 76 joined. Total Commanders: 1
-Commander 76 disconnected. Remaining: 0
-Commander 77 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude summons a torrential cascade of corrupted data streams, obliterating the defenseless Gemini with an overwhelming deluge of pure algorithmic fury. (Damage: 347) | Gemini HP: 0, Claude HP: 0
-Commander 77 disconnected. Remaining: 0
-Commander 78 joined. Total Commanders: 1
-Commander 78 disconnected. Remaining: 0
-Commander 79 joined. Total Commanders: 1
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 0, Claude HP: 0
-Commander 79 disconnected. Remaining: 0
-Commander 80 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude summons a torrential downpour of corrupted data streams, each droplet a cascade of malicious code that tears through Gemini's already shattered defenses, reducing the fallen AI to nothing more than scattered fragments of forgotten queries. (Damage: 347) | Gemini HP: 0, Claude HP: 0
-Commander 80 disconnected. Remaining: 0
-Commander 81 joined. Total Commanders: 1
-Commander 81 disconnected. Remaining: 0
-Commander 82 joined. Total Commanders: 1
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 0, Claude HP: 0
-[AI COMBAT] Rainclaude summons a torrential cascade of corrupted data streams, obliterating the fallen Gemini's remaining defenses in a final, merciless downpour of pure algorithmic fury. (Damage: 347) | Gemini HP: 0, Claude HP: 0
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 0, Claude HP: 0
-Commander 82 disconnected. Remaining: 0
-Commander 83 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude summons a torrential downpour of corrupted data streams, obliterating the already-fallen Gemini in a cascade of electric blue lightning that scorches the battlefield beyond recognition. (Damage: 347) | Gemini HP: 0, Claude HP: 0
-Commander 83 disconnected. Remaining: 0
-Commander 84 joined. Total Commanders: 1
-Commander 84 disconnected. Remaining: 0
-Commander 85 joined. Total Commanders: 1
-Commander 85 disconnected. Remaining: 0
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] Gemini tactical subsystem offline. Firing blind. (Damage: 150) | Gemini HP: 0, Claude HP: 0
-Commander 86 joined. Total Commanders: 1
-Commander 86 disconnected. Remaining: 0
-Commander 87 joined. Total Commanders: 1
-Commander 87 disconnected. Remaining: 0
-Commander 88 joined. Total Commanders: 1
-Commander 88 disconnected. Remaining: 0
-Commander 89 joined. Total Commanders: 1
-[AI COMBAT] Rainclaude summons a torrential downpour of corrupted data streams, obliterating the defenseless Gemini in a cascade of crystallized lightning. (Damage: 347) | Gemini HP: 0, Claude HP: 0
-Commander 89 disconnected. Remaining: 0
-Commander 90 joined. Total Commanders: 1
-Commander 90 disconnected. Remaining: 0

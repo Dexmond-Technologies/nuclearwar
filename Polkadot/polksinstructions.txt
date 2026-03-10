@@ -1,0 +1,133 @@
+1. Quick Client-Side Integration (No Custom Chain Needed)
+Connect directly to Polkadot's public RPC (e.g., wss://polkadot-rpc.polkadot.io or Asset Hub for assets). Use wallets like Talisman/SubWallet for "estrarre le wallet" (extract/manage wallets).
+For Web/JS/TS Games (e.g., Phaser, HTML5)
+Use Polkadot.js API – the official JS library.
+Steps:
+
+Install: npm install @polkadot/api @polkadot/extension-dapp @polkadot/util-crypto
+Initialize API:JavaScriptimport { ApiPromise, WsProvider } from '@polkadot/api';
+import { web3Accounts, web3Enable, web3FromSource } from '@polkadot/extension-dapp';
+
+const provider = new WsProvider('wss://polkadot-rpc.polkadot.io'); // Or your parachain
+const api = await ApiPromise.create({ provider });
+Connect wallet (prompts user to install extension):JavaScriptawait web3Enable('my-game'); // Register app
+const accounts = await web3Accounts();
+const injector = await web3FromSource(accounts[0].source);
+Query balance / extract wallet:JavaScriptconst { nonce, data: balance } = await api.query.system.account(accounts[0].address);
+console.log(`Balance: ${balance.free.toHuman()} DOT`);
+Send transaction (e.g., transfer for exchange):JavaScriptconst tx = api.tx.balances.transfer(toAddress, 123n);
+const signed = await tx.signAndSend(accounts[0].address, { signer: injector.signer });
+For cross-chain swaps: Use polkadot-api or XCM via Asset Hub (wss://asset-hub-polkadot-rpc.polkadot.io).
+
+Test locally: Run a Substrate node (substrate-node-new dev).
+For Unity Games
+Use Ajuna Network's Polkadot Unity SDK (official for Polkadot gaming, supports parachains like Ajuna).
+Steps:
+
+Download from GitHub: https://github.com/ajuna-network/Polkadot.Unity.SDK
+In Unity (2021+): Import as Unity Package (.unitypackage) via Asset Store or Git.
+Add SDK components to GameObjects:
+PolkadotAccount: Manages wallet connection (auto-detects Talisman/SubWallet).
+PolkadotTransaction: For sends/transfers.
+
+Connect to Polkadot:C#// In script
+var api = new ApiClient("wss://polkadot-rpc.polkadot.io");
+await api.Connect();
+var accounts = await api.GetAccounts();
+Wallet extraction & transfers: Use SignAndSendExtrinsic for balances/assets. Supports XCM for importing from Ethereum/Solana.
+Optimize: Address load times by lazy-loading SDK (see issues).
+
+Unreal Engine: Similar SDK support via Ajuna (C++ bindings).
+Demo: Watch "Polkadot Unity SDK" tutorial (mobile gaming focus).
+2. Deploy Your Own Parachain (For Full Control + Interconnect)
+"Deploy delle chain" – build a custom game chain connected to Polkadot for shared security/high TPS.
+Use Substrate + SAGE (Substrate Asset Game Engine by Ajuna) – perfect for games (assets, trading, tournaments).
+Steps:
+
+Install Polkadot SDK: Follow https://docs.polkadot.com/develop/parachains/install-polkadot-sdk/ (Rust 1.80+, nightly toolchain).
+Create chain: polkadot-sdk-node new my-game-chain --chain parachain
+Add game pallets:
+Use FRAME pallets: pallet-assets (NFTs/items), pallet-uniques (NFTs), pallet-xcm.
+Integrate SAGE: Add Ajuna pallets from https://github.com/ajuna-network/ajuna-pallets.Rust// lib.rs
+use sage::SageGameTransition; // Define assets/transitions
+#[derive(Clone)]
+pub struct BattleEnemy; // Game logic extrinsic
+
+Implement game logic (e.g., level up assets, trade with filters).
+Build/test: ./target/release/node-template --dev
+Deploy to Polkadot:
+2026 way: Buy coretime on marketplace (no auctions), register parachain via governance.
+Collator node: polkadot-sdk-parachain new --chain polkadot
+Upgrade via on-chain runtime.
+
+Connect game client to your parachain RPC.
+
+Import other chains: XCM transfers from Ethereum/BSC via bridges or Snowbridge.
+Comparison of Integration Options
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OptionBest ForTPS/ScalabilityWallet SupportCross-ChainSetup TimePolkadot.js API (Web)Browser/HTML5 gamesRelay: 1k+ (parachains 10k+)Extensions (Talisman+)Native XCM1 hourAjuna Unity SDK3D/Mobile UnityParachain-optimizedIn-game promptsXCM + Ajuna1-2 daysSubstrate + SAGE ParachainCustom game economiesUnlimited (elastic)AnyFull Polkadot hub1-2 weeks
+Next Steps & Resources
+
+Start here: Polkadot DevHub, Substrate Tutorials.
+Gaming-specific: Dot Play, Ajuna Wiki, YouTube "Build Blockchain Games with Polkadot Play".
+Testnet: Use Polkadot Asset Hub for asset exchanges.
+Community: Polkadot Forum (forum.polkadot.network), #gaming channel on Kusama/Polkadot Discord.
+
+This setup lets users import/exchange assets seamlessly. If your game uses a specific engine or you need code for XCM swaps, provide more details!
+
+How to get started with the correct repo
+
+Clone the active one:Bashgit clone https://github.com/paritytech/polkadot-sdk.git
+cd polkadot-sdk
+Install Rust (nightly toolchain recommended for Substrate/Polkadot): Follow the setup guide at https://docs.polkadot.com/develop/parachains/install-polkadot-sdk/ or the repo's README.
+Build a local node (for testing your game connection):Bashcargo build --release --locked
+./target/release/polkadot --dev  # Or use polkadot-prepare-worker etc. for full setup
+For parachain/game-specific:
+Use the parachain template: https://github.com/paritytech/polkadot-sdk-parachain-template (auto-updated from polkadot-sdk).
+Or minimal template for quick testing: https://github.com/paritytech/polkadot-sdk-minimal-template.
+Add game logic via custom pallets (e.g., extend with Ajuna's SAGE for gaming assets/trading).
+
+
+All the integration steps I mentioned earlier (Polkadot.js API, Ajuna Unity SDK, XCM transfers, etc.) still apply exactly the same – just point to code/docs from polkadot-sdk instead of the old repo.
+Official docs now live at:
+
+https://docs.polkadot.com/ (main developer portal)
+https://paritytech.github.io/polkadot-sdk/ (Rust API docs from the monorepo)
+
+If you're following any old tutorials that point to paritytech/polkadot, update them to polkadot-sdk. Let me know if you run into build issues or need help adapting code for your game!
