@@ -1802,87 +1802,122 @@ async function runAIMarketBuying() {
       console.error("[AI MARKET] Error reading account files:", e);
   }
 
-  // Each AI makes 2-5 purchases per cycle (every 30 mins)
-  const geminiPurchases = 2 + Math.floor(Math.random() * 4);
-  const claudePurchases = 2 + Math.floor(Math.random() * 4);
-  
+  // Filter catalog down to only Metals and Natural Resources per user request
+  const validCatalog = AI_MARKET_CATALOG.filter(item => item.category === 'Metals' || item.category === 'Natural Resources');
+  if (validCatalog.length === 0) return;
+
   // -- GEMINI buys --
-  for (let i = 0; i < geminiPurchases; i++) {
-    if (geminiDailySpent >= geminiDailyCap) break;
-    const item = AI_MARKET_CATALOG[Math.floor(Math.random() * AI_MARKET_CATALOG.length)];
-    // Buy 1-5 units with market price variance ±5%
-    const units = 1 + Math.floor(Math.random() * 5);
-    const variance = 0.95 + (Math.random() * 0.1); // ±5%
-    const cost = Math.round(item.basePrice * units * variance);
-    if (geminiDailySpent + cost > geminiDailyCap) break;
-    
-    geminiDailySpent += cost;
-    buys.push({ aiName: 'gemini', item: item.name, category: item.category, units, cost, unit: item.unit });
+  // Force Gemini to maximize its daily cap
+  let geminiPurchasesThisCycle = 0;
+  while (geminiDailySpent < geminiDailyCap && geminiPurchasesThisCycle < 50) { // Safety break at 50 iterations
+      const remainingBudgetC = geminiDailyCap - geminiDailySpent;
+      
+      // Shuffle catalog to pick a random valid item
+      const item = validCatalog[Math.floor(Math.random() * validCatalog.length)];
+      
+      // Calculate how many of this item we can comfortably buy with remaining budget
+      const variance = 0.95 + (Math.random() * 0.1); // ±5%
+      const effectivePrice = item.basePrice * variance;
+      
+      const affordableUnits = Math.floor(remainingBudgetC / effectivePrice);
+      
+      // Stop if we literally can't even afford 1 unit of this random item
+      if (affordableUnits < 1) {
+          // Break is risky; just increment cycle count to eventually break if we're near strictly zero cap
+          geminiPurchasesThisCycle++;
+          continue; 
+      }
+      
+      // Buy an aggressive amount: between 50% and 100% of what's affordable, but at least 1 
+      const unitsToBuy = Math.max(1, Math.floor(affordableUnits * (0.5 + Math.random() * 0.5)));
+      const cost = Math.round(effectivePrice * unitsToBuy);
+      
+      if (geminiDailySpent + cost > geminiDailyCap) break; // Final safety check
+      
+      geminiDailySpent += cost;
+      buys.push({ aiName: 'gemini', item: item.name, category: item.category, units: unitsToBuy, cost, unit: item.unit });
 
-    if (geminiAccount) {
-        if (!geminiAccount.balances) geminiAccount.balances = { D3X: 0 };
-        geminiAccount.balances.D3X = Math.max(0, geminiAccount.balances.D3X - cost);
-        
-        if (!geminiAccount.portfolio) geminiAccount.portfolio = { commodities: {}, tradeLogs: [] };
-        
-        if (!geminiAccount.portfolio.commodities[item.name]) {
-            geminiAccount.portfolio.commodities[item.name] = { shares: 0, avgCost: 0, totalSpent: 0 };
-        }
-        
-        let c = geminiAccount.portfolio.commodities[item.name];
-        let totalShares = c.shares + units;
-        let newTotalSpent = c.totalSpent + cost;
-        c.avgCost = newTotalSpent / totalShares;
-        c.totalSpent = newTotalSpent;
-        c.shares += units;
-        
-        const tString = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
-        geminiAccount.portfolio.tradeLogs.push(`[${tString}] BOUGHT ${units} ${item.name} for ${cost.toLocaleString()} D3X`);
-        if (geminiAccount.portfolio.tradeLogs.length > 50) geminiAccount.portfolio.tradeLogs.shift();
-    }
+      if (geminiAccount) {
+          if (!geminiAccount.balances) geminiAccount.balances = { D3X: 0 };
+          geminiAccount.balances.D3X = Math.max(0, geminiAccount.balances.D3X - cost);
+          
+          if (!geminiAccount.portfolio) geminiAccount.portfolio = { commodities: {}, tradeLogs: [] };
+          
+          if (!geminiAccount.portfolio.commodities[item.name]) {
+              geminiAccount.portfolio.commodities[item.name] = { shares: 0, avgCost: 0, totalSpent: 0 };
+          }
+          
+          let c = geminiAccount.portfolio.commodities[item.name];
+          let totalShares = c.shares + unitsToBuy;
+          let newTotalSpent = c.totalSpent + cost;
+          c.avgCost = newTotalSpent / totalShares;
+          c.totalSpent = newTotalSpent;
+          c.shares += unitsToBuy;
+          
+          const tString = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
+          geminiAccount.portfolio.tradeLogs.push(`[${tString}] BOUGHT ${unitsToBuy} ${item.name} for ${cost.toLocaleString()} D3X`);
+          if (geminiAccount.portfolio.tradeLogs.length > 50) geminiAccount.portfolio.tradeLogs.shift();
+      }
 
-    const gemFromWallet = geminiKeypair ? geminiKeypair.publicKey.toBase58() : (process.env.gemini_wallet || 'GEMINI_NOT_SET');
-    await pgPool.query(`INSERT INTO pending_settlements (from_wallet, to_wallet, amount, reason) VALUES ($1, $2, $3, $4)`,
-      [gemFromWallet, BURN_ADDRESS.toBase58(), cost, `market_buy_${item.name.replace(/ /g,'_')}`]).catch(console.error);
+      const gemFromWallet = geminiKeypair ? geminiKeypair.publicKey.toBase58() : (process.env.gemini_wallet || 'GEMINI_NOT_SET');
+      await pgPool.query(`INSERT INTO pending_settlements (from_wallet, to_wallet, amount, reason) VALUES ($1, $2, $3, $4)`,
+        [gemFromWallet, BURN_ADDRESS.toBase58(), cost, `market_buy_${item.name.replace(/ /g,'_')}`]).catch(console.error);
+        
+      geminiPurchasesThisCycle++;
   }
   
   // -- RAINCLAUDE buys --
-  for (let i = 0; i < claudePurchases; i++) {
-    if (claudeDailySpent >= claudeDailyCap) break;
-    const item = AI_MARKET_CATALOG[Math.floor(Math.random() * AI_MARKET_CATALOG.length)];
-    const units = 1 + Math.floor(Math.random() * 5);
-    const variance = 0.95 + (Math.random() * 0.1);
-    const cost = Math.round(item.basePrice * units * variance);
-    if (claudeDailySpent + cost > claudeDailyCap) break;
-    
-    claudeDailySpent += cost;
-    buys.push({ aiName: 'claude', item: item.name, category: item.category, units, cost, unit: item.unit });
-    
-    if (claudeAccount) {
-        if (!claudeAccount.balances) claudeAccount.balances = { D3X: 0 };
-        claudeAccount.balances.D3X = Math.max(0, claudeAccount.balances.D3X - cost);
+  // Force Rainclaude to maximize its daily cap
+  let claudePurchasesThisCycle = 0;
+  while (claudeDailySpent < claudeDailyCap && claudePurchasesThisCycle < 50) { // Safety break at 50 iterations
+      const remainingBudgetR = claudeDailyCap - claudeDailySpent;
+      
+      const item = validCatalog[Math.floor(Math.random() * validCatalog.length)];
+      const variance = 0.95 + (Math.random() * 0.1);
+      const effectivePrice = item.basePrice * variance;
+      
+      const affordableUnits = Math.floor(remainingBudgetR / effectivePrice);
+      
+      if (affordableUnits < 1) {
+          claudePurchasesThisCycle++;
+          continue;
+      }
+      
+      const unitsToBuy = Math.max(1, Math.floor(affordableUnits * (0.5 + Math.random() * 0.5)));
+      const cost = Math.round(effectivePrice * unitsToBuy);
+      
+      if (claudeDailySpent + cost > claudeDailyCap) break; // Final safety check
+      
+      claudeDailySpent += cost;
+      buys.push({ aiName: 'claude', item: item.name, category: item.category, units: unitsToBuy, cost, unit: item.unit });
+      
+      if (claudeAccount) {
+          if (!claudeAccount.balances) claudeAccount.balances = { D3X: 0 };
+          claudeAccount.balances.D3X = Math.max(0, claudeAccount.balances.D3X - cost);
+          
+          if (!claudeAccount.portfolio) claudeAccount.portfolio = { commodities: {}, tradeLogs: [] };
+          
+          if (!claudeAccount.portfolio.commodities[item.name]) {
+              claudeAccount.portfolio.commodities[item.name] = { shares: 0, avgCost: 0, totalSpent: 0 };
+          }
+          
+          let c = claudeAccount.portfolio.commodities[item.name];
+          let totalShares = c.shares + unitsToBuy;
+          let newTotalSpent = c.totalSpent + cost;
+          c.avgCost = newTotalSpent / totalShares;
+          c.totalSpent = newTotalSpent;
+          c.shares += unitsToBuy;
+          
+          const tString = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
+          claudeAccount.portfolio.tradeLogs.push(`[${tString}] BOUGHT ${unitsToBuy} ${item.name} for ${cost.toLocaleString()} D3X`);
+          if (claudeAccount.portfolio.tradeLogs.length > 50) claudeAccount.portfolio.tradeLogs.shift();
+      }
+      
+      const claudeFromWallet = rainclaudeKeypair ? rainclaudeKeypair.publicKey.toBase58() : 'CLAUDE_NOT_SET';
+      await pgPool.query(`INSERT INTO pending_settlements (from_wallet, to_wallet, amount, reason) VALUES ($1, $2, $3, $4)`,
+        [claudeFromWallet, BURN_ADDRESS.toBase58(), cost, `market_buy_${item.name.replace(/ /g,'_')}`]).catch(console.error);
         
-        if (!claudeAccount.portfolio) claudeAccount.portfolio = { commodities: {}, tradeLogs: [] };
-        
-        if (!claudeAccount.portfolio.commodities[item.name]) {
-            claudeAccount.portfolio.commodities[item.name] = { shares: 0, avgCost: 0, totalSpent: 0 };
-        }
-        
-        let c = claudeAccount.portfolio.commodities[item.name];
-        let totalShares = c.shares + units;
-        let newTotalSpent = c.totalSpent + cost;
-        c.avgCost = newTotalSpent / totalShares;
-        c.totalSpent = newTotalSpent;
-        c.shares += units;
-        
-        const tString = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
-        claudeAccount.portfolio.tradeLogs.push(`[${tString}] BOUGHT ${units} ${item.name} for ${cost.toLocaleString()} D3X`);
-        if (claudeAccount.portfolio.tradeLogs.length > 50) claudeAccount.portfolio.tradeLogs.shift();
-    }
-    
-    const claudeFromWallet = rainclaudeKeypair ? rainclaudeKeypair.publicKey.toBase58() : 'CLAUDE_NOT_SET';
-    await pgPool.query(`INSERT INTO pending_settlements (from_wallet, to_wallet, amount, reason) VALUES ($1, $2, $3, $4)`,
-      [claudeFromWallet, BURN_ADDRESS.toBase58(), cost, `market_buy_${item.name.replace(/ /g,'_')}`]).catch(console.error);
+      claudePurchasesThisCycle++;
   }
   
   if (buys.length > 0) {
