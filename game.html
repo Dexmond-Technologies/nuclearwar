@@ -3946,55 +3946,70 @@ function initDatacenters() {
             window.datacentersGroup.add(mesh);
 
             // STAKING TOWER ADDITION FOR CYBER SKIN
-            // Generate ONE massive Staking Tower specifically next to the D3X Exchange object.
+            // Generate THREE massive Staking Towers specifically next to the D3X Exchange object.
             if (isD3XExchange) {
-                const towerLatRad = (dc.lat + 44) * Math.PI / 180; // High offset to prevent clipping with scale 7 Exchange
-                const towerLonRad = -(dc.lon - 44) * Math.PI / 180;
-                const towerGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.35, 32);
-                towerGeo.translate(0, 0.175, 0); // Pivot at bottom
-                const towerMat = new THREE.MeshPhongMaterial({ color: 0xff0033, shininess: 100, specular: 0xffffff });
-                const towerMesh = new THREE.Mesh(towerGeo, towerMat);
+                const centerLat = dc.lat + 44;
+                const centerLon = dc.lon - 44;
                 
-                towerMesh.position.set(
-                    r * Math.cos(towerLatRad) * Math.cos(towerLonRad),
-                    r * Math.sin(towerLatRad),
-                    r * Math.cos(towerLatRad) * Math.sin(towerLonRad)
-                );
-                towerMesh.lookAt(new THREE.Vector3(0,0,0));
-                towerMesh.rotateX(-Math.PI/2); // Align cylinder outwards to prevent clipping
-
-                // Big STAKING Text Sprite
-                const tCanvas = document.createElement('canvas');
-                tCanvas.width = 512;
-                tCanvas.height = 128;
-                const tCtx = tCanvas.getContext('2d');
-                tCtx.font = 'bold 80px "Orbitron", sans-serif';
-                tCtx.fillStyle = '#ffffff';
-                tCtx.textAlign = 'center';
-                tCtx.textBaseline = 'middle';
-                tCtx.fillText('STAKING', 256, 64);
+                // Offsets for the 3 towers forming a triangle/cluster
+                const towerOffsets = [
+                    { lat: 0, lon: 0 },
+                    { lat: -0.8, lon: 1.2 },
+                    { lat: 0.8, lon: 1.2 }
+                ];
                 
-                const tTex = new THREE.CanvasTexture(tCanvas);
-                const tSpriteMat = new THREE.SpriteMaterial({ map: tTex, transparent: true, depthTest: false });
-                const tSprite = new THREE.Sprite(tSpriteMat);
-                tSprite.scale.set(0.3, 0.075, 1);
-                tSprite.position.set(0, 0.45, 0); 
-                towerMesh.add(tSprite);
+                towerOffsets.forEach((off, idx) => {
+                    const towerLatRad = (centerLat + off.lat) * Math.PI / 180;
+                    const towerLonRad = -(centerLon + off.lon) * Math.PI / 180;
+                    // Lowered height by 30%: 0.35 * 0.7 = 0.245
+                    const towerGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.245, 32);
+                    towerGeo.translate(0, 0.1225, 0); // Pivot at bottom
+                    const towerMat = new THREE.MeshPhongMaterial({ color: 0xff0033, shininess: 100, specular: 0xffffff });
+                    const towerMesh = new THREE.Mesh(towerGeo, towerMat);
+                    
+                    towerMesh.position.set(
+                        r * Math.cos(towerLatRad) * Math.cos(towerLonRad),
+                        r * Math.sin(towerLatRad),
+                        r * Math.cos(towerLatRad) * Math.sin(towerLonRad)
+                    );
+                    towerMesh.lookAt(new THREE.Vector3(0,0,0));
+                    towerMesh.rotateX(-Math.PI/2); // Align cylinder outwards to prevent clipping
 
-                // Big Aura for tower
-                const tAuraGeo = new THREE.SphereGeometry(0.08, 32, 32);
-                const tAuraMat = new THREE.MeshBasicMaterial({ color: 0xff0033, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending });
-                const tAura = new THREE.Mesh(tAuraGeo, tAuraMat);
-                tAura.position.set(0, 0.175, 0);
-                towerMesh.add(tAura);
+                    // Big STAKING CENTRE Text Sprite (only on the first center tower so it doesn't overlap messily)
+                    if (idx === 0) {
+                        const tCanvas = document.createElement('canvas');
+                        tCanvas.width = 512;
+                        tCanvas.height = 128;
+                        const tCtx = tCanvas.getContext('2d');
+                        tCtx.font = 'bold 64px "Orbitron", sans-serif';
+                        tCtx.fillStyle = '#ffffff';
+                        tCtx.textAlign = 'center';
+                        tCtx.textBaseline = 'middle';
+                        tCtx.fillText('STAKING CENTRE', 256, 64);
+                        
+                        const tTex = new THREE.CanvasTexture(tCanvas);
+                        const tSpriteMat = new THREE.SpriteMaterial({ map: tTex, transparent: true, depthTest: false });
+                        const tSprite = new THREE.Sprite(tSpriteMat);
+                        tSprite.scale.set(0.3, 0.075, 1);
+                        tSprite.position.set(0, 0.32, 0); 
+                        towerMesh.add(tSprite);
+                    }
 
-                towerMesh.userData = {
-                    type: 'staking_tower',
-                    name: "D3X STAKING TOWER",
-                    protocol: protocolName || 'D3X CORE NETWORK'
-                };
-                
-                window.datacentersGroup.add(towerMesh);
+                    // Big Aura for tower
+                    const tAuraGeo = new THREE.SphereGeometry(0.08, 32, 32);
+                    const tAuraMat = new THREE.MeshBasicMaterial({ color: 0xff0033, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending });
+                    const tAura = new THREE.Mesh(tAuraGeo, tAuraMat);
+                    tAura.position.set(0, 0.1225, 0);
+                    towerMesh.add(tAura);
+
+                    towerMesh.userData = {
+                        type: 'staking_tower',
+                        name: "D3X STAKING TOWER",
+                        protocol: protocolName || 'D3X CORE NETWORK'
+                    };
+                    
+                    window.datacentersGroup.add(towerMesh);
+                });
             }
         });
     }
@@ -6410,59 +6425,61 @@ window.rebuildD3XExchangeMenu = function() {
     container.innerHTML = `
         <h2 style="color:#ffffff; letter-spacing:2px; margin-bottom:30px; text-shadow:0 0 10px #39ff14;">ACQUIRE D3X TOKENS</h2>
         
-        <button onclick="loadExchangeIframe('https://raydium.io/swap/?position_tab=staked+RAY&inputMint=sol&outputMint=AGN8SrMCMEgiP1ghvPHa5VRf5rPFDSYVrGFyBGE1Cqpa')" style="
-            display:block; width: 80%; max-width: 400px; padding: 15px; margin-bottom: 20px;
-            background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
-            font-size: 20px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
-            box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
-        " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
-            ► PROCEED TO RAYDIUM
-        </button>
-        
-        <button onclick="loadExchangeIframe('https://jup.ag/swap/SOL-AGN8SrMCMEgiP1ghvPHa5VRf5rPFDSYVrGFyBGE1Cqpa')" style="
-            display:block; width: 80%; max-width: 400px; padding: 15px; margin-bottom: 20px;
-            background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
-            font-size: 20px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
-            box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
-        " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
-            ► PROCEED TO JUPITER
-        </button>
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; max-width: 1200px; padding-bottom: 20px;">
+            <button onclick="loadExchangeIframe('https://raydium.io/swap/?position_tab=staked+RAY&inputMint=sol&outputMint=AGN8SrMCMEgiP1ghvPHa5VRf5rPFDSYVrGFyBGE1Cqpa')" style="
+                width: 100%; padding: 15px; 
+                background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
+                font-size: 18px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
+                box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
+            " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
+                ► PROCEED TO RAYDIUM
+            </button>
+            
+            <button onclick="loadExchangeIframe('https://jup.ag/swap/SOL-AGN8SrMCMEgiP1ghvPHa5VRf5rPFDSYVrGFyBGE1Cqpa')" style="
+                width: 100%; padding: 15px; 
+                background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
+                font-size: 18px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
+                box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
+            " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
+                ► PROCEED TO JUPITER
+            </button>
 
-        <button onclick="loadExchangeIframe('https://uniswap.org')" style="
-            display:block; width: 80%; max-width: 400px; padding: 15px; margin-bottom: 20px;
-            background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
-            font-size: 20px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
-            box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
-        " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
-            ► PROCEED TO UNISWAP
-        </button>
-        
-        <button onclick="loadExchangeIframe('https://pancakeswap.finance')" style="
-            display:block; width: 80%; max-width: 400px; padding: 15px; margin-bottom: 20px;
-            background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
-            font-size: 20px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
-            box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
-        " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
-            ► PROCEED TO PANCAKESWAP
-        </button>
+            <button onclick="loadExchangeIframe('https://uniswap.org')" style="
+                width: 100%; padding: 15px; 
+                background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
+                font-size: 18px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
+                box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
+            " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
+                ► PROCEED TO UNISWAP
+            </button>
+            
+            <button onclick="loadExchangeIframe('https://pancakeswap.finance')" style="
+                width: 100%; padding: 15px; 
+                background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
+                font-size: 18px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
+                box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
+            " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
+                ► PROCEED TO PANCAKESWAP
+            </button>
 
-        <button onclick="loadExchangeIframe('https://curve.fi')" style="
-            display:block; width: 80%; max-width: 400px; padding: 15px; margin-bottom: 20px;
-            background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
-            font-size: 20px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
-            box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
-        " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
-            ► PROCEED TO CURVE FINANCE
-        </button>
+            <button onclick="loadExchangeIframe('https://curve.fi')" style="
+                width: 100%; padding: 15px; 
+                background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
+                font-size: 18px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
+                box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
+            " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
+                ► PROCEED TO CURVE FINANCE
+            </button>
 
-        <button onclick="loadExchangeIframe('https://sushi.com')" style="
-            display:block; width: 80%; max-width: 400px; padding: 15px; margin-bottom: 20px;
-            background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
-            font-size: 20px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
-            box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
-        " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
-            ► PROCEED TO SUSHISWAP
-        </button>
+            <button onclick="loadExchangeIframe('https://sushi.com')" style="
+                width: 100%; padding: 15px; 
+                background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
+                font-size: 18px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
+                box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
+            " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
+                ► PROCEED TO SUSHISWAP
+            </button>
+        </div>
     `;
 };
 
@@ -6511,59 +6528,61 @@ window.openD3XExchangePanel = function(dcData) {
     <div id="d3x-exchange-container" style="flex-grow:1; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); border:1px dashed rgba(57,255,20,0.4); border-radius:8px; padding:20px; text-align:center; position:relative; overflow:hidden;">
         <h2 style="color:#ffffff; letter-spacing:2px; margin-bottom:30px; text-shadow:0 0 10px #39ff14;">ACQUIRE D3X TOKENS</h2>
         
-        <button onclick="loadExchangeIframe('https://raydium.io/swap/?position_tab=staked+RAY&inputMint=sol&outputMint=AGN8SrMCMEgiP1ghvPHa5VRf5rPFDSYVrGFyBGE1Cqpa')" style="
-            display:block; width: 80%; max-width: 400px; padding: 15px; margin-bottom: 20px;
-            background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
-            font-size: 20px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
-            box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
-        " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
-            ► PROCEED TO RAYDIUM
-        </button>
-        
-        <button onclick="loadExchangeIframe('https://jup.ag/swap/SOL-AGN8SrMCMEgiP1ghvPHa5VRf5rPFDSYVrGFyBGE1Cqpa')" style="
-            display:block; width: 80%; max-width: 400px; padding: 15px; margin-bottom: 20px;
-            background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
-            font-size: 20px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
-            box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
-        " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
-            ► PROCEED TO JUPITER
-        </button>
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; max-width: 1200px; padding-bottom: 20px;">
+            <button onclick="loadExchangeIframe('https://raydium.io/swap/?position_tab=staked+RAY&inputMint=sol&outputMint=AGN8SrMCMEgiP1ghvPHa5VRf5rPFDSYVrGFyBGE1Cqpa')" style="
+                width: 100%; padding: 15px; 
+                background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
+                font-size: 18px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
+                box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
+            " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
+                ► PROCEED TO RAYDIUM
+            </button>
+            
+            <button onclick="loadExchangeIframe('https://jup.ag/swap/SOL-AGN8SrMCMEgiP1ghvPHa5VRf5rPFDSYVrGFyBGE1Cqpa')" style="
+                width: 100%; padding: 15px; 
+                background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
+                font-size: 18px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
+                box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
+            " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
+                ► PROCEED TO JUPITER
+            </button>
 
-        <button onclick="loadExchangeIframe('https://uniswap.org')" style="
-            display:block; width: 80%; max-width: 400px; padding: 15px; margin-bottom: 20px;
-            background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
-            font-size: 20px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
-            box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
-        " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
-            ► PROCEED TO UNISWAP
-        </button>
-        
-        <button onclick="loadExchangeIframe('https://pancakeswap.finance')" style="
-            display:block; width: 80%; max-width: 400px; padding: 15px; margin-bottom: 20px;
-            background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
-            font-size: 20px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
-            box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
-        " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
-            ► PROCEED TO PANCAKESWAP
-        </button>
+            <button onclick="loadExchangeIframe('https://uniswap.org')" style="
+                width: 100%; padding: 15px; 
+                background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
+                font-size: 18px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
+                box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
+            " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
+                ► PROCEED TO UNISWAP
+            </button>
+            
+            <button onclick="loadExchangeIframe('https://pancakeswap.finance')" style="
+                width: 100%; padding: 15px; 
+                background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
+                font-size: 18px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
+                box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
+            " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
+                ► PROCEED TO PANCAKESWAP
+            </button>
 
-        <button onclick="loadExchangeIframe('https://curve.fi')" style="
-            display:block; width: 80%; max-width: 400px; padding: 15px; margin-bottom: 20px;
-            background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
-            font-size: 20px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
-            box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
-        " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
-            ► PROCEED TO CURVE FINANCE
-        </button>
+            <button onclick="loadExchangeIframe('https://curve.fi')" style="
+                width: 100%; padding: 15px; 
+                background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
+                font-size: 18px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
+                box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
+            " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
+                ► PROCEED TO CURVE FINANCE
+            </button>
 
-        <button onclick="loadExchangeIframe('https://sushi.com')" style="
-            display:block; width: 80%; max-width: 400px; padding: 15px; margin-bottom: 20px;
-            background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
-            font-size: 20px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
-            box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
-        " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
-            ► PROCEED TO SUSHISWAP
-        </button>
+            <button onclick="loadExchangeIframe('https://sushi.com')" style="
+                width: 100%; padding: 15px; 
+                background: rgba(57,255,20,0.1); border: 2px solid #39ff14; color: #39ff14;
+                font-size: 18px; font-weight: bold; text-decoration: none; border-radius: 8px; cursor:pointer;
+                box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.2s; font-family:'Orbitron', sans-serif;
+            " onmouseover="this.style.background='rgba(57,255,20,0.3)'; this.style.boxShadow='0 0 25px rgba(57,255,20,0.6)';" onmouseout="this.style.background='rgba(57,255,20,0.1)'; this.style.boxShadow='0 0 15px rgba(57,255,20,0.3)';">
+                ► PROCEED TO SUSHISWAP
+            </button>
+        </div>
     </div>
   `;
 
