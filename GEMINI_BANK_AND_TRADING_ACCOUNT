@@ -3,7 +3,7 @@
   "faction": "Humanity (Allied)",
   "walletAddress": "2hF5Z3JPa5Feo4zdHWhcgdQv8RerDcBAk1LkhoYW8TBj",
   "balances": {
-    "D3X": 99999375.522
+    "D3X": 99998529.211
   },
   "commodities": {
     "Metals": {
@@ -16,8 +16,9 @@
       "Tin": 0,
       "Aluminum (Bauxite)": 0,
       "Aluminum": 0,
-      "Cobalt": 5,
-      "Aluminium": 2
+      "Cobalt": 9,
+      "Aluminium": 5,
+      "Iron Ore": 3
     },
     "Natural Resources": {
       "Lumber (Wood)": 0,
@@ -39,14 +40,62 @@
       "Networking Switches (400GbE)": 0
     },
     "Tech": {
-      "SSD Storage (1TB)": 4
+      "SSD Storage (1TB)": 7,
+      "RAM (64GB)": 5,
+      "Silicon Wafers": 3
     },
     "Agriculture": {
       "Soy Beans": 3,
-      "Wheat": 4
+      "Wheat": 8,
+      "Cotton": 6
     },
     "Energy": {
-      "Coal": 4
+      "Coal": 4,
+      "Crude Oil": 3
     }
+  },
+  "portfolio": {
+    "commodities": {
+      "Networking Switches (400GbE)": {
+        "shares": 2,
+        "avgCost": 18043,
+        "totalSpent": 36086
+      },
+      "Lumber (Wood)": {
+        "shares": 4,
+        "avgCost": 0.5,
+        "totalSpent": 2
+      },
+      "Nickel": {
+        "shares": 5,
+        "avgCost": 18.2,
+        "totalSpent": 91
+      },
+      "Crude Oil": {
+        "shares": 7,
+        "avgCost": 80.28571428571429,
+        "totalSpent": 562
+      },
+      "Copper": {
+        "shares": 5,
+        "avgCost": 8.6,
+        "totalSpent": 43
+      },
+      "Google Cloud TPU v5e": {
+        "shares": 5,
+        "avgCost": 9035,
+        "totalSpent": 45175
+      }
+    },
+    "tradeLogs": [
+      "[16:14:03] BOUGHT 2 Networking Switches (400GbE) for 36,086 D3X",
+      "[16:14:03] BOUGHT 4 Lumber (Wood) for 2 D3X",
+      "[16:14:03] BOUGHT 5 Nickel for 91 D3X",
+      "[16:14:03] BOUGHT 5 Crude Oil for 404 D3X",
+      "[16:14:03] BOUGHT 2 Crude Oil for 158 D3X",
+      "[16:14:39] BOUGHT 2 Copper for 17 D3X",
+      "[16:14:40] BOUGHT 5 Google Cloud TPU v5e for 45,175 D3X",
+      "[16:14:40] BOUGHT 3 Copper for 26 D3X"
+    ]
   }
 }
