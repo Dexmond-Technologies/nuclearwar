@@ -223,7 +223,7 @@ const server = http.createServer((req, res) => {
       btcWallet: process.env.BTC_WALLET || "NOT_SET",
       ethWallet: process.env.ETH_WALLET || "NOT_SET",
       xlmWallet: process.env.XLM_WALLET || "NOT_SET",
-      solWallet: process.env.SOL_ORACLE_WALLET || "NOT_SET"
+      solWallet: process.env.gemini_wallet || (typeof geminiKeypair !== 'undefined' && geminiKeypair ? geminiKeypair.publicKey.toBase58() : "NOT_SET")
     }));
   } else if (req.url === '/api/soundtrack') {
     res.writeHead(200, {
@@ -1446,11 +1446,11 @@ async function fetchAndBroadcastAIBalances() {
     try {
         let geminiBalance = 0;
         let claudeBalance = 0;
+        const geminiPubkeyStr = process.env.gemini_wallet;
+        const targetGeminiPubkey = geminiKeypair ? geminiKeypair.publicKey : (geminiPubkeyStr ? new web3.PublicKey(geminiPubkeyStr) : null);
+        const rainclaudePubkey = new web3.PublicKey("5rdrJ46YJbtVHEx7xRgURGm49Cwf1WikLhU71VnS8");
         
         try {
-            const geminiPubkeyStr = process.env.gemini_wallet;
-            const targetGeminiPubkey = geminiKeypair ? geminiKeypair.publicKey : (geminiPubkeyStr ? new web3.PublicKey(geminiPubkeyStr) : null);
-            
             if (targetGeminiPubkey) {
                 const accounts = await solanaConnection.getParsedTokenAccountsByOwner(
                     targetGeminiPubkey, 
@@ -1468,8 +1468,6 @@ async function fetchAndBroadcastAIBalances() {
             // Add a small delay between requests to avoid bursting the RPC node rate limits
             await new Promise(r => setTimeout(r, 2000));
 
-            // Use the real, hardcoded public key for Rainclaude
-            const rainclaudePubkey = new web3.PublicKey("5rdrJ46YJbtVHEx7xRgURGm49Cwf1WikLhU71VnS8");
             const accounts = await solanaConnection.getParsedTokenAccountsByOwner(
                 rainclaudePubkey, 
                 { mint: D3X_MINT_ADDRESS }
@@ -1496,9 +1494,9 @@ async function fetchAndBroadcastAIBalances() {
                 let gemData = JSON.parse(fs.readFileSync(gemPath, 'utf8'));
                 gemData.balances.D3X = geminiBalance;
                 
-                const geminiPubkeyStr = process.env.gemini_wallet;
-                const targetGeminiPubkey = geminiKeypair ? geminiKeypair.publicKey.toBase58() : geminiPubkeyStr;
-                if (targetGeminiPubkey) gemData.walletAddress = targetGeminiPubkey;
+                
+                const trgPubKeyStr = targetGeminiPubkey ? (typeof targetGeminiPubkey === 'string' ? targetGeminiPubkey : targetGeminiPubkey.toBase58()) : geminiPubkeyStr;
+                if (trgPubKeyStr) gemData.walletAddress = trgPubKeyStr;
                 
                 fs.writeFileSync(gemPath, JSON.stringify(gemData, null, 2));
             }
@@ -1508,7 +1506,9 @@ async function fetchAndBroadcastAIBalances() {
         broadcastAll({
             type: 'ai_d3x_balances',
             gemini: geminiBalance,
-            claude: claudeBalance
+            claude: claudeBalance,
+            geminiWallet: targetGeminiPubkey ? (typeof targetGeminiPubkey === 'string' ? targetGeminiPubkey : targetGeminiPubkey.toBase58()) : process.env.gemini_wallet || "NOT_SET",
+            claudeWallet: rainclaudePubkey.toBase58()
         });
     } catch (err) {
         console.error("Balance Fetch Error:", err.message);
