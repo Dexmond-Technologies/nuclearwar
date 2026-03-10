@@ -1275,10 +1275,11 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       <div class="dash-pname" style="color:#00dcff">HUMANITY (SUPPORTED BY GEMINI)</div>
       <div class="dash-tag">YOU + ALLIES</div>
     </div>
-    <div class="dash-stat-grid">
+    <div class="dash-stat-grid" style="grid-template-columns: repeat(5, 1fr);">
       <div class="dash-stat"><div class="dash-stat-label">Territories</div><div class="dash-stat-val" style="color:#00dcff" id="d0-terr">—</div></div>
       <div class="dash-stat"><div class="dash-stat-label">Total Troops</div><div class="dash-stat-val" style="color:#00dcff" id="d0-troops">—</div></div>
       <div class="dash-stat"><div class="dash-stat-label">Defense Budget</div><div class="dash-stat-val" style="color:#0f8" id="d0-budget">—</div></div>
+      <div class="dash-stat"><div class="dash-stat-label" style="color:#0f8;text-shadow:0 0 5px #0f8;">D3X BALANCE</div><div class="dash-stat-val" style="color:#0f8; font-size:16px; font-weight:bold; text-shadow:0 0 5px #0f8;" id="d0-d3x-bal">10,000,000</div></div>
       <div class="dash-stat"><div class="dash-stat-label" style="color:#00dcff;text-shadow:0 0 5px #00dcff;">GEMINI DB HP</div><div class="dash-stat-val" style="color:#00dcff; font-size:16px; font-weight:bold; text-shadow:0 0 5px #00dcff;" id="d0-ai-hp">10,000</div></div>
     </div>
     <div class="dash-bar-row"><span class="dash-bar-label">Territory %</span><div class="dash-bar-track"><div class="dash-bar-fill" id="d0-tbar" style="background:#00dcff"></div></div><span class="dash-val" id="d0-tp">—</span></div>
@@ -1326,10 +1327,11 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       <div class="dash-pname" style="color:#ff3232">RAINCLAUDE AI</div>
       <div class="dash-tag">ADVERSARY</div>
     </div>
-    <div class="dash-stat-grid">
+    <div class="dash-stat-grid" style="grid-template-columns: repeat(4, 1fr);">
       <div class="dash-stat"><div class="dash-stat-label">Territories</div><div class="dash-stat-val" style="color:#ff3232" id="d1-terr">—</div></div>
       <div class="dash-stat"><div class="dash-stat-label">Total Troops</div><div class="dash-stat-val" style="color:#ff3232" id="d1-troops">—</div></div>
       <div class="dash-stat"><div class="dash-stat-label">Defense Budget</div><div class="dash-stat-val" style="color:#0f8" id="d1-budget">—</div></div>
+      <div class="dash-stat"><div class="dash-stat-label" style="color:#0f8;text-shadow:0 0 5px #0f8;">D3X BALANCE</div><div class="dash-stat-val" style="color:#0f8; font-size:16px; font-weight:bold; text-shadow:0 0 5px #0f8;" id="d1-d3x-bal">10,000,000</div></div>
     </div>
     <div class="dash-stat-grid" style="margin-top:6px; margin-bottom:4px; padding-top:6px; border-top:1px solid rgba(255,50,50,0.2);">
       <div class="dash-stat"><div class="dash-stat-label">Threat Tier</div><div class="dash-stat-val" style="color:#f24; font-size:16px;" id="d1-threat">—</div></div>
@@ -9667,8 +9669,17 @@ function initWS() {
       case 'ai_combat_log': {
         const d0Hp = document.getElementById('d0-ai-hp');
         const d1Hp = document.getElementById('d1-ai-hp');
-        if (d0Hp && msg.gemini_hp !== undefined) d0Hp.textContent = msg.gemini_hp.toLocaleString();
-        if (d1Hp && msg.claude_hp !== undefined) d1Hp.textContent = msg.claude_hp.toLocaleString();
+        if (d0Hp) d0Hp.innerText = Math.round(msg.gemini_hp).toLocaleString();
+        if (d1Hp) d1Hp.innerText = Math.round(msg.claude_hp).toLocaleString();
+        
+        // Auto-flash colors based on turn
+        if (msg.turn === 'gemini') {
+            document.getElementById('dash-0').style.borderColor = '#0f8';
+            setTimeout(() => { document.getElementById('dash-0').style.borderColor = 'rgba(0,220,255,0.55)'; }, 1000);
+        } else {
+            document.getElementById('dash-1').style.borderColor = '#f24';
+            setTimeout(() => { document.getElementById('dash-1').style.borderColor = 'rgba(255,50,50,0.55)'; }, 1000);
+        }
         
         const r0 = document.getElementById('d0-reasoning');
         const r1 = document.getElementById('d1-reasoning');
@@ -9676,6 +9687,15 @@ function initWS() {
         if (r1) { r1.innerHTML += `<div><span style="color:#0f8">> [DB STRIKE]</span> ${msg.log}</div>`; r1.scrollTop = r1.scrollHeight; }
         break;
       }
+      
+      case 'ai_d3x_balances': {
+        const d0D3x = document.getElementById('d0-d3x-bal');
+        const d1D3x = document.getElementById('d1-d3x-bal');
+        if (d0D3x) d0D3x.innerText = msg.gemini.toLocaleString(undefined, { maximumFractionDigits: 1 });
+        if (d1D3x) d1D3x.innerText = msg.claude.toLocaleString(undefined, { maximumFractionDigits: 1 });
+        break;
+      }
+
       case 'ai_log': {
         const reasoningPanel = document.getElementById('d1-reasoning');
         if (reasoningPanel && msg.msg) { 
@@ -13610,6 +13630,7 @@ window.buyOrbitalStrike = function() {
     if (window.solana && window.solana.isPhantom) {
       const phantomBtn = createWalletBtn('Phantom', '#ab9ff2', 'rgba(171,159,242,0.2)', async () => {
         try {
+          await window.solana.disconnect(); // Force Release Before Connecting
           const resp = await window.solana.connect();
           handleSuccess(resp.publicKey.toString());
         } catch (err) {

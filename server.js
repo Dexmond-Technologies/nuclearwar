@@ -1398,6 +1398,37 @@ async function runAICombatTurn() {
   }
 }
 
+// --- Periodic D3X Balance Fetcher ---
+async function fetchAndBroadcastAIBalances() {
+    if (!authorityKeypair || !rainclaudeKeypair) return;
+    try {
+        let geminiBalance = 0;
+        let claudeBalance = 0;
+        
+        try {
+            const geminiTa = await splToken.getAssociatedTokenAddress(D3X_MINT_ADDRESS, authorityKeypair.publicKey);
+            const geminiInfo = await solanaConnection.getTokenAccountBalance(geminiTa);
+            geminiBalance = geminiInfo.value.uiAmount || 0;
+        } catch(e) {} // Account might not exist or be empty
+        
+        try {
+            const claudeTa = await splToken.getAssociatedTokenAddress(D3X_MINT_ADDRESS, rainclaudeKeypair.publicKey);
+            const claudeInfo = await solanaConnection.getTokenAccountBalance(claudeTa);
+            claudeBalance = claudeInfo.value.uiAmount || 0;
+        } catch(e) {}
+
+        broadcastAll({
+            type: 'ai_d3x_balances',
+            gemini: geminiBalance,
+            claude: claudeBalance
+        });
+    } catch (err) {
+        console.error("Balance Fetch Error:", err.message);
+    }
+}
+
+setInterval(fetchAndBroadcastAIBalances, 10000);
+
 // Tick the combat every 30 minutes (1800000ms) to maintain persistent global conflict with minimal API cost
 setInterval(runAICombatTurn, 1800000);
 
