@@ -13691,12 +13691,13 @@ window.buyOrbitalStrike = function() {
     if (window.solana && window.solana.isPhantom) {
       const phantomBtn = createWalletBtn('Phantom', '#ab9ff2', 'rgba(171,159,242,0.2)', async () => {
         try {
-          await window.solana.disconnect(); // Force Release Before Connecting
+          // Force disconnect first to GUARANTEE Phantom prompts for a password and explicit wallet selection
+          await window.solana.disconnect(); 
           const resp = await window.solana.connect();
           handleSuccess(resp.publicKey.toString());
         } catch (err) {
           console.error(err);
-          alert('Phantom Connection Failed');
+          alert('Phantom Connection Failed or Rejected.');
         }
       });
       modal.appendChild(phantomBtn);
@@ -13707,24 +13708,13 @@ window.buyOrbitalStrike = function() {
       modal.appendChild(msg);
     }
 
-    // MetaMask Button
-    if (window.ethereum && window.ethereum.isMetaMask) {
-      const metamaskBtn = createWalletBtn('MetaMask', '#f6851b', 'rgba(246,133,27,0.2)', async () => {
-        try {
-          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-          handleSuccess(accounts[0]);
-        } catch (err) {
-          console.error(err);
-          alert('MetaMask Connection Failed');
-        }
-      });
-      modal.appendChild(metamaskBtn);
-    } else {
-      const msg = document.createElement('div');
-      msg.innerText = 'MetaMask extension not detected.';
-      msg.style.color = '#f6851b'; msg.style.opacity = '0.5'; msg.style.fontSize = '11px'; msg.style.marginBottom = '10px';
-      modal.appendChild(msg);
-    }
+    // MetaMask Button (Temporarily Disabled by User Request)
+    const metamaskBtn = createWalletBtn('MetaMask [UNAVAILABLE]', '#555', 'rgba(100,100,100,0.2)', async () => {
+        alert('MetaMask integration is temporarily disabled for D3X transition. Please use Phantom.');
+    });
+    metamaskBtn.style.opacity = '0.5';
+    metamaskBtn.style.cursor = 'not-allowed';
+    modal.appendChild(metamaskBtn);
 
     const closeBtn = document.createElement('button');
     closeBtn.innerText = 'ABORT';
