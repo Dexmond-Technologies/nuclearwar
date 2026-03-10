@@ -1683,27 +1683,20 @@ async function fetchAndBroadcastAIBalances() {
                 claudeBalance = 0;
             }
             
-            // Persist the real-time balance back into the RAINCLAUDE_ACCOUNT file
-            const fs = require('fs');
-            const path = require('path');
-            
-            const rcPath = path.join(__dirname, 'RAINCLAUDE_ACCOUNT');
-            if (fs.existsSync(rcPath)) {
-                let rcData = JSON.parse(fs.readFileSync(rcPath, 'utf8'));
-                rcData.balances.D3X = claudeBalance;
-                fs.writeFileSync(rcPath, JSON.stringify(rcData, null, 2));
-            }
-            
-            const gemPath = path.join(__dirname, 'GEMINI_BANK_AND_TRADING_ACCOUNT');
-            if (fs.existsSync(gemPath)) {
-                let gemData = JSON.parse(fs.readFileSync(gemPath, 'utf8'));
-                gemData.balances.D3X = geminiBalance;
+            if (pgPool) {
+                const res = await pgPool.query("SELECT gemini_portfolio, claude_portfolio FROM ai_combat_state WHERE id = 1");
+                let gemData = res.rows.length > 0 && res.rows[0].gemini_portfolio ? res.rows[0].gemini_portfolio : { commodities: {}, tradeLogs: [] };
+                let rcData = res.rows.length > 0 && res.rows[0].claude_portfolio ? res.rows[0].claude_portfolio : { commodities: {}, tradeLogs: [] };
                 
-                
+                // Track wallet on gemini portfolio object specifically for frontend
                 const trgPubKeyStr = targetGeminiPubkey ? (typeof targetGeminiPubkey === 'string' ? targetGeminiPubkey : targetGeminiPubkey.toBase58()) : geminiPubkeyStr;
                 if (trgPubKeyStr) gemData.walletAddress = trgPubKeyStr;
                 
-                fs.writeFileSync(gemPath, JSON.stringify(gemData, null, 2));
+                await pgPool.query(`
+                  UPDATE ai_combat_state
+                  SET gemini_portfolio = $1, claude_portfolio = $2, updated_at = NOW()
+                  WHERE id = 1
+                `, [gemData, rcData]);
             }
 
         } catch(e) { console.error('Claude balance error:', e.message); claudeBalance = 0; }
@@ -1785,21 +1778,17 @@ async function runAIMarketBuying() {
   const buys = [];
   
   // Read localized JSON accounts
-  const geminiFilePath = path.join(__dirname, 'GEMINI_BANK_AND_TRADING_ACCOUNT');
-  const claudeFilePath = path.join(__dirname, 'RAINCLAUDE_ACCOUNT');
-  
-  let geminiAccount = null;
-  let claudeAccount = null;
+  let geminiAccount = { balances: { D3X: 0 }, portfolio: { commodities: {}, tradeLogs: [] } };
+  let claudeAccount = { balances: { D3X: 0 }, portfolio: { commodities: {}, tradeLogs: [] } };
   
   try {
-      if (fs.existsSync(geminiFilePath)) {
-          geminiAccount = JSON.parse(fs.readFileSync(geminiFilePath, 'utf8'));
-      }
-      if (fs.existsSync(claudeFilePath)) {
-          claudeAccount = JSON.parse(fs.readFileSync(claudeFilePath, 'utf8'));
+      const res = await pgPool.query("SELECT gemini_portfolio, claude_portfolio FROM ai_combat_state WHERE id = 1");
+      if (res.rows.length > 0) {
+          if (res.rows[0].gemini_portfolio) geminiAccount.portfolio = res.rows[0].gemini_portfolio;
+          if (res.rows[0].claude_portfolio) claudeAccount.portfolio = res.rows[0].claude_portfolio;
       }
   } catch(e) {
-      console.error("[AI MARKET] Error reading account files:", e);
+      console.error("[AI MARKET] Error reading portfolios from DB:", e);
   }
 
   // Filter catalog down to only Metals and Natural Resources per user request
@@ -1921,16 +1910,15 @@ async function runAIMarketBuying() {
   }
   
   if (buys.length > 0) {
-    // Write back to files
+    // Write back to PostgreSQL
     try {
-        if (geminiAccount) {
-            fs.writeFileSync(geminiFilePath, JSON.stringify(geminiAccount, null, 2), 'utf8');
-        }
-        if (claudeAccount) {
-            fs.writeFileSync(claudeFilePath, JSON.stringify(claudeAccount, null, 2), 'utf8');
-        }
+        await pgPool.query(`
+          UPDATE ai_combat_state 
+          SET gemini_portfolio = $1, claude_portfolio = $2, updated_at = NOW() 
+          WHERE id = 1
+        `, [geminiAccount.portfolio, claudeAccount.portfolio]);
     } catch(e) {
-        console.error("[AI MARKET] Error saving account files:", e);
+        console.error("[AI MARKET] Error saving portfolios to DB:", e);
     }
 
     // Broadcast all purchases to all connected clients
@@ -2095,7 +2083,9 @@ async function startServer() {
           ADD COLUMN IF NOT EXISTS gemini_instability INTEGER DEFAULT 0,
           ADD COLUMN IF NOT EXISTS claude_instability INTEGER DEFAULT 0,
           ADD COLUMN IF NOT EXISTS gemini_blockade_turns INTEGER DEFAULT 0,
-          ADD COLUMN IF NOT EXISTS claude_blockade_turns INTEGER DEFAULT 0
+          ADD COLUMN IF NOT EXISTS claude_blockade_turns INTEGER DEFAULT 0,
+          ADD COLUMN IF NOT EXISTS gemini_portfolio JSONB,
+          ADD COLUMN IF NOT EXISTS claude_portfolio JSONB
         `);
       } catch(e) {
         // Columns exist or migration not needed
