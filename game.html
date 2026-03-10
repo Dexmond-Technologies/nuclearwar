@@ -10836,7 +10836,10 @@ window.droneBattleState = {
     missiles: [],
     explosions: [],
     lasers: [],
-    buildingsGroup: new THREE.Group()
+    buildingsGroup: new THREE.Group(),
+    logCooldown: 0,
+    geminiLog: [],
+    claudeLog: []
 };
 
 function spawnDroneCity() {
@@ -10907,9 +10910,8 @@ function initDroneBattle() {
     spawnDroneCity();
     
     const factions = [
-        { name: 'WHITE', color: 0xffffff, count: 10 },
-        { name: 'RED', color: 0xff0044, count: 5 },  // Rainclaude red
-        { name: 'BLUE', color: 0x0088ff, count: 5 }   // Gemini blue
+        { name: 'GEMINI', color: 0x00aaff, count: 10 },
+        { name: 'RAINCLAUDE', color: 0xff0044, count: 10 }
     ];
     
     // Quadcopter geometry
@@ -11031,7 +11033,7 @@ function updateDroneBattle(dt) {
                     alignment.add(other.velocity);
                     cohesion.add(other.mesh.position);
                     neighborCount++;
-                } else if (d.faction !== 'WHITE' && other.faction !== 'WHITE') {
+                } else {
                     if (distSq < minDistSq) {
                         minDistSq = distSq;
                         closestEnemy = other;
@@ -11079,23 +11081,42 @@ function updateDroneBattle(dt) {
             if (d.role === 'Bomber') {
                 d.cooldown = 4.0;
                 spawnDroneMissile(pos.clone(), d.target.mesh);
+                _droneBattleLogEvent(d.faction, `${d.role} launched MISSILE at ${d.target.faction} ${d.target.role}`);
+            } else if (d.role === 'Scout') {
+                d.cooldown = 1.5;
+                spawnDroneLaser(pos.clone(), d.target.mesh.position.clone(), d.faction);
+                if (Math.random() < 0.15) d.target.hp -= 1;
+                if (Math.random() < 0.3) _droneBattleLogEvent(d.faction, `Scout DETECTED ${d.target.faction} ${d.target.role}`);
             } else {
                 d.cooldown = 0.5;
                 spawnDroneLaser(pos.clone(), d.target.mesh.position.clone(), d.faction);
                 if (Math.random() < 0.3) d.target.hp -= 2;
+                if (Math.random() < 0.2) _droneBattleLogEvent(d.faction, `Fighter ENGAGING ${d.target.faction} ${d.target.role}`);
             }
         }
         
+        // Regrouping log — fires ONCE when crossing below 30% threshold
+        if (d.hp > 0 && d.hp < d.maxHp * 0.3 && !d._regroupLogged) {
+            d._regroupLogged = true;
+            _droneBattleLogEvent(d.faction, `${d.role} REGROUPING — hull ${Math.round(d.hp/d.maxHp*100)}%`);
+        }
+        if (d.hp >= d.maxHp * 0.3) d._regroupLogged = false;
+        
         if (d.hp <= 0) {
             spawnDroneExplosion(pos.clone());
+            _droneBattleLogEvent(d.target ? d.target.faction : d.faction, `${d.faction} ${d.role} DESTROYED`);
             const startVec = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
             pos.copy(startVec.multiplyScalar(altitude));
             d.hp = d.maxHp;
+            d._regroupLogged = false;
             d.target = null;
         }
     });
     
     if (!isWTR) return;
+    
+    // Flush queued drone reasoning logs to faction dashboard panels
+    _flushDroneBattleLogs(dt);
     
     for (let i = window.droneBattleState.lasers.length - 1; i >= 0; i--) {
         const l = window.droneBattleState.lasers[i];
@@ -11142,11 +11163,47 @@ function updateDroneBattle(dt) {
 
 function spawnDroneLaser(start, end, faction) {
     const geo = new THREE.BufferGeometry().setFromPoints([start, end]);
-    const color = faction === 'RED' ? 0xff0044 : 0x00aaff;
+    const color = faction === 'RAINCLAUDE' ? 0xff0044 : 0x00aaff;
     const mat = new THREE.LineBasicMaterial({color: color, transparent: true, opacity: 1.0, blending: THREE.AdditiveBlending});
     const line = new THREE.Line(geo, mat);
     scene.add(line);
     window.droneBattleState.lasers.push({mesh: line, life: 1.0});
+}
+
+// --- DRONE BATTLE REASONING LOG SYSTEM ---
+const _droneBattleLogQueue = [];
+let _droneBattleLogTimer = 0;
+
+function _droneBattleLogEvent(faction, msg) {
+    _droneBattleLogQueue.push({ faction, msg, time: Date.now() });
+    if (_droneBattleLogQueue.length > 30) _droneBattleLogQueue.shift();
+}
+
+function _flushDroneBattleLogs(dt) {
+    _droneBattleLogTimer -= dt;
+    if (_droneBattleLogTimer > 0) return;
+    _droneBattleLogTimer = 3.0; // Emit every 3 seconds
+    
+    if (_droneBattleLogQueue.length === 0) return;
+    
+    // Grab up to 3 most recent events
+    const batch = _droneBattleLogQueue.splice(0, Math.min(3, _droneBattleLogQueue.length));
+    
+    const r0 = document.getElementById('d0-reasoning'); // Gemini panel
+    const r1 = document.getElementById('d1-reasoning'); // Rainclaude panel
+    
+    batch.forEach(evt => {
+        const tStr = new Date(evt.time).toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
+        const line = `<div><span style="color:${evt.faction === 'GEMINI' ? '#0af' : '#f44'}">> [DRONE OPS ${tStr}]</span> ${evt.msg}</div>`;
+        
+        if (evt.faction === 'GEMINI' && r0) {
+            r0.innerHTML += line;
+            r0.scrollTop = r0.scrollHeight;
+        } else if (evt.faction === 'RAINCLAUDE' && r1) {
+            r1.innerHTML += line;
+            r1.scrollTop = r1.scrollHeight;
+        }
+    });
 }
 
 function spawnDroneMissile(pos, targetMesh) {
@@ -14764,7 +14821,7 @@ window.buyOrbitalStrike = function() {
 // Removed hover listeners for ops-sidebar (now permanently displayed)
 
 </script>
-<script src="/dist/improve_earth.js"></script>
+<script src="/dist/improve_earth.js" defer></script>
 
 <!-- Vanilla Wallet Integration (Phantom / MetaMask) -->
 <script>

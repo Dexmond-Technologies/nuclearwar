@@ -1906,7 +1906,7 @@ async function runAIMarketBuying() {
       const variance = 0.95 + (Math.random() * 0.1); // ±5%
       const effectivePrice = item.basePrice * variance;
       
-      const affordableUnits = Math.floor(remainingBudgetC / effectivePrice);
+      let affordableUnits = Math.floor(remainingBudgetC / effectivePrice);
       
       // Stop if we literally can't even afford 1 unit of this random item
       if (affordableUnits < 1) {
@@ -1966,7 +1966,7 @@ async function runAIMarketBuying() {
       const variance = 0.95 + (Math.random() * 0.1);
       const effectivePrice = item.basePrice * variance;
       
-      const affordableUnits = Math.floor(remainingBudgetR / effectivePrice);
+      let affordableUnits = Math.floor(remainingBudgetR / effectivePrice);
       
       if (affordableUnits < 1) {
           if (claudePurchasesThisCycle === 0) {
