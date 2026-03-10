@@ -4725,8 +4725,12 @@ function initDexmondHub() {
   building.rotateX(Math.PI / 2); // Stand it upright
   building.rotateY(Math.PI / 2); // Face it outward
 
-  // Add the building directly to the global scene so it ignores conditional skin rendering
-  scene.add(building);
+  window.dexmondHubGroup = building;
+  // Initially hidden, only shown on CyberSkin (index 4)
+  window.dexmondHubGroup.visible = false;
+  
+  // Add the building directly to the global scene so its visibility can be easily toggled
+  scene.add(window.dexmondHubGroup);
   console.log("3D Extruded Dexmond Hub Initialized at Micronesia.");
 }
 initDexmondHub();
@@ -14669,6 +14673,11 @@ window.toggleRedSkin = function() {
   }
   if (typeof window.worldBankGroup !== 'undefined') {
       window.worldBankGroup.visible = (skin.name === 'CYBER');
+  }
+  
+  // Ensure the White 'D' Dexmond Hub only appears on the CYBER skin
+  if (typeof window.dexmondHubGroup !== 'undefined') {
+      window.dexmondHubGroup.visible = (skin.name === 'CYBER');
   }
   
   // Ensure CMD Help indicator is always shown
