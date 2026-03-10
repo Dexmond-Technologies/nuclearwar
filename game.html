@@ -138,9 +138,41 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   z-index: 100;
   display: none;
 }
+#live-simulation-label {
+  position: absolute;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 16px;
+  font-weight: bold;
+  color: #0af;
+  letter-spacing: 6px;
+  text-shadow: 0 0 10px #0af, 0 0 20px #0af;
+  animation: cyberPulse 1s infinite alternate;
+  pointer-events: none;
+  z-index: 100;
+  display: block; /* Default for skin 0 */
+}
+#global-intelligence-label {
+  position: absolute;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 16px;
+  font-weight: bold;
+  color: #f55;
+  letter-spacing: 6px;
+  text-shadow: 0 0 10px #f55, 0 0 20px #f55;
+  animation: cyberPulse 1s infinite alternate;
+  pointer-events: none;
+  z-index: 100;
+  display: none;
+}
 #datacenter-warfare-label {
   position: absolute;
-  bottom: 36px;
+  bottom: 50px;
   left: 50%;
   transform: translateX(-50%);
   font-family: 'Share Tech Mono', monospace;
@@ -332,7 +364,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 #go-title{font-size:44px;letter-spacing:6px;text-shadow:0 0 30px currentColor;margin-bottom:16px;}
 
 /* Attack Presets Modal */
-#attack-modal, #nuke-modal, #leaderboard-modal, #naval-modal, #shooter-modal {
+#attack-modal, #nuke-modal, #leaderboard-modal, #naval-modal, #shooter-modal, #satellite-war-modal {
   position: absolute;
   top: 0; left: 0; width: 100vw; height: 100vh;
   background: rgba(0,0,0,0.4);
@@ -340,7 +372,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   z-index: 100;
   pointer-events: auto;
 }
-#attack-modal.show, #nuke-modal.show, #leaderboard-modal.show, #naval-modal.show, #shooter-modal.show { 
+#attack-modal.show, #nuke-modal.show, #leaderboard-modal.show, #naval-modal.show, #shooter-modal.show, #satellite-war-modal.show { 
   display: flex !important; 
   animation: fadeInModal 0.3s ease-out;
 }
@@ -1116,12 +1148,6 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     <div style="text-align:center; position:absolute; left:50%; transform:translateX(-50%);">
       <div id="game-title">☢ NUCLEAR WAR</div>
       <div id="phase-label">—</div>
-      <!-- Datacenter Power Load Display -->
-      <div id="datacenter-power-display" style="display:none; font-family:'Share Tech Mono', monospace; font-size:14px; margin-top:4px; border:1px solid rgba(0,255,136,0.3); background:rgba(0,10,20,0.8); padding:6px 14px; border-radius:4px; box-shadow:0 0 10px rgba(0,255,136,0.1); width:max-content; margin-left:auto; margin-right:auto;">
-        <span style="color:#00dcff; text-shadow:0 0 5px #00dcff;">HUMANITY OUTPUT: <span id="hum-pwr">2.41 TW</span></span>
-        <span style="color:#444; margin:0 12px; font-weight:lighter;">|</span>
-        <span style="color:#ff2244; text-shadow:0 0 5px #ff2244;">RAINCLAUDE DRAIN: <span id="rc-pwr">812 GW</span></span>
-      </div>
     </div>
     <div style="display:flex;gap:15px;pointer-events:auto;align-items:center; margin-left:auto;">
       <div style="display:flex;gap:12px;align-items:center;">
@@ -1146,6 +1172,16 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
   
   <div id="botbar">
     <div id="cybercrime-map-label">CYBER-WARFARE</div>
+    <div id="live-simulation-label">LIVE-SIMULATION</div>
+    <div id="global-intelligence-label">GLOBAL-INTELLIGENCE</div>
+    
+    <!-- Datacenter Power Load Display (Moved from Topbar to bottom) -->
+    <div id="datacenter-power-display" style="display:none; position:absolute; bottom:85px; left:50%; transform:translateX(-50%); font-family:'Share Tech Mono', monospace; font-size:14px; border:1px solid rgba(0,255,136,0.3); background:rgba(0,10,20,0.8); padding:6px 14px; border-radius:4px; box-shadow:0 0 10px rgba(0,255,136,0.1); width:max-content; z-index:110; pointer-events:none;">
+      <span style="color:#00dcff; text-shadow:0 0 5px #00dcff;">HUMANITY OUTPUT: <span id="hum-pwr">2.41 TW</span></span>
+      <span style="color:#444; margin:0 12px; font-weight:lighter;">|</span>
+      <span style="color:#ff2244; text-shadow:0 0 5px #ff2244;">RAINCLAUDE DRAIN: <span id="rc-pwr">812 GW</span></span>
+    </div>
+    
     <div id="datacenter-warfare-label">CITADEL BANK TOKENIZED ASSETS AND BRIDGES</div>
     <div id="green-skin-info" onclick="if(typeof window.showGMarketWallet === 'function') window.showGMarketWallet();">
       <div style="display:flex; align-items:center;">
@@ -1172,7 +1208,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 
   <!-- DATACENTER CO-OP UI (CYBER SKIN ONLY) -->
   <!-- STAKING TOWER MODAL -->
-  <div id="staking-tower-modal" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:840px; min-height:340px; display:flex; flex-direction:column; background:rgba(20,0,0,0.95); border:1px solid #ff0033; border-radius:8px; box-shadow:0 0 30px rgba(255,0,50,0.3); padding:20px; pointer-events:auto; backdrop-filter:blur(10px); z-index:100;">
+  <div id="staking-tower-modal" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:840px; min-height:340px; flex-direction:column; background:rgba(20,0,0,0.95); border:1px solid #ff0033; border-radius:8px; box-shadow:0 0 30px rgba(255,0,50,0.3); padding:20px; pointer-events:auto; backdrop-filter:blur(10px); z-index:100;">
     <button onclick="document.getElementById('staking-tower-modal').style.display='none'; window.selectedStakingTower=null;" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#f55;font-size:16px;cursor:pointer;line-height:1;padding:4px;">✕</button>
     <h2 style="margin:0 0 5px 0; color:#ff0033; font-family:'Orbitron', sans-serif; font-size:22px; text-transform:uppercase; letter-spacing:2px; text-shadow:0 0 10px rgba(255,0,50,0.5);">STAKING TERMINAL</h2>
     <div style="color:#aaa; font-family:'Share Tech Mono', monospace; font-size:12px; margin-bottom:20px;">NODE PROTOCOL: <span style="color:#fff;" id="staking-tower-node-name">D3X CORE NETWORK</span></div>
@@ -1255,6 +1291,16 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     <div id="d0-reasoning" style="margin-top:12px; padding:10px; background:rgba(0,220,255,0.05); border:1px solid rgba(0,220,255,0.2); border-radius:4px; font-family:'Courier New', monospace; font-size:14px; color:#0af; flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom: 4px;">
       <div style="opacity:0.5">> AWAITING COMMAND INPUT...</div>
     </div>
+    
+    <!-- MOCK CRYPTO WAR FEED (GEMINI) -->
+    <div id="d0-crypto-feed" style="margin-top:8px; padding:8px; background:rgba(0,255,136,0.05); border:1px solid rgba(0,255,136,0.2); border-radius:4px; font-family:'Courier New', monospace; font-size:12px; color:#0f8; height:80px; overflow-y:hidden; display:flex; flex-direction:column; gap:2px; margin-bottom: 8px;">
+      <div style="opacity:0.8; font-weight:bold; border-bottom:1px dashed rgba(0,255,136,0.3); padding-bottom:4px; margin-bottom:4px;">LIVE TRADE FEED [GEMINI] 
+        <span id="d0-crypto-total" style="float:right; color:#fff;">VOL: $0</span>
+      </div>
+      <div id="d0-crypto-lines" style="display:flex; flex-direction:column-reverse; height:100%; overflow:hidden;">
+        <div style="opacity:0.5">> INITIATING ALGORITHMIC TRADES...</div>
+      </div>
+    </div>
     <div id="phase-btns" style="display:flex; gap:10px; align-items:center; margin-bottom: 15px;">
       <button class="phase-btn" id="pb-reinforce" style="flex:1;">REINFORCE</button>
       <button class="phase-btn" id="pb-attack" style="flex:1;">ATTACK</button>
@@ -1301,6 +1347,16 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
     <div class="dash-status" id="d1-status">CALCULATING...</div>
     <div id="d1-reasoning" style="margin-top:12px; padding:6px; background:rgba(255,0,0,0.05); border:1px solid rgba(255,50,50,0.2); border-radius:4px; font-family:'Courier New', monospace; font-size:14px; color:#f55; flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:2px; margin-bottom: 5px;">
       <div style="opacity:0.5">> AWAITING COMBAT DATA...</div>
+    </div>
+    
+    <!-- MOCK CRYPTO WAR FEED (RAINCLAUDE) -->
+    <div id="d1-crypto-feed" style="margin-top:4px; padding:6px; background:rgba(255,170,0,0.05); border:1px solid rgba(255,170,0,0.2); border-radius:4px; font-family:'Courier New', monospace; font-size:12px; color:#fa0; height:80px; overflow-y:hidden; display:flex; flex-direction:column; gap:2px; margin-bottom: 5px;">
+      <div style="opacity:0.8; font-weight:bold; border-bottom:1px dashed rgba(255,170,0,0.3); padding-bottom:4px; margin-bottom:4px;">LIVE TRADE FEED [RAINCLAUDE] 
+        <span id="d1-crypto-total" style="float:right; color:#fff;">VOL: $0</span>
+      </div>
+      <div id="d1-crypto-lines" style="display:flex; flex-direction:column-reverse; height:100%; overflow:hidden;">
+        <div style="opacity:0.5">> INITIATING HIGH-FREQUENCY ATTACKS...</div>
+      </div>
     </div>
   </div>
   <button class="war-room-btn" id="btn-toggle-intel" style="bottom: 79px; width:25vw; right:20px; padding:6px 12px; font-size:9px; animation: none;">
@@ -1992,6 +2048,32 @@ Type 'help' for available commands.
   </div>
 </div>
 
+<!-- D3X Mining Modal -->
+<div id="d3x-mining-modal" style="position:absolute;inset:0;background:rgba(0,15,5,.95);display:none;align-items:center;justify-content:center;z-index:1060;backdrop-filter:blur(8px);">
+  <div class="rep-card" style="width:500px; max-width:95vw; border-color:#0f8; box-shadow:0 0 40px rgba(0,255,136,.2);">
+    <div class="rep-title" style="color:#0f8; text-shadow:0 0 15px rgba(0,255,136,.8);" id="mining-cave-title">D3X MINING CAVE</div>
+    <div class="rep-desc" style="color:#aaffd0;">Burn 1 D3X to mine for rewards. Fill the internal meter to 1.0 D3X to automatically withdraw to your wallet.</div>
+    
+    <div style="background:rgba(0,255,136,.05); border:1px solid rgba(0,255,136,.3); padding:20px; text-align:center; margin-bottom:20px; border-radius:8px;">
+        <div style="font-size:12px; color:#0af; letter-spacing:2px; margin-bottom:10px;">MINING PROGRESS (<span id="internal-mining-amount">0.00</span> / 1.00 D3X)</div>
+        <div style="width:100%; height:8px; background:rgba(0,255,136,.1); margin:0 auto; border-radius:4px; overflow:hidden;">
+            <div id="mining-progress-bar" style="height:100%; width:0%; background:#0f8; transition:0.3s; box-shadow:0 0 10px #0f8;"></div>
+        </div>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <div style="font-size:14px; font-weight:bold; color:#f55; letter-spacing:1px;">COST: 1 D3X</div>
+        <button id="btn-mine-d3x" class="sp-btn" onclick="mineD3XCoin()" style="background:rgba(0,255,136,.2); border:1px solid #0f8; color:#0f8; padding:15px 30px; font-size:16px;">MINE DEPOSITS</button>
+    </div>
+    
+    <div id="mining-log" style="height:100px; overflow-y:auto; background:rgba(0,255,136,0.05); border:1px solid rgba(0,255,136,0.2); padding:10px; font-size:11px; display:flex; flex-direction:column; gap:4px; text-align:left;">
+      <div style="opacity:0.7;">Cave accessed. Awaiting mining directive...</div>
+    </div>
+
+    <button class="sp-btn" style="background:transparent; border:1px solid #f55; color:#f55; width:100%; padding:10px; font-size:12px; margin-top:15px;" onclick="document.getElementById('d3x-mining-modal').style.display='none';">LEAVE CAVE</button>
+  </div>
+</div>
+
 <!-- Black Market (D3X Store) Modal -->
 <div id="d3x-store-modal" style="position:absolute;inset:0;background:rgba(0,5,15,.95);display:none;align-items:center;justify-content:center;z-index:1060;backdrop-filter:blur(8px);">
   <div class="rep-card" style="width:700px; max-width:95vw; border-color:#d400ff; box-shadow:0 0 40px rgba(212,0,255,.2);">
@@ -2090,34 +2172,64 @@ Type 'help' for available commands.
 </div>
 
 <div id="naval-modal">
-  <div style="background:rgba(0,10,20,0.95); border:1px solid rgba(0,255,136,0.5); padding:25px; width:500px; max-width:90%; color:#0f8; font-family:'Share Tech Mono', monospace; box-shadow:0 0 30px rgba(0,255,136,0.15); position:relative;">
+  <div style="background:rgba(0,10,20,0.95); border:1px solid rgba(0,255,136,0.5); padding:25px; width:700px; max-width:95%; color:#0f8; font-family:'Share Tech Mono', monospace; box-shadow:0 0 30px rgba(0,255,136,0.15); position:relative;">
     <button onclick="document.getElementById('naval-modal').classList.remove('show')" style="position:absolute; top:10px; right:12px; background:none; border:none; color:#f55; cursor:pointer; font-size:16px;">✕</button>
     <div style="text-align:center; font-size:22px; font-weight:bold; letter-spacing:4px; margin-bottom:20px; border-bottom:1px solid rgba(0,255,136,0.3); padding-bottom:8px; text-shadow:0 0 10px #0f8;">
       NAVAL ENGAGEMENT
     </div>
     
-    <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-      <div style="text-align:center; flex:1; border-right:1px solid rgba(0,255,136,0.2);">
-        <div style="font-size:10px; color:#0af; letter-spacing:2px; margin-bottom:5px;">HUMAN FLEET</div>
-        <div style="font-size:24px; font-weight:bold; color:#0af;" id="naval-hp-human">100</div>
-        <div style="width:80%; height:4px; background:rgba(0,170,255,0.2); margin:8px auto; border-radius:2px; overflow:hidden;">
+    <div style="display:flex; justify-content:space-between; margin-bottom:15px; gap:20px;">
+      <div style="text-align:center; flex:1; border-right:1px solid rgba(0,255,136,0.2); padding-right:20px;">
+        <div style="font-size:12px; color:#0af; letter-spacing:2px; margin-bottom:5px;">HUMAN FLEET (SHIPS HITTING: <span id="naval-hp-human">17</span>)</div>
+        <div style="width:100%; height:4px; background:rgba(0,170,255,0.2); margin:8px auto 15px; border-radius:2px; overflow:hidden;">
           <div id="naval-bar-human" style="height:100%; width:100%; background:#0af; transition:0.3s;"></div>
+        </div>
+        <div id="human-grid" style="display:grid; grid-template-columns:repeat(10, 1fr); gap:2px; width:100%; aspect-ratio:1; margin:0 auto; background:rgba(0,170,255,0.05); padding:2px;"></div>
+      </div>
+      <div style="text-align:center; flex:1;">
+        <div style="font-size:12px; color:#f55; letter-spacing:2px; margin-bottom:5px;">RAINCLAUDE AI (SHIPS HITTING: <span id="naval-hp-ai">17</span>)</div>
+        <div style="width:100%; height:4px; background:rgba(255,85,85,0.2); margin:8px auto 15px; border-radius:2px; overflow:hidden;">
+          <div id="naval-bar-ai" style="height:100%; width:100%; background:#f55; transition:0.3s;"></div>
+        </div>
+        <div id="ai-grid" style="display:grid; grid-template-columns:repeat(10, 1fr); gap:2px; width:100%; aspect-ratio:1; margin:0 auto; background:rgba(255,85,85,0.05); padding:2px;"></div>
+      </div>
+    </div>
+    
+    <div id="naval-log" style="height:100px; overflow-y:auto; background:rgba(0,255,136,0.05); border:1px solid rgba(0,255,136,0.2); padding:10px; font-size:11px; display:flex; flex-direction:column; gap:4px;">
+      <div style="opacity:0.7;">Sonar contact acquired. Awaiting firing coordinates...</div>
+    </div>
+  </div>
+</div>
+
+<div id="satellite-war-modal">
+  <div style="background:rgba(5,20,30,0.95); border:1px solid rgba(0,170,255,0.5); padding:25px; width:500px; max-width:90%; color:#0af; font-family:'Share Tech Mono', monospace; box-shadow:0 0 30px rgba(0,170,255,0.15); position:relative;">
+    <button onclick="document.getElementById('satellite-war-modal').classList.remove('show')" style="position:absolute; top:10px; right:12px; background:none; border:none; color:#f55; cursor:pointer; font-size:16px;">✕</button>
+    <div style="text-align:center; font-size:22px; font-weight:bold; letter-spacing:4px; margin-bottom:20px; border-bottom:1px solid rgba(0,170,255,0.3); padding-bottom:8px; text-shadow:0 0 10px #0af;">
+      ORBITAL ENGAGEMENT
+    </div>
+    
+    <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+      <div style="text-align:center; flex:1; border-right:1px solid rgba(0,170,255,0.2);">
+        <div style="font-size:10px; color:#0af; letter-spacing:2px; margin-bottom:5px;">HUMANITY SAT</div>
+        <div style="font-size:24px; font-weight:bold; color:#0af;" id="sat-hp-human">100</div>
+        <div style="width:80%; height:4px; background:rgba(0,170,255,0.2); margin:8px auto; border-radius:2px; overflow:hidden;">
+          <div id="sat-bar-human" style="height:100%; width:100%; background:#0af; transition:0.3s;"></div>
         </div>
       </div>
       <div style="text-align:center; flex:1;">
-        <div style="font-size:10px; color:#f55; letter-spacing:2px; margin-bottom:5px;">RAINCLAUDE AI</div>
-        <div style="font-size:24px; font-weight:bold; color:#f55;" id="naval-hp-ai">100</div>
+        <div style="font-size:10px; color:#f55; letter-spacing:2px; margin-bottom:5px;">RAINCLAUDE SAT</div>
+        <div style="font-size:24px; font-weight:bold; color:#f55;" id="sat-hp-ai">100</div>
         <div style="width:80%; height:4px; background:rgba(255,85,85,0.2); margin:8px auto; border-radius:2px; overflow:hidden;">
-          <div id="naval-bar-ai" style="height:100%; width:100%; background:#f55; transition:0.3s;"></div>
+          <div id="sat-bar-ai" style="height:100%; width:100%; background:#f55; transition:0.3s;"></div>
         </div>
       </div>
     </div>
     
-    <div id="naval-log" style="height:120px; overflow-y:auto; background:rgba(0,255,136,0.05); border:1px solid rgba(0,255,136,0.2); padding:10px; font-size:11px; margin-bottom:15px; display:flex; flex-direction:column; gap:4px;">
-      <div style="opacity:0.7;">Sonar contact acquired. Engaging enemy frigate.</div>
+    <div id="sat-log" style="height:120px; overflow-y:auto; background:rgba(0,170,255,0.05); border:1px solid rgba(0,170,255,0.2); padding:10px; font-size:11px; margin-bottom:15px; display:flex; flex-direction:column; gap:4px;">
+      <div style="opacity:0.7;">Orbital target locked. Commencing cyber-attack...</div>
     </div>
     
-    <button id="btn-fire-torpedo" onclick="fireNavalTorpedo()" style="width:100%; padding:15px; background:linear-gradient(135deg,rgba(0,170,255,0.2),rgba(0,170,255,0.4)); border:1px solid #0af; color:#0af; font-family:'Share Tech Mono', monospace; font-size:16px; font-weight:bold; letter-spacing:3px; cursor:pointer; transition:0.2s;">FIRE TORPEDO</button>
+    <button id="btn-fire-laser" onclick="fireSatelliteLaser()" style="width:100%; padding:15px; background:linear-gradient(135deg,rgba(0,255,136,0.2),rgba(0,255,136,0.4)); border:1px solid #0f8; color:#0f8; font-family:'Share Tech Mono', monospace; font-size:16px; font-weight:bold; letter-spacing:3px; cursor:pointer; transition:0.2s;">FIRE BEAM WEAPON</button>
   </div>
 </div>
 
@@ -2561,11 +2673,20 @@ scene.add(boatGroup);
 let redSatGroup = new THREE.Group();
 redSatGroup.visible = false;
 let redSats = [];
+let redSatMarkers = [];
 scene.add(redSatGroup);
+
+let redWarfareProjectiles = [];
+let redWarfareParticles = [];
 
 let naturalResourcesGroup = new THREE.Group();
 naturalResourcesGroup.visible = false;
 scene.add(naturalResourcesGroup);
+
+let d3xCaveGroup = new THREE.Group();
+d3xCaveGroup.visible = false;
+let d3xCaveMarkers = [];
+scene.add(d3xCaveGroup);
 
 function initNaturalResources() {
   const createResSprite = (lat, lon, color, size, label) => {
@@ -2615,6 +2736,71 @@ function initNaturalResources() {
 }
 // Initialize immediately
 initNaturalResources();
+
+function initD3XCaves() {
+  const coords = [
+    {lat: 40, lon: -100, name: "NA D3X Mine"},
+    {lat: -15, lon: -60, name: "SA D3X Mine"},
+    {lat: 50, lon: 15, name: "EU D3X Mine"},
+    {lat: -5, lon: 20, name: "AF D3X Mine"},
+    {lat: 45, lon: 100, name: "AS D3X Mine"},
+    {lat: -25, lon: 135, name: "OC D3X Mine"},
+    {lat: 70, lon: -40, name: "GL D3X Mine"},
+    {lat: 20, lon: 80, name: "IN D3X Mine"},
+    {lat: 25, lon: 45, name: "ME D3X Mine"},
+    {lat: 36, lon: 138, name: "JP D3X Mine"}
+  ];
+
+  coords.forEach(cave => {
+    const group = new THREE.Group();
+    const pos = ll2v(cave.lat, cave.lon, GLOBE_R + 0.015);
+    group.position.copy(pos);
+    group.lookAt(new THREE.Vector3(0,0,0));
+
+    // Rock mesh
+    const rockGeo = new THREE.DodecahedronGeometry(0.09, 0); 
+    const rockMat = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.2, metalness: 0.8, transparent: true, opacity: 0.9 });
+    const rock = new THREE.Mesh(rockGeo, rockMat);
+    rock.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, Math.random()*Math.PI);
+    rock.userData.isD3XRock = true; // Tag for animation loop
+    group.add(rock);
+
+    // Glowing core
+    const coreGeo = new THREE.DodecahedronGeometry(0.045, 0);
+    const coreMat = new THREE.MeshBasicMaterial({ color: 0xff00ff });
+    const core = new THREE.Mesh(coreGeo, coreMat);
+    core.userData.isD3XCore = true; // Tag for animation loop
+    group.add(core);
+
+    // Text Label Maker ("D3X" directly on the rocks)
+    const canvas = document.createElement('canvas');
+    canvas.width = 128; canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)'; // Bright white to contrast with rainbow rocks
+    ctx.font = 'bold 40px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText("D3X", 64, 64);
+    const tex = new THREE.CanvasTexture(canvas);
+    const spriteMat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
+    const sprite = new THREE.Sprite(spriteMat);
+    sprite.scale.set(0.2, 0.2, 1);
+    sprite.position.set(0, 0, 0); // Centered exactly on the rock core
+    group.add(sprite);
+
+    // Hitbox specifically for clicking
+    const hitGeo = new THREE.BoxGeometry(0.3, 0.3, 0.3);
+    const hitMat = new THREE.MeshBasicMaterial({visible: false});
+    const hitMesh = new THREE.Mesh(hitGeo, hitMat);
+    hitMesh.userData = { isD3XCave: true, name: cave.name };
+    group.add(hitMesh);
+    d3xCaveMarkers.push(hitMesh);
+
+    d3xCaveGroup.add(group);
+  });
+  console.log("D3X Mining Caves Initialized (10 Locations).");
+}
+initD3XCaves();
 
 let armsIndustryGroup = new THREE.Group();
 armsIndustryGroup.visible = false;
@@ -4049,19 +4235,25 @@ function initDatacenters() {
                     steamCtx.fillRect(0, 0, 64, 64);
                     const steamTex = new THREE.CanvasTexture(steamCanvas);
                     
-                    for (let s = 0; s < 8; s++) {
-                        const steamMat = new THREE.SpriteMaterial({ map: steamTex, transparent: true, opacity: 0.6 + Math.random() * 0.4, blending: THREE.AdditiveBlending });
+                    for (let s = 0; s < 12; s++) { // Increased to 12 for more soup
+                        const steamMat = new THREE.SpriteMaterial({ map: steamTex, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending });
                         const steamSprite = new THREE.Sprite(steamMat);
                         steamSprite.scale.set(0.18 + Math.random()*0.15, 0.18 + Math.random()*0.15, 1);
-                        // Randomize position around the base slightly wider and much higher to peak out of the red aura
+                        
                         const angle = Math.random() * Math.PI * 2;
                         const dist = Math.random() * 0.08 + 0.05;
                         const height = Math.random() * 0.15 + 0.05;
-                        steamSprite.position.set(Math.cos(angle)*dist, height, Math.sin(angle)*dist);
+                        const finalPos = new THREE.Vector3(Math.cos(angle)*dist, height, Math.sin(angle)*dist);
+                        steamSprite.position.copy(finalPos);
                         
-                        // Add some movement data for animation loop if desired (we'll just leave them static puffs for now for performance, or lightly rotate them)
+                        steamSprite.userData = {
+                            basePos: finalPos.clone(),
+                            speed: 0.1 + Math.random() * 0.15,
+                            age: Math.random() * 10
+                        };
                         steamGroup.add(steamSprite);
                     }
+                    steamGroup.userData.isSteamGroup = true;
                     towerMesh.add(steamGroup);
 
                     towerMesh.userData = {
@@ -4072,6 +4264,74 @@ function initDatacenters() {
                     
                     window.datacentersGroup.add(towerMesh);
                 });
+
+                // MOVED TESLA TOWERS HALFWAY TO D3X STAKING TOWERS
+                const npLat = 52; // Moved from 60 down to 52 (halfway to 44)
+                const npLon = -22; // Moved from 0 to -22 (halfway to -44)
+                
+                towerOffsets.forEach((off, idx) => {
+                    const towerLatRad = (npLat + (off.lat * 0.5)) * Math.PI / 180; // Tighter cluster
+                    const towerLonRad = -(npLon + off.lon) * Math.PI / 180;
+                    const towerGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.245, 32);
+                    towerGeo.translate(0, 0.1225, 0);
+                    const towerMat = new THREE.MeshPhongMaterial({ color: 0x00aaff, shininess: 100, specular: 0xffffff });
+                    const towerMesh = new THREE.Mesh(towerGeo, towerMat);
+                    
+                    const lowerAmt = 0.0245;
+                    const rLowered = r - lowerAmt;
+                    
+                    towerMesh.position.set(
+                        rLowered * Math.cos(towerLatRad) * Math.cos(towerLonRad),
+                        rLowered * Math.sin(towerLatRad),
+                        rLowered * Math.cos(towerLatRad) * Math.sin(towerLonRad)
+                    );
+                    towerMesh.lookAt(new THREE.Vector3(0,0,0));
+                    towerMesh.rotateX(-Math.PI/2);
+                    
+                    // Electric Aura (Tesla Coil effect) Doubled intensity
+                    const tAuraGeo = new THREE.SphereGeometry(0.06, 32, 32); // Reduced from 0.12 to 0.06
+                    const tAuraMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, wireframe: true, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending });
+                    const tAura = new THREE.Mesh(tAuraGeo, tAuraMat);
+                    tAura.position.set(0, 0.1225, 0);
+                    towerMesh.add(tAura);
+                    
+                    const tLight = new THREE.PointLight(0x00aaff, 2, 4); // Reduced from 4, 6
+                    tLight.position.set(0, 0.1225, 0);
+                    towerMesh.add(tLight);
+
+                    towerMesh.userData = {
+                        type: 'staking_tower',
+                        name: "NORTH POLE STAKING TOWER",
+                        protocol: 'D3X TESLA NETWORK',
+                        isNorthPole: true,
+                        aura: tAura,
+                        light: tLight
+                    };
+                    
+                    window.datacentersGroup.add(towerMesh);
+                });
+                
+                // Elaborate Electricity Bridges for North Pole
+                window.npLightningGroup = new THREE.Group();
+                scene.add(window.npLightningGroup);
+                const bridgeMat = new THREE.LineBasicMaterial({ color: 0x00eaff, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
+                
+                const numBridges = 3;
+                const braidsPerBridge = 3;
+                const segments = 30;
+                
+                for(let b=0; b<numBridges; b++) {
+                    const bridgeGroup = new THREE.Group();
+                    bridgeGroup.userData = { targetNode: null, timer: 0, poleIdx: b%3 };
+                    for (let i=0; i<braidsPerBridge; i++) {
+                        const geo = new THREE.BufferGeometry();
+                        geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array((segments+1) * 3), 3));
+                        const line = new THREE.Line(geo, bridgeMat);
+                        line.userData = { braidIdx: i, phaseOff: Math.random() * Math.PI * 2, freq1: 2+Math.random()*3, freq2: 4+Math.random()*5, radius: 0.03 + Math.random()*0.02 };
+                        bridgeGroup.add(line);
+                    }
+                    window.npLightningGroup.add(bridgeGroup);
+                }
             }
         });
     }
@@ -4345,7 +4605,8 @@ sg.setAttribute('position',new THREE.Float32BufferAttribute(sp,3));
 scene.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:0.018,transparent:true,opacity:.7})));
 
 // Globe
-const globeGeo = new THREE.SphereGeometry(GLOBE_R, 192, 192);
+// 30% increased density for Cyber Skin
+const globeGeo = new THREE.SphereGeometry(GLOBE_R, 250, 250);
 const texLoader = new THREE.TextureLoader();
 const earthTex  = texLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/land_ocean_ice_cloud_2048.jpg');
 
@@ -5499,7 +5760,13 @@ window.showCmdHelpModal = function() {
     footer.style.backgroundColor='rgba(0,0,0,0.8)';
     footer.style.borderTop='2px solid rgba(255,51,102,0.5)';
     footer.innerHTML = `<div style="color:#ff3366; font-size:18px; font-family:'Share Tech Mono', monospace; font-weight:bold; letter-spacing:1.5px; text-transform:uppercase;">⚠️ WARNING: Epilepsy Notice</div>
-    <div style="color:#ff88aa; font-size:14px; margin-top:5px; font-family:'Courier New', monospace;">This simulation contains rapid flashing lights, intense visual sequences, and high-frequency UI updates that may trigger seizures for people with photosensitive epilepsy. Viewer discretion is advised.</div>`;
+    <div style="color:#ff88aa; font-size:14px; margin-top:5px; font-family:'Courier New', monospace;">This simulation contains rapid flashing lights, intense visual sequences, and high-frequency UI updates that may trigger seizures for people with photosensitive epilepsy. Viewer discretion is advised.</div>
+    <div style="margin-top:20px;">
+      <label style="color:#00dcff; font-family:'Courier New', monospace; font-size:14px; cursor:pointer;">
+        <input type="checkbox" onchange="localStorage.setItem('hideEpilepsyWarning', this.checked ? 'true' : 'false')" \${localStorage.getItem('hideEpilepsyWarning') === 'true' ? 'checked' : ''}>
+        Do not show this warning again
+      </label>
+    </div>`;
     modal.appendChild(footer);
   }
 
@@ -6429,6 +6696,27 @@ function handleGlobeClick(e) {
       return; // Intercept and stop further map propagation
     }
   }
+
+  // Intercept clicks on D3X Mining Caves (Green Skin)
+  if (window.currentSkinIndex === 2 && typeof d3xCaveMarkers !== 'undefined' && d3xCaveMarkers.length > 0) {
+    const caveHits = ray.intersectObjects(d3xCaveMarkers, false);
+    if (caveHits.length > 0) {
+      const caveName = caveHits[0].object.userData.name;
+      openD3XMiningCave(caveName);
+      return;
+    }
+  }
+
+  // Intercept clicks on Red Satellites for Satellite Mini-Game
+  if (window.isRedSkin && typeof redSatMarkers !== 'undefined' && redSatMarkers.length > 0) {
+    const satHits = ray.intersectObjects(redSatMarkers, true);
+    if (satHits.length > 0) {
+      if (typeof window.openSatelliteWar === 'function') {
+        window.openSatelliteWar(satHits[0].object);
+      }
+      return;
+    }
+  }
   
   // Intercept clicks on Airplane Markers for Shooter Mini-Game
   if (window.isRedSkin && window.planeMarkers && window.planeMarkers.length > 0) {
@@ -7007,7 +7295,7 @@ window.triggerSolanaDonation = async function() {
           document.getElementById('staking-tower-node-name').textContent = dcData.protocol || 'D3X CORE NETWORK';
           document.getElementById('staking-tower-balance').textContent = window.localD3XBalance ? window.localD3XBalance.toFixed(2) : '100';
           document.getElementById('staking-tower-active').textContent = (Math.random() * 50).toFixed(2) + ' D3X';
-          document.getElementById('staking-tower-modal').style.display = 'block';
+          document.getElementById('staking-tower-modal').style.display = 'flex';
           document.getElementById('datacenter-action-panel').style.display = 'none'; // Close DC panel if open
           return;
       }
@@ -7185,32 +7473,37 @@ function updateGreenMarket() {
     if (holdingsHtml === '') holdingsHtml = ''; // Removed empty state text
     document.getElementById('green-market-holdings').innerHTML = holdingsHtml;
   }
+  
+  // Auto-refresh the main ledger modal if it's currently open
+  if (document.getElementById('gmarket-ledger-modal')) {
+      window.showGMarketWallet();
+  }
 }
 
 window.tradeGreenMetal = function(metalName, amount) {
   if (typeof _sfxClick !== 'undefined') _sfxClick();
   const c = window.greenMarket.commodities[metalName];
   if (!c) return;
-  const myIndex = typeof GS !== 'undefined' && GS.myIndex !== undefined ? GS.myIndex : 0;
-  const player = GS.players && GS.players[myIndex] ? GS.players[myIndex] : null;
-  if (!player) return;
+  
+  // Ensure wallet is initialized
+  if (window.localD3XBalance === undefined) window.localD3XBalance = 100;
 
-  const cost = c.price / 100; // MIL cost
+  const cost = c.price / 100; // MIL cost translates 1:1 to D3X here for simplicity
   const totalCost = Math.round(cost * Math.abs(amount) * 100) / 100;
 
   if (amount > 0) {
-    if (player.budget >= totalCost) {
-      player.budget -= totalCost;
+    if (window.localD3XBalance >= totalCost) {
+      window.localD3XBalance -= totalCost;
       c.shares += amount;
-      if (typeof setLog === 'function') setLog(`📈 ACQUIRED: ${amount}x ${metalName} stake for $${totalCost} MIL.`);
+      if (typeof setLog === 'function') setLog(`📈 ACQUIRED: ${amount}x ${metalName} stake for ${totalCost} D3X.`);
     } else {
-      if (typeof setLog === 'function') setLog(`❌ INSUFFICIENT FUNDS: $${totalCost} MIL needed for ${metalName} stake.`);
+      if (typeof setLog === 'function') setLog(`❌ INSUFFICIENT FUNDS: ${totalCost} D3X needed for ${metalName} stake.`);
     }
   } else if (amount < 0) {
     if (c.shares >= Math.abs(amount)) {
       c.shares += amount; 
-      player.budget += totalCost;
-      if (typeof setLog === 'function') setLog(`📉 LIQUIDATED: ${Math.abs(amount)}x ${metalName} stake for a $${totalCost} MIL return.`);
+      window.localD3XBalance += totalCost;
+      if (typeof setLog === 'function') setLog(`📉 LIQUIDATED: ${Math.abs(amount)}x ${metalName} stake for a ${totalCost} D3X return.`);
     } else {
       if (typeof setLog === 'function') setLog(`❌ NO STAKE: You do not own shares of ${metalName} to sell.`);
     }
@@ -7224,39 +7517,57 @@ setInterval(updateGreenMarket, 3000);
 
 window.showGMarketWallet = function() {
   if (typeof _sfxClick !== 'undefined') _sfxClick();
-  const modal = document.createElement('div');
-  modal.style.position = 'fixed';
-  modal.style.top = '50%';
-  modal.style.left = '50%';
-  modal.style.transform = 'translate(-50%,-50%)';
-  modal.style.width = '1200px';
-  modal.style.backgroundColor = 'rgba(0,18,8,0.95)';
-  modal.style.border = '2px solid #0f8';
-  modal.style.boxShadow = '0 0 25px rgba(0,255,136,0.4)';
-  modal.style.zIndex = '99999';
-  modal.style.display = 'flex';
-  modal.style.flexDirection = 'column';
-  modal.style.fontFamily = '"Orbitron", sans-serif';
-  modal.style.backdropFilter = 'blur(10px)';
   
-  const header = document.createElement('div');
-  header.style.padding = '15px';
-  header.style.color = '#fff';
-  header.style.backgroundColor = 'rgba(0,100,50,0.5)';
-  header.style.display = 'flex';
-  header.style.justifyContent = 'space-between';
-  header.style.alignItems = 'center';
-  header.style.borderBottom = '1px solid #0f8';
-  header.innerHTML = `
-    <span style="font-size:16px; font-weight:bold; letter-spacing:2px; color:#0f8;">💼 G-MARKET ASSET LEDGER</span>
-    <span style="cursor:pointer; color:#f22; font-size:12px; border:1px solid #f22; padding:4px 8px; border-radius:3px; background:rgba(255,0,0,0.1);" onmouseover="this.style.background='rgba(255,0,0,0.3)';" onmouseout="this.style.background='rgba(255,0,0,0.1)';" onclick="this.parentElement.parentElement.remove(); if(typeof _sfxClick !== 'undefined') _sfxClick();">[CLOSE]</span>
-  `;
+  if (window.localD3XBalance === undefined) window.localD3XBalance = 100;
   
-  const contentBox = document.createElement('div');
-  contentBox.style.padding = '20px';
-  contentBox.style.color = '#ddd';
-  contentBox.style.maxHeight = '800px';
-  contentBox.style.overflowY = 'hidden';
+  let modal = document.getElementById('gmarket-ledger-modal');
+  let contentBox;
+  let oldScroll = 0;
+
+  if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'gmarket-ledger-modal';
+      modal.style.position = 'fixed';
+      modal.style.top = '50%';
+      modal.style.left = '50%';
+      modal.style.transform = 'translate(-50%,-50%)';
+      modal.style.width = '1200px';
+      modal.style.backgroundColor = 'rgba(0,18,8,0.95)';
+      modal.style.border = '2px solid #0f8';
+      modal.style.boxShadow = '0 0 25px rgba(0,255,136,0.4)';
+      modal.style.zIndex = '99999';
+      modal.style.display = 'flex';
+      modal.style.flexDirection = 'column';
+      modal.style.fontFamily = '"Orbitron", sans-serif';
+      modal.style.backdropFilter = 'blur(10px)';
+      
+      const header = document.createElement('div');
+      header.style.padding = '15px';
+      header.style.color = '#fff';
+      header.style.backgroundColor = 'rgba(0,100,50,0.5)';
+      header.style.display = 'flex';
+      header.style.justifyContent = 'space-between';
+      header.style.alignItems = 'center';
+      header.style.borderBottom = '1px solid #0f8';
+      header.innerHTML = `
+        <span style="font-size:16px; font-weight:bold; letter-spacing:2px; color:#0f8;">💼 G-MARKET ASSET LEDGER</span>
+        <span style="cursor:pointer; color:#f22; font-size:12px; border:1px solid #f22; padding:4px 8px; border-radius:3px; background:rgba(255,0,0,0.1);" onmouseover="this.style.background='rgba(255,0,0,0.3)';" onmouseout="this.style.background='rgba(255,0,0,0.1)';" onclick="this.parentElement.parentElement.remove(); if(typeof _sfxClick !== 'undefined') _sfxClick();">[CLOSE]</span>
+      `;
+      
+      contentBox = document.createElement('div');
+      contentBox.id = 'gmarket-ledger-content';
+      contentBox.style.padding = '20px';
+      contentBox.style.color = '#ddd';
+      contentBox.style.maxHeight = '70vh';
+      contentBox.style.overflowY = 'auto';
+      
+      modal.appendChild(header);
+      modal.appendChild(contentBox);
+      document.body.appendChild(modal);
+  } else {
+      contentBox = document.getElementById('gmarket-ledger-content');
+      oldScroll = contentBox.scrollTop;
+  }
 
   let listHtml = `<table style="width:100%; border-collapse:collapse; font-size:13px;">
     <tr style="border-bottom:1px dashed #0f8; color:#0f8;">
@@ -7264,6 +7575,7 @@ window.showGMarketWallet = function() {
       <th style="padding:10px 8px; text-align:right;">PRICE / SHARE</th>
       <th style="padding:10px 8px; text-align:right;">OWNED</th>
       <th style="padding:10px 8px; text-align:right;">TOTAL VALUE</th>
+      <th style="padding:10px 8px; text-align:center;">TRADE ACTIONS</th>
     </tr>`;
 
   let totalVal = 0;
@@ -7285,21 +7597,28 @@ window.showGMarketWallet = function() {
         <td style="padding:10px 8px; text-align:right; font-family:'Courier New', monospace; font-weight:bold;">${trend} $${shareVal.toFixed(2)}M</td>
         <td style="padding:10px 8px; text-align:right; font-weight:bold; color:${c.shares > 0 ? '#0f8' : '#aaa'};">${c.shares}</td>
         <td style="padding:10px 8px; text-align:right; font-family:'Courier New', monospace; color:${c.shares > 0 ? '#0f8' : '#aaa'};">$${holdVal.toFixed(2)}M</td>
+        <td style="padding:10px 8px; text-align:center;">
+          <button onclick="tradeGreenMetal('${k}', 1); showGMarketWallet();" style="background:none; border:1px solid #0f8; color:#0f8; font-family:'Orbitron', sans-serif; font-size:10px; padding:4px 10px; cursor:pointer; border-radius:3px; transition:0.2s;" onmouseover="this.style.background='#0f8'; this.style.color='#000';" onmouseout="this.style.background='none'; this.style.color='#0f8';">BUY</button>
+          <button onclick="tradeGreenMetal('${k}', -1); showGMarketWallet();" style="background:none; border:1px solid #f22; color:#f22; font-family:'Orbitron', sans-serif; font-size:10px; padding:4px 10px; cursor:pointer; border-radius:3px; transition:0.2s; opacity:${c.shares > 0 ? 1 : 0.4}; margin-left:8px;" ${c.shares > 0 ? '' : 'disabled'} onmouseover="this.style.background='#f22'; this.style.color='#fff';" onmouseout="this.style.background='none'; this.style.color='#f22';">SELL</button>
+        </td>
       </tr>
     `;
   });
 
   listHtml += `</table>`;
   
-  listHtml += `<div style="margin-top:20px; text-align:right; font-size:16px; font-weight:bold; color:#fff; padding-top:15px; border-top:1px dashed #0f8;">
-    NET WORTH (HOLDINGS): <span style="color:#0f8; font-family:'Courier New', monospace;">$${totalVal.toFixed(2)} M</span>
+  listHtml += `
+  <div style="display:flex; justify-content:space-between; margin-top:20px; padding-top:15px; border-top:1px dashed #0f8;">
+    <div style="font-size:14px; font-weight:bold; color:#aaa; font-family:'Courier New', monospace;">
+      AVAILABLE D3X WALLET BALANCE: <span style="color:#fff;">${window.localD3XBalance.toFixed(2)} D3X</span>
+    </div>
+    <div style="text-align:right; font-size:16px; font-weight:bold; color:#fff;">
+      NET WORTH (HOLDINGS): <span style="color:#0f8; font-family:'Courier New', monospace;">$${totalVal.toFixed(2)} M</span>
+    </div>
   </div>`;
   
   contentBox.innerHTML = listHtml;
-  
-  modal.appendChild(header);
-  modal.appendChild(contentBox);
-  document.body.appendChild(modal);
+  contentBox.scrollTop = oldScroll;
 };
 
 // ------------------------------
@@ -9669,11 +9988,11 @@ function createShipCanvas() {
   return c;
 }
 
-function createSatelliteCanvas() {
+function createSatelliteCanvas(color) {
   const c = document.createElement('canvas'); c.width=128; c.height=128;
   const ctx = c.getContext('2d');
-  ctx.fillStyle = '#e0e0e0'; // Greyish white
-  ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 10;
+  ctx.fillStyle = color || '#e0e0e0'; // Use passed color or default greyish white
+  ctx.shadowColor = color || '#ffffff'; ctx.shadowBlur = 10;
   // Core
   ctx.fillRect(54, 54, 20, 20);
   // Solar panels
@@ -9694,7 +10013,7 @@ function spawnAmbients() {
   const matShip = new THREE.SpriteMaterial({map: texShip, color: 0xffffff});
   const matSat = new THREE.SpriteMaterial({map: texSat, color: 0xffffff});
 
-  for(let i=0; i<60; i++) {
+  for(let i=0; i<240; i++) { // Doubled again from 120 to 240
     const type = i % 3; // 0: Jet, 1: Sub, 2: Ship
     const mat = type === 0 ? matJet : type === 1 ? matSub : matShip;
     // slightly adjusted orbital heights so they don't clip through the globe as often
@@ -9705,8 +10024,8 @@ function spawnAmbients() {
     sprite.scale.set(1.8, 1.8, 1.0);
     
     // Random position
-    const phi = Math.acos(-1 + (2 * i)/60);
-    const theta = Math.sqrt(60 * Math.PI) * phi;
+    const phi = Math.acos(-1 + (2 * i)/240);
+    const theta = Math.sqrt(240 * Math.PI) * phi;
     sprite.position.setFromSphericalCoords(radius, phi, theta);
     
     const pivot = new THREE.Group();
@@ -9741,9 +10060,20 @@ function spawnAmbients() {
     ambients.push({ pivot, axis, speed, sprite, type: 3, offset: Math.random()*100 });
   }
 
-  // Spawn 50 Satellites exclusively for Red Skin map
-  for(let i=0; i<50; i++) {
-    const sprite = new THREE.Sprite(matSat);
+  // Spawn 150 Satellites exclusively for Red Skin map
+  const texSatRed = new THREE.CanvasTexture(createSatelliteCanvas('#ff0000'));
+  const texSatBlue = new THREE.CanvasTexture(createSatelliteCanvas('#0000ff'));
+  const matSatRed = new THREE.SpriteMaterial({map: texSatRed, color: 0xffffff});
+  const matSatBlue = new THREE.SpriteMaterial({map: texSatBlue, color: 0xffffff});
+
+  for(let i=0; i<300; i++) { // Doubled from 150 to 300
+    let currentMat = matSat; // 40% white (neutral)
+    if (i < 90) { // 30% red (rainclaude)
+      currentMat = matSatRed;
+    } else if (i < 180) { // 30% blue (humanity)
+      currentMat = matSatBlue;
+    }
+    const sprite = new THREE.Sprite(currentMat);
     sprite.scale.set(0.7, 0.7, 1.0);
     // Denser, slightly lower orbit for red skin scanning effect
     const radius = 11.5 + Math.random() * 2.0; 
@@ -9779,6 +10109,16 @@ function spawnAmbients() {
     
     pivot.add(laserBeam);
     
+    // Add click target (large) for Minigame
+    const hitBoxGeo = new THREE.BoxGeometry(0.3, 0.3, 0.3);
+    const hitBoxMat = new THREE.MeshBasicMaterial({visible: false});
+    const hitBox = new THREE.Mesh(hitBoxGeo, hitBoxMat);
+    // Position hitbox same as satellite sprite
+    hitBox.position.copy(sprite.position);
+    pivot.add(hitBox);
+    hitBox.userData = { isRedSat: true, parent: pivot };
+    redSatMarkers.push(hitBox);
+
     // Orbital mechanics (slightly faster for dramatic effect on Red Skin)
     const axis = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
     const speed = Math.random()*0.0015 + 0.0005;
@@ -9840,8 +10180,132 @@ function animate() {
     if (window.planeData) {
       for(let i=0; i<window.planeData.length; i++) {
         const p = window.planeData[i];
-        if (p && p.pivot) p.pivot.rotateOnAxis(p.axis, p.speed * ((dt*60)||1));
+        if (p && p.pivot) {
+           p.pivot.rotateOnAxis(p.axis, p.speed * ((dt*60)||1));
+           // Randomly drop bombs from planes
+           if (window.isRedSkin && Math.random() < 0.005) {
+               // Calculate world position of the plane
+               const planeWorldPos = new THREE.Vector3();
+               p.pivot.children[0].getWorldPosition(planeWorldPos);
+               
+               const bombGeo = new THREE.CylinderGeometry(0.006, 0.006, 0.02, 8);
+               const bombMat = new THREE.MeshBasicMaterial({ color: 0x555555 });
+               const bomb = new THREE.Mesh(bombGeo, bombMat);
+               
+               // Start position is the plane, end position is directly below on the surface
+               const startPos = planeWorldPos.clone();
+               const endPos = startPos.clone().normalize().multiplyScalar(GLOBE_R);
+               
+               bomb.position.copy(startPos);
+               bomb.lookAt(endPos);
+               bomb.rotateX(Math.PI / 2); // Point cylinder downward
+               
+               scene.add(bomb);
+               redWarfareProjectiles.push({
+                   mesh: bomb, type: 'bomb',
+                   startPos: startPos, endPos: endPos,
+                   progress: 0, speed: 0.02
+               });
+           }
+        }
       }
+    }
+    
+    // Randomly spawn boat rockets
+    if (window.isRedSkin && typeof boatMarkers !== 'undefined' && boatMarkers.length > 1 && Math.random() < 0.02) {
+        // Pick random shooter
+        const shooterIdx = Math.floor(Math.random() * boatMarkers.length);
+        const shooter = boatMarkers[shooterIdx].userData.parent; // the boatGroup
+        
+        let targetIdx = Math.floor(Math.random() * boatMarkers.length);
+        while(targetIdx === shooterIdx) targetIdx = Math.floor(Math.random() * boatMarkers.length);
+        const target = boatMarkers[targetIdx].userData.parent;
+        
+        if (shooter && target) {
+            const startPos = new THREE.Vector3();
+            shooter.getWorldPosition(startPos);
+            
+            const endPos = new THREE.Vector3();
+            target.getWorldPosition(endPos);
+            
+            const rocketGeo = new THREE.CylinderGeometry(0.003, 0.003, 0.03, 8);
+            const rocketMat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+            const rocket = new THREE.Mesh(rocketGeo, rocketMat);
+            
+            rocket.position.copy(startPos);
+            // Height trajectory arc parameters
+            const distance = startPos.distanceTo(endPos);
+            const arcHeight = distance * 0.3; 
+            
+            scene.add(rocket);
+            redWarfareProjectiles.push({
+                mesh: rocket, type: 'rocket',
+                startPos: startPos, endPos: endPos, arcHeight: arcHeight,
+                progress: 0, speed: 0.015
+            });
+        }
+    }
+    
+    // Process Projectiles
+    for (let i = redWarfareProjectiles.length - 1; i >= 0; i--) {
+        const proj = redWarfareProjectiles[i];
+        proj.progress += proj.speed * ((dt*60)||1);
+        
+        if (proj.progress >= 1.0) {
+            // Impact!
+            scene.remove(proj.mesh);
+            redWarfareProjectiles.splice(i, 1);
+            
+            // Spawn explosion particle
+            const expMat = new THREE.SpriteMaterial({ 
+                map: new THREE.CanvasTexture(createGlowCanvas(proj.type === 'bomb' ? '#ff5500' : '#ffff00')), 
+                color: 0xffffff, transparent: true, blending: THREE.AdditiveBlending 
+            });
+            const expSprite = new THREE.Sprite(expMat);
+            expSprite.position.copy(proj.endPos);
+            expSprite.scale.set(0.05, 0.05, 1);
+            scene.add(expSprite);
+            
+            redWarfareParticles.push({
+                mesh: expSprite, life: 1.0, decay: 0.05,
+                scaleMax: proj.type === 'bomb' ? 0.3 : 0.2
+            });
+        } else {
+            if (proj.type === 'bomb') {
+                proj.mesh.position.copy(proj.startPos).lerp(proj.endPos, proj.progress);
+            } else if (proj.type === 'rocket') {
+                // Parabolic arc for rocket
+                const currentPos = new THREE.Vector3().copy(proj.startPos).lerp(proj.endPos, proj.progress);
+                const heightOffset = Math.sin(proj.progress * Math.PI) * proj.arcHeight;
+                currentPos.add(currentPos.clone().normalize().multiplyScalar(heightOffset));
+                
+                // Track previous position for lookAt
+                const prevPos = proj.mesh.position.clone();
+                proj.mesh.position.copy(currentPos);
+                if (proj.progress > 0) {
+                    proj.mesh.lookAt(currentPos.clone().add(currentPos.clone().sub(prevPos)));
+                    proj.mesh.rotateX(Math.PI / 2);
+                }
+            }
+        }
+    }
+    
+    // Process Explosion Particles
+    for (let i = redWarfareParticles.length - 1; i >= 0; i--) {
+        const p = redWarfareParticles[i];
+        p.life -= p.decay * ((dt*60)||1);
+        
+        if (p.life <= 0) {
+            scene.remove(p.mesh);
+            p.mesh.material.map.dispose();
+            p.mesh.material.dispose();
+            redWarfareParticles.splice(i, 1);
+        } else {
+            // Expand and fade out
+            const currentScale = p.scaleMax * (1.0 - p.life);
+            p.mesh.scale.set(currentScale, currentScale, 1);
+            p.mesh.material.opacity = p.life;
+        }
     }
   }
 
@@ -9863,6 +10327,25 @@ function animate() {
                   if (dc.userData.light) {
                       dc.userData.light.intensity = 1.5 + Math.sin(time3 * 10) * 0.75; // Intensity halved
                   }
+              }
+              // Animate Hot Soup Steam
+              const steamG = dc.children.find(c => c.userData && c.userData.isSteamGroup);
+              if (steamG) {
+                  steamG.children.forEach(sprite => {
+                      sprite.userData.age += dt;
+                      // Move up based on age
+                      const upLift = (sprite.userData.age * sprite.userData.speed) % 0.4;
+                      sprite.position.y = sprite.userData.basePos.y + upLift;
+                      
+                      // Fade out as it goes higher
+                      const fade = 1.0 - (upLift / 0.4);
+                      sprite.material.opacity = Math.max(0, Math.sin(fade * Math.PI) * 0.8);
+                      
+                      // Slowly expand horizontally
+                      const expansion = 1.0 + (upLift * 2.0);
+                      const sBase = 0.18; // approx base size
+                      sprite.scale.set(sBase * expansion, sBase * expansion, 1);
+                  });
               }
           } else if (dc.userData && dc.userData.isMasterNode) {
                             if (dc.userData.aura) {
@@ -9890,6 +10373,154 @@ function animate() {
               if (p.progress > 1.0) p.progress -= 1.0;
               p.mesh.position.copy(p.curve.getPoint(p.progress));
           });
+      }
+      
+      // Animate North Pole Tesla Towers
+      const npTowers = [];
+      window.datacentersGroup.children.forEach(dc => {
+          if (dc.userData && dc.userData.isNorthPole) {
+              npTowers.push(dc);
+              
+              // Dynamic pulsing effect using a sine wave
+              const pulseVar = Math.sin(time3 * 5 + dc.position.x * 10) * 0.5 + 0.5; // values between 0.0 and 1.0
+              
+              const buzzOffset = Math.random() * 0.15 + (pulseVar * 0.4); // Reduced by 50%
+              dc.userData.aura.scale.set(1 + buzzOffset, 1 + buzzOffset, 1 + buzzOffset);
+              
+              const rotSpeed = 0.1 + (pulseVar * 0.2); // Reduced by 50%
+              dc.userData.aura.rotation.x += rotSpeed;
+              dc.userData.aura.rotation.y += rotSpeed * 1.5;
+              
+              dc.userData.aura.material.opacity = 0.3 + (pulseVar * 0.3); // Reduced by 50%
+              
+              if (Math.random() < 0.2) dc.userData.light.intensity = 2 + Math.random() * 5 + (pulseVar * 3); // Flashing light follows pulse, reduced by 50%
+          }
+      });
+      
+      // Elaborate Electricity Bridges Animation
+      if (npTowers.length === 3 && window.npLightningGroup && window.currentSkinIndex === 3) { // CYBER skin
+          window.npLightningGroup.visible = true;
+          window.npLightningGroup.children.forEach(bridge => {
+              bridge.userData.timer -= dt;
+              if (bridge.userData.timer <= 0) {
+                  const allNodes = window.datacentersGroup.children.filter(n => !n.userData.isNorthPole);
+                  if (allNodes.length > 0) {
+                      bridge.userData.targetNode = allNodes[Math.floor(Math.random() * allNodes.length)];
+                      bridge.userData.timer = 4.0 + Math.random() * 4.0; // Hold connection for 4-8 seconds
+                  }
+              }
+              
+              if (bridge.userData.targetNode) {
+                  const p1 = npTowers[bridge.userData.poleIdx].position;
+                  const p2 = bridge.userData.targetNode.position;
+                  const dist = p1.distanceTo(p2);
+                  const segments = 30;
+                  
+                  bridge.children.forEach(braid => {
+                      const posArray = braid.geometry.attributes.position.array;
+                      const phase = time3 * braid.userData.freq1 + braid.userData.phaseOff;
+                      const phase2 = time3 * braid.userData.freq2;
+                      
+                      for (let i = 0; i <= segments; i++) {
+                          const t = i / segments;
+                          
+                          // Base curve (arc) from p1 to p2
+                          let bx = p1.x + (p2.x - p1.x) * t;
+                          let by = p1.y + (p2.y - p1.y) * t;
+                          let bz = p1.z + (p2.z - p1.z) * t;
+                          
+                          const pCenter = new THREE.Vector3(bx, by, bz);
+                          const nor = pCenter.clone().normalize();
+                          const arcHeight = Math.sin(t * Math.PI) * dist * 0.4; // 40% height of dist
+                          
+                          bx += nor.x * arcHeight;
+                          by += nor.y * arcHeight;
+                          bz += nor.z * arcHeight;
+                          
+                          // Braid displacement (perpendicular to path)
+                          const dir = new THREE.Vector3(p2.x-p1.x, p2.y-p1.y, p2.z-p1.z).normalize();
+                          const up = dir.clone().cross(nor).normalize();
+                          const right = dir.clone().cross(up).normalize();
+                          
+                          // Taper radius at ends and pulse overall radius
+                          const envelope = Math.sin(t * Math.PI);
+                          const pulse = 1.0 + Math.sin(time3 * 10 + braid.userData.phaseOff) * 0.3;
+                          const r = braid.userData.radius * envelope * pulse;
+                          
+                          const dx = Math.cos(phase + t * Math.PI * 4) * r * right.x + Math.sin(phase2 + t * Math.PI * 6) * r * up.x;
+                          const dy = Math.cos(phase + t * Math.PI * 4) * r * right.y + Math.sin(phase2 + t * Math.PI * 6) * r * up.y;
+                          const dz = Math.cos(phase + t * Math.PI * 4) * r * right.z + Math.sin(phase2 + t * Math.PI * 6) * r * up.z;
+                          
+                          posArray[i*3] = bx + dx;
+                          posArray[i*3+1] = by + dy;
+                          posArray[i*3+2] = bz + dz;
+                      }
+                      braid.geometry.attributes.position.needsUpdate = true;
+                  });
+              } else {
+                  bridge.children.forEach(braid => {
+                     const posArray = braid.geometry.attributes.position.array;
+                     for(let i=0; i<posArray.length; i++) posArray[i] = 0;
+                     braid.geometry.attributes.position.needsUpdate = true;
+                  });
+              }
+          });
+      } else if (window.npLightningGroup) {
+          window.npLightningGroup.visible = false;
+      }
+  } // <-- RESTORED MISSING BRACKET
+  
+  // D3X Mining Caves LGBT Rainbow Oscillator
+  if (window.currentSkinIndex === 2 && typeof d3xCaveGroup !== 'undefined' && d3xCaveGroup.visible) {
+      const hue = (time3 * 0.2) % 1.0; // cycle through colors every 5 seconds
+      const rainbowColor = new THREE.Color().setHSL(hue, 1.0, 0.5);
+      
+      d3xCaveGroup.children.forEach(cave => {
+          cave.children.forEach(child => {
+              if (child.userData.isD3XCore) {
+                  child.material.color.copy(rainbowColor);
+              } else if (child.userData.isD3XRock) {
+                  child.material.emissive.copy(rainbowColor);
+                  child.material.emissiveIntensity = 0.5 + Math.sin(time3 * 5) * 0.2; // Pulsing blur/glow effect
+              }
+          });
+      });
+  }
+
+  // ---------------------------------------------------------------------
+  // MOCK CRYPTO WAR LOGIC (Gemini vs Rainclaude Feeds)
+  // ---------------------------------------------------------------------
+  if (Math.random() < 0.05) { // 5% chance per frame (~3 times a second)
+      const isGemini = Math.random() > 0.5;
+      const coins = ['D3X', 'SOL', 'BTC', 'ETH', 'XRP', 'XLM', 'USDC'];
+      const coin = coins[Math.floor(Math.random() * coins.length)];
+      const actions = isGemini ? ['LONG', 'BUY', 'STAKE', 'ACCUMULATE'] : ['SHORT', 'SELL', 'LIQUIDATE', 'DUMP'];
+      const action = actions[Math.floor(Math.random() * actions.length)];
+      const amt = Math.floor(Math.random() * 500000) + 10000;
+      
+      if (!window.geminiCryptoVol) window.geminiCryptoVol = 0;
+      if (!window.claudeCryptoVol) window.claudeCryptoVol = 0;
+      
+      if (isGemini) {
+          window.geminiCryptoVol += amt;
+          const line = document.createElement('div');
+          line.innerHTML = `> Executed: ${action} $${Math.floor(amt).toLocaleString()} <span style="color:#fff">${coin}</span>`;
+          const container = document.getElementById('d0-crypto-lines');
+          if (container) {
+              container.prepend(line);
+              if (container.children.length > 5) container.lastChild.remove();
+              document.getElementById('d0-crypto-total').innerText = 'VOL: $' + window.geminiCryptoVol.toLocaleString();
+          }
+      } else {
+          window.claudeCryptoVol += amt;
+          const line = document.createElement('div');
+          line.innerHTML = `> Executed: ${action} $${Math.floor(amt).toLocaleString()} <span style="color:#fff">${coin}</span>`;
+          const container = document.getElementById('d1-crypto-lines');
+          if (container) {
+              container.prepend(line);
+              if (container.children.length > 5) container.lastChild.remove();
+              document.getElementById('d1-crypto-total').innerText = 'VOL: $' + window.claudeCryptoVol.toLocaleString();
+          }
       }
   }
 
@@ -10053,7 +10684,11 @@ function animate() {
         const arbitrary = new THREE.Vector3(0, 1, 0);
         if(Math.abs(upAxis.y) > 0.99) arbitrary.set(1, 0, 0);
         const rightAxis = new THREE.Vector3().crossVectors(upAxis, arbitrary).normalize();
-        const bendAngle = t * (Math.PI / 10);
+        
+        // Bend 20% more and 40% faster
+        const bendProgress = Math.pow(t, 0.6); // 40% faster bending
+        const bendAngle = bendProgress * (Math.PI / 8.333); // 20% more bend
+        
         rawPos.applyAxisAngle(rightAxis, bendAngle);
         pos = rawPos;
         // Calculate fade based on distance from the current rocket head
@@ -10111,7 +10746,10 @@ function animate() {
       if(Math.abs(upAxis.y) > 0.99) arbitrary.set(1, 0, 0); // Handle poles
       
       const rightAxis = new THREE.Vector3().crossVectors(upAxis, arbitrary).normalize();
-      const bendAngle = fj.progress * (Math.PI / 10); // Adjust divisor for more/less curve
+      
+      // Bend 20% more and 40% faster
+      const bendProgress = Math.pow(fj.progress, 0.6); // 40% faster
+      const bendAngle = bendProgress * (Math.PI / 8.333); // 20% more curve
       
       // Rotate the position to make it curve sideways
       rawPos.applyAxisAngle(rightAxis, bendAngle);
@@ -11545,13 +12183,30 @@ function fetchAndRenderBoats() {
   
   const R = typeof GLOBE_R !== 'undefined' ? GLOBE_R + 0.025 : 1.025; // Earth radius in THREE.js scene, slightly above surface
   
-  const data = [
+  const baseData = [
       { lat: 40.7128, lon: -74.0060, cog: 90, name: "US DEFENDER" }, // NY Coast
       { lat: 35.6895, lon: 139.6917, cog: 180, name: "JP PATROL" },  // Tokyo Bay
       { lat: 51.5074, lon: -0.1278, cog: 270, name: "UK FRIGATE" },  // London Coast
       { lat: 25.0330, lon: 121.5654, cog: 45, name: "TW ESCORT" },   // Taiwan Strait
-      { lat: 0, lon: 0, cog: 0, name: "EQUATOR GHOST" }              // Center of map
+      { lat: 0, lon: 0, cog: 0, name: "EQUATOR GHOST" },             // Center of map
+      { lat: -33.8688, lon: 151.2093, cog: 30, name: "AU CRUISER" }, // Sydney
+      { lat: -22.9068, lon: -43.1729, cog: 120, name: "BR CARRIER" },// Rio
+      { lat: 37.7749, lon: -122.4194, cog: 210, name: "SF PATROL" }, // San Francisco
+      { lat: 1.3521, lon: 103.8198, cog: 60, name: "SG NAVAL" },     // Singapore
+      { lat: 43.1198, lon: 131.8869, cog: 300, name: "RU SUB" }      // Vladivostok
   ];
+
+  const data = [];
+  for (let loop = 0; loop < 2; loop++) { // Double from 10 to 20
+      baseData.forEach(b => {
+          data.push({
+              lat: b.lat + (loop > 0 ? (Math.random() - 0.5) * 8 : 0),
+              lon: b.lon + (loop > 0 ? (Math.random() - 0.5) * 8 : 0),
+              cog: b.cog + (loop > 0 ? (Math.random() - 0.5) * 45 : 0),
+              name: b.name + (loop > 0 ? " B" : " A")
+          });
+      });
+  }
 
   data.forEach(boat => {
       const boatGroup = new THREE.Group();
@@ -11656,80 +12311,269 @@ function fetchAndRenderBoats() {
 
 // ================= NAVAL WAR MINI-GAME =================
 
-window.navalWarState = { active: false, humanHp: 100, aiHp: 100, boatMesh: null };
+window.navalWarState = { active: false, humanHp: 17, aiHp: 17, boatMesh: null, humanGrid: [], aiGrid: [] };
+
+function generateBattleshipGrid() {
+    let grid = Array.from({length: 10}, () => Array(10).fill(0));
+    const sizes = [5, 4, 3, 3, 2];
+    for(let size of sizes) {
+        let placed = false;
+        while(!placed) {
+            let dir = Math.random() < 0.5 ? 'H' : 'V';
+            let r = Math.floor(Math.random() * 10);
+            let c = Math.floor(Math.random() * 10);
+            if (dir === 'H' && c + size <= 10) {
+                let clear = true;
+                for(let i=0; i<size; i++) if(grid[r][c+i] !== 0) clear = false;
+                if(clear) {
+                    for(let i=0; i<size; i++) grid[r][c+i] = 1;
+                    placed = true;
+                }
+            } else if (dir === 'V' && r + size <= 10) {
+                let clear = true;
+                for(let i=0; i<size; i++) if(grid[r+i][c] !== 0) clear = false;
+                if(clear) {
+                    for(let i=0; i<size; i++) grid[r+i][c] = 1;
+                    placed = true;
+                }
+            }
+        }
+    }
+    return grid;
+}
 
 window.openNavalWar = function(mesh) {
   if (!window.isRedSkin) return;
   SFX.playClick();
-  window.navalWarState = { active: true, humanHp: 100, aiHp: 100, boatMesh: mesh };
+  window.navalWarState = { 
+     active: true, humanHp: 17, aiHp: 17, boatMesh: mesh,
+     humanGrid: generateBattleshipGrid(),
+     aiGrid: generateBattleshipGrid()
+  };
   
-  document.getElementById('naval-hp-human').textContent = '100';
+  document.getElementById('naval-hp-human').textContent = '17';
   document.getElementById('naval-bar-human').style.width = '100%';
-  document.getElementById('naval-hp-ai').textContent = '100';
+  document.getElementById('naval-hp-ai').textContent = '17';
   document.getElementById('naval-bar-ai').style.width = '100%';
   
   const log = document.getElementById('naval-log');
-  log.innerHTML = '<div style="opacity:0.7;">Sonar contact acquired. Engaging enemy frigate.</div>';
+  log.innerHTML = '<div style="opacity:0.7;">Sonar contact acquired. Awaiting firing coordinates...</div>';
   
-  document.getElementById('btn-fire-torpedo').style.display = 'block';
+  window.renderNavalGrids();
   document.getElementById('naval-modal').classList.add('show');
 };
 
-window.fireNavalTorpedo = function() {
-  if (!window.navalWarState.active) return;
-  SFX.playSiren(); // Torpedo launch sound
-  
-  // RNG Combat
-  const humanDmg = Math.floor(10 + Math.random() * 25);
-  const aiDmg = Math.floor(5 + Math.random() * 30);
-  
-  window.navalWarState.humanHp = Math.max(0, window.navalWarState.humanHp - aiDmg);
-  window.navalWarState.aiHp = Math.max(0, window.navalWarState.aiHp - humanDmg);
-  
-  // Update UI
-  document.getElementById('naval-hp-human').textContent = window.navalWarState.humanHp;
-  document.getElementById('naval-bar-human').style.width = window.navalWarState.humanHp + '%';
-  document.getElementById('naval-hp-ai').textContent = window.navalWarState.aiHp;
-  document.getElementById('naval-bar-ai').style.width = window.navalWarState.aiHp + '%';
-  
-  const log = document.getElementById('naval-log');
-  log.innerHTML += `<div><span style="color:#0af">HUMAN hits for ${humanDmg} DMG!</span> | <span style="color:#f55">RAINCLAUDE hits for ${aiDmg} DMG!</span></div>`;
-  log.scrollTop = log.scrollHeight;
-  
-  // Check Win/Loss Condition
-  if (window.navalWarState.humanHp <= 0 || window.navalWarState.aiHp <= 0) {
-    window.navalWarState.active = false;
-    document.getElementById('btn-fire-torpedo').style.display = 'none';
+window.renderNavalGrids = function() {
+    const pGrid = document.getElementById('human-grid');
+    const aGrid = document.getElementById('ai-grid');
+    if (!pGrid || !aGrid) return;
+    pGrid.innerHTML = '';
+    aGrid.innerHTML = '';
     
-    if (window.navalWarState.humanHp > window.navalWarState.aiHp) {
-      log.innerHTML += `<div style="color:#0f8; font-weight:bold; font-size:14px; margin-top:10px;">TACTICAL VICTORY! Rainclaude frigate sunk. +50,000 Troops recovered!</div>`;
-      // Grant Reward
-      if (GS.players[GS.myIndex]) {
-        GS.reinforceLeft += 5; // 5 x 10k troops
-        updateDashboard();
-        setLog("🎁 Naval Victory! +50,000 reserve troops added.");
-      }
-      
-      // Remove boat from map
-      if (window.navalWarState.boatMesh) {
-         scene.remove(window.navalWarState.boatMesh);
-         boatMarkers = boatMarkers.filter(b => b !== window.navalWarState.boatMesh);
-      }
-    } else if (window.navalWarState.aiHp > window.navalWarState.humanHp) {
-      log.innerHTML += `<div style="color:#f55; font-weight:bold; font-size:14px; margin-top:10px;">DEFEAT! Human fleet destroyed.</div>`;
-      setLog("💥 Naval Defeat! Fleet lost to Rainclaude.");
+    for(let r=0; r<10; r++) {
+        for(let c=0; c<10; c++) {
+            // Human cell
+            const cellH = document.createElement('div');
+            cellH.style.border = '1px solid rgba(0,170,255,0.3)';
+            cellH.style.cursor = 'default';
+            let valH = window.navalWarState.humanGrid[r][c];
+            if (valH === 0) cellH.style.background = 'transparent'; // empty water
+            else if (valH === 1) cellH.style.background = 'rgba(0,170,255,0.5)'; // ship
+            else if (valH === 2) cellH.style.background = '#f55'; // hit
+            else if (valH === 3) cellH.style.background = 'rgba(255,255,255,0.3)'; // miss
+            pGrid.appendChild(cellH);
+            
+            // AI cell
+            const cellA = document.createElement('div');
+            cellA.style.border = '1px solid rgba(255,85,85,0.3)';
+            cellA.style.cursor = 'pointer';
+            let valA = window.navalWarState.aiGrid[r][c];
+            
+            if (valA === 0 || valA === 1) {
+                cellA.style.background = 'transparent'; // hid AI ships
+                cellA.onmouseover = function() { cellA.style.background = 'rgba(255,85,85,0.2)'; };
+                cellA.onmouseout = function() { cellA.style.background = 'transparent'; };
+                cellA.onclick = function() { window.fireAtAI(r, c); };
+            } else if (valA === 2) {
+                cellA.style.background = '#0f8'; // Player hit AI
+                cellA.style.cursor = 'default';
+            } else if (valA === 3) {
+                cellA.style.background = 'rgba(255,255,255,0.3)'; // miss
+                cellA.style.cursor = 'default';
+            }
+            aGrid.appendChild(cellA);
+        }
+    }
+};
+
+window.fireAtAI = function(r, c) {
+    if (!window.navalWarState.active) return;
+    
+    let aGrid = window.navalWarState.aiGrid;
+    let hit = (aGrid[r][c] === 1);
+    aGrid[r][c] = hit ? 2 : 3;
+    
+    const log = document.getElementById('naval-log');
+    if (hit) {
+        if(typeof SFX.playExplosion === 'function') SFX.playExplosion();
+        else SFX.playSiren();
+        window.navalWarState.aiHp--;
+        log.innerHTML += `<div><span style="color:#0f8">DIRECT HIT! Rainclaude vessel damaged at [${r},${c}].</span></div>`;
     } else {
-      log.innerHTML += `<div style="color:#fa0; font-weight:bold; font-size:14px; margin-top:10px;">DRAW! Mutual destruction.</div>`;
+        SFX.playClick();
+        log.innerHTML += `<div><span style="color:#aaa">Miss! Torpedo detonated in open water at [${r},${c}].</span></div>`;
+    }
+    
+    // Update AI HP bar
+    document.getElementById('naval-hp-ai').textContent = window.navalWarState.aiHp;
+    document.getElementById('naval-bar-ai').style.width = ((window.navalWarState.aiHp / 17) * 100) + '%';
+    log.scrollTop = log.scrollHeight;
+    
+    window.renderNavalGrids();
+    
+    // Check win
+    if (window.navalWarState.aiHp <= 0) {
+        window.endNavalWar('human');
+        return;
+    }
+    
+    // AI Turn (Disable player input briefly by disabling active flag)
+    window.navalWarState.active = false;
+    setTimeout(() => {
+        let pGrid = window.navalWarState.humanGrid;
+        
+        // simple random AI
+        let aiR, aiC;
+        do {
+            aiR = Math.floor(Math.random() * 10);
+            aiC = Math.floor(Math.random() * 10);
+        } while(pGrid[aiR][aiC] === 2 || pGrid[aiR][aiC] === 3);
+        
+        let aiHit = (pGrid[aiR][aiC] === 1);
+        pGrid[aiR][aiC] = aiHit ? 2 : 3;
+        
+        if (aiHit) {
+             if(typeof SFX.playExplosion === 'function') SFX.playExplosion();
+             else SFX.playSiren();
+             window.navalWarState.humanHp--;
+             log.innerHTML += `<div><span style="color:#f55">WARNING! Human vessel hit at [${aiR},${aiC}]!</span></div>`;
+        } else {
+             SFX.playClick();
+             log.innerHTML += `<div><span style="color:#aaa">Rainclaude missed at [${aiR},${aiC}].</span></div>`;
+        }
+        
+        document.getElementById('naval-hp-human').textContent = window.navalWarState.humanHp;
+        document.getElementById('naval-bar-human').style.width = ((window.navalWarState.humanHp / 17) * 100) + '%';
+        log.scrollTop = log.scrollHeight;
+        
+        window.renderNavalGrids();
+        
+        if (window.navalWarState.humanHp <= 0) {
+            window.endNavalWar('ai');
+        } else {
+            window.navalWarState.active = true; // allow player to shoot again
+        }
+    }, 600);
+}
+
+window.endNavalWar = function(winner) {
+    window.navalWarState.active = false;
+    const log = document.getElementById('naval-log');
+    if (winner === 'human') {
+      log.innerHTML += `<div style="color:#0f8; font-weight:bold; font-size:14px; margin-top:10px;">TACTICAL VICTORY! Rainclaude fleet sunk. +50,000 Troops gained!</div>`;
+      if (typeof GS !== 'undefined' && GS.players[GS.myIndex]) {
+        GS.reinforceLeft += 5; 
+        updateDashboard();
+        if (typeof setLog === 'function') setLog("🎁 Naval Victory! +50,000 reserve troops added.");
+      }
+      if (typeof scene !== 'undefined' && window.navalWarState.boatMesh) {
+         scene.remove(window.navalWarState.boatMesh);
+         if (typeof boatMarkers !== 'undefined') {
+            boatMarkers = boatMarkers.filter(b => b !== window.navalWarState.boatMesh);
+         }
+      }
+    } else {
+      log.innerHTML += `<div style="color:#f55; font-weight:bold; font-size:14px; margin-top:10px;">DEFEAT! Human fleet destroyed.</div>`;
+      if (typeof setLog === 'function') setLog("💥 Naval Defeat! Fleet lost to Rainclaude.");
     }
     log.scrollTop = log.scrollHeight;
-  }
-};
+}
 
 // ================= AIRPLANE SHOOTER MINI-GAME =================
 
 window.planeMarkers = [];
 window.planeData = [];
 window.shooterState = { active: false, ammo: 3, aiHp: 100, planeMesh: null };
+window.satelliteWarState = { active: false, humanHp: 100, aiHp: 100, satMesh: null };
+
+window.openSatelliteWar = function(mesh) {
+  if (!window.isRedSkin) return;
+  SFX.playClick();
+  window.satelliteWarState = { active: true, humanHp: 100, aiHp: 100, satMesh: mesh };
+  
+  document.getElementById('sat-hp-human').textContent = '100';
+  document.getElementById('sat-bar-human').style.width = '100%';
+  document.getElementById('sat-hp-ai').textContent = '100';
+  document.getElementById('sat-bar-ai').style.width = '100%';
+  
+  const log = document.getElementById('sat-log');
+  log.innerHTML = '<div style="opacity:0.7;">Orbital target locked. Commencing cyber-attack...</div>';
+  
+  document.getElementById('btn-fire-laser').style.display = 'block';
+  document.getElementById('satellite-war-modal').classList.add('show');
+};
+
+window.fireSatelliteLaser = function() {
+  if (!window.satelliteWarState.active) return;
+  SFX.playLaser(); // Future beam sound mapping, falls back to click if undefined
+  
+  // RNG Combat
+  const humanDmg = Math.floor(15 + Math.random() * 20);
+  const aiDmg = Math.floor(10 + Math.random() * 25);
+  
+  window.satelliteWarState.humanHp = Math.max(0, window.satelliteWarState.humanHp - aiDmg);
+  window.satelliteWarState.aiHp = Math.max(0, window.satelliteWarState.aiHp - humanDmg);
+  
+  // Update UI
+  document.getElementById('sat-hp-human').textContent = window.satelliteWarState.humanHp;
+  document.getElementById('sat-bar-human').style.width = window.satelliteWarState.humanHp + '%';
+  document.getElementById('sat-hp-ai').textContent = window.satelliteWarState.aiHp;
+  document.getElementById('sat-bar-ai').style.width = window.satelliteWarState.aiHp + '%';
+  
+  const log = document.getElementById('sat-log');
+  log.innerHTML += `<div><span style="color:#0af">HUMAN EMP hits for ${humanDmg} DMG!</span> | <span style="color:#f55">RAINCLAUDE EMP hits for ${aiDmg} DMG!</span></div>`;
+  log.scrollTop = log.scrollHeight;
+  
+  // Check Win/Loss Condition
+  if (window.satelliteWarState.humanHp <= 0 || window.satelliteWarState.aiHp <= 0) {
+    window.satelliteWarState.active = false;
+    document.getElementById('btn-fire-laser').style.display = 'none';
+    
+    if (window.satelliteWarState.humanHp > window.satelliteWarState.aiHp) {
+      log.innerHTML += `<div style="color:#0f8; font-weight:bold; font-size:14px; margin-top:10px;">TACTICAL VICTORY! Rainclaude satellite neutralized. +20,000 Troops gained!</div>`;
+      // Grant Reward
+      if (GS.players[GS.myIndex]) {
+        GS.reinforceLeft += 2; // 2 x 10k troops
+        updateDashboard();
+        setLog("🎁 Orbital Victory! +20,000 reserve troops added.");
+      }
+      
+      // Remove satellite from map
+      if (typeof scene !== 'undefined' && window.satelliteWarState.satMesh) {
+         scene.remove(window.satelliteWarState.satMesh.userData.parent);
+         if (typeof redSatMarkers !== 'undefined') {
+            redSatMarkers = redSatMarkers.filter(b => b !== window.satelliteWarState.satMesh);
+         }
+      }
+    } else if (window.satelliteWarState.aiHp > window.satelliteWarState.humanHp) {
+      log.innerHTML += `<div style="color:#f55; font-weight:bold; font-size:14px; margin-top:10px;">DEFEAT! Human satellite destroyed.</div>`;
+      setLog("💥 Orbital Defeat! Cyber-link severed.");
+    } else {
+      log.innerHTML += `<div style="color:#fa0; font-weight:bold; font-size:14px; margin-top:10px;">DRAW! Mutually assured network destruction.</div>`;
+    }
+    log.scrollTop = log.scrollHeight;
+  }
+};
 
 window.spawnRedPlanes = function() {
   if (typeof scene === 'undefined' || typeof THREE === 'undefined') return;
@@ -11744,10 +12588,18 @@ window.spawnRedPlanes = function() {
   if (!window.isRedSkin) return;
   
   const R = typeof GLOBE_R !== 'undefined' ? GLOBE_R + 0.045 : 1.045; // Fly slightly higher than boats
-  const planeMat = new THREE.MeshBasicMaterial({ color: 0xffffff, depthTest: true });
+  const planeMatNeutral = new THREE.MeshBasicMaterial({ color: 0xffffff, depthTest: true });
+  const planeMatRaincloud = new THREE.MeshBasicMaterial({ color: 0xff0000, depthTest: true });
+  const planeMatHumanity = new THREE.MeshBasicMaterial({ color: 0x0000ff, depthTest: true });
   
   // Build a generic airplane group (half the size of the boat markers)
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 60; i++) {
+    let planeMat = planeMatNeutral;
+    if (i < 18) { // 30% of 60
+      planeMat = planeMatRaincloud;
+    } else if (i < 54) { // 60% of 60
+      planeMat = planeMatHumanity;
+    }
     const planeGroup = new THREE.Group();
     
     // Plane flies in local -Y direction.
@@ -12110,11 +12962,34 @@ window.toggleRedSkin = function() {
   if (typeof boatGroup !== 'undefined') boatGroup.visible = skin.showOverlays;
   if (typeof redSatGroup !== 'undefined') redSatGroup.visible = skin.showOverlays;
   
+  // Clear red warfare projectiles if turning OFF red skin
+  if (!skin.showOverlays) {
+      if (typeof redWarfareProjectiles !== 'undefined') {
+          redWarfareProjectiles.forEach(p => {
+               scene.remove(p.mesh);
+               if (p.mesh.geometry) p.mesh.geometry.dispose();
+               if (p.mesh.material) p.mesh.material.dispose();
+          });
+          redWarfareProjectiles = [];
+      }
+      if (typeof redWarfareParticles !== 'undefined') {
+          redWarfareParticles.forEach(p => {
+               scene.remove(p.mesh);
+               if (p.mesh.material.map) p.mesh.material.map.dispose();
+               if (p.mesh.material) p.mesh.material.dispose();
+          });
+          redWarfareParticles = [];
+      }
+  }
+
   // Exclusively render ISS on the Live skin
   if (window.issGroup) window.issGroup.visible = (window.currentSkinIndex === 0);
 
   // Toggle Natural Resources map layer
   if (typeof naturalResourcesGroup !== 'undefined') naturalResourcesGroup.visible = skin.showResources;
+  
+  // Toggle D3X Caves layer
+  if (typeof d3xCaveGroup !== 'undefined') d3xCaveGroup.visible = (skin.name === 'GREEN');
   
   // Toggle Global Arms map layer
   if (typeof armsIndustryGroup !== 'undefined') armsIndustryGroup.visible = skin.showArms;
@@ -12162,7 +13037,7 @@ window.toggleRedSkin = function() {
       // Auto-open Simulation Info for Black Skin due to Epilepsy Warning necessity
       if (skin.name === 'BLK') {
           setTimeout(() => {
-              if (typeof showCmdHelpModal === 'function') showCmdHelpModal();
+              if (typeof showCmdHelpModal === 'function' && localStorage.getItem('hideEpilepsyWarning') !== 'true') showCmdHelpModal();
           }, 300); // Slight delay for smooth transition
       }
   } else {
@@ -12180,17 +13055,16 @@ window.toggleRedSkin = function() {
       window.activeAttacks = {};
   }
 
-  // Toggle Cybercrime Map Label
+  // Toggle Map Labels for Respective Skins
   const cyberLabel = document.getElementById('cybercrime-map-label');
-  if (cyberLabel) {
-      cyberLabel.style.display = (skin.name === 'BLK') ? 'block' : 'none';
-  }
-  
-  // Toggle Datacenter Warfare Label
+  const liveLabel = document.getElementById('live-simulation-label');
+  const intelLabel = document.getElementById('global-intelligence-label');
   const datacenterLabel = document.getElementById('datacenter-warfare-label');
-  if (datacenterLabel) {
-      datacenterLabel.style.display = (skin.name === 'CYBER') ? 'block' : 'none';
-  }
+  
+  if (cyberLabel) cyberLabel.style.display = (skin.name === 'BLK') ? 'block' : 'none';
+  if (liveLabel) liveLabel.style.display = (skin.name === 'LIVE') ? 'block' : 'none';
+  if (intelLabel) intelLabel.style.display = (skin.name === 'RED') ? 'block' : 'none';
+  if (datacenterLabel) datacenterLabel.style.display = (skin.name === 'CYBER') ? 'block' : 'none';
   
   // Toggle Green Skin Info Label
   const greenSkinInfo = document.getElementById('green-skin-info');
@@ -13443,6 +14317,59 @@ function processHackCommand(cmd) {
 
   printTerm('Command not recognized or target inaccessible.');
 }
+
+window.internalD3XMiningAmount = 0.0;
+
+window.openD3XMiningCave = function(caveName) {
+    if (window.currentSkinIndex !== 2) return;
+    SFX.playClick();
+    document.getElementById('mining-cave-title').textContent = caveName.toUpperCase();
+    document.getElementById('internal-mining-amount').textContent = window.internalD3XMiningAmount.toFixed(2);
+    document.getElementById('mining-progress-bar').style.width = (window.internalD3XMiningAmount * 100) + '%';
+    document.getElementById('mining-log').innerHTML = '<div style="opacity:0.7;">Cave accessed. Awaiting mining directive...</div>';
+    document.getElementById('d3x-mining-modal').style.display = 'flex';
+};
+
+window.mineD3XCoin = function() {
+    const myPlayer = GS.players && GS.players[GS.myIndex];
+    if (!myPlayer) return;
+    
+    if (myPlayer.budget < 1) {
+        SFX.playError();
+        const log = document.getElementById('mining-log');
+        log.innerHTML += `<div><span style="color:#f55">ERROR: Insufficient D3X. Required: 1 D3X.</span></div>`;
+        log.scrollTop = log.scrollHeight;
+        return;
+    }
+    
+    // Burn 1 D3X
+    myPlayer.budget -= 1;
+    updateDashboard(); // Updates the UI balance globally
+    
+    SFX.playLaser(); // Good enough for a laser drill sound placeholder
+    
+    // Accumulate +0.05
+    window.internalD3XMiningAmount += 0.05;
+    
+    const log = document.getElementById('mining-log');
+    log.innerHTML += `<div><span style="color:#aaa">-1 D3X Burned.</span> Mining operation yielded <span style="color:#0f8">+0.05 D3X</span> internal progress.</div>`;
+    
+    // Check if we hit 1.0 total
+    if (window.internalD3XMiningAmount >= 0.99) { // Using 0.99 to avoid float precision bugs around 1.0
+        window.internalD3XMiningAmount = 0.0;
+        myPlayer.budget += 1; // Payout 1 whole D3X
+        updateDashboard();
+        SFX.playSiren(); // Payout sound
+        log.innerHTML += `<div style="color:#0f8; font-weight:bold; font-size:14px; margin-top:10px;">JACKPOT! 1.0 D3X Deposited to Wallet!</div>`;
+        if (typeof setLog === 'function') setLog("💎 D3X Mining Operation Successful! +1 D3X added to balance.");
+    }
+    
+    // Update mining modal UI
+    document.getElementById('internal-mining-amount').textContent = window.internalD3XMiningAmount.toFixed(2);
+    document.getElementById('mining-progress-bar').style.width = (window.internalD3XMiningAmount * 100) + '%';
+    document.getElementById('d3x-balance').textContent = myPlayer.budget; // Update black market balance if open behind it
+    log.scrollTop = log.scrollHeight;
+};
 
 </script>
 
