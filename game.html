@@ -106,10 +106,10 @@ body {
 .player-badges{display:flex;gap:8px;}
 .pb{padding:4px 10px;border-radius:3px;font-size:10px;letter-spacing:1px;border:1px solid;}
 
-#topleft-stats { position: absolute; left: 20px; width: 25vw; display: flex; flex-direction: column; align-items: center; }
+#topleft-stats { position: absolute; left: 20px; width: 30vw; display: flex; flex-direction: column; align-items: center; }
 
 /* Side Panel */
-#side-panel{position:absolute;top:auto;bottom:48px;left:20px;width:25vw;background:rgba(0,8,20,.95);
+#side-panel{position:absolute;top:auto;bottom:48px;left:20px;width:30vw;background:rgba(0,8,20,.95);
   border:1px solid rgba(0,220,255,.55);border-radius:6px;padding:18px 21px;pointer-events:auto;display:none;
   box-shadow:0 0 24px rgba(0,220,255,.14); z-index:100;backdrop-filter:blur(6px);box-sizing:border-box;}
 #side-panel.open{display:block;}
@@ -241,7 +241,7 @@ body {
 .die.def{background:#001a30;border:2px solid #0af;color:#0af;}
 
 /* Chat */
-#chat-box{position:absolute;bottom:53px;left:calc(20px + 25vw + 80px);width:260px;background:rgba(0,5,15,.95);
+#chat-box{position:absolute;bottom:53px;left:calc(20px + 30vw + 80px);width:260px;background:rgba(0,5,15,.95);
   border:1px solid #0af;border-radius:8px;display:none;pointer-events:auto;z-index:200;
   box-shadow:0 0 15px rgba(0,170,255,0.4);}
 #chat-box.open{display:flex;flex-direction:column;}
@@ -251,7 +251,7 @@ body {
   font:10px 'Courier New',monospace;outline:none;}
 #btn-chat-toggle {
   position: absolute;
-  left: calc(20px + 25vw + 16px);
+  left: calc(20px + 30vw + 16px);
   bottom: 51px;
   width: 50px;
   height: 50px;
@@ -279,7 +279,7 @@ body {
 /* CMD Hacker Button */
 #btn-cmd-toggle {
   position: absolute;
-  left: calc(20px + 25vw + 16px);
+  left: calc(20px + 30vw + 16px);
   bottom: 115px; /* Just above chat button with 14px gap */
   width: 50px;
   height: 50px;
@@ -307,7 +307,7 @@ body {
 
 #btn-cmd-help {
   position: absolute;
-  left: calc(20px + 25vw + 30px);
+  left: calc(20px + 30vw + 30px);
   bottom: 175px; 
   width: 25px;
   height: 25px;
@@ -650,7 +650,7 @@ body {
 
 /* ── FACTION DASHBOARDS ─ 2-faction: Human vs Rainclaude ── */
 .faction-dash{
-  position:absolute; width:25vw;
+  position:absolute; width:30vw;
   background:rgba(0,0,0,.88);
   border-radius:6px;
   padding:18px 21px;
@@ -671,7 +671,7 @@ body {
 
 /* War Room Button */
 .war-room-btn {
-  position:absolute; right:20px; bottom:45px; width:25vw;
+  position:absolute; right:20px; bottom:45px; width:30vw;
   background:linear-gradient(135deg, rgba(200,0,0,0.8), rgba(100,0,0,0.9));
   border:1px solid #f24; color:#fff; padding:10px 4px; text-align:center;
   font:10px 'Courier New', monospace; font-weight:bold; letter-spacing:2px;
@@ -921,7 +921,7 @@ body {
 .strat-drawer {
   position:fixed;
   bottom:10px;
-  left:calc(20px + 25vw + 80px);
+  left:calc(20px + 30vw + 80px);
   background:rgba(0,6,18,0.97);
   border:1px solid rgba(0,180,255,0.4);
   border-radius:10px;
@@ -1164,7 +1164,7 @@ body {
 <div id="hud">
   <div id="topbar">
     <div id="topleft-stats" style="display:flex; gap:15px; align-items:center;">
-      <div style="margin-top: 25px; width: 25vw; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <div style="margin-top: 25px; width: 30vw; display: flex; flex-direction: column; align-items: center; justify-content: center;">
         <div id="global-player-count" style="font-family:'Courier New', monospace; font-size:11px; font-weight:bold; letter-spacing:2px; color:#0af; margin-bottom: 4px; text-shadow:0 0 8px rgba(0,170,255,0.6);">
           🟢 <span id="gpc-val">0</span> ACTIVE COMMANDERS
         </div>
@@ -1353,7 +1353,7 @@ body {
       </div>
   </div>
   
-  <div id="right-hud-group" style="position:absolute; bottom:55px; right:calc(25px + 25vw); display:flex; flex-direction:column; gap:8px; width:115px; z-index:100; align-items:stretch; pointer-events:none;">
+  <div id="right-hud-group" style="position:absolute; bottom:55px; right:calc(25px + 30vw); display:flex; flex-direction:column; gap:8px; width:115px; z-index:100; align-items:stretch; pointer-events:none;">
       <div id="skin-hint-arrow" style="position:absolute; top:35px; left:-40px; font-size:32px; color:#ff5577; text-shadow:0 0 15px rgba(255,-85,119,0.8); opacity:0; pointer-events:none; z-index:9999; transition:opacity 0.5s; animation:bounceRight 0.5s infinite alternate;">➔</div>
       <button id="btn-toggle-skin" onclick="toggleRedSkin()">🔴 RED SKIN</button>
       
@@ -1370,7 +1370,7 @@ body {
   <button id="btn-toggle-soundtrack" onclick="toggleSoundtrack()">🎵 SOUNDTRACK</button>
   <button id="btn-toggle-radio" onclick="toggleRadio()">📻 ON</button>
   <button id="btn-toggle-radio-lock" onclick="toggleRadioLock()" style="display:none;">🔒 LOCK RADIO</button>
-  <div id="infinite-world-radio-label" style="position:absolute; bottom:28px; left:calc(20px + 25vw - 34px); transform:translateX(-50%); width:max-content; color:white; font-family:'Share Tech Mono', monospace; font-size:9px; letter-spacing:1px; z-index:20; opacity:0.8; pointer-events:none; display:none;">INFINITE WORLD RADIO</div>
+  <div id="infinite-world-radio-label" style="position:absolute; bottom:28px; left:calc(20px + 30vw - 34px); transform:translateX(-50%); width:max-content; color:white; font-family:'Share Tech Mono', monospace; font-size:9px; letter-spacing:1px; z-index:20; opacity:0.8; pointer-events:none; display:none;">INFINITE WORLD RADIO</div>
   <button id="btn-toggle-radio-next" onclick="playNextRadio()" style="display:none;">NEXT ➔</button>
 
   <div class="faction-dash" id="dash-1">
@@ -1416,7 +1416,7 @@ body {
       </div>
     </div>
   </div>
-  <button class="war-room-btn" id="btn-toggle-intel" style="bottom: 79px; width:25vw; right:20px; padding:6px 12px; font-size:9px; animation: none;">
+  <button class="war-room-btn" id="btn-toggle-intel" style="bottom: 79px; width:30vw; right:20px; padding:6px 12px; font-size:9px; animation: none;">
     👁 HOSTILE INTEL
   </button>
   <a href="https://dexmond.com/worldmonitor.html" target="_blank" class="war-room-btn" id="btn-war-room">
@@ -1473,7 +1473,7 @@ body {
 #btn-toggle-soundtrack {
   position: absolute;
   bottom: 3px;
-  left: calc(20px + 25vw - 235px);
+  left: calc(20px + 30vw - 235px);
   padding: 4px 8px;
   border: 1px solid rgba(255,50,50,0.5);
   background: rgba(255,50,50,0.1);
@@ -1504,7 +1504,7 @@ body {
 #btn-toggle-radio {
   position: absolute;
   bottom: 3px;
-  left: calc(20px + 25vw - 128px);
+  left: calc(20px + 30vw - 128px);
   padding: 4px 8px;
   border: 1px solid rgba(0,255,136,0.5);
   background: rgba(0,255,136,0.1);
@@ -1535,7 +1535,7 @@ body {
 #btn-toggle-radio-lock {
   position: absolute;
   bottom: 3px;
-  left: calc(20px + 25vw - 78px);
+  left: calc(20px + 30vw - 78px);
   padding: 4px 8px;
   border: 1px solid rgba(255,170,0,0.5);
   background: rgba(255,170,0,0.1);
@@ -1566,7 +1566,7 @@ body {
 #btn-toggle-radio-next {
   position: absolute;
   bottom: 3px;
-  left: calc(20px + 25vw + 10px);
+  left: calc(20px + 30vw + 10px);
   padding: 4px 8px;
   border: 1px solid rgba(255,170,0,0.5);
   background: rgba(255,170,0,0.1);
@@ -1617,7 +1617,7 @@ const authWaitInterval = setInterval(() => {
 #ops-sidebar {
   position: fixed;
   top: 72px;
-  left: calc(20px + 25vw + 12px);
+  left: calc(20px + 30vw + 12px);
   display: flex !important;
   opacity: 1;
   flex-direction: column;
