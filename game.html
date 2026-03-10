@@ -1459,6 +1459,7 @@ body {
   <div id="right-hud-group" style="position:absolute; bottom:55px; right:calc(25px + 30vw); display:flex; flex-direction:column; gap:8px; width:115px; z-index:100; align-items:stretch; pointer-events:none;">
       <div id="skin-hint-arrow" style="position:absolute; top:35px; left:-40px; font-size:32px; color:#ff5577; text-shadow:0 0 15px rgba(255,-85,119,0.8); opacity:0; pointer-events:none; z-index:9999; transition:opacity 0.5s; animation:bounceRight 0.5s infinite alternate;">➔</div>
       <button id="btn-toggle-skin" onclick="toggleRedSkin()">🔴 RED SKIN</button>
+      <div id="wtr-skin-label" style="display:none; color:#00aaff; font-family:'Orbitron', sans-serif; font-size:9px; text-shadow:0 0 5px #00aaff; margin-top:2px; margin-bottom:4px; text-align:center; font-weight:bold; letter-spacing:0.5px; opacity:0.8;">DEXMOND SIMULATIONS<br/>blue globe ARENA</div>
       
       <div id="user-stats-box" style="text-align:left;">
         <div class="us-title" id="us-name">COM-—</div>
@@ -14671,6 +14672,13 @@ window.toggleRedSkin = function() {
       window.datacentersGroup.visible = (skin.name === 'CYBER');
       if (window.dcNetworkGroup) window.dcNetworkGroup.visible = (skin.name === 'CYBER');
   }
+  
+  // Toggle the new WTR skin label
+  const wtrLabel = document.getElementById('wtr-skin-label');
+  if (wtrLabel) {
+      wtrLabel.style.display = (skin.name === 'WTR') ? 'block' : 'none';
+  }
+  
   if (typeof window.worldBankGroup !== 'undefined') {
       window.worldBankGroup.visible = (skin.name === 'CYBER');
   }
