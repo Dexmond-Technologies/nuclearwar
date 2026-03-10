@@ -1953,8 +1953,8 @@ async function fetchAndBroadcastAIBalances() {
         } catch(e) { console.error('Gemini balance error:', e.message); geminiBalance = 0; }
         
         try {
-            // Add a small delay between requests to avoid bursting the RPC node rate limits
-            await new Promise(r => setTimeout(r, 2000));
+            // Add a 3-second delay between requests to avoid bursting the RPC node rate limits
+            await new Promise(r => setTimeout(r, 3000));
 
             const accounts = await solanaConnection.getParsedTokenAccountsByOwner(
                 rainclaudePubkey, 
@@ -1986,7 +1986,8 @@ async function fetchAndBroadcastAIBalances() {
 
         try {
             if (cachedWorldBankWallet && cachedWorldBankWallet !== "NOT_SET") {
-                await new Promise(r => setTimeout(r, 2000));
+                // Add an additional 3-second delay before querying World Bank
+                await new Promise(r => setTimeout(r, 3000));
                 const wbPubkey = new web3.PublicKey(cachedWorldBankWallet);
                 const accounts = await solanaConnection.getParsedTokenAccountsByOwner(
                     wbPubkey, 
@@ -2029,8 +2030,8 @@ async function fetchAndBroadcastAIBalances() {
     }
 }
 
-// Polling interval increased to 60 seconds to prevent Solana Public RPC 429 Rate Limiting
-setInterval(fetchAndBroadcastAIBalances, 60000);
+// Polling interval increased to 5 minutes (300000ms) to prevent Solana Public RPC 429 Rate Limiting
+setInterval(fetchAndBroadcastAIBalances, 300000);
 
 // Tick the combat every 30 minutes (1800000ms) to maintain persistent global conflict with minimal API cost
 setInterval(runAICombatTurn, 1800000);
