@@ -7303,7 +7303,7 @@ window.triggerSolanaDonation = async function() {
       if (dcData && dcData.type === 'staking_tower') {
           window.selectedStakingTower = topMesh;
           document.getElementById('staking-tower-node-name').textContent = dcData.protocol || 'D3X CORE NETWORK';
-          document.getElementById('staking-tower-balance').textContent = window.localD3XBalance ? window.localD3XBalance.toFixed(2) : '100';
+          document.getElementById('staking-tower-balance').textContent = window.localD3XBalance ? window.localD3XBalance.toFixed(2) : '0.00';
           document.getElementById('staking-tower-active').textContent = (Math.random() * 50).toFixed(2) + ' D3X';
           document.getElementById('staking-tower-modal').style.display = 'flex';
           document.getElementById('datacenter-action-panel').style.display = 'none'; // Close DC panel if open
@@ -7406,34 +7406,34 @@ canvas.addEventListener('mousemove', e => {
 // --- GREEN SKIN MARKET SYSTEM ---
 window.greenMarket = {
   commodities: {
-    // METALS (scaled down from Metric Ton / Global Quote to per-unit/kg for gameplay)
-    'Copper': { price: 12.98, vol: 0.02, shares: 0, history: [12.98] }, // 12986 / 1000
-    'Lithium': { price: 68.97, vol: 0.05, shares: 0, history: [68.97] }, // ETF proxy
-    'Rare Earth Elements': { price: 92.53, vol: 0.08, shares: 0, history: [92.53] },
-    'Iron ore': { price: 14.97, vol: 0.01, shares: 0, history: [14.97] }, // ETF proxy
-    'Gold': { price: 473.51, vol: 0.015, shares: 0, history: [473.51] }, // ETF proxy
-    'Nickel': { price: 3.02, vol: 0.03, shares: 0, history: [3.02] }, // ETF proxy
-    'Tin': { price: 71.85, vol: 0.04, shares: 0, history: [71.85] },
-    'Aluminum (Bauxite)': { price: 3.13, vol: 0.02, shares: 0, history: [3.13] }, // 3133 / 1000
-    'Aluminum': { price: 3.13, vol: 0.02, shares: 0, history: [3.13] }, // 3133 / 1000
-    'Cobalt': { price: 71.85, vol: 0.06, shares: 0, history: [71.85] },
+    // METALS (Prices in base D3X Equivalent)
+    'Copper': { price: 8.50, vol: 0.02, shares: 0, history: [8.50] }, 
+    'Lithium': { price: 35.00, vol: 0.05, shares: 0, history: [35.00] }, 
+    'Rare Earth Elements': { price: 120.00, vol: 0.08, shares: 0, history: [120.00] },
+    'Iron ore': { price: 1.20, vol: 0.01, shares: 0, history: [1.20] }, 
+    'Gold': { price: 2150.00, vol: 0.015, shares: 0, history: [2150.00] }, 
+    'Nickel': { price: 18.50, vol: 0.03, shares: 0, history: [18.50] }, 
+    'Tin': { price: 27.00, vol: 0.04, shares: 0, history: [27.00] },
+    'Aluminum (Bauxite)': { price: 2.50, vol: 0.02, shares: 0, history: [2.50] },
+    'Aluminum': { price: 4.80, vol: 0.02, shares: 0, history: [4.80] }, 
+    'Cobalt': { price: 28.00, vol: 0.06, shares: 0, history: [28.00] },
     
     // NATURAL RESOURCES
-    'Lumber (Wood)': { price: 5.40, vol: 0.015, shares: 0, history: [5.40] },
-    'Freshwater': { price: 0.85, vol: 0.005, shares: 0, history: [0.85] },
-    'Natural Gas': { price: 2.15, vol: 0.04, shares: 0, history: [2.15] },
-    'Crude Oil': { price: 82.40, vol: 0.03, shares: 0, history: [82.40] },
-    'Wheat': { price: 6.20, vol: 0.02, shares: 0, history: [6.20] },
+    'Lumber (Wood)': { price: 0.50, vol: 0.015, shares: 0, history: [0.50] },
+    'Freshwater': { price: 0.10, vol: 0.005, shares: 0, history: [0.10] },
+    'Natural Gas': { price: 3.50, vol: 0.04, shares: 0, history: [3.50] },
+    'Crude Oil': { price: 78.50, vol: 0.03, shares: 0, history: [78.50] },
+    'Wheat': { price: 0.60, vol: 0.02, shares: 0, history: [0.60] },
     
-    // TECH & COMPUTE HARDWARE
-    'NVIDIA H100 Tensor Core': { price: 30000.00, vol: 0.08, shares: 0, history: [30000.00] },
-    'NVIDIA A100 80GB': { price: 15000.00, vol: 0.05, shares: 0, history: [15000.00] },
-    'Google Cloud TPU v5e': { price: 12500.00, vol: 0.06, shares: 0, history: [12500.00] },
-    'AMD EPYC 9004 CPUs': { price: 8000.00, vol: 0.04, shares: 0, history: [8000.00] },
-    'DDR5 ECC RAM (128GB)': { price: 1200.00, vol: 0.03, shares: 0, history: [1200.00] },
-    'Enterprise NVMe SSD (15TB)': { price: 2500.00, vol: 0.02, shares: 0, history: [2500.00] },
-    'Compute Motherboards (Dual Socket)': { price: 1800.00, vol: 0.015, shares: 0, history: [1800.00] },
-    'Titanium Grade PSUs (2000W)': { price: 450.00, vol: 0.01, shares: 0, history: [450.00] },
+    // TECH & COMPUTE HARDWARE (Premium D3X Assets)
+    'NVIDIA H100 Tensor Core': { price: 35000.00, vol: 0.08, shares: 0, history: [35000.00] },
+    'NVIDIA A100 80GB': { price: 12000.00, vol: 0.05, shares: 0, history: [12000.00] },
+    'Google Cloud TPU v5e': { price: 9500.00, vol: 0.06, shares: 0, history: [9500.00] },
+    'AMD EPYC 9004 CPUs': { price: 4500.00, vol: 0.04, shares: 0, history: [4500.00] },
+    'DDR5 ECC RAM (128GB)': { price: 380.00, vol: 0.03, shares: 0, history: [380.00] },
+    'Enterprise NVMe SSD (15TB)': { price: 1250.00, vol: 0.02, shares: 0, history: [1250.00] },
+    'Compute Motherboards (Dual Socket)': { price: 1100.00, vol: 0.015, shares: 0, history: [1100.00] },
+    'Titanium Grade PSUs (2000W)': { price: 550.00, vol: 0.01, shares: 0, history: [550.00] },
     'Direct-to-Chip Liquid Cooling Units': { price: 5500.00, vol: 0.02, shares: 0, history: [5500.00] },
     'Networking Switches (400GbE)': { price: 18000.00, vol: 0.035, shares: 0, history: [18000.00] }
   },
@@ -7463,7 +7463,7 @@ function updateGreenMarket() {
     if(c.history.length > 20) c.history.shift();
 
     let trend = c.history[c.history.length-1] >= c.history[c.history.length-2] ? '<span style="color:#0f0">▲</span>' : '<span style="color:#f00">▼</span>';
-    let shareVal = c.price / 100; // Value per share in MIL
+    let shareVal = c.price; // Native D3X value
 
     totalWorth += (c.shares * shareVal);
 
@@ -7471,7 +7471,7 @@ function updateGreenMarket() {
       holdingsHtml += `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; background:rgba(0,255,136,0.1); padding:4px; border-radius:3px; border:1px solid rgba(0,255,136,0.2); font-size:9px;">
           <span style="color:#fff">${k} <span style="color:#0f8; font-weight:bold; margin-left:3px;">x${c.shares}</span></span>
-          <span style="font-family:'Orbitron', monospace; font-size:10px; font-weight:bold; text-align:right;">${trend} $${shareVal.toFixed(2)}M</span>
+          <span style="font-family:'Orbitron', monospace; font-size:10px; font-weight:bold; text-align:right;">${trend} ${shareVal.toFixed(2)} D3X</span>
         </div>
       `;
     }
@@ -7481,7 +7481,7 @@ function updateGreenMarket() {
     const priceEl = document.getElementById(`market-price-${safeK}`);
     const sellBtn = document.getElementById(`market-sell-${safeK}`);
     if (priceEl) {
-      priceEl.innerHTML = `${trend} $${shareVal.toFixed(2)} MIL <span style="font-size:10px; color:#aaa; font-weight:normal;">/ SHARE</span>`;
+      priceEl.innerHTML = `${trend} ${shareVal.toFixed(2)} D3X <span style="font-size:10px; color:#aaa; font-weight:normal;">/ UNIT</span>`;
     }
     if (sellBtn) {
        sellBtn.style.opacity = c.shares > 0 ? '1' : '0.3';
@@ -7491,7 +7491,7 @@ function updateGreenMarket() {
 
   const networthEl = document.getElementById('green-market-networth');
   if (networthEl) {
-    networthEl.innerText = '$' + totalWorth.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}) + ' M';
+    networthEl.innerText = totalWorth.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}) + ' D3X';
     if (holdingsHtml === '') holdingsHtml = ''; // Removed empty state text
     document.getElementById('green-market-holdings').innerHTML = holdingsHtml;
   }
@@ -7508,9 +7508,9 @@ window.tradeGreenMetal = function(metalName, amount) {
   if (!c) return;
   
   // Ensure wallet is initialized
-  if (window.localD3XBalance === undefined) window.localD3XBalance = 100;
+  if (window.localD3XBalance === undefined) window.localD3XBalance = 0;
 
-  const cost = c.price / 100; // MIL cost translates 1:1 to D3X here for simplicity
+  const cost = c.price; // Native D3X cost
   const totalCost = Math.round(cost * Math.abs(amount) * 100) / 100;
 
   if (amount > 0) {
@@ -7540,7 +7540,7 @@ setInterval(updateGreenMarket, 3000);
 window.showGMarketWallet = function() {
   if (typeof _sfxClick !== 'undefined') _sfxClick();
   
-  if (window.localD3XBalance === undefined) window.localD3XBalance = 100;
+  if (window.localD3XBalance === undefined) window.localD3XBalance = 0;
   
   let modal = document.getElementById('gmarket-ledger-modal');
   let contentBox;
@@ -7616,9 +7616,9 @@ window.showGMarketWallet = function() {
     listHtml += `
       <tr style="border-bottom:1px solid rgba(0,255,136,0.15);">
         <td style="padding:10px 8px; color:#fff; font-weight:bold;">${parseInt(c.shares) > 0 ? '▶ ' : ''}${k}</td>
-        <td style="padding:10px 8px; text-align:right; font-family:'Courier New', monospace; font-weight:bold;">${trend} $${shareVal.toFixed(2)}M</td>
+        <td style="padding:10px 8px; text-align:right; font-family:'Courier New', monospace; font-weight:bold;">${trend} ${shareVal.toFixed(2)} D3X</td>
         <td style="padding:10px 8px; text-align:right; font-weight:bold; color:${c.shares > 0 ? '#0f8' : '#aaa'};">${c.shares}</td>
-        <td style="padding:10px 8px; text-align:right; font-family:'Courier New', monospace; color:${c.shares > 0 ? '#0f8' : '#aaa'};">$${holdVal.toFixed(2)}M</td>
+        <td style="padding:10px 8px; text-align:right; font-family:'Courier New', monospace; color:${c.shares > 0 ? '#0f8' : '#aaa'};">${holdVal.toFixed(2)} D3X</td>
         <td style="padding:10px 8px; text-align:center;">
           <button onclick="tradeGreenMetal('${k}', 1); showGMarketWallet();" style="background:none; border:1px solid #0f8; color:#0f8; font-family:'Orbitron', sans-serif; font-size:10px; padding:4px 10px; cursor:pointer; border-radius:3px; transition:0.2s;" onmouseover="this.style.background='#0f8'; this.style.color='#000';" onmouseout="this.style.background='none'; this.style.color='#0f8';">BUY</button>
           <button onclick="tradeGreenMetal('${k}', -1); showGMarketWallet();" style="background:none; border:1px solid #f22; color:#f22; font-family:'Orbitron', sans-serif; font-size:10px; padding:4px 10px; cursor:pointer; border-radius:3px; transition:0.2s; opacity:${c.shares > 0 ? 1 : 0.4}; margin-left:8px;" ${c.shares > 0 ? '' : 'disabled'} onmouseover="this.style.background='#f22'; this.style.color='#fff';" onmouseout="this.style.background='none'; this.style.color='#f22';">SELL</button>
@@ -7635,7 +7635,7 @@ window.showGMarketWallet = function() {
       AVAILABLE D3X WALLET BALANCE: <span style="color:#fff;">${window.localD3XBalance.toFixed(2)} D3X</span>
     </div>
     <div style="text-align:right; font-size:16px; font-weight:bold; color:#fff;">
-      NET WORTH (HOLDINGS): <span style="color:#0f8; font-family:'Courier New', monospace;">$${totalVal.toFixed(2)} M</span>
+      NET WORTH (HOLDINGS): <span style="color:#0f8; font-family:'Courier New', monospace;">${totalVal.toFixed(2)} D3X</span>
     </div>
   </div>`;
   
@@ -9702,8 +9702,14 @@ function initWS() {
         appendChat(msg.name,msg.text, 0); break;
       case 'my_d3x_balance': {
           const balEl = document.getElementById('cwd-bal');
-          if (balEl && msg.amount !== undefined) {
-              balEl.innerText = "| " + Number(msg.amount).toLocaleString(undefined, { maximumFractionDigits: 1 }) + " D3X";
+          if (msg.amount !== undefined) {
+              window.localD3XBalance = Number(msg.amount);
+              if (balEl) balEl.innerText = "| " + window.localD3XBalance.toLocaleString(undefined, { maximumFractionDigits: 1 }) + " D3X";
+              
+              // Auto-refresh menus if they are open and balance arrived
+              if (typeof updateGreenMarket === 'function') updateGreenMarket();
+              const stkBalEl = document.getElementById('staking-tower-balance');
+              if (stkBalEl) stkBalEl.textContent = window.localD3XBalance.toFixed(2);
           }
           break;
       }
