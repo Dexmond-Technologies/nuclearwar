@@ -1292,7 +1292,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       <div class="dash-dot" style="background:#00dcff"></div>
       <div class="dash-pname" style="color:#00dcff">HUMANITY (SUPPORTED BY GEMINI)</div>
       <div class="dash-tag">YOU + ALLIES</div>
-      <div style="position:absolute; top:8px; right:8px; text-align:right;">
+      <div style="position:absolute; top:-2px; right:58px; text-align:right;">
          <div style="color:#0f8; font-family:'Courier New', monospace; font-size:14px; font-weight:bold; text-shadow:0 0 5px #0f8;" id="d0-d3x-bal">SYNCING...</div>
       </div>
     </div>
@@ -1347,7 +1347,7 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
       <div class="dash-dot" style="background:#ff3232"></div>
       <div class="dash-pname" style="color:#ff3232">RAINCLAUDE AI</div>
       <div class="dash-tag">ADVERSARY</div>
-      <div style="position:absolute; top:8px; right:8px; text-align:right;">
+      <div style="position:absolute; top:-2px; right:58px; text-align:right;">
          <div style="color:#0f8; font-family:'Courier New', monospace; font-size:14px; font-weight:bold; text-shadow:0 0 5px #0f8;" id="d1-d3x-bal">SYNCING...</div>
       </div>
     </div>
@@ -5915,7 +5915,7 @@ function updateDashboard() {
 
     set('terr', terrCount);
     set('troops', totalTroops.toLocaleString());
-    set('budget', `$${p.budget.toLocaleString()} B`);
+    set('budget', `${p.budget.toLocaleString()} D3X`);
     set('tp', terrPct+'%');
     set('mp', formatTroops(totalTroopsRaw));
     set('ap', avgAtk);
@@ -8387,7 +8387,7 @@ function executeAttackPreset(type) {
     const cost = costMap[type];
     
     if (GS.players[0].budget < cost) {
-      setLog(`⚠ INSUFFICIENT DEFENSE BUDGET. Need $${cost}B.`);
+      setLog(`⚠ INSUFFICIENT DEFENSE BUDGET. Need ${cost} D3X.`);
       // Visual feedback on the modal
       const modal = document.querySelector('.atk-card');
       if (modal) {
@@ -8411,7 +8411,7 @@ function executeAttackPreset(type) {
     const cost = costMap[type];
     
     if (GS.players[0].budget < cost) {
-      setLog(`⚠ INSUFFICIENT DEFENSE BUDGET. Need $${cost}B.`);
+      setLog(`⚠ INSUFFICIENT DEFENSE BUDGET. Need ${cost} D3X.`);
       // Visual feedback on the modal
       const modal = document.querySelector('.atk-card');
       if (modal) {
