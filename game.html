@@ -3082,6 +3082,29 @@ function showCompanyInfo(compData) {
       }
     }
 
+  const corpAssets = [
+    "Quantum Compute Core", "Corporate Treasury Vault", "Proprietary IP Databank",
+    "Central Data Lake", "Logistics Control System", "Offshore Liquidity Pool",
+    "Satellite Uplink Node", "AI Training Cluster", "High-Frequency Trading Engine"
+  ];
+  
+  // Seed random assignment based on company name length + first letter
+  const aIdx = (compData.name.length + compData.name.charCodeAt(0)) % corpAssets.length;
+  const targetAsset = corpAssets[aIdx];
+
+  // Simulated AI Conflict State
+  let conflictStr = '';
+  // Randomly assign a visual state based on time to make it dynamic, bounded by company charSum so it persists for a bit
+  const timeState = Math.floor(Date.now() / 15000) + charSum;
+  if (timeState % 3 === 0) {
+     conflictStr = `<div style="margin-top:10px; padding:5px; background:rgba(0,255,136,0.1); border:1px solid #0f8; color:#0f8; font-size:11px; text-align:center;">🛡️ GEMINI AI IS SECURING THIS ASSET</div>`;
+  } else if (timeState % 3 === 1) {
+     conflictStr = `<div style="margin-top:10px; padding:5px; background:rgba(255,0,0,0.1); border:1px solid #f24; color:#f24; font-size:11px; text-align:center;">⚠️ RAINCLAUDE UPLOADING MALWARE TO HEIST ASSET</div>`;
+  } else {
+     // Active combat
+     conflictStr = `<div style="margin-top:10px; padding:5px; background:rgba(255,150,0,0.1); border:1px solid #f80; color:#f80; font-size:11px; text-align:center;">⚔️ ACTIVE AI CYBER-WARFARE DETECTED ⚔️</div>`;
+  }
+
   modal.innerHTML = `
     <div style="position:absolute;top:10px;right:15px;cursor:pointer;color:#f24;font-weight:bold;" onclick="document.getElementById('company-info-modal').style.display='none'">X</div>
     <div style="margin-bottom:15px;">
@@ -3095,6 +3118,12 @@ function showCompanyInfo(compData) {
         <div><span style="color:#0f8">LON:</span> ${compData.lon !== undefined ? compData.lon.toFixed(4) : '---'}</div>
     </div>
     <div style="margin-top:15px;font-size:12px;color:${compData.color || '#ffff00'};letter-spacing:1px;font-weight:bold;">${assetClassStr}</div>
+    
+    <div style="margin-top:15px; background:rgba(0,0,0,0.5); padding:10px; border:1px solid #444; border-radius:4px;">
+        <div style="color:#aaa; font-size:10px; margin-bottom:5px;">INTERNAL CORP ASSET:</div>
+        <div style="color:#fff; font-size:14px; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">${targetAsset}</div>
+        ${conflictStr}
+    </div>
   `;
   modal.style.display = 'block';
 }
