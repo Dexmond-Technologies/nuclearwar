@@ -1340,6 +1340,53 @@ function initWebSockets() {
         break;
       }
       
+      case 'process_mine_click': {
+        const callsign = msg.callsign;
+        const mineId = msg.mineId;
+        if (!callsign || !mineId) break;
+
+        // Ensure server-side memory for this commander's dig state exists
+        if (!globalGameState.digStates) globalGameState.digStates = {};
+        if (!globalGameState.digStates[callsign]) globalGameState.digStates[callsign] = {};
+        if (!globalGameState.digStates[callsign][mineId]) {
+            globalGameState.digStates[callsign][mineId] = { clicks: 0 };
+        }
+        
+        const state = globalGameState.digStates[callsign][mineId];
+        
+        // Cost: 3 to 6 coins
+        const cost = Math.floor(Math.random() * 4) + 3;
+        // Reward: 2 coins
+        const baseReward = 2;
+        
+        let treasure = 0;
+        let isJackpot = false;
+        
+        state.clicks++;
+        
+        if (state.clicks >= 10) {
+            treasure = 35;
+            isJackpot = true;
+            state.clicks = 0; // Reset dig cycle
+        }
+        
+        const netChange = baseReward + treasure - cost;
+        
+        // Respond to client so they can update their local memory and UI
+        ws.send(JSON.stringify({
+            type: 'mine_click_result',
+            mineId: mineId,
+            cost: cost,
+            baseReward: baseReward,
+            treasure: treasure,
+            isJackpot: isJackpot,
+            netChange: netChange,
+            clicks: state.clicks
+        }));
+        
+        break;
+      }
+      
       case 'save_portfolio': {
         const callsign = msg.callsign;
         const portfolioData = msg.portfolio;

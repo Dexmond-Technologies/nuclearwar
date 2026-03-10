@@ -2209,23 +2209,26 @@ Type 'help' for available commands.
   </div>
 </div>
 
-<!-- D3X Mine Staking Modal (Green Skin) -->
+<!-- D3X Mine Digging Clicker Modal (Green Skin) -->
 <div id="d3x-resource-staking-modal" style="position:absolute;inset:0;background:rgba(0,15,5,.95);display:none;align-items:center;justify-content:center;z-index:1060;backdrop-filter:blur(8px);">
   <div class="rep-card" style="width:500px; max-width:95vw; border-color:#0f8; box-shadow:0 0 40px rgba(0,255,136,.2); text-align:center;">
-    <div class="rep-title" style="color:#0f8; text-shadow:0 0 15px rgba(0,255,136,.8);" id="d3x-stake-title">D3X MINING/STAKING</div>
-    <div class="rep-desc" style="color:#aaffd0; margin-bottom: 20px;">Deploy miners to extract D3X and secure network resources. Completes in exactly 1 hour.</div>
+    <div class="rep-title" style="color:#0f8; text-shadow:0 0 15px rgba(0,255,136,.8);" id="d3x-stake-title">D3X DEEP EXCAVATION</div>
+    <div class="rep-desc" style="color:#aaffd0; margin-bottom: 20px;">Deploy rigs deeper into the crust. Excavation costs 3-6 D3X but rewards 2 D3X instantly. Breaching the core (10 Digs) yields a massive 35 D3X jackpot!</div>
     
-    <div style="background:rgba(0,255,136,.05); border:1px solid rgba(0,255,136,.3); padding:20px; text-align:center; margin-bottom:20px; border-radius:8px;">
-        <div id="d3x-stake-timer" style="font-size:32px; font-family:monospace; color:#0af; font-weight:bold; letter-spacing:4px; margin-bottom:10px; text-shadow:0 0 10px rgba(0,170,255,0.5);">01:00:00</div>
-        <div id="d3x-stake-status" style="font-size:12px; color:#aaa; letter-spacing:2px; margin-bottom:10px;">AWAITING STAKE INITIATION</div>
+    <div style="background:rgba(0,255,136,.05); border:1px solid rgba(0,255,136,.3); padding:20px; text-align:center; margin-bottom:10px; border-radius:8px;">
+        <div id="d3x-stake-timer" style="font-size:32px; font-family:monospace; color:#0af; font-weight:bold; letter-spacing:4px; margin-bottom:10px; text-shadow:0 0 10px rgba(0,170,255,0.5);">0 / 10</div>
+        <div id="d3x-stake-status" style="font-size:12px; color:#aaa; letter-spacing:2px; margin-bottom:10px;">CORE BREACH PROGRESS</div>
         <div style="width:100%; height:8px; background:rgba(0,255,136,.1); margin:0 auto; border-radius:4px; overflow:hidden;">
-            <div id="d3x-stake-progress" style="height:100%; width:0%; background:#0f8; transition:1s linear; box-shadow:0 0 10px #0f8;"></div>
+            <div id="d3x-stake-progress" style="height:100%; width:0%; background:#0f8; transition:0.2s linear; box-shadow:0 0 10px #0f8;"></div>
         </div>
     </div>
 
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <div style="font-size:14px; font-weight:bold; color:#0f0; letter-spacing:1px;" id="d3x-stake-reward-text">POTENTIAL YIELD: 3-7 D3X</div>
-        <button id="btn-stake-d3x" class="sp-btn" onclick="handleStakeD3X()" style="background:rgba(0,255,136,.2); border:1px solid #0f8; color:#0f8; padding:15px 30px; font-size:16px; min-width: 180px;">STAKE TO MINE</button>
+    <div id="d3x-dig-log" style="height:80px; overflow-y:auto; background:rgba(0,0,0,0.5); border:1px solid rgba(0,255,136,0.2); margin-bottom:15px; padding:8px; font-family:monospace; font-size:11px; text-align:left; color:#aaa; display:flex; flex-direction:column; gap:4px; align-items:flex-start;">
+        <div style="color:#0f8; opacity:0.8;">> MINE LINK ESTABLISHED. READY FOR EXCAVATION.</div>
+    </div>
+
+    <div style="display:flex; justify-content:center; align-items:center; margin-bottom:20px;">
+        <button id="btn-stake-d3x" class="sp-btn" onclick="handleDigD3X()" style="background:rgba(0,255,136,.2); border:1px solid #0f8; color:#0f8; padding:20px 40px; font-size:24px; min-width: 100%; font-weight:bold; cursor:pointer;" onmouseover="this.style.background='rgba(0,255,136,.4)'" onmouseout="this.style.background='rgba(0,255,136,.2)'">DIG DEEPER</button>
     </div>
 
     <button class="sp-btn" style="background:transparent; border:1px solid #f55; color:#f55; width:100%; padding:10px; font-size:12px;" onclick="closeD3XStakeModal();">CLOSE LINK</button>
@@ -10297,6 +10300,33 @@ function initWS() {
   ws.onmessage=e=>{
     const msg=JSON.parse(e.data);
     switch(msg.type){
+      case 'mine_click_result': {
+          if (msg.mineId !== window.activeMineModalId) break;
+          
+          // Server computed the math. Sync our UI safely.
+          if (!window.d3xDigState[msg.mineId]) window.d3xDigState[msg.mineId] = { clicks: 0 };
+          window.d3xDigState[msg.mineId].clicks = msg.clicks;
+          
+          window.localD3XBalance += msg.netChange;
+          if (document.getElementById('cwd-bal')) {
+              document.getElementById('cwd-bal').innerText = "| " + window.localD3XBalance.toLocaleString() + " D3X";
+          }
+          
+          updateDigUI(msg.clicks);
+          
+          if (msg.isJackpot) {
+              appendDigLog(`<span style="color:#fa0; font-weight:bold;">>>> CORE BREACH! +${msg.treasure} D3X FOUND!</span>`);
+              if (typeof spawnFlyingResourceText === 'function') {
+                  // Approximate coordinates to pop up from center screen
+                  spawnFlyingResourceText(`+${msg.treasure} D3X JACKPOT!`, window.innerWidth/2, window.innerHeight/2, '#fa0');
+              }
+              if (typeof _sfxExplosion !== 'undefined') _sfxExplosion(); // Extra punchy sound effect
+          } else {
+              appendDigLog(`<span style="color:#f55">-${msg.cost} D3X</span> Burned. Mined <span style="color:#0f8">+${msg.baseReward} D3X</span>. (Net: ${msg.netChange > 0 ? '+' : ''}${msg.netChange})`);
+          }
+          break;
+      }
+      
       case 'drone_control': {
           if (msg.faction === 'GEMINI' && msg.targetPos) {
               window.droneApiTarget = msg.targetPos;
@@ -15066,105 +15096,76 @@ window.toggleRadioLock = function() {
 };
 
 // ========================================================
-// D3X MINE STAKING LOGIC
+// D3X MINE EXCAVATION LOGIC
 // ========================================================
-window.d3xStakeState = window.d3xStakeState || {};
-let activeStakeTimerInterval = null;
+window.d3xDigState = window.d3xDigState || {};
+window.activeMineModalId = null;
 
 window.closeD3XStakeModal = function() {
     document.getElementById('d3x-resource-staking-modal').style.display = 'none';
-    if (activeStakeTimerInterval) {
-        clearInterval(activeStakeTimerInterval);
-        activeStakeTimerInterval = null;
-    }
+    window.activeMineModalId = null;
 };
 
 window.openD3XStakeModal = function(mineId) {
     if (typeof _sfxClick !== 'undefined') _sfxClick();
     const modal = document.getElementById('d3x-resource-staking-modal');
     modal.style.display = 'flex';
-    modal.dataset.activeMineId = mineId;
+    window.activeMineModalId = mineId;
     
-    // Clear any previous interval updating the UI
-    if (activeStakeTimerInterval) clearInterval(activeStakeTimerInterval);
-    
-    updateD3XStakeModalUI(mineId);
-    
-    // Start interval to keep UI updated every second while open
-    activeStakeTimerInterval = setInterval(() => {
-        updateD3XStakeModalUI(mineId);
-    }, 1000);
+    // Reset UI to current state
+    document.getElementById('d3x-stake-title').innerText = `D3X MINE [${mineId.substring(0,8).toUpperCase()}]`;
+    const state = window.d3xDigState[mineId] || { clicks: 0 };
+    updateDigUI(state.clicks);
 };
 
-function updateD3XStakeModalUI(mineId) {
-    const state = window.d3xStakeState[mineId];
-    const timerDisplay = document.getElementById('d3x-stake-timer');
-    const statusText = document.getElementById('d3x-stake-status');
-    const progressBar = document.getElementById('d3x-stake-progress');
-    const actionBtn = document.getElementById('btn-stake-d3x');
-    const title = document.getElementById('d3x-stake-title');
+function updateDigUI(clicks) {
+    document.getElementById('d3x-stake-timer').innerText = `${clicks} / 10`;
+    document.getElementById('d3x-stake-progress').style.width = `${(clicks / 10) * 100}%`;
     
-    title.innerText = `D3X MINE [${mineId.substring(0,8).toUpperCase()}]`;
-
-    if (!state) {
-        // Not Staking
-        timerDisplay.innerText = "01:00:00";
-        statusText.innerText = "AWAITING STAKE INITIATION";
-        progressBar.style.width = "0%";
-        progressBar.style.background = "#0f8";
-        actionBtn.innerText = "STAKE TO MINE";
-        actionBtn.onclick = () => window.handleStakeD3X(mineId);
-        actionBtn.style.pointerEvents = 'auto';
-        actionBtn.style.opacity = '1';
-        return;
-    }
-
-    const elapsed = Date.now() - state.startTime;
-    const duration = 3600000; // 1 hour in ms
-    const remaining = Math.max(0, duration - elapsed);
-
-    if (remaining > 0) {
-        // Staking in progress
-        const s = Math.floor((remaining / 1000) % 60);
-        const m = Math.floor((remaining / 1000 / 60) % 60);
-        const h = Math.floor((remaining / 1000 / 60 / 60));
-        timerDisplay.innerText = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-        statusText.innerText = "MINING IN PROGRESS";
-        
-        const pct = (elapsed / duration) * 100;
-        progressBar.style.width = `${pct}%`;
-        progressBar.style.background = "#fa0";
-        
-        actionBtn.innerText = "MINING...";
-        actionBtn.onclick = null;
-        actionBtn.style.pointerEvents = 'none';
-        actionBtn.style.opacity = '0.5';
+    if (clicks === 0) {
+        document.getElementById('d3x-stake-progress').style.background = "#fa0";
     } else {
-        // Ready to collect
-        timerDisplay.innerText = "00:00:00";
-        statusText.innerText = "MINING COMPLETE. YIELD READY.";
-        progressBar.style.width = "100%";
-        progressBar.style.background = "#0f8";
-        
-        actionBtn.innerText = "COLLECT YIELD";
-        actionBtn.onclick = () => window.handleCollectD3X(mineId);
-        actionBtn.style.pointerEvents = 'auto';
-        actionBtn.style.opacity = '1';
+        document.getElementById('d3x-stake-progress').style.background = "#0f8";
     }
 }
 
-window.handleStakeD3X = function(mineId) {
+window.handleDigD3X = function() {
     if (typeof _sfxClick !== 'undefined') _sfxClick();
-    window.d3xStakeState[mineId] = {
-        startTime: Date.now()
-    };
-    updateD3XStakeModalUI(mineId);
     
-    // Optional: Visual cue on the map
-    if (typeof setLog === 'function') {
-        setLog(`[MINING] Deployed rigs to Sector ${mineId.substring(0,4)}. Estimated completion: 1 hour.`);
+    if (!window.activeMineModalId) return;
+    
+    // Validate we actually have some D3X to afford the 3-6 D3X dig cost
+    if (window.localD3XBalance < 6) {
+        appendDigLog(`<span style="color:#f55">ERROR: Insufficient D3X</span> to power excavation rig (6 D3X required).`);
+        return;
+    }
+    
+    if (typeof ws !== 'undefined' && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+            type: 'process_mine_click',
+            callsign: window.myCallsign || GS.playerCallsign,
+            mineId: window.activeMineModalId
+        }));
+    } else {
+        appendDigLog(`<span style="color:#f55">ERROR: Connection to server lost.</span>`);
     }
 };
+
+function appendDigLog(htmlString) {
+    const logDiv = document.getElementById('d3x-dig-log');
+    if (!logDiv) return;
+    
+    const tString = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    const newEntry = document.createElement('div');
+    newEntry.innerHTML = `[${tString}] ${htmlString}`;
+    logDiv.appendChild(newEntry);
+    
+    // Keep max 20 lines
+    while (logDiv.children.length > 20) {
+        logDiv.removeChild(logDiv.firstChild);
+    }
+    logDiv.scrollTop = logDiv.scrollHeight;
+}
 
 window.handleCollectD3X = function(mineId) {
     if (typeof _sfxClick !== 'undefined') _sfxClick();
