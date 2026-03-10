@@ -1433,7 +1433,9 @@ async function fetchAndBroadcastAIBalances() {
             }
         } catch(e) { console.error('Gemini balance error:', e.message); geminiBalance = 0; }
         
-        try {
+            // Add a small delay between requests to avoid bursting the RPC node rate limits
+            await new Promise(r => setTimeout(r, 2000));
+
             const accounts = await solanaConnection.getParsedTokenAccountsByOwner(
                 rainclaudeKeypair.publicKey, 
                 { mint: D3X_MINT_ADDRESS }
@@ -1455,7 +1457,8 @@ async function fetchAndBroadcastAIBalances() {
     }
 }
 
-setInterval(fetchAndBroadcastAIBalances, 10000);
+// Polling interval increased to 60 seconds to prevent Solana Public RPC 429 Rate Limiting
+setInterval(fetchAndBroadcastAIBalances, 60000);
 
 // Tick the combat every 30 minutes (1800000ms) to maintain persistent global conflict with minimal API cost
 setInterval(runAICombatTurn, 1800000);

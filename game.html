@@ -1225,17 +1225,17 @@ body{background:#02050a;color:#fff;font-family:'Courier New',monospace;overflow:
 
   <!-- DATACENTER CO-OP UI (CYBER SKIN ONLY) -->
   <!-- STAKING TOWER MODAL -->
-  <div id="staking-tower-modal" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:840px; min-height:340px; flex-direction:column; background:rgba(20,0,0,0.95); border:1px solid #ff0033; border-radius:8px; box-shadow:0 0 30px rgba(255,0,50,0.3); padding:20px; pointer-events:auto; backdrop-filter:blur(10px); z-index:100;">
+  <div id="staking-tower-modal" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:840px; min-height:340px; flex-direction:column; background:rgba(20,0,0,0.95); border:1px solid #ff0033; border-radius:8px; box-shadow:0 0 30px rgba(255,0,50,0.3); padding:20px; pointer-events:auto; backdrop-filter:blur(10px); z-index:99999;">
     <button onclick="document.getElementById('staking-tower-modal').style.display='none'; window.selectedStakingTower=null;" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#f55;font-size:16px;cursor:pointer;line-height:1;padding:4px;">✕</button>
     <h2 style="margin:0 0 5px 0; color:#ff0033; font-family:'Orbitron', sans-serif; font-size:22px; text-transform:uppercase; letter-spacing:2px; text-shadow:0 0 10px rgba(255,0,50,0.5);">STAKING TERMINAL</h2>
     <div style="color:#aaa; font-family:'Share Tech Mono', monospace; font-size:12px; margin-bottom:20px;">NODE PROTOCOL: <span style="color:#fff;" id="staking-tower-node-name">D3X CORE NETWORK</span></div>
     
-    <div style="display:flex; gap:15px; flex:1;">
+    <div style="display:flex; gap:15px; flex:1; align-items:flex-start;">
       <div style="flex:1; border:1px solid rgba(255,0,50,0.3); padding:15px; background:rgba(40,0,0,0.5); border-radius:4px; display:flex; flex-direction:column; justify-content:center;">
         <div style="color:#fa0; font-family:'Share Tech Mono', monospace; font-size:14px; margin-bottom:10px;">AVAILABLE D3X: <span style="color:#fff;" id="staking-tower-balance">100</span></div>
         <div style="color:#0f0; font-family:'Share Tech Mono', monospace; font-size:14px; margin-bottom:20px;">ESTIMATED APY: <span style="color:#fff;">12.5%</span></div>
         <input type="number" id="staking-tower-amount-input" placeholder="Amount to Stake" style="width:100%; box-sizing:border-box; padding:8px; background:rgba(255,255,255,0.05); border:1px solid #ff0033; color:#fff; font-family:'Courier New', monospace; outline:none; margin-bottom:10px; border-radius:2px;">
-        <button id="btn-stake-deposit" onclick="handleStakeDeposit()" style="width:100%; padding:10px; background:rgba(255,0,50,0.2); border:1px solid #ff0033; color:#ff0033; font-family:'Share Tech Mono', monospace; cursor:pointer; font-weight:bold; transition:all 0.2s; border-radius:2px; margin-top:auto;">DEPOSIT STAKE</button>
+        <button id="btn-stake-deposit" onclick="handleStakeDeposit()" style="width:100%; padding:10px; background:rgba(255,0,50,0.2); border:1px solid #ff0033; color:#ff0033; font-family:'Share Tech Mono', monospace; cursor:pointer; font-weight:bold; transition:all 0.2s; border-radius:2px;">DEPOSIT STAKE</button>
       </div>
       <div style="flex:1; border:1px solid rgba(255,0,50,0.3); padding:15px; background:rgba(40,0,0,0.5); border-radius:4px; display:flex; flex-direction:column; justify-content:center;">
         <div style="color:#0af; font-family:'Share Tech Mono', monospace; font-size:14px; margin-bottom:10px;">ACTIVE STAKED: <span style="color:#fff;" id="staking-tower-active">0 D3X</span></div>
@@ -4622,8 +4622,8 @@ function initGlobalTradeNetwork() {
   }
 
   routes.forEach(rt => {
-    // Inject 4 vehicles traversing each global route (we added 160 routes, 4x bidirectional = massive density)
-    for(let i=0; i<4; i++) {
+    // Inject 8 vehicles traversing each global route (we added 160 routes, 8x bidirectional = massive density)
+    for(let i=0; i<8; i++) {
        createTradeRoute(rt.from[0], rt.from[1], rt.to[0], rt.to[1], rt.type);
        createTradeRoute(rt.to[0], rt.to[1], rt.from[0], rt.from[1], rt.type);
     }
@@ -7560,7 +7560,13 @@ window.tradeGreenMetal = function(metalName, amount) {
     }
   }
   updateGreenMarket();
-  if (typeof updateDashBoard === 'function') updateDashBoard(); // Refresh user budget graphic immediately
+  if (typeof updateDashboard === 'function') updateDashboard();
+
+  // Sync the top-right wallet balance UI
+  const balEl = document.getElementById('cwd-bal');
+  if (balEl) {
+      balEl.innerText = "| " + window.localD3XBalance.toLocaleString(undefined, { maximumFractionDigits: 1 }) + " D3X";
+  }
 };
 
 updateGreenMarket(); // Initial render to prevent 2-3s delay on script load
@@ -7583,6 +7589,7 @@ window.showGMarketWallet = function() {
       modal.style.left = '50%';
       modal.style.transform = 'translate(-50%,-50%)';
       modal.style.width = '1200px';
+      modal.style.maxHeight = '75vh';
       modal.style.backgroundColor = 'rgba(0,18,8,0.95)';
       modal.style.border = '2px solid #0f8';
       modal.style.boxShadow = '0 0 25px rgba(0,255,136,0.4)';
@@ -7661,10 +7668,10 @@ window.showGMarketWallet = function() {
   listHtml += `
   <div style="display:flex; justify-content:space-between; margin-top:20px; padding-top:15px; border-top:1px dashed #0f8;">
     <div style="font-size:14px; font-weight:bold; color:#aaa; font-family:'Courier New', monospace;">
-      AVAILABLE D3X WALLET BALANCE: <span style="color:#fff;">${window.localD3XBalance.toFixed(2)} D3X</span>
+      AVAILABLE D3X WALLET BALANCE: <span style="color:#fff;">${window.localD3XBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} D3X</span>
     </div>
     <div style="text-align:right; font-size:16px; font-weight:bold; color:#fff;">
-      NET WORTH (HOLDINGS): <span style="color:#0f8; font-family:'Courier New', monospace;">${totalVal.toFixed(2)} D3X</span>
+      NET WORTH (HOLDINGS): <span style="color:#0f8; font-family:'Courier New', monospace;">${totalVal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} D3X</span>
     </div>
   </div>`;
   
@@ -10133,15 +10140,15 @@ function spawnAmbients() {
     ambients.push({ pivot, axis, speed, sprite, type, offset: Math.random()*100 });
   }
 
-  // Spawn 15 Satellites in high orbit
-  for(let i=0; i<15; i++) {
+  // Spawn 30 Satellites in high orbit
+  for(let i=0; i<30; i++) {
     const sprite = new THREE.Sprite(matSat);
     sprite.scale.set(0.6, 0.6, 1.0);
     // High orbit radius
     const radius = 12.5 + Math.random() * 1.5;
     
-    const phi = Math.acos(-1 + (2 * i)/15);
-    const theta = Math.sqrt(15 * Math.PI) * phi;
+    const phi = Math.acos(-1 + (2 * i)/30);
+    const theta = Math.sqrt(30 * Math.PI) * phi;
     sprite.position.setFromSphericalCoords(radius, phi, theta);
     
     const pivot = new THREE.Group();
@@ -10160,11 +10167,11 @@ function spawnAmbients() {
   const matSatRed = new THREE.SpriteMaterial({map: texSatRed, color: 0xffffff});
   const matSatBlue = new THREE.SpriteMaterial({map: texSatBlue, color: 0xffffff});
 
-  for(let i=0; i<300; i++) { // Doubled from 150 to 300
+  for(let i=0; i<600; i++) { // Doubled from 150 to 600
     let currentMat = matSat; // 40% white (neutral)
-    if (i < 90) { // 30% red (rainclaude)
+    if (i < 180) { // 30% red (rainclaude)
       currentMat = matSatRed;
-    } else if (i < 180) { // 30% blue (humanity)
+    } else if (i < 360) { // 30% blue (humanity)
       currentMat = matSatBlue;
     }
     const sprite = new THREE.Sprite(currentMat);
@@ -10173,8 +10180,8 @@ function spawnAmbients() {
     const radius = 11.5 + Math.random() * 2.0; 
     
     // Distribute evenly around the sphere
-    const phi = Math.acos(-1 + (2 * i)/50);
-    const theta = Math.sqrt(50 * Math.PI) * phi;
+    const phi = Math.acos(-1 + (2 * i)/600);
+    const theta = Math.sqrt(600 * Math.PI) * phi;
     sprite.position.setFromSphericalCoords(radius, phi, theta);
     
     const pivot = new THREE.Group();
@@ -14421,9 +14428,18 @@ window.lastMiningTime = 0;
 const MINING_COOLDOWN_MS = 15000; // 15 Seconds Cooldown
 
 window.mineD3XCoin = function() {
-    const myPlayer = GS.players && GS.players[GS.myIndex];
-    if (!myPlayer) return;
+    const log = document.getElementById('mining-log');
     
+    // Check if player has enough D3X to mine
+    if (window.localD3XBalance === undefined) window.localD3XBalance = 0;
+    
+    if (window.localD3XBalance < 1.0) {
+        SFX.playError();
+        log.innerHTML += `<div><span style="color:#f55">INSUFFICIENT FUNDS: Need 1.0 D3X to mine.</span></div>`;
+        log.scrollTop = log.scrollHeight;
+        return;
+    }
+
     // Check Cooldown Timer
     const now = Date.now();
     const timeSinceLastMine = now - window.lastMiningTime;
@@ -14431,26 +14447,36 @@ window.mineD3XCoin = function() {
     if (timeSinceLastMine < MINING_COOLDOWN_MS) {
         SFX.playError();
         const timeLeft = Math.ceil((MINING_COOLDOWN_MS - timeSinceLastMine) / 1000);
-        const log = document.getElementById('mining-log');
         log.innerHTML += `<div><span style="color:#f55">DRILL OVERHEATED: Cooling down. Please wait ${timeLeft}s...</span></div>`;
         log.scrollTop = log.scrollHeight;
         return;
     }
     
-    // Free Action granted
-    window.lastMiningTime = now;
-    SFX.playLaser(); // Drilling sound
-    window.internalD3XMiningAmount += 0.05;
+    // Pay the 1 D3X cost to mine
+    window.localD3XBalance -= 1.0;
+    if (typeof updateDashboard === 'function') updateDashboard();
     
-    const log = document.getElementById('mining-log');
-    log.innerHTML += `<div><span style="color:#aaa">Energy Consumed.</span> Drill fired! Yielded <span style="color:#0f8">+0.05 D3X</span> progress.</div>`;
+    // Update top-right balance UI
+    const balEl = document.getElementById('cwd-bal');
+    if (balEl) {
+        balEl.innerText = "| " + window.localD3XBalance.toLocaleString(undefined, { maximumFractionDigits: 1 }) + " D3X";
+    }
+
+    window.lastMiningTime = now;
+    if (typeof SFX !== 'undefined' && SFX.playLaser) SFX.playLaser(); // Drilling sound
+    window.internalD3XMiningAmount += 0.1; // 10% reward yield
+    
+    log.innerHTML += `<div><span style="color:#aaa">1.0 D3X Consumed.</span> Drill fired! Yielded <span style="color:#0f8">+0.10 D3X</span> progress.</div>`;
     
     // Check if we hit 1.0 total
     if (window.internalD3XMiningAmount >= 0.99) { // Using 0.99 to avoid float precision bugs around 1.0
         window.internalD3XMiningAmount = 0.0;
-        myPlayer.budget += 1; // Payout 1 whole D3X
-        updateDashboard();
-        SFX.playSiren(); // Payout sound
+        window.localD3XBalance += 1.0; // Payout 1 whole D3X
+        
+        if (typeof updateDashboard === 'function') updateDashboard();
+        if (balEl) balEl.innerText = "| " + window.localD3XBalance.toLocaleString(undefined, { maximumFractionDigits: 1 }) + " D3X";
+
+        if (typeof SFX !== 'undefined' && SFX.playSiren) SFX.playSiren(); // Payout sound
         log.innerHTML += `<div style="color:#ffcc00; font-weight:bold; font-size:14px; margin-top:10px;">💎 JACKPOT 💎<br/>1.0 D3X Deposited from Master Wallet!</div>`;
         if (typeof setLog === 'function') setLog("💎 D3X Mining Operation Successful! +1 D3X granted.");
     }
@@ -14463,10 +14489,12 @@ window.mineD3XCoin = function() {
     // Start Visual Cooldown Tick
     const btn = document.querySelector('#d3x-mining-modal button[onclick="mineD3XCoin()"]');
     if (btn) {
-        const originalText = btn.innerHTML;
+        const originalText = 'MINE DEPOSITS';
         btn.disabled = true;
         btn.style.opacity = '0.5';
         let cd = MINING_COOLDOWN_MS / 1000;
+        
+        btn.innerHTML = `RECHARGING (${cd}s)...`;
         
         const tick = setInterval(() => {
             cd--;

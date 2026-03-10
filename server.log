@@ -72,3 +72,5 @@ Commander 16 disconnected. Remaining: 0
 Commander 17 joined. Total Commanders: 1
 Commander 17 disconnected. Remaining: 0
 [KEEP-ALIVE] Failed to ping World Monitor: fetch failed
+Claude API Returned Error: invalid x-api-key
+[AI COMBAT] [RAINCLAUDE: KINETIC_STRIKE] Rainclaude API Quota Limit. Initiating automated countermeasures. | Gemini HP: 3650, Claude HP: 8605
