@@ -1342,7 +1342,7 @@ body {
   <div style="position:absolute; bottom:12px; left:20px; font-family:'Share Tech Mono', monospace; font-size:10px; font-weight:normal; letter-spacing:3px; color:#0af; text-transform:uppercase; z-index:15; pointer-events:none; text-shadow:0 0 5px rgba(0,170,255,0.8);">DEXMOND TECHNOLOGIES Ltd</div>
   
   <div style="position:absolute; top:20px; right:20px; display:flex; gap:10px; align-items:center;">
-      <button id="btn-reinvest-d3x" onclick="toggleReinvest()" style="display:block; width:130px; pointer-events:auto; padding:8px 0; background:rgba(0,255,136,0.15); border:1px solid #0f8; color:#0f8; font-family:'Courier New', monospace; font-size:10px; font-weight:bold; text-align:center; cursor:pointer; border-radius:4px; transition:all 0.2s; box-shadow:0 0 10px rgba(0,255,136,0.2); box-sizing:border-box; margin-right:100px;">♻️ REINVEST: OFF<br/>AIRDROP 1X</button>
+      <button id="btn-reinvest-d3x" onclick="toggleReinvest()" style="display:block; width:130px; pointer-events:auto; padding:8px 0; background:rgba(0,255,136,0.15); border:1px solid #0f8; color:#0f8; font-family:'Courier New', monospace; font-size:10px; font-weight:bold; text-align:center; cursor:pointer; border-radius:4px; transition:all 0.2s; box-shadow:0 0 10px rgba(0,255,136,0.2); box-sizing:border-box; margin-right:200px;">♻️ REINVEST: OFF<br/>AIRDROP 1X</button>
       <div id="top-right-stats" style="background:rgba(0,180,255,0.1); border:1px solid rgba(0,180,255,0.4); padding:6px 12px; border-radius:4px; display:none; align-items:center; gap:8px;">
           <div style="color:#0af; font-weight:bold; font-size:11px;" id="d0-d3x-address">LOADING WALLET...</div>
           <div style="color:#fff; opacity:0.5;">|</div>
@@ -9942,8 +9942,17 @@ function initWS() {
                     }
                 });
                 if (msg.data.tradeLogs) window.greenMarket.tradeLogs = msg.data.tradeLogs;
+                if (typeof msg.data.localD3XBalance === 'number') {
+                    window.localD3XBalance = msg.data.localD3XBalance;
+                    const balEl = document.getElementById('cwd-bal');
+                    if (balEl) balEl.innerText = "| " + window.localD3XBalance.toLocaleString(undefined, { maximumFractionDigits: 1 }) + " D3X";
+                }
+                
+                if (typeof updateGreenMarket === 'function') updateGreenMarket();
+                if (typeof updateDashboard === 'function') updateDashboard();
+
                 console.log("🟢 [MARKET] Loaded persistent user portfolio from DB.");
-                if (document.getElementById('green-market-modal').style.display === 'flex') {
+                if (document.getElementById('green-market-modal') && document.getElementById('green-market-modal').style.display === 'flex') {
                     renderGreenMarketList();
                 }
             }
