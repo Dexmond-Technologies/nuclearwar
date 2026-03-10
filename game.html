@@ -8356,6 +8356,49 @@ function showGreenSkinResourceModal(iso) {
     metalsHtml += `</div></div>`;
   }
   
+  const RESOURCES_DATA = [
+      { name: 'Crude Oil', color: '#fa0', desc: 'State monopolies or direct government control over production (e.g., National Oil Companies).' },
+      { name: 'Natural Gas', color: '#0f8', desc: 'State-controlled extraction, reserves owned by the nation.' },
+      { name: 'Coal', color: '#aaa', desc: 'Government-dominated production or heavily regulated public land leasing.' },
+      { name: 'Uranium', color: '#0f0', desc: 'Heavily regulated and state-controlled for strategic/security purposes.' },
+      { name: 'Phosphate Rock', color: '#f88', desc: 'Key fertilizer component; production is strictly state-influenced or owned.' },
+      { name: 'Potash', color: '#ffc', desc: 'Essential agricultural resource; governed by state leases and public resource management.' },
+      { name: 'Salt', color: '#ddf', desc: 'State-produced resource or regulated government monopoly.' },
+      { name: 'Limestone', color: '#ccc', desc: 'State-leased or directly controlled on public lands for construction.' },
+      { name: 'Gypsum', color: '#eda', desc: 'Managed through state building materials oversight and leasing.' },
+      { name: 'Freshwater', color: '#08f', desc: 'Governments strictly control extraction, distribution, and ownership.' },
+      // Bonus catalog items that exist in the DB but not originally listed in the modal
+      { name: 'Lumber (Wood)', color: '#a64', desc: 'Timber rights managed by state forestry departments.' },
+      { name: 'Wheat', color: '#fd0', desc: 'Agricultural staple, heavily subsidized and traded globally.' }
+  ];
+
+  let resourcesHtml = '';
+  RESOURCES_DATA.forEach(r => {
+      let tradeHtml = '';
+      if (window.greenMarket && window.greenMarket.commodities[r.name]) {
+          const safeK = r.name.replace(/[^a-zA-Z]/g, '');
+          const c = window.greenMarket.commodities[r.name];
+          const priceMIL = (c.price / 100).toFixed(2);
+          tradeHtml = `
+            <div style="margin-top:10px; padding-top:8px; border-top: 1px dashed rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center;">
+               <div id="market-price-${safeK}" style="font-family:'Orbitron', monospace; font-size:14px; font-weight:bold; color:#fff;">
+                  $${priceMIL} MIL <span style="font-size:10px; color:#aaa; font-weight:normal;">/ SHARE</span>
+               </div>
+               <div style="display:flex; gap:5px;">
+                  <button onclick="window.tradeGreenMetal('${r.name}', 1)" style="background:rgba(0,255,136,0.2); border:1px solid #0f8; color:#0f8; padding:4px 8px; border-radius:3px; cursor:pointer; font-weight:bold; font-size:11px;">BUY</button>
+                  <button id="market-sell-${safeK}" onclick="window.tradeGreenMetal('${r.name}', -1)" ${c.shares === 0 ? 'disabled style="background:rgba(255,50,50,0.1); border:1px solid #f55; color:#f55; padding:4px 8px; border-radius:3px; cursor:not-allowed; font-weight:bold; font-size:11px; opacity:0.3;"' : 'style="background:rgba(255,50,50,0.2); border:1px solid #f55; color:#f55; padding:4px 8px; border-radius:3px; cursor:pointer; font-weight:bold; font-size:11px; opacity:1;"'}>SELL</button>
+               </div>
+            </div>
+          `;
+      }
+      resourcesHtml += `
+      <div class="strat-item">
+        <div class="strat-item-title" style="color:${r.color};">❖ ${r.name}</div>
+        <div class="strat-item-desc">${r.desc}</div>
+        ${tradeHtml}
+      </div>`;
+  });
+
   const content = `
     <div id="mock-trade-green-ui" data-country-name="${cName}" style="background:rgba(0,100,50,0.2); border:1px solid #0f8; padding:5px 10px; border-radius:4px; margin-bottom:10px; font-family:'Orbitron', sans-serif;">
        <b style="color:#0f8; font-size:13px; display:block; margin-bottom:3px;">LIVE MARKET: G-RESOURCES</b>
@@ -8365,47 +8408,8 @@ function showGreenSkinResourceModal(iso) {
       <span style="opacity:0.6;">Owned and managed by:</span><br>
       <b style="font-size:14px; color:#0f8;">${cName} GOVERNMENT</b>
     </div>
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-right: 5px;">
-      <div class="strat-item">
-        <div class="strat-item-title" style="color:#fa0;">🛢 Oil (Petroleum)</div>
-        <div class="strat-item-desc">State monopolies or direct government control over production (e.g., National Oil Companies).</div>
-      </div>
-      <div class="strat-item">
-        <div class="strat-item-title" style="color:#0f8;">💨 Natural Gas</div>
-        <div class="strat-item-desc">State-controlled extraction, reserves owned by the nation.</div>
-      </div>
-      <div class="strat-item">
-        <div class="strat-item-title" style="color:#aaa;">⛏ Coal</div>
-        <div class="strat-item-desc">Government-dominated production or heavily regulated public land leasing.</div>
-      </div>
-      <div class="strat-item">
-        <div class="strat-item-title" style="color:#0f0;">☢ Uranium</div>
-        <div class="strat-item-desc">Heavily regulated and state-controlled for strategic/security purposes.</div>
-      </div>
-      <div class="strat-item">
-        <div class="strat-item-title" style="color:#f88;">🌿 Phosphate Rock</div>
-        <div class="strat-item-desc">Key fertilizer component; production is strictly state-influenced or owned.</div>
-      </div>
-      <div class="strat-item">
-        <div class="strat-item-title" style="color:#ffc;">🌾 Potash</div>
-        <div class="strat-item-desc">Essential agricultural resource; governed by state leases and public resource management.</div>
-      </div>
-      <div class="strat-item">
-        <div class="strat-item-title" style="color:#ddf;">🧂 Salt</div>
-        <div class="strat-item-desc">State-produced resource or regulated government monopoly.</div>
-      </div>
-      <div class="strat-item">
-        <div class="strat-item-title" style="color:#ccc;">🧱 Limestone</div>
-        <div class="strat-item-desc">State-leased or directly controlled on public lands for construction.</div>
-      </div>
-      <div class="strat-item">
-        <div class="strat-item-title" style="color:#eda;">🏠 Gypsum</div>
-        <div class="strat-item-desc">Managed through state building materials oversight and leasing.</div>
-      </div>
-      <div class="strat-item">
-        <div class="strat-item-title" style="color:#08f;">💧 Water (Freshwater)</div>
-        <div class="strat-item-desc">Governments strictly control extraction, distribution, and ownership.</div>
-      </div>
+    <div id="natural-resources-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-right: 5px;">
+      ${resourcesHtml}
     </div>
     ${metalsHtml}
   `;

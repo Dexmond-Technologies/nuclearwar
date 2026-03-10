@@ -2063,6 +2063,13 @@ const AI_MARKET_CATALOG = [
   { name: 'Natural Gas', category: 'Natural Resources', basePrice: 3.50 },
   { name: 'Crude Oil', category: 'Natural Resources', basePrice: 78.50 },
   { name: 'Wheat', category: 'Natural Resources', basePrice: 0.60 },
+  { name: 'Coal', category: 'Natural Resources', basePrice: 110.00 },
+  { name: 'Uranium', category: 'Natural Resources', basePrice: 85.00 },
+  { name: 'Phosphate Rock', category: 'Natural Resources', basePrice: 150.00 },
+  { name: 'Potash', category: 'Natural Resources', basePrice: 300.00 },
+  { name: 'Salt', category: 'Natural Resources', basePrice: 40.00 },
+  { name: 'Limestone', category: 'Natural Resources', basePrice: 15.00 },
+  { name: 'Gypsum', category: 'Natural Resources', basePrice: 20.00 },
   
   // Tech & Compute Hardware
   { name: 'NVIDIA H100 Tensor Core', category: 'Tech & Compute Hardware', basePrice: 35000.00 },
