@@ -2479,6 +2479,113 @@ Type 'help' for available commands.
 @keyframes blink { 0%, 100% {opacity:1;} 50% {opacity:0.3;} }
 </style>
 
+<!-- Weapon Arsenal Overlay Modal (Tiers 1-4) -->
+<div id="weapon-arsenal-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:10005; background:rgba(0,5,15,0.85); backdrop-filter:blur(5px); justify-content:center; align-items:center;">
+  <div style="background:rgba(0,15,30,0.95); border:1px solid #00aaff; border-radius:8px; padding:20px; width:800px; max-width:95vw; box-shadow:0 0 40px rgba(0,170,255,0.2), inset 0 0 20px rgba(0,170,255,0.1); position:relative; overflow:hidden;">
+    <button onclick="closeWeaponArsenal()" style="position:absolute; top:12px; right:15px; background:none; border:none; color:#f55; cursor:pointer; font-size:18px; line-height:1; z-index:10;">✕</button>
+    
+    <div style="font-family:'Orbitron', sans-serif; color:#0af; font-size:18px; letter-spacing:3px; margin-bottom:20px; text-transform:uppercase; border-bottom:1px solid rgba(0,170,255,0.4); padding-bottom:10px;" id="weapon-arsenal-title">
+       [ TIER TITLE ] - ARSENAL ACCESS
+    </div>
+    
+    <div id="weapon-arsenal-list" style="display:grid; grid-template-columns:1fr 1fr; gap:15px; max-height:60vh; overflow-y:auto; padding-right:10px;">
+       <!-- JavaScript iterates and pushes weapons here -->
+    </div>
+    
+    <div style="margin-top:20px; border-top:1px solid rgba(0,170,255,0.4); padding-top:10px; font-family:'Share Tech Mono', monospace; font-size:12px; color:#8ac; opacity:0.8; line-height:1.4;">
+      <span style="color:#f24; font-weight:bold;">[ATTACK SYS READY]</span> Select a payload class above. Damage is calculated automatically upon deployment based on Ponderated Base Values.
+    </div>
+  </div>
+</div>
+<script>
+// Catalog hardcoded exactly from the approved implementation_plan.md matrix
+window.WEAPONS_CATALOG = [
+  // Tier 1
+  { name: "Pistol", tier: 1, attack: 5 },
+  { name: "Revolver", tier: 1, attack: 8 },
+  { name: "Rifle", tier: 1, attack: 15 },
+  { name: "Assault Rifle", tier: 1, attack: 22 },
+  { name: "Sniper Rifle", tier: 1, attack: 35 },
+  { name: "Shotgun", tier: 1, attack: 18 },
+  { name: "Submachine Gun", tier: 1, attack: 20 },
+  { name: "Machine Gun", tier: 1, attack: 30 },
+  // Tier 2
+  { name: "Hand Grenade", tier: 2, attack: 45 },
+  { name: "Smoke Grenade", tier: 2, attack: 5 },
+  { name: "Flashbang", tier: 2, attack: 10 },
+  { name: "TNT Charge", tier: 2, attack: 75 },
+  { name: "Plastic Explosive", tier: 2, attack: 90 },
+  { name: "Land Mine", tier: 2, attack: 85 },
+  { name: "Depth Charge", tier: 2, attack: 110 },
+  // Tier 3
+  { name: "Rocket Launcher", tier: 3, attack: 150 },
+  { name: "Anti-Tank Rocket", tier: 3, attack: 180 },
+  { name: "Mortar", tier: 3, attack: 220 },
+  { name: "Howitzer", tier: 3, attack: 350 },
+  { name: "Artillery Cannon", tier: 3, attack: 400 },
+  { name: "Multiple Rocket Launcher", tier: 3, attack: 550 },
+  // Tier 4
+  { name: "Guided Missile", tier: 4, attack: 800 },
+  { name: "Cruise Missile", tier: 4, attack: 1200 },
+  { name: "Surface-to-Air Missile", tier: 4, attack: 950 },
+  { name: "Ballistic Missile", tier: 4, attack: 3500 },
+  { name: "Gravity Bomb", tier: 4, attack: 2000 },
+  { name: "Cluster Bomb", tier: 4, attack: 2500 },
+  { name: "Incendiary Bomb", tier: 4, attack: 2800 },
+  { name: "Bunker-Buster Bomb", tier: 4, attack: 3200 },
+  { name: "Torpedo", tier: 4, attack: 1500 }
+];
+
+function openWeaponArsenal(tierId, titleName) {
+  if (typeof _sfxClick !== 'undefined') _sfxClick();
+  const modal = document.getElementById('weapon-arsenal-modal');
+  const title = document.getElementById('weapon-arsenal-title');
+  const list = document.getElementById('weapon-arsenal-list');
+  
+  title.innerText = titleName + " ARSENAL";
+  list.innerHTML = "";
+  
+  const filteredWeapons = window.WEAPONS_CATALOG.filter(w => w.tier === tierId);
+  filteredWeapons.forEach(w => {
+    const card = document.createElement('div');
+    card.style.background = 'rgba(0,40,80,0.6)';
+    card.style.border = '1px solid rgba(0,170,255,0.3)';
+    card.style.borderRadius = '4px';
+    card.style.padding = '12px';
+    card.style.display = 'flex';
+    card.style.justifyContent = 'space-between';
+    card.style.alignItems = 'center';
+    card.style.cursor = 'pointer';
+    card.style.transition = '0.2s';
+    
+    card.onmouseover = () => { card.style.background = 'rgba(0,60,120,0.8)'; card.style.borderColor = '#0af'; };
+    card.onmouseout = () => { card.style.background = 'rgba(0,40,80,0.6)'; card.style.borderColor = 'rgba(0,170,255,0.3)'; };
+    card.onclick = () => { 
+        if (typeof _sfxClick !== 'undefined') _sfxClick();
+        if (typeof setLog !== 'undefined') setLog(`Deployed ${w.name} [ATK: ${w.attack}]`);
+        // We could deduct ammo or D3X here in the future
+    };
+    
+    card.innerHTML = `
+      <div style="font-family:'Share Tech Mono', monospace; font-size:16px; color:#fff; text-shadow:0 0 5px #0af;">
+        ${w.name}
+      </div>
+      <div style="font-family:'Orbitron', sans-serif; font-size:14px; font-weight:bold; color:#f24; text-shadow:0 0 5px #f00;">
+        [ ATK: ${w.attack.toLocaleString()} ]
+      </div>
+    `;
+    list.appendChild(card);
+  });
+  
+  modal.style.display = 'flex';
+}
+
+function closeWeaponArsenal() {
+    if (typeof _sfxClick !== 'undefined') _sfxClick();
+    document.getElementById('weapon-arsenal-modal').style.display = 'none';
+}
+</script>
+
 <!-- Game Over -->
 <div id="gameover">
   <div id="go-title">— WINS THE WORLD —</div>
@@ -2997,6 +3104,8 @@ function initBlueBuildings() {
     rLabel.position.y = 0.35;
     rocketGroup.add(rLabel);
 
+    rocketGroup.userData = { isWeaponBuilding: true, tier: 3, buildingName: "HEAVY WEAPONS" };
+
     const rocketPos = ll2v(38.89, -77.03, GLOBE_R);
     rocketGroup.position.copy(rocketPos);
     rocketGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), rocketPos.clone().normalize());
@@ -3021,6 +3130,8 @@ function initBlueBuildings() {
     const bLabel = createTextSprite("TIER 4: STRATEGIC WEAPONS", "#00ffff");
     bLabel.position.y = 0.35;
     bombGroup.add(bLabel);
+
+    bombGroup.userData = { isWeaponBuilding: true, tier: 4, buildingName: "STRATEGIC WEAPONS" };
 
     const bombPos = ll2v(55.75, 37.61, GLOBE_R);
     bombGroup.position.copy(bombPos);
@@ -3050,6 +3161,8 @@ function initBlueBuildings() {
     const cLabel = createTextSprite("TIER 1: SMALL ARMS", "#00ffff");
     cLabel.position.y = 0.35;
     cmdGroup.add(cLabel);
+
+    cmdGroup.userData = { isWeaponBuilding: true, tier: 1, buildingName: "SMALL ARMS" };
 
     const cmdPos = ll2v(51.50, -0.12, GLOBE_R);
     cmdGroup.position.copy(cmdPos);
@@ -3132,7 +3245,8 @@ function initWTRBuildings() {
     mLabel.position.y = 0.15;
     mineGroup.add(mLabel);
 
-    // Place it somewhere oceanic or central (e.g., off the coast of Africa / Pacific)
+    mineGroup.userData = { isWeaponBuilding: true, tier: 2, buildingName: "EXPLOSIVES" };
+
     const minePos = ll2v(0, -20, GLOBE_R); 
     mineGroup.position.copy(minePos);
     mineGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), minePos.clone().normalize());
@@ -7382,6 +7496,53 @@ function handleGlobeClick(e) {
       if (m) m.classList.add('show');
       return; // consume click
     }
+  }
+
+  // 0.6 Check Weapon Tier Structures
+  if (window.currentSkinIndex === 5 && window.blueBuildingsGroup && window.blueBuildingsGroup.visible) {
+      const blueHits = ray.intersectObjects(window.blueBuildingsGroup.children, true);
+      if (blueHits.length > 0) {
+          // Identify which building was clicked based on custom userdata logic
+          const hitObj = blueHits[0].object;
+          
+          // Climb tree to find userdata
+          let current = hitObj;
+          let foundTier = null;
+          let foundName = "";
+          while(current) {
+              if (current.userData && current.userData.isWeaponBuilding) {
+                  foundTier = current.userData.tier;
+                  foundName = current.userData.buildingName;
+                  break;
+              }
+              current = current.parent;
+          }
+          
+          if (foundTier) {
+              openWeaponArsenal(foundTier, foundName);
+              return; // Consume click
+          }
+      }
+  }
+  if (window.currentSkinIndex === 4 && window.wtrBuildingsGroup && window.wtrBuildingsGroup.visible) {
+      const wtrHits = ray.intersectObjects(window.wtrBuildingsGroup.children, true);
+      if (wtrHits.length > 0) {
+          let current = wtrHits[0].object;
+          let foundTier = null;
+          let foundName = "";
+          while(current) {
+              if (current.userData && current.userData.isWeaponBuilding) {
+                  foundTier = current.userData.tier;
+                  foundName = current.userData.buildingName;
+                  break;
+              }
+              current = current.parent;
+          }
+          if (foundTier) {
+              openWeaponArsenal(foundTier, foundName);
+              return; // Consume click
+          }
+      }
   }
 
   // Intercept clicks on Boat Markers for Naval War Mini-Game
