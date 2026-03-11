@@ -15762,134 +15762,17 @@ window.buyOrbitalStrike = function() {
 </script>
 <script src="/dist/improve_earth.js" defer></script>
 
-<!-- Vanilla Wallet Integration (Phantom / MetaMask) -->
+// Load the Official Solana Wallet Adapter Bundle (Vanilla JS)
+<script src="public/vanilla-wallet.bundle.js" defer></script>
+
+<!-- Vanilla Wallet Integration (Phantom / Solflare) -->
 <script>
   window.openVanillaWalletModal = function() {
-    const overlay = document.createElement('div');
-    overlay.id = 'vanilla-wallet-overlay';
-    overlay.style.position = 'fixed';
-    overlay.style.top = '0';
-    overlay.style.left = '0';
-    overlay.style.width = '100vw';
-    overlay.style.height = '100vh';
-    overlay.style.backgroundColor = 'rgba(0,0,0,0.85)';
-    overlay.style.display = 'flex';
-    overlay.style.justifyContent = 'center';
-    overlay.style.alignItems = 'center';
-    overlay.style.zIndex = '999999';
-
-    const modal = document.createElement('div');
-    modal.style.background = '#0a192f';
-    modal.style.border = '1px solid #00f0ff';
-    modal.style.padding = '30px';
-    modal.style.borderRadius = '4px';
-    modal.style.fontFamily = "'Courier New', monospace";
-    modal.style.color = '#fff';
-    modal.style.boxShadow = '0 0 25px rgba(0, 240, 255, 0.2)';
-    modal.style.textAlign = 'center';
-    modal.style.width = '320px';
-
-    const title = document.createElement('h3');
-    title.innerText = 'SELECT DATA LINK';
-    title.style.margin = '0 0 20px 0';
-    title.style.color = '#00f0ff';
-    title.style.letterSpacing = '2px';
-    modal.appendChild(title);
-
-    const createWalletBtn = (name, color, hoverColor, onClickFn) => {
-      const btn = document.createElement('button');
-      btn.innerText = `CONNECT ${name.toUpperCase()}`;
-      btn.style.display = 'block';
-      btn.style.width = '100%';
-      btn.style.padding = '14px';
-      btn.style.marginBottom = '12px';
-      btn.style.background = 'rgba(0,20,40,0.8)';
-      btn.style.color = color;
-      btn.style.border = `1px solid ${color}`;
-      btn.style.borderRadius = '4px';
-      btn.style.cursor = 'pointer';
-      btn.style.fontSize = '14px';
-      btn.style.fontWeight = 'bold';
-      btn.style.letterSpacing = '1px';
-      btn.style.transition = 'all 0.2s';
-      
-      btn.onmouseover = () => {
-        btn.style.background = hoverColor;
-        btn.style.boxShadow = `0 0 15px ${color}`;
-      };
-      btn.onmouseout = () => {
-        btn.style.background = 'rgba(0,20,40,0.8)';
-        btn.style.boxShadow = 'none';
-      };
-
-      btn.onclick = async () => {
-        btn.innerText = 'CONNECTING...';
-        await onClickFn();
-        document.getElementById('vanilla-wallet-overlay')?.remove();
-      };
-      return btn;
-    };
-
-    const handleSuccess = (address) => {
-      const statusEl = document.getElementById('lobby-auth-status');
-      if (statusEl) {
-        statusEl.innerHTML = '✓ DATA LINK ESTABLISHED: ' + address.substring(0,4) + '...' + address.substring(address.length-4);
+      if (window.solanaWalletManager) {
+          window.solanaWalletManager.showWalletModal();
+      } else {
+          alert("Solana Wallet Connectors are still loading. Please wait a moment.");
       }
-      const authFlex = document.getElementById('auth-container-flex');
-      if (authFlex) {
-        authFlex.style.display = 'none';
-      }
-      window.pendingSolanaAddress = address; // Keep mapping name for backend compatibility
-      if (typeof window.joinGlobalWar === 'function') {
-        window.joinGlobalWar();
-      }
-    };
-
-    // Phantom Button
-    if (window.solana && window.solana.isPhantom) {
-      const phantomBtn = createWalletBtn('Phantom', '#ab9ff2', 'rgba(171,159,242,0.2)', async () => {
-        try {
-          // Force disconnect first to GUARANTEE Phantom prompts for a password and explicit wallet selection
-          await window.solana.disconnect(); 
-          const resp = await window.solana.connect();
-          handleSuccess(resp.publicKey.toString());
-        } catch (err) {
-          console.error(err);
-          alert('Phantom Connection Failed or Rejected.');
-        }
-      });
-      modal.appendChild(phantomBtn);
-    } else {
-      const msg = document.createElement('div');
-      msg.innerText = 'Phantom extension not detected.';
-      msg.style.color = '#ab9ff2'; msg.style.opacity = '0.5'; msg.style.fontSize = '11px'; msg.style.marginBottom = '10px';
-      modal.appendChild(msg);
-    }
-
-    // MetaMask Button (Temporarily Disabled by User Request)
-    const metamaskBtn = createWalletBtn('MetaMask [UNAVAILABLE]', '#555', 'rgba(100,100,100,0.2)', async () => {
-        alert('MetaMask integration is temporarily disabled for D3X transition. Please use Phantom.');
-    });
-    metamaskBtn.style.opacity = '0.5';
-    metamaskBtn.style.cursor = 'not-allowed';
-    modal.appendChild(metamaskBtn);
-
-    const closeBtn = document.createElement('button');
-    closeBtn.innerText = 'ABORT';
-    closeBtn.style.marginTop = '15px';
-    closeBtn.style.background = 'transparent';
-    closeBtn.style.color = '#ff3232';
-    closeBtn.style.border = 'none';
-    closeBtn.style.cursor = 'pointer';
-    closeBtn.style.fontSize = '12px';
-    closeBtn.style.letterSpacing = '1px';
-    closeBtn.onclick = () => overlay.remove();
-    closeBtn.onmouseover = () => closeBtn.style.textShadow = '0 0 8px #ff3232';
-    closeBtn.onmouseout = () => closeBtn.style.textShadow = 'none';
-    
-    modal.appendChild(closeBtn);
-    overlay.appendChild(modal);
-    document.body.appendChild(overlay);
   }
 
 // =====================================================================

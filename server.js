@@ -172,7 +172,7 @@ async function loadGameStateFallback() {
   return null;
 }
 
-const PORT = process.env.PORT || 8888;
+const PORT = 8888; // Hardcoded to 8888 per user request
 
 // OpenSky API Removed
 
