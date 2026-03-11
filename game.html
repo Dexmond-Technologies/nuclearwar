@@ -3027,6 +3027,67 @@ function initBlueBuildings() {
 }
 initBlueBuildings();
 
+let wtrBuildingsGroup = new THREE.Group();
+wtrBuildingsGroup.visible = false;
+scene.add(wtrBuildingsGroup);
+window.wtrBuildingsGroup = wtrBuildingsGroup;
+
+function initWTRBuildings() {
+    // High-poly shiny metallic materials for the landmine
+    const darkMetalMat = new THREE.MeshStandardMaterial({
+        color: 0x333333, roughness: 0.4, metalness: 0.7
+    });
+    const brassMat = new THREE.MeshStandardMaterial({
+        color: 0xb5a642, roughness: 0.3, metalness: 0.9
+    });
+    const redGlowMat = new THREE.MeshStandardMaterial({
+        color: 0xff0000, emissive: 0x550000, roughness: 0.1, metalness: 0.5
+    });
+
+    const mineGroup = new THREE.Group();
+    
+    // Main circular body
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.03, 32), darkMetalMat);
+    base.position.y = 0.015;
+    mineGroup.add(base);
+    
+    // Sloped upper casing
+    const casing = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.08, 0.02, 32), darkMetalMat);
+    casing.position.y = 0.04;
+    mineGroup.add(casing);
+    
+    // Center pressure plate (brass)
+    const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.01, 32), brassMat);
+    plate.position.y = 0.055;
+    mineGroup.add(plate);
+    
+    // Blinking armed indicator
+    const led = new THREE.Mesh(new THREE.SphereGeometry(0.005, 16, 16), redGlowMat);
+    led.position.set(0, 0.06, 0);
+    mineGroup.add(led);
+    
+    // Outer prongs/triggers
+    for (let i = 0; i < 6; i++) {
+        const prong = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.003, 0.02, 8), brassMat);
+        const angle = (Math.PI / 3) * i;
+        prong.position.x = Math.cos(angle) * 0.06;
+        prong.position.z = Math.sin(angle) * 0.06;
+        prong.position.y = 0.04;
+        prong.rotation.x = Math.PI / 2; // Flat initially
+        prong.rotation.z = angle; // Pointing outward
+        // Tilt slightly upward
+        prong.rotateY(Math.PI / 8); 
+        mineGroup.add(prong);
+    }
+
+    // Place it somewhere oceanic or central (e.g., off the coast of Africa / Pacific)
+    const minePos = ll2v(0, -20, GLOBE_R); 
+    mineGroup.position.copy(minePos);
+    mineGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), minePos.clone().normalize());
+    wtrBuildingsGroup.add(mineGroup);
+}
+initWTRBuildings();
+
 function initD3XCaves() {
   const coords = [
     {lat: 40, lon: -100, name: "NA D3X Mine"},
@@ -14786,6 +14847,11 @@ window.toggleRedSkin = function() {
   // Toggle High Detailed Blue Buildings exclusively on Blue Skin
   if (typeof window.blueBuildingsGroup !== 'undefined') {
       window.blueBuildingsGroup.visible = (skin.name === 'BLUE');
+  }
+  
+  // Toggle High Detailed Landmine exclusively on WTR Skin
+  if (typeof window.wtrBuildingsGroup !== 'undefined') {
+      window.wtrBuildingsGroup.visible = (skin.name === 'WTR');
   }
   
   // Toggle Metals Trade  // Elements normally toggled by specific skins
