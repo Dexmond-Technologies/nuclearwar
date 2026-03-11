@@ -16497,6 +16497,15 @@ window.simulateCompanyD3XTrading = function() {
 setInterval(window.simulateCompanyD3XTrading, 3000);
 
 // =====================================================================
+// GLOBAL D3X WALLET BALANCE POLLING (Every 60s)
+// =====================================================================
+setInterval(() => {
+    if (typeof ws !== 'undefined' && ws && ws.readyState === 1 && window.pendingSolanaAddress) {
+        ws.send(JSON.stringify({ type: 'get_my_d3x_balance', wallet: window.pendingSolanaAddress }));
+    }
+}, 60000);
+
+// =====================================================================
 // BLACK SKIN 5-MINUTE CYBER WARFARE POPUP
 // =====================================================================
 setInterval(() => {
