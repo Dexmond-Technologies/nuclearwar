@@ -2727,6 +2727,8 @@ Type 'help' for available commands.
 
         // Crypto
         let commodities = aiData.portfolio ? aiData.portfolio.commodities : null;
+        if (typeof commodities === 'string') { try { commodities = JSON.parse(commodities); } catch(e){} }
+        
         if (commodities && Object.keys(commodities).length > 0) {
             h += `<div style="width:100%; font-family:'Share Tech Mono', monospace; font-size:16px; color:#fff; margin-top:10px; border-bottom:1px solid rgba(${themeColor},0.3); padding-bottom:5px; margin-bottom:10px;">CRYPTO PORTFOLIO</div>`;
             for(const item in commodities) {
@@ -2742,6 +2744,8 @@ Type 'help' for available commands.
 
         // Metals / Mining Inventory
         let mining = aiData.portfolio ? aiData.portfolio.mining_inventory : null;
+        if (typeof mining === 'string') { try { mining = JSON.parse(mining); } catch(e){} }
+        
         if (mining && Object.keys(mining).length > 0) {
             h += `<div style="width:100%; font-family:'Share Tech Mono', monospace; font-size:16px; color:#fff; margin-top:10px; border-bottom:1px solid rgba(${themeColor},0.3); padding-bottom:5px; margin-bottom:10px;">METALS / MINING</div>`;
             for(const item in mining) {
@@ -2756,6 +2760,8 @@ Type 'help' for available commands.
 
         // Weapons
         let weapons = aiData.weapons;
+        if (typeof weapons === 'string') { try { weapons = JSON.parse(weapons); } catch(e){} }
+        
         if (weapons && Object.keys(weapons).length > 0) {
             h += `<div style="width:100%; font-family:'Share Tech Mono', monospace; font-size:16px; color:#fff; margin-top:10px; border-bottom:1px solid rgba(${themeColor},0.3); padding-bottom:5px; margin-bottom:10px;">WEAPON CACHE</div>`;
             for(const weapon in weapons) {
