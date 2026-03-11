@@ -11410,16 +11410,14 @@ function initWS() {
           Object.assign(window.gameState.gemini, msg.gemini);
           Object.assign(window.gameState.claude, msg.claude);
 
-          const rInvModal = document.getElementById('rainclaude-inventory-modal');
           const rInvContent = document.getElementById('rainclaude-inventory-content');
-          if (rInvModal && rInvModal.style.display === 'flex') {
+          if (rInvContent) {
               let cldData = window.gameState.claude.portfolio ? window.gameState.claude : { portfolio: { commodities: {} } };
               rInvContent.innerHTML = buildAIPossessionsHTML(cldData, '255,50,50');
           }
 
-          const gInvModal = document.getElementById('gemini-inventory-modal');
           const gInvContent = document.getElementById('gemini-inventory-content');
-          if (gInvModal && gInvModal.style.display === 'flex') {
+          if (gInvContent) {
               let gemData = window.gameState.gemini.portfolio ? window.gameState.gemini : { portfolio: { commodities: {} } };
               gInvContent.innerHTML = buildAIPossessionsHTML(gemData, '0,170,255');
           }
