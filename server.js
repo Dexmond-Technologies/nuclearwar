@@ -1438,6 +1438,51 @@ function initWebSockets() {
         }
         break;
       }
+
+      case 'buy_weapon': {
+        const callsign = msg.callsign;
+        const weaponName = msg.weaponName;
+        const cost = msg.cost;
+        if (!pgPool || !callsign || !weaponName || cost === undefined) break;
+        
+        try {
+            // First check if user has enough D3X
+            const res = await pgPool.query(`SELECT d3x_balance, weapon_inventory FROM commanders WHERE callsign = $1`, [callsign]);
+            if (res.rows.length === 0) break;
+            
+            let bal = parseInt(res.rows[0].d3x_balance || 0, 10);
+            let inv = res.rows[0].weapon_inventory || {};
+            
+            if (bal >= cost) {
+                // Deduct cost and update JSONB dict locally
+                const newBal = bal - cost;
+                inv[weaponName] = (inv[weaponName] || 0) + 1;
+                
+                await pgPool.query(`UPDATE commanders SET d3x_balance = $1, weapon_inventory = $2 WHERE callsign = $3`, [newBal, inv, callsign]);
+                
+                // Return success log back to the buyer
+                ws.send(JSON.stringify({ 
+                    type: 'weapon_purchased', 
+                    success: true, 
+                    weaponName: weaponName, 
+                    cost: cost,
+                    newBalance: newBal,
+                    inventory: inv
+                }));
+                console.log(`[ARSENAL] Commander ${callsign} purchased ${weaponName} for ${cost} D3X. New Balance: ${newBal}`);
+            } else {
+                // Insufficient funds error
+                ws.send(JSON.stringify({ 
+                    type: 'weapon_purchased', 
+                    success: false, 
+                    error: 'Insufficient D3X. Requires ' + cost 
+                }));
+            }
+        } catch (e) {
+            console.error('DB Error on buy_weapon:', e.message);
+        }
+        break;
+      }
       
       case 'get_ai_wallets': {
         if (!pgPool) break;
@@ -2555,8 +2600,16 @@ async function startServer() {
         await pgPool.query(`ALTER TABLE commanders ADD COLUMN IF NOT EXISTS pending_d3x INTEGER DEFAULT 0`);
         await pgPool.query(`ALTER TABLE commanders ADD COLUMN IF NOT EXISTS portfolio JSONB`);
         await pgPool.query(`ALTER TABLE commanders ADD COLUMN IF NOT EXISTS d3x_balance BIGINT DEFAULT 0`);
+        await pgPool.query(`ALTER TABLE commanders ADD COLUMN IF NOT EXISTS weapon_inventory JSONB DEFAULT '{}'::jsonb`);
         console.log('☢ D3X Schema Migration successful');
       } catch(e) { /* Col exists */ }
+
+      try {
+          await pgPool.query(`ALTER TABLE ai_combat_state ADD COLUMN IF NOT EXISTS gemini_portfolio JSONB DEFAULT '{}'::jsonb`);
+          await pgPool.query(`ALTER TABLE ai_combat_state ADD COLUMN IF NOT EXISTS claude_portfolio JSONB DEFAULT '{}'::jsonb`);
+          await pgPool.query(`ALTER TABLE ai_combat_state ADD COLUMN IF NOT EXISTS gemini_weapon_inventory JSONB DEFAULT '{}'::jsonb`);
+          await pgPool.query(`ALTER TABLE ai_combat_state ADD COLUMN IF NOT EXISTS claude_weapon_inventory JSONB DEFAULT '{}'::jsonb`);
+      } catch(e) { console.warn("ai_combat_state migration:", e.message); }
 
       // AI Combat System Table
       await pgPool.query(`
