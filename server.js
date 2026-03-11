@@ -2187,6 +2187,18 @@ const AI_MARKET_CATALOG = [
   { name: 'Networking Switches (400GbE)', category: 'Tech & Compute Hardware', basePrice: 18000.00 }
 ];
 
+const AI_WEAPONS_CATALOG = [
+  { name: "Pistol", attack: 5, cost: 3 }, { name: "Revolver", attack: 8, cost: 5 }, { name: "Rifle", attack: 15, cost: 10 }, { name: "Shotgun", attack: 18, cost: 15 },
+  { name: "Submachine Gun", attack: 20, cost: 20 }, { name: "Assault Rifle", attack: 22, cost: 25 }, { name: "Machine Gun", attack: 30, cost: 35 }, { name: "Sniper Rifle", attack: 35, cost: 45 },
+  { name: "Smoke Grenade", attack: 5, cost: 10 }, { name: "Flashbang", attack: 10, cost: 15 }, { name: "Hand Grenade", attack: 45, cost: 30 }, { name: "TNT Charge", attack: 75, cost: 60 },
+  { name: "Land Mine", attack: 85, cost: 75 }, { name: "Plastic Explosive", attack: 90, cost: 80 }, { name: "Depth Charge", attack: 110, cost: 100 },
+  { name: "Rocket Launcher", attack: 150, cost: 150 }, { name: "Anti-Tank Rocket", attack: 180, cost: 200 }, { name: "Mortar", attack: 220, cost: 250 },
+  { name: "Howitzer", attack: 350, cost: 350 }, { name: "Artillery Cannon", attack: 400, cost: 450 }, { name: "Multiple Rocket Launcher", attack: 550, cost: 600 },
+  { name: "Guided Missile", attack: 800, cost: 850 }, { name: "Surface-to-Air Missile", attack: 950, cost: 950 }, { name: "Cruise Missile", attack: 1200, cost: 1200 },
+  { name: "Torpedo", attack: 1500, cost: 1400 }, { name: "Gravity Bomb", attack: 2000, cost: 1600 }, { name: "Cluster Bomb", attack: 2500, cost: 1750 },
+  { name: "Incendiary Bomb", attack: 2800, cost: 1850 }, { name: "Bunker-Buster Bomb", attack: 3200, cost: 1900 }, { name: "Ballistic Missile", attack: 3500, cost: 2000 }
+];
+
 async function runAIMarketBuying() {
   if (!pgPool) return;
   
@@ -2201,14 +2213,16 @@ async function runAIMarketBuying() {
   const buys = [];
   
   // Read localized JSON accounts
-  let geminiAccount = { balances: { D3X: 0 }, portfolio: { commodities: {}, tradeLogs: [] } };
-  let claudeAccount = { balances: { D3X: 0 }, portfolio: { commodities: {}, tradeLogs: [] } };
+  let geminiAccount = { balances: { D3X: 0 }, portfolio: { commodities: {}, tradeLogs: [] }, weapon_inventory: {} };
+  let claudeAccount = { balances: { D3X: 0 }, portfolio: { commodities: {}, tradeLogs: [] }, weapon_inventory: {} };
   
   try {
-      const res = await pgPool.query("SELECT gemini_portfolio, claude_portfolio FROM ai_combat_state WHERE id = 1");
+      const res = await pgPool.query("SELECT gemini_portfolio, claude_portfolio, gemini_weapon_inventory, claude_weapon_inventory FROM ai_combat_state WHERE id = 1");
       if (res.rows.length > 0) {
           if (res.rows[0].gemini_portfolio) geminiAccount.portfolio = res.rows[0].gemini_portfolio;
           if (res.rows[0].claude_portfolio) claudeAccount.portfolio = res.rows[0].claude_portfolio;
+          if (res.rows[0].gemini_weapon_inventory) geminiAccount.weapon_inventory = res.rows[0].gemini_weapon_inventory;
+          if (res.rows[0].claude_weapon_inventory) claudeAccount.weapon_inventory = res.rows[0].claude_weapon_inventory;
       }
   } catch(e) {
       console.error("[AI MARKET] Error reading portfolios from DB:", e);
@@ -2342,14 +2356,35 @@ async function runAIMarketBuying() {
       claudePurchasesThisCycle++;
   }
   
+  // AI Weapon Autonomous Purchasing Hook
+  const wCat = AI_WEAPONS_CATALOG;
+  
+  if (geminiDailySpent < geminiDailyCap) {
+      const weapon = wCat[Math.floor(Math.random() * wCat.length)];
+      if (geminiDailySpent + weapon.cost <= geminiDailyCap) {
+          geminiAccount.weapon_inventory[weapon.name] = (geminiAccount.weapon_inventory[weapon.name] || 0) + 1;
+          geminiDailySpent += weapon.cost;
+          buys.push({ aiName: 'gemini', item: weapon.name, category: 'Armaments', units: 1, cost: weapon.cost, unit: 'Weapon' });
+      }
+  }
+  
+  if (claudeDailySpent < claudeDailyCap) {
+      const weapon = wCat[Math.floor(Math.random() * wCat.length)];
+      if (claudeDailySpent + weapon.cost <= claudeDailyCap) {
+          claudeAccount.weapon_inventory[weapon.name] = (claudeAccount.weapon_inventory[weapon.name] || 0) + 1;
+          claudeDailySpent += weapon.cost;
+          buys.push({ aiName: 'claude', item: weapon.name, category: 'Armaments', units: 1, cost: weapon.cost, unit: 'Weapon' });
+      }
+  }
+
   if (buys.length > 0) {
     // Write back to PostgreSQL
     try {
         await pgPool.query(`
           UPDATE ai_combat_state 
-          SET gemini_portfolio = $1, claude_portfolio = $2, updated_at = NOW() 
+          SET gemini_portfolio = $1, claude_portfolio = $2, gemini_weapon_inventory = $3, claude_weapon_inventory = $4, updated_at = NOW() 
           WHERE id = 1
-        `, [geminiAccount.portfolio, claudeAccount.portfolio]);
+        `, [geminiAccount.portfolio, claudeAccount.portfolio, geminiAccount.weapon_inventory, claudeAccount.weapon_inventory]);
     } catch(e) {
         console.error("[AI MARKET] Error saving portfolios to DB:", e);
     }
