@@ -1,21 +1,14 @@
-const { Client } = require('pg');
-
-const client = new Client({
-  connectionString: 'postgresql://nuclearwar_db_user:Kg5fnacbBT1wwukMwvJ2zSm03eRNbze5@dpg-d6j5m8kr85hc73fqe70g-a.oregon-postgres.render.com/nuclearwar_db',
-  ssl: { rejectUnauthorized: false }
-});
+const { Pool } = require('pg');
+const pool = new Pool({});
 
 async function run() {
-  await client.connect();
-  
   try {
-    const res = await client.query("SELECT * FROM information_schema.columns WHERE table_name = 'ai_combat_state';");
-    console.log("Columns:", res.rows.map(r => r.column_name));
+    const res = await pool.query("SELECT gemini_portfolio, claude_portfolio, gemini_weapon_inventory, claude_weapon_inventory FROM ai_combat_state WHERE id = 1");
+    console.log(JSON.stringify(res.rows[0], null, 2));
   } catch (err) {
     console.error(err);
   } finally {
-    await client.end();
+    pool.end();
   }
 }
-
 run();
