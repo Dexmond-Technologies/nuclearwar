@@ -646,6 +646,7 @@ function initWebSockets() {
 
           let attacks = 0;
           let damage = 0;
+          let miningInventory = {};
           if (pgPool) {
             // Upsert into our commanders database and RETURNING stats
             const res = await pgPool.query(`
@@ -653,12 +654,13 @@ function initWebSockets() {
               VALUES ($1, $2, $3, NOW()) 
               ON CONFLICT (callsign) DO UPDATE 
               SET email = EXCLUDED.email, picture_url = EXCLUDED.picture_url, last_seen = NOW()
-              RETURNING attacks, damage
+              RETURNING attacks, damage, mining_inventory
             `, [client.name, client.email, client.picture]);
             
             if (res.rows.length > 0) {
               attacks = res.rows[0].attacks || 0;
               damage = res.rows[0].damage || 0;
+              miningInventory = res.rows[0].mining_inventory || {};
             }
           }
 
@@ -668,7 +670,7 @@ function initWebSockets() {
             type: 'google_auth_success', 
             name: client.name,
             picture: client.picture,
-            stats: { attacks, damage }
+            stats: { attacks, damage, mining_inventory: miningInventory }
           }));
           
           // Notify the room that this user was renamed/joined as someone else
@@ -723,6 +725,7 @@ function initWebSockets() {
         
         let attacks = 0;
         let damage = 0;
+        let miningInventory = {};
         if (pgPool) {
           try {
             // Upsert into our commanders database (Use wallet as callsign/identity)
@@ -731,12 +734,13 @@ function initWebSockets() {
               VALUES ($1, NOW()) 
               ON CONFLICT (callsign) DO UPDATE 
               SET last_seen = NOW()
-              RETURNING attacks, damage
+              RETURNING attacks, damage, mining_inventory
             `, [client.name]);
             
             if (res.rows.length > 0) {
               attacks = res.rows[0].attacks || 0;
               damage = res.rows[0].damage || 0;
+              miningInventory = res.rows[0].mining_inventory || {};
             }
           } catch(dbErr) {
             console.error('⚠ Solana Auth DB Error:', dbErr.message);
@@ -749,7 +753,7 @@ function initWebSockets() {
           type: 'google_auth_success', // Re-use same success event handler on frontend
           name: client.name,
           picture: null,          
-          stats: { attacks, damage }
+          stats: { attacks, damage, mining_inventory: miningInventory }
         }));
         
         broadcast({
@@ -764,6 +768,51 @@ function initWebSockets() {
         break;
       }
       
+      case 'mountain_dig_complete': {
+        if (!client.name || !pgPool) break;
+        try {
+            // RNG Rolls
+            const rand = Math.random();
+            const resources = {
+                iron: 0, copper: 0, gold: 0, silver: 0, 
+                coal: 0, titanium: 0, lithium: 0, rare_earth: 0
+            };
+            
+            // Base common drops (always drop some)
+            resources.iron = Math.floor(Math.random() * 5) + 1;
+            resources.coal = Math.floor(Math.random() * 6) + 1;
+            
+            // Uncommon
+            if (rand < 0.6) resources.copper = Math.floor(Math.random() * 3) + 1;
+            if (rand < 0.3) resources.silver = Math.floor(Math.random() * 3) + 1;
+            if (rand < 0.15) resources.gold = Math.floor(Math.random() * 2) + 1;
+            
+            // Rare
+            if (rand < 0.08) resources.titanium = Math.floor(Math.random() * 2) + 1;
+            if (rand < 0.04) resources.lithium = 1;
+            if (rand < 0.01) resources.rare_earth = 1;
+
+            // Load, Update, Save
+            const res = await pgPool.query(`SELECT mining_inventory FROM commanders WHERE callsign = $1`, [client.name]);
+            if (res.rows.length > 0) {
+                let inv = res.rows[0].mining_inventory || { iron: 0, copper: 0, gold: 0, silver: 0, coal: 0, titanium: 0, lithium: 0, rare_earth: 0 };
+                
+                // Merge new resources into total inventory
+                Object.keys(resources).forEach(k => {
+                    inv[k] = (inv[k] || 0) + resources[k];
+                });
+                
+                // Persist
+                await pgPool.query(`UPDATE commanders SET mining_inventory = $1 WHERE callsign = $2`, [inv, client.name]);
+                
+                ws.send(JSON.stringify({ type: 'mountain_dig_result', items: resources, inventory: inv }));
+            }
+        } catch(e) {
+            console.error('Mountain Dig Error:', e);
+        }
+        break;
+      }
+
       case 'request_loan': {
         const walletAddr = msg.wallet;
         const collateral = parseInt(msg.collateral);
@@ -2636,6 +2685,7 @@ async function startServer() {
         await pgPool.query(`ALTER TABLE commanders ADD COLUMN IF NOT EXISTS portfolio JSONB`);
         await pgPool.query(`ALTER TABLE commanders ADD COLUMN IF NOT EXISTS d3x_balance BIGINT DEFAULT 0`);
         await pgPool.query(`ALTER TABLE commanders ADD COLUMN IF NOT EXISTS weapon_inventory JSONB DEFAULT '{}'::jsonb`);
+        await pgPool.query(`ALTER TABLE commanders ADD COLUMN IF NOT EXISTS mining_inventory JSONB DEFAULT '{}'::jsonb`);
         console.log('☢ D3X Schema Migration successful');
       } catch(e) { /* Col exists */ }
 

@@ -1343,6 +1343,22 @@ body {
   </div>
 
   <!-- DATACENTER CO-OP UI (CYBER SKIN ONLY) -->
+  <!-- GREEN MOUNTAIN DIG MODAL -->
+  <div id="mountain-dig-modal" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:400px; background:rgba(0,30,15,0.95); border:1px solid #0f8; border-radius:8px; box-shadow:0 0 40px rgba(0,255,136,0.2); padding:25px; pointer-events:auto; backdrop-filter:blur(10px); z-index:99999; text-align:center;">
+    <button onclick="document.getElementById('mountain-dig-modal').style.display='none';" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#0f8;font-size:20px;cursor:pointer;line-height:1;padding:4px; transition:0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#0f8'">✕</button>
+    <div style="font-size:40px; margin-bottom:10px; filter:drop-shadow(0 0 10px #0f8);">⛰️</div>
+    <h2 style="margin:0 0 5px 0; color:#0f8; font-family:'Orbitron', sans-serif; font-size:22px; text-transform:uppercase; letter-spacing:2px; text-shadow:0 0 10px rgba(0,255,136,0.5);">MOUNTAIN RESOURCE DIG</h2>
+    <div style="color:#8f8; font-family:'Share Tech Mono', monospace; font-size:12px; margin-bottom:25px; opacity:0.8;">DEPLOY MACHINERY TO EXTRACT RAW MINERALS</div>
+    
+    <div id="dig-progress-container" style="visibility:hidden; width:100%; background:rgba(0,255,136,0.1); border:1px solid #0f8; border-radius:15px; overflow:hidden; margin-bottom:15px; height:20px;">
+        <div id="dig-progress-bar" style="width:0%; height:100%; background:linear-gradient(90deg, #0a5, #0f8); box-shadow:0 0 10px #0f8; transition:width 0.1s linear;"></div>
+    </div>
+    
+    <div id="dig-status-text" style="color:#fff; font-family:'Courier New', monospace; font-size:14px; font-weight:bold; margin-bottom:20px; min-height:20px; text-shadow:0 0 5px #0f8;"></div>
+    
+    <button id="btn-dig-action" onclick="startMountainDig()" style="width:100%; padding:15px; background:rgba(0,255,136,0.15); border:1px solid #0f8; color:#0f8; font-family:'Orbitron', sans-serif; font-size:16px; font-weight:bold; cursor:pointer; letter-spacing:2px; transition:all 0.2s; border-radius:4px; box-shadow:inset 0 0 15px rgba(0,255,136,0.1);" onmouseover="this.style.background='rgba(0,255,136,0.3)'; this.style.boxShadow='0 0 20px rgba(0,255,136,0.4)';" onmouseout="this.style.background='rgba(0,255,136,0.15)'; this.style.boxShadow='inset 0 0 15px rgba(0,255,136,0.1)';">COMMENCE EXCAVATION</button>
+  </div>
+
   <!-- STAKING TOWER MODAL -->
   <div id="staking-tower-modal" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:840px; min-height:340px; flex-direction:column; background:rgba(20,0,0,0.95); border:1px solid #ff0033; border-radius:8px; box-shadow:0 0 30px rgba(255,0,50,0.3); padding:20px; pointer-events:auto; backdrop-filter:blur(10px); z-index:99999;">
     <button onclick="document.getElementById('staking-tower-modal').style.display='none'; window.selectedStakingTower=null;" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#f55;font-size:16px;cursor:pointer;line-height:1;padding:4px;">✕</button>
@@ -7782,6 +7798,17 @@ function handleGlobeClick(e) {
     }
   }
 
+  // Intercept clicks on Green Mountains (Green Skin)
+  if (window.currentSkinIndex === 2 && window.greenMountainsGroup && window.greenMountainsGroup.visible) {
+    const mountainHits = ray.intersectObjects(window.greenMountainsGroup.children, true);
+    if (mountainHits.length > 0) {
+      if (typeof window.openMountainDigModal === 'function') {
+        window.openMountainDigModal();
+      }
+      return; // Consume click
+    }
+  }
+
   // Intercept clicks on Red Satellites for Satellite Mini-Game
   if (window.isRedSkin && typeof redSatMarkers !== 'undefined' && redSatMarkers.length > 0) {
     const satHits = ray.intersectObjects(redSatMarkers, true);
@@ -11004,7 +11031,7 @@ function initWS() {
 
         // Show onboarding when joining from lobby
         if (!document.getElementById('hud').style.display || document.getElementById('hud').style.display === 'none') {
-            document.getElementById('onboarding-modal').classList.add('show');
+            // document.getElementById('onboarding-modal').classList.add('show');
         }
         loadCountries().then(() => {
           if (msg.gameState) {
@@ -11090,6 +11117,7 @@ function initWS() {
           const dmgEl = document.getElementById('us-damage');
           if (atkEl) atkEl.textContent = (msg.stats.attacks || 0).toLocaleString();
           if (dmgEl) dmgEl.textContent = formatTroops(msg.stats.damage || 0) + ' MILS';
+          window.miningInventory = msg.stats.mining_inventory || { iron: 0, copper: 0, gold: 0, silver: 0, coal: 0, titanium: 0, lithium: 0, rare_earth: 0 };
         } else {
           // Fallback fetch if stats were omitted in standard payload
           ws.send(JSON.stringify({ type: 'get_commander_stats', callsign: msg.name }));
@@ -11123,6 +11151,31 @@ function initWS() {
                 }
             }
         } catch(e) { console.error("Error loading portfolio:", e); }
+        break;
+      case 'mountain_dig_result':
+        window.isDigging = false;
+        if (msg.inventory) window.miningInventory = msg.inventory;
+        
+        const statusText = document.getElementById('dig-status-text');
+        const btn = document.getElementById('btn-dig-action');
+        
+        if (msg.items && statusText) {
+            let resStr = [];
+            Object.keys(msg.items).forEach(k => {
+                if (msg.items[k] > 0) resStr.push(`+${msg.items[k]} ${k.toUpperCase()}`);
+            });
+            
+            if (resStr.length > 0) {
+                statusText.innerHTML = `<span style="color:#0f8">EXCAVATION YIELD:</span><br><br><span style="color:#fff; font-size:16px;">` + resStr.join(' &nbsp;|&nbsp; ') + `</span>`;
+            } else {
+                statusText.innerHTML = `<span style="color:#fa0">YIELDED NO MINERALS. DIRT ONLY.</span>`;
+            }
+        }
+        
+        if (btn) {
+            btn.innerText = "DIG AGAIN";
+            btn.style.display = 'block';
+        }
         break;
       case 'ai_market_purchases':
         if (!window.greenMarket || !window.greenMarket.commodities) break;
@@ -15761,6 +15814,63 @@ window.toggleRadioLock = function() {
     // Visually notify
     // if (typeof setLog === 'function') setLog('📻 Station UNLOCKED. Auto-rotation enabled.');
   }
+};
+
+// ========================================================
+// GREEN MOUNTAIN DIG LOGIC
+// ========================================================
+window.isDigging = false;
+
+window.openMountainDigModal = function() {
+    if (window.isDigging) return; // Prevent reopening during active dig
+    if (typeof _sfxClick !== 'undefined') _sfxClick();
+    
+    document.getElementById('mountain-dig-modal').style.display = 'block';
+    
+    // Reset state
+    const progressBar = document.getElementById('dig-progress-bar');
+    const progressContainer = document.getElementById('dig-progress-container');
+    const statusText = document.getElementById('dig-status-text');
+    const btn = document.getElementById('btn-dig-action');
+    
+    progressContainer.style.visibility = 'hidden';
+    progressBar.style.width = '0%';
+    statusText.innerText = '';
+    btn.style.display = 'block';
+};
+
+window.startMountainDig = function() {
+    if (window.isDigging) return;
+    if (typeof _sfxClick !== 'undefined') _sfxClick();
+    
+    window.isDigging = true;
+    
+    const progressBar = document.getElementById('dig-progress-bar');
+    const progressContainer = document.getElementById('dig-progress-container');
+    const statusText = document.getElementById('dig-status-text');
+    const btn = document.getElementById('btn-dig-action');
+    
+    btn.style.display = 'none';
+    progressContainer.style.visibility = 'visible';
+    progressBar.style.width = '0%';
+    statusText.innerText = 'EXCAVATING... 0%';
+    
+    let w = 0;
+    const interval = setInterval(() => {
+        w += 2; // 5 seconds total (50 steps of 100ms)
+        progressBar.style.width = w + '%';
+        statusText.innerText = `EXCAVATING... ${w}%`;
+        
+        if (w >= 100) {
+            clearInterval(interval);
+            statusText.innerText = 'EXTRACTING MINERALS...';
+            
+            // Dispatch to server to roll RNG and get actual items
+            if (window.ws && window.ws.readyState === WebSocket.OPEN) {
+                window.ws.send(JSON.stringify({ type: 'mountain_dig_complete' }));
+            }
+        }
+    }, 100);
 };
 
 // ========================================================
