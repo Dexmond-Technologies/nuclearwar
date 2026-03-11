@@ -3101,7 +3101,45 @@ function initGreenMountains() {
         side2.rotation.x = 0.15;
         side2.renderOrder = 9999;
         group.add(side2);
+        // Intense Aura for mountain (Green Glow)
+        const mAuraGeo = new THREE.SphereGeometry(0.12 * scaleMulti, 32, 32); 
+        const mAuraMat = new THREE.MeshBasicMaterial({ color: 0x00ff44, transparent: true, opacity: 1.0, blending: THREE.AdditiveBlending });
+        const mAura = new THREE.Mesh(mAuraGeo, mAuraMat);
+        mAura.position.set(0, 0.15 * scaleMulti, 0);
+        group.add(mAura);
         
+        // Add point light to cast real intense green glow on surrounding geometry
+        const mLight = new THREE.PointLight(0x00ff44, 3, 2);
+        mLight.position.set(0, 0.15 * scaleMulti, 0);
+        group.add(mLight);
+
+        // Add volumetric glowing mist (steam particle system) around the mountain
+        const steamGroup = new THREE.Group();
+        const steamCanvas = document.createElement('canvas');
+        steamCanvas.width = 64; steamCanvas.height = 64;
+        const steamCtx = steamCanvas.getContext('2d');
+        const steamGrad = steamCtx.createRadialGradient(32, 32, 0, 32, 32, 32);
+        steamGrad.addColorStop(0, 'rgba(150, 255, 150, 0.8)'); // Bright white-green core
+        steamGrad.addColorStop(0.5, 'rgba(150, 255, 150, 0.3)');
+        steamGrad.addColorStop(1, 'rgba(150, 255, 150, 0)');
+        steamCtx.fillStyle = steamGrad;
+        steamCtx.fillRect(0, 0, 64, 64);
+        const steamTex = new THREE.CanvasTexture(steamCanvas);
+        
+        for (let s = 0; s < 12; s++) { // 12 overlapping sprites for the bloom effect
+            const steamMat = new THREE.SpriteMaterial({ map: steamTex, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false });
+            const steamSprite = new THREE.Sprite(steamMat);
+            steamSprite.position.set(
+                (Math.random() - 0.5) * 0.4 * scaleMulti,
+                (Math.random() * 0.3) * scaleMulti,
+                (Math.random() - 0.5) * 0.4 * scaleMulti
+            );
+            const size = (Math.random() * 0.25 + 0.15) * scaleMulti;
+            steamSprite.scale.set(size, size, 1);
+            steamGroup.add(steamSprite);
+        }
+        group.add(steamGroup);
+
         return group;
     }
     
