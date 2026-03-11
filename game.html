@@ -2941,6 +2941,23 @@ scene.add(blueBuildingsGroup);
 window.blueBuildingsGroup = blueBuildingsGroup;
 
 function initBlueBuildings() {
+    const createTextSprite = (text, color) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 512; canvas.height = 128;
+        const ctx = canvas.getContext('2d');
+        ctx.font = 'Bold 32px Orbitron, Arial';
+        ctx.fillStyle = color;
+        ctx.textAlign = 'center';
+        ctx.shadowColor = '#000';
+        ctx.shadowBlur = 4;
+        ctx.fillText(text, 256, 80);
+        const tex = new THREE.CanvasTexture(canvas);
+        const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
+        const sprite = new THREE.Sprite(mat);
+        sprite.scale.set(0.3, 0.075, 1);
+        return sprite;
+    };
+
     // High-poly shiny metallic materials
     const silverMat = new THREE.MeshStandardMaterial({
         color: 0xaaaaaa, roughness: 0.2, metalness: 0.8
@@ -2976,6 +2993,10 @@ function initBlueBuildings() {
     rBooster.position.y = -0.02;
     rocketGroup.add(rBooster);
 
+    const rLabel = createTextSprite("TIER 3: HEAVY WEAPONS", "#00ffff");
+    rLabel.position.y = 0.35;
+    rocketGroup.add(rLabel);
+
     const rocketPos = ll2v(38.89, -77.03, GLOBE_R);
     rocketGroup.position.copy(rocketPos);
     rocketGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), rocketPos.clone().normalize());
@@ -2996,6 +3017,11 @@ function initBlueBuildings() {
     const bBox = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.02, 0.08), redMat);
     bBox.position.y = 0.23;
     bombGroup.add(bBox);
+
+    const bLabel = createTextSprite("TIER 4: STRATEGIC WEAPONS", "#00ffff");
+    bLabel.position.y = 0.35;
+    bombGroup.add(bLabel);
+
     const bombPos = ll2v(55.75, 37.61, GLOBE_R);
     bombGroup.position.copy(bombPos);
     bombGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), bombPos.clone().normalize());
@@ -3020,6 +3046,11 @@ function initBlueBuildings() {
     const cAnt = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.1, 16), silverMat);
     cAnt.position.y = 0.22;
     cmdGroup.add(cAnt);
+
+    const cLabel = createTextSprite("TIER 1: SMALL ARMS", "#00ffff");
+    cLabel.position.y = 0.35;
+    cmdGroup.add(cLabel);
+
     const cmdPos = ll2v(51.50, -0.12, GLOBE_R);
     cmdGroup.position.copy(cmdPos);
     cmdGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), cmdPos.clone().normalize());
@@ -3033,6 +3064,23 @@ scene.add(wtrBuildingsGroup);
 window.wtrBuildingsGroup = wtrBuildingsGroup;
 
 function initWTRBuildings() {
+    const createTextSprite = (text, color) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 512; canvas.height = 128;
+        const ctx = canvas.getContext('2d');
+        ctx.font = 'Bold 32px Orbitron, Arial';
+        ctx.fillStyle = color;
+        ctx.textAlign = 'center';
+        ctx.shadowColor = '#000';
+        ctx.shadowBlur = 4;
+        ctx.fillText(text, 256, 80);
+        const tex = new THREE.CanvasTexture(canvas);
+        const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
+        const sprite = new THREE.Sprite(mat);
+        sprite.scale.set(0.3, 0.075, 1);
+        return sprite;
+    };
+
     // High-poly shiny metallic materials for the landmine
     const darkMetalMat = new THREE.MeshStandardMaterial({
         color: 0x333333, roughness: 0.4, metalness: 0.7
@@ -3079,6 +3127,10 @@ function initWTRBuildings() {
         prong.rotateY(Math.PI / 8); 
         mineGroup.add(prong);
     }
+
+    const mLabel = createTextSprite("TIER 2: EXPLOSIVES", "#00aaff");
+    mLabel.position.y = 0.15;
+    mineGroup.add(mLabel);
 
     // Place it somewhere oceanic or central (e.g., off the coast of Africa / Pacific)
     const minePos = ll2v(0, -20, GLOBE_R); 
