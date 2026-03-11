@@ -1512,7 +1512,7 @@ body {
   </div>
   <div class="faction-dash" id="dash-1">
     <div class="dash-header" style="position:relative;">
-      <button id="btn-reinvest-d3x" onclick="toggleReinvest()" style="position:absolute; top:-40px; left:0; display:block; width:130px; pointer-events:auto; padding:8px 0; background:rgba(0,255,136,0.15); border:1px solid #0f8; color:#0f8; font-family:'Courier New', monospace; font-size:10px; font-weight:bold; text-align:center; cursor:pointer; border-radius:4px; transition:all 0.2s; box-shadow:0 0 10px rgba(0,255,136,0.2); box-sizing:border-box; z-index:100;">♻️ REINVEST: OFF<br/>AIRDROP 1X</button>
+      <button id="btn-reinvest-d3x" onclick="toggleReinvest()" style="position:absolute; top:-60px; left:-15px; display:block; width:130px; pointer-events:auto; padding:8px 0; background:rgba(0,255,136,0.15); border:1px solid #0f8; color:#0f8; font-family:'Courier New', monospace; font-size:10px; font-weight:bold; text-align:center; cursor:pointer; border-radius:4px; transition:all 0.2s; box-shadow:0 0 10px rgba(0,255,136,0.2); box-sizing:border-box; z-index:100;">♻️ REINVEST: OFF<br/>AIRDROP 1X</button>
       <!-- RAINCLAUDE INVENTORY BUTTON -->
       <button id="btn-rainclaude-inventory" onclick="openRainclaudeInventory()" style="position:absolute; left:-280px; top:-70px; background:rgba(60,0,0,0.9); border:2px solid #f33; border-radius:8px; color:#f33; font-family:'Share Tech Mono', monospace; font-size:12px; font-weight:bold; padding:8px 15px; cursor:pointer; pointer-events:auto; z-index:999999; box-shadow:0 -5px 15px rgba(255,50,50,0.4); transition:0.2s; letter-spacing:2px; text-shadow:0 0 10px #f33; backdrop-filter:blur(5px);" onmouseover="this.style.background='rgba(160,0,0,0.9)'; this.style.color='#fff';" onmouseout="this.style.background='rgba(60,0,0,0.9)'; this.style.color='#f33';">
         RAINCLAUDE INVENTORY ⯆
@@ -1577,7 +1577,7 @@ body {
 <style>
 #btn-toggle-skin {
   position: relative;
-  width: 21px;
+  width: 34px;
   height: 336px;
   box-sizing: border-box;
   text-align: center;
@@ -1780,11 +1780,12 @@ body {
   display: flex !important;
   opacity: 1;
   flex-direction: column;
+  align-items: center;
   gap: 8px;
   background: rgba(0, 8, 22, 0.88);
   border: 1px solid rgba(0, 180, 255, 0.35);
   border-radius: 28px;
-  padding: 10px 7px;
+  padding: 10px 7px 20px 7px;
   z-index: 10;
   pointer-events: auto;
   box-shadow: 0 0 20px rgba(0, 170, 255, 0.12), 0 4px 30px rgba(0,0,0,0.5);
@@ -1890,18 +1891,15 @@ body {
   <!-- SKIN TOGGLE CONTAINER -->
   <div style="display:flex; flex-direction:column; align-items:center; position:relative; width:100%;">
       <div id="skin-hint-arrow" style="position:absolute; top:4px; left:-35px; font-size:24px; color:#ff5577; text-shadow:0 0 15px rgba(255,-85,119,0.8); opacity:0; pointer-events:none; z-index:9999; transition:opacity 0.5s; animation:bounceRight 0.5s infinite alternate;">➔</div>
-      <button id="btn-toggle-skin" onclick="toggleRedSkin()">🔴 SKIN</button>
+      <button id="btn-toggle-skin" onclick="toggleRedSkin()">parallel layers</button>
       <div id="wtr-skin-label" style="display:none; color:#00aaff; font-family:'Orbitron', sans-serif; font-size:8px; text-shadow:0 0 5px #00aaff; margin-top:4px; margin-bottom:0; text-align:center; font-weight:bold; letter-spacing:0px; opacity:0.8;"></div>
   </div>
+  <button id="btn-cmd-help" title="Simulation Info" onclick="showCmdHelpModal()" style="position:relative; left:auto; bottom:auto; align-self:center; margin-top:44px;">?</button>
+  <button id="btn-cmd-toggle" title="ACCESS SECURE TERMINAL" style="position:relative; left:auto; bottom:auto; align-self:center; margin-top:4px;">CMD</button>
+  <button id="btn-chat-toggle" title="Open Global Chat" style="position:relative; left:auto; bottom:auto; align-self:center; margin-top:4px;"><i class="fas fa-comment-dots"></i></button>
+
 </div>
 
-<!-- Chat -->
-  <button id="btn-chat-toggle" title="Open Global Chat"><i class="fas fa-comment-dots"></i></button>
-
-  <!-- CMD HACKER TERMINAL BUTTON -->
-  <button id="btn-cmd-toggle" title="ACCESS SECURE TERMINAL">CMD</button>
-  <button id="btn-cmd-help" title="Simulation Info" onclick="showCmdHelpModal()">?</button>
-  
 </div>
 <div id="chat-box">
   <div id="chat-msgs"></div>
@@ -14857,12 +14855,12 @@ window.currentSkinIndex = 0;
 window.isRedSkin = false; // Legacy flag preserved for scripts that might check it directly
 
 const SKINS = [
-  { name: 'LIVE',  color: 0xffffff, btnText: '🔴 RED EARTH SKIN', btnClass: '',              showOverlays: false, cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
-  { name: 'RED',   color: 0xff0000, btnText: '🟢 GRN SKIN',    btnClass: 'active-premium',showOverlays: false, cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
-  { name: 'GREEN', color: 0x22ff22, btnText: '💠 CYBR SKIN',   btnClass: 'active-normal', showOverlays: false, cleanGlobe: true,  hideTroops: true,  showResources: true,  showArms: true, showBoats: false, isPremium: false },
-  { name: 'CYBER', color: 0x00f0ff, btnText: '⬛ BLK SKIN',    btnClass: 'active-premium',showOverlays: false,  cleanGlobe: true, hideTroops: true,  showResources: false,  showArms: false,  showBoats: false,  isPremium: false },
-  { name: 'BLK',   color: 0x050505, btnText: '💧 WTR SKIN',    btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true,  showResources: false, showArms: false, showBoats: false, isPremium: false },
-  { name: 'WTR',   color: 0x00aaff, btnText: '🌍 LIVE SKIN',   btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true,  showResources: false, showArms: false, showBoats: false, isPremium: false }
+  { name: 'LIVE',  color: 0xffffff, btnText: 'parallel layers', btnClass: '',              showOverlays: false, cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
+  { name: 'RED',   color: 0xff0000, btnText: 'parallel layers', btnClass: 'active-premium',showOverlays: false, cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
+  { name: 'GREEN', color: 0x22ff22, btnText: 'parallel layers', btnClass: 'active-normal', showOverlays: false, cleanGlobe: true,  hideTroops: true,  showResources: true,  showArms: true, showBoats: false, isPremium: false },
+  { name: 'CYBER', color: 0x00f0ff, btnText: 'parallel layers', btnClass: 'active-premium',showOverlays: false,  cleanGlobe: true, hideTroops: true,  showResources: false,  showArms: false,  showBoats: false,  isPremium: false },
+  { name: 'BLK',   color: 0x050505, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true,  showResources: false, showArms: false, showBoats: false, isPremium: false },
+  { name: 'WTR',   color: 0x00aaff, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true,  showResources: false, showArms: false, showBoats: false, isPremium: false }
 ];
 window.SKINS = SKINS;
 
@@ -15245,6 +15243,8 @@ document.body.appendChild(soundtrackWarningOverlay);
 
 let customSoundtrack = new Audio();
 let soundtrackPlaylist = [];
+// Eager-load the playlist globally to bypass browser async autoplay restrictions on the UNLOCK click
+fetch('/api/soundtrack').then(r => r.json()).then(files => { soundtrackPlaylist = files; }).catch(e => console.error("Could not load local soundtrack", e));
 let soundtrackCurrentIdx = 0;
 let soundtrackWelcomed = false;
 let isSoundtrackOn = false;
