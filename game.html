@@ -6905,6 +6905,9 @@ function troopTexture(txt, colHex) {
   const cn = document.createElement('canvas'); cn.width = 128; cn.height = 64;
   const ctx = cn.getContext('2d');
   
+  // High-contrast override for empty territories so '0' doesn't disappear on Red Skin
+  if (txt === '0' && colHex === '#333333') colHex = '#aaaaaa'; 
+  
   // Halos / faction glow
   ctx.shadowColor = colHex;
   ctx.shadowBlur = 15;
