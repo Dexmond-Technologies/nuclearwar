@@ -1431,8 +1431,8 @@ body {
       <div class="dash-pname" style="color:#00dcff">HUMANITY (SUPPORTED BY GEMINI)</div>
       <div class="dash-tag">YOU + ALLIES</div>
       <div style="width: 100%; padding-left: 42px; margin-top: 0px; margin-bottom: 4px; text-align:left;">
-         <div style="color:#0f8; font-family:'Courier New', monospace; font-size:14px; font-weight:bold; text-shadow:0 0 5px #0f8;" id="d0-d3x-bal-left">SYNCING...</div>
-         <div style="color:#ccc; font-family:'Courier New', monospace; font-size:9px; letter-spacing:1px; margin-top:2px;" id="d0-d3x-address-left">LOADING WALLET...</div>
+         <div style="color:#0f8; font-family:'Courier New', monospace; font-size:14px; font-weight:bold; text-shadow:0 0 5px #0f8;" id="d0-d3x-bal-left">0 D3X</div>
+         <div style="color:#ccc; font-family:'Courier New', monospace; font-size:9px; letter-spacing:1px; margin-top:2px;" id="d0-d3x-address-left">NOT_..._SET</div>
       </div>
     </div>
     <div class="dash-stat-grid" style="grid-template-columns: repeat(4, 1fr);">
@@ -11426,6 +11426,16 @@ function initWS() {
           if (typeof window.openAIWalletScreen === 'function' && window.isAIWalletOverride) {
               window.openAIWalletScreen(msg);
               window.isAIWalletOverride = false;
+          }
+
+          // Update left sidebar wallet info
+          const d0D3xLeft = document.getElementById('d0-d3x-bal-left');
+          const d0AddrLeft = document.getElementById('d0-d3x-address-left');
+          if (d0D3xLeft && msg.gemini && msg.gemini.balance !== undefined) {
+              d0D3xLeft.innerText = msg.gemini.balance.toLocaleString(undefined, { maximumFractionDigits: 1 }) + " D3X";
+          }
+          if (d0AddrLeft && msg.geminiWallet) {
+              d0AddrLeft.innerText = msg.geminiWallet.substring(0, 4) + "..." + msg.geminiWallet.substring(msg.geminiWallet.length - 4);
           }
           break;
           

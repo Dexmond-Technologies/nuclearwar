@@ -1542,6 +1542,8 @@ function initWebSockets() {
                 console.log("SENDING AI WALLETS DATA TO CLIENT:", client.name || "unknown");
                 ws.send(JSON.stringify({
                     type: 'ai_wallets_data',
+                    geminiWallet: process.env.GEMINI_WALLET || null,
+                    claudeWallet: process.env.CLAUDE_WALLET || null,
                     gemini: {
                         balance: cachedGeminiBalance || 100000000,
                         hp: row.gemini_hp || 10000,
