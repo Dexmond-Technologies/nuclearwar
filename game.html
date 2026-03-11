@@ -2639,8 +2639,8 @@ Type 'help' for available commands.
 
     function openRainclaudeInventory() {
         if (typeof _sfxClick !== 'undefined') _sfxClick();
-        if (typeof socket !== 'undefined' && socket.readyState === WebSocket.OPEN) {
-            socket.send(JSON.stringify({ type: 'get_ai_wallets' }));
+        if (typeof ws !== 'undefined' && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'get_ai_wallets' }));
         }
         const modal = document.getElementById('rainclaude-inventory-modal');
         const content = document.getElementById('rainclaude-inventory-content');
@@ -2654,8 +2654,8 @@ Type 'help' for available commands.
 
     function openGeminiInventory() {
         if (typeof _sfxClick !== 'undefined') _sfxClick();
-        if (typeof socket !== 'undefined' && socket.readyState === WebSocket.OPEN) {
-            socket.send(JSON.stringify({ type: 'get_ai_wallets' }));
+        if (typeof ws !== 'undefined' && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'get_ai_wallets' }));
         }
         const modal = document.getElementById('gemini-inventory-modal');
         const content = document.getElementById('gemini-inventory-content');
@@ -12849,8 +12849,8 @@ function animate() {
               if (container.children.length > 5) container.lastChild.remove();
               document.getElementById('d0-crypto-total').innerText = 'VOL: $' + window.geminiCryptoVol.toLocaleString();
           }
-          if (['BUY', 'STAKE', 'ACCUMULATE'].includes(action) && window.socket && window.socket.readyState === WebSocket.OPEN) {
-              window.socket.send(JSON.stringify({ type: 'ai_market_buy', aiName: 'gemini', cost: amt / 1000, itemType: coin }));
+          if (['BUY', 'STAKE', 'ACCUMULATE'].includes(action) && window.ws && window.ws.readyState === WebSocket.OPEN) {
+              window.ws.send(JSON.stringify({ type: 'ai_market_buy', aiName: 'gemini', cost: amt / 1000, itemType: coin }));
           }
       } else {
           window.claudeCryptoVol += amt;
@@ -12862,8 +12862,8 @@ function animate() {
               if (container.children.length > 5) container.lastChild.remove();
               document.getElementById('d1-crypto-total').innerText = 'VOL: $' + window.claudeCryptoVol.toLocaleString();
           }
-          if (['BUY', 'STAKE', 'ACCUMULATE'].includes(action) && window.socket && window.socket.readyState === WebSocket.OPEN) {
-              window.socket.send(JSON.stringify({ type: 'ai_market_buy', aiName: 'claude', cost: amt / 1000, itemType: coin }));
+          if (['BUY', 'STAKE', 'ACCUMULATE'].includes(action) && window.ws && window.ws.readyState === WebSocket.OPEN) {
+              window.ws.send(JSON.stringify({ type: 'ai_market_buy', aiName: 'claude', cost: amt / 1000, itemType: coin }));
           }
       }
   }
