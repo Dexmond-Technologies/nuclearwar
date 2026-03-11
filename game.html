@@ -1421,6 +1421,12 @@ body {
   </div>
 
   <!-- FACTION DASHBOARDS: Human (left) vs Rainclaude (right) -->
+  
+  <!-- GEMINI INVENTORY BUTTON (Attached to left side of dashboard) -->
+  <button id="btn-gemini-inventory" onclick="openGeminiInventory()" style="position:fixed; left:0; bottom:300px; background:rgba(0,170,255,0.2); border:1px solid #0af; border-left:none; border-radius:0 8px 8px 0; color:#0af; font-family:'Share Tech Mono', monospace; font-size:12px; font-weight:bold; padding:15px 5px; writing-mode:vertical-rl; text-orientation:mixed; cursor:pointer; z-index:9000; box-shadow:2px 0 10px rgba(0,170,255,0.2); transition:0.2s; letter-spacing:2px; text-shadow:0 0 5px #0af;" onmouseover="this.style.background='rgba(0,170,255,0.4)'; this.style.paddingLeft='10px';" onmouseout="this.style.background='rgba(0,170,255,0.2)'; this.style.paddingLeft='5px';">
+    GEMINI INVENTORY ⯈
+  </button>
+  
   <div class="faction-dash" id="dash-0">
     <div class="dash-header" style="position:relative; flex-wrap: wrap;">
       <div class="dash-dot" style="background:#00dcff"></div>
@@ -1499,6 +1505,11 @@ body {
   <button id="btn-toggle-radio-lock" onclick="toggleRadioLock()" style="display:none;">🔒 LOCK RADIO</button>
   <div id="infinite-world-radio-label" style="position:absolute; bottom:28px; left:calc(20px + 30vw - 34px); transform:translateX(-50%); width:max-content; color:white; font-family:'Share Tech Mono', monospace; font-size:9px; letter-spacing:1px; z-index:20; opacity:0.8; pointer-events:none; display:none;">INFINITE WORLD RADIO</div>
   <button id="btn-toggle-radio-next" onclick="playNextRadio()" style="display:none;">NEXT ➔</button>
+
+  <!-- RAINCLAUDE INVENTORY BUTTON (Attached to left side of dashboard) -->
+  <button id="btn-rainclaude-inventory" onclick="openRainclaudeInventory()" style="position:fixed; right:0; bottom:300px; background:rgba(255,50,50,0.2); border:1px solid #f33; border-right:none; border-radius:8px 0 0 8px; color:#f33; font-family:'Share Tech Mono', monospace; font-size:12px; font-weight:bold; padding:15px 5px; writing-mode:vertical-rl; text-orientation:mixed; cursor:pointer; z-index:9000; box-shadow:-2px 0 10px rgba(255,50,50,0.2); transition:0.2s; letter-spacing:2px; text-shadow:0 0 5px #f33; transform:rotate(180deg);" onmouseover="this.style.background='rgba(255,50,50,0.4)'; this.style.paddingRight='10px';" onmouseout="this.style.background='rgba(255,50,50,0.2)'; this.style.paddingRight='5px';">
+    ⯇ RAINCLAUDE INVENTORY
+  </button>
 
   <div class="faction-dash" id="dash-1">
     <div class="dash-header" style="position:relative;">
@@ -2551,6 +2562,66 @@ Type 'help' for available commands.
     </div>
   </div>
 </div>
+
+<!-- AI INVENTORY MODALS -->
+<div id="rainclaude-inventory-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:10005; background:rgba(20,0,0,0.9); backdrop-filter:blur(10px); justify-content:center; align-items:center; flex-direction:column;">
+  <button onclick="document.getElementById('rainclaude-inventory-modal').style.display='none'" style="position:absolute; top:20px; right:30px; background:none; border:none; color:#f55; cursor:pointer; font-size:36px; line-height:1; z-index:10; transition:0.2s;" onmouseover="this.style.textShadow='0 0 10px #f55';" onmouseout="this.style.textShadow='none';">✕</button>
+  <h1 style="color:#f33; font-family:'Orbitron', sans-serif; font-size:48px; letter-spacing:8px; text-shadow:0 0 20px rgba(255,50,50,0.8); margin-bottom:10px; text-transform:uppercase;">RAINCLAUDE INVENTORY</h1>
+  <div style="font-family:'Share Tech Mono', monospace; color:#f88; font-size:16px; margin-bottom:40px; letter-spacing:2px; opacity:0.8;">AUTONOMOUS ADVERSARY ASSET MANIFEST</div>
+  <div id="rainclaude-inventory-content" style="display:flex; flex-wrap:wrap; gap:20px; justify-content:center; max-width:80vw; max-height:60vh; overflow-y:auto; padding:20px;">
+      <!-- Populated via JS -->
+  </div>
+</div>
+
+<div id="gemini-inventory-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:10005; background:rgba(0,10,20,0.9); backdrop-filter:blur(10px); justify-content:center; align-items:center; flex-direction:column;">
+  <button onclick="document.getElementById('gemini-inventory-modal').style.display='none'" style="position:absolute; top:20px; right:30px; background:none; border:none; color:#0af; cursor:pointer; font-size:36px; line-height:1; z-index:10; transition:0.2s;" onmouseover="this.style.textShadow='0 0 10px #0af';" onmouseout="this.style.textShadow='none';">✕</button>
+  <h1 style="color:#0af; font-family:'Orbitron', sans-serif; font-size:48px; letter-spacing:8px; text-shadow:0 0 20px rgba(0,170,255,0.8); margin-bottom:10px; text-transform:uppercase;">GEMINI INVENTORY</h1>
+  <div style="font-family:'Share Tech Mono', monospace; color:#8ce; font-size:16px; margin-bottom:40px; letter-spacing:2px; opacity:0.8;">ALLIED INTELLIGENCE ASSET MANIFEST</div>
+  <div id="gemini-inventory-content" style="display:flex; flex-wrap:wrap; gap:20px; justify-content:center; max-width:80vw; max-height:60vh; overflow-y:auto; padding:20px;">
+      <!-- Populated via JS -->
+  </div>
+</div>
+
+<script>
+    function buildAIPossessionsHTML(commodities, themeColor) {
+        if(!commodities || Object.keys(commodities).length === 0) return `<div style="padding:10px; color:#555; text-align:center; font-style:italic; font-family:'Courier New', monospace;">No mapped possessions.</div>`;
+        let h = '';
+        for(const item in commodities) {
+            const shares = commodities[item].shares;
+            if (shares > 0) {
+                h += `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(${themeColor},0.1); border:1px solid rgba(${themeColor},0.5); padding:15px; border-radius:4px; width:300px; font-family:'Courier New', monospace; font-size:18px;">
+                        <span style="color:#fff; text-transform:uppercase; letter-spacing:1px;">${item}</span>
+                        <span style="font-weight:bold; color:rgb(${themeColor}); text-shadow:0 0 10px rgba(${themeColor},0.8);">${shares.toLocaleString()} UNITS</span>
+                      </div>`;
+            }
+        }
+        return h === '' ? `<div style="padding:10px; color:#555; text-align:center; font-style:italic; font-family:'Courier New', monospace;">No active resources held.</div>` : h;
+    }
+
+    function openRainclaudeInventory() {
+        if (typeof _sfxClick !== 'undefined') _sfxClick();
+        const modal = document.getElementById('rainclaude-inventory-modal');
+        const content = document.getElementById('rainclaude-inventory-content');
+        
+        let cldData = { portfolio: { commodities: {} } };
+        if (window.gameState && window.gameState.claude) cldData = window.gameState.claude;
+        
+        content.innerHTML = buildAIPossessionsHTML(cldData.portfolio.commodities, '255,50,50');
+        modal.style.display = 'flex';
+    }
+
+    function openGeminiInventory() {
+        if (typeof _sfxClick !== 'undefined') _sfxClick();
+        const modal = document.getElementById('gemini-inventory-modal');
+        const content = document.getElementById('gemini-inventory-content');
+        
+        let gemData = { portfolio: { commodities: {} } };
+        if (window.gameState && window.gameState.gemini) gemData = window.gameState.gemini;
+        
+        content.innerHTML = buildAIPossessionsHTML(gemData.portfolio.commodities, '0,170,255');
+        modal.style.display = 'flex';
+    }
+</script>
 <script>
 // Catalog hardcoded exactly from the approved implementation_plan.md matrix
 window.WEAPONS_CATALOG = [
@@ -2599,7 +2670,12 @@ function openWeaponArsenal(tierId, titleName) {
   title.innerText = titleName + " ARSENAL";
   list.innerHTML = "";
   
-  const filteredWeapons = window.WEAPONS_CATALOG.filter(w => w.tier === tierId);
+  let filteredWeapons = [];
+  if (tierId === 'DEXMOND') {
+      filteredWeapons = window.WEAPONS_CATALOG.filter(w => w.tier !== 2);
+  } else {
+      filteredWeapons = window.WEAPONS_CATALOG.filter(w => w.tier === tierId);
+  }
   filteredWeapons.forEach(w => {
     const card = document.createElement('div');
     card.style.background = 'rgba(0,40,80,0.6)';
@@ -3408,31 +3484,6 @@ function initWTRBuildings() {
         return mineGroup;
     }
 
-    function createBlueNeonSpikeCluster() {
-        const spikeGroup = new THREE.Group();
-        const blueGlowMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
-        const coreMat = new THREE.MeshStandardMaterial({ color: 0x0055ff, emissive: 0x002288, metalness: 0.8, roughness: 0.2 });
-        
-        const base = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 0.05, 8), coreMat);
-        base.position.y = 0.025;
-        spikeGroup.add(base);
-
-        for (let i=0; i<8; i++) {
-            const spike = new THREE.Mesh(new THREE.ConeGeometry(0.015, 0.25 + Math.random()*0.15, 5), blueGlowMat);
-            spike.position.y = 0.1;
-            spike.rotation.x = (Math.random() - 0.5) * 1.0;
-            spike.rotation.z = (Math.random() - 0.5) * 1.0;
-            spikeGroup.add(spike);
-        }
-
-        const pLight = new THREE.PointLight(0x00ffff, 2, 0.6);
-        pLight.position.y = 0.15;
-        spikeGroup.add(pLight);
-
-        spikeGroup.userData = { isWeaponBuilding: true, tier: 4, buildingName: "STRATEGIC WEAPONS" };
-        return spikeGroup;
-    }
-
     // Generate 20 Landmines (Tier 2) scattered randomly
     for(let i=0; i<20; i++) {
         const mine = createLandmine();
@@ -3442,17 +3493,6 @@ function initWTRBuildings() {
         mine.position.copy(pos);
         mine.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pos.clone().normalize());
         wtrBuildingsGroup.add(mine);
-    }
-
-    // Generate 20 Blue Neon Spikes (Tier 4) scattered randomly
-    for(let i=0; i<20; i++) {
-        const spike = createBlueNeonSpikeCluster();
-        const lat = (Math.random() - 0.5) * 140; // Avoid extreme poles
-        const lon = (Math.random() - 0.5) * 360;
-        const pos = ll2v(lat, lon, GLOBE_R); 
-        spike.position.copy(pos);
-        spike.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pos.clone().normalize());
-        wtrBuildingsGroup.add(spike);
     }
 }
 initWTRBuildings();
@@ -7692,8 +7732,10 @@ function handleGlobeClick(e) {
     }
   }
   
+  const currentSkinName = window.SKINS[window.currentSkinIndex].name;
+
   // 0.5 Check ISS Click First (Only on Live Skin)
-  if (window.currentSkinIndex === 0 && window.issGroup && window.issGroup.visible) {
+  if (currentSkinName === 'LIVE' && window.issGroup && window.issGroup.visible) {
     const issHits = ray.intersectObjects(window.issGroup.children, true);
     if (issHits.length > 0) {
       if(typeof _sfxClick !== 'undefined') _sfxClick();
@@ -7704,14 +7746,11 @@ function handleGlobeClick(e) {
     }
   }
 
-  // 0.6 Check Weapon Tier Structures
-  if (window.currentSkinIndex === 4 && window.blueBuildingsGroup && window.blueBuildingsGroup.visible) {
+  // 0.6 Check Weapon Tier Structures (Legacy / Blue)
+  if (window.blueBuildingsGroup && window.blueBuildingsGroup.visible) {
       const blueHits = ray.intersectObjects(window.blueBuildingsGroup.children, true);
       if (blueHits.length > 0) {
-          // Identify which building was clicked based on custom userdata logic
           const hitObj = blueHits[0].object;
-          
-          // Climb tree to find userdata
           let current = hitObj;
           let foundTier = null;
           let foundName = "";
@@ -7723,14 +7762,15 @@ function handleGlobeClick(e) {
               }
               current = current.parent;
           }
-          
           if (foundTier) {
               openWeaponArsenal(foundTier, foundName);
               return; // Consume click
           }
       }
   }
-  if (window.currentSkinIndex === 5 && window.wtrBuildingsGroup && window.wtrBuildingsGroup.visible) {
+
+  // WTR Skin Weapons (Landmines)
+  if (currentSkinName === 'WTR' && window.wtrBuildingsGroup && window.wtrBuildingsGroup.visible) {
       const wtrHits = ray.intersectObjects(window.wtrBuildingsGroup.children, true);
       if (wtrHits.length > 0) {
           let current = wtrHits[0].object;
@@ -7751,67 +7791,42 @@ function handleGlobeClick(e) {
       }
   }
 
-  // Intercept clicks on Boat Markers for Naval War Mini-Game
-  if (window.isRedSkin && boatMarkers && boatMarkers.length > 0) {
-    const boatHits = ray.intersectObjects(boatMarkers, false);
-    if (boatHits.length > 0) {
-      if (typeof window.openNavalWar === 'function') {
-        window.openNavalWar(boatHits[0].object);
+  // DEXMOND Hub (Cyber Skin only)
+  if (currentSkinName === 'CYBER' && window.dexmondHubGroup && window.dexmondHubGroup.visible) {
+      const hubHits = ray.intersectObjects(window.dexmondHubGroup.children, true);
+      if (hubHits.length > 0) {
+          if(typeof _sfxClick !== 'undefined') _sfxClick();
+          openWeaponArsenal('DEXMOND', 'GLOBAL DEXMOND');
+          return;
       }
-      return; // Intercept and stop further map propagation
-    }
   }
 
   // Intercept clicks on D3X Mining Caves (Green Skin)
-  if (window.currentSkinIndex === 2 && typeof d3xCaveMarkers !== 'undefined' && d3xCaveMarkers.length > 0) {
+  if (currentSkinName === 'GREEN' && typeof d3xCaveMarkers !== 'undefined' && d3xCaveMarkers.length > 0) {
     const caveHits = ray.intersectObjects(d3xCaveMarkers, false);
     if (caveHits.length > 0) {
-      // Find the specific marker clicked
       const clickedHit = caveHits[0].object;
       if (clickedHit.userData && clickedHit.userData.isD3XCave) {
-        // Use the persistent parent group UUID for a unique Mine ID
         const mineId = 'MINE-' + clickedHit.parent.uuid.substring(0,8);
         window.openD3XStakeModal(mineId);
-        return; // Consume click
+        return; 
       }
     }
   }
 
   // Intercept clicks on Green Mountains (Green Skin)
-  if (window.currentSkinIndex === 2 && window.greenMountainsGroup && window.greenMountainsGroup.visible) {
+  if (currentSkinName === 'GREEN' && window.greenMountainsGroup && window.greenMountainsGroup.visible) {
     const mountainHits = ray.intersectObjects(window.greenMountainsGroup.children, true);
     if (mountainHits.length > 0) {
       if (typeof window.openMountainDigModal === 'function') {
         window.openMountainDigModal();
       }
-      return; // Consume click
-    }
-  }
-
-  // Intercept clicks on Red Satellites for Satellite Mini-Game
-  if (window.isRedSkin && typeof redSatMarkers !== 'undefined' && redSatMarkers.length > 0) {
-    const satHits = ray.intersectObjects(redSatMarkers, true);
-    if (satHits.length > 0) {
-      if (typeof window.openSatelliteWar === 'function') {
-        window.openSatelliteWar(satHits[0].object);
-      }
-      return;
-    }
-  }
-  
-  // Intercept clicks on Airplane Markers for Shooter Mini-Game
-  if (window.isRedSkin && window.planeMarkers && window.planeMarkers.length > 0) {
-    const planeHits = ray.intersectObjects(window.planeMarkers, true);
-    if (planeHits.length > 0) {
-      if (typeof window.openShooterGame === 'function') {
-        window.openShooterGame(planeHits[0].object);
-      }
-      return; // Intercept and stop further map propagation
+      return; 
     }
   }
 
   // Intercept clicks on Company Markers (Black Skin only)
-  if (window.currentSkinIndex === 4) {
+  if (currentSkinName === 'BLK') {
     let allCompanies = [];
     if (window.companiesGroup && window.companiesGroup.visible) allCompanies = allCompanies.concat(window.companiesGroup.children);
     if (window.mediumCompaniesGroup && window.mediumCompaniesGroup.visible) allCompanies = allCompanies.concat(window.mediumCompaniesGroup.children);
@@ -14586,497 +14601,8 @@ function fetchAndRenderBoats() {
       });
 }
 
-// ================= NAVAL WAR MINI-GAME =================
-
-window.navalWarState = { active: false, humanHp: 17, aiHp: 17, boatMesh: null, humanGrid: [], aiGrid: [] };
-
-function generateBattleshipGrid() {
-    let grid = Array.from({length: 10}, () => Array(10).fill(0));
-    const sizes = [5, 4, 3, 3, 2];
-    for(let size of sizes) {
-        let placed = false;
-        while(!placed) {
-            let dir = Math.random() < 0.5 ? 'H' : 'V';
-            let r = Math.floor(Math.random() * 10);
-            let c = Math.floor(Math.random() * 10);
-            if (dir === 'H' && c + size <= 10) {
-                let clear = true;
-                for(let i=0; i<size; i++) if(grid[r][c+i] !== 0) clear = false;
-                if(clear) {
-                    for(let i=0; i<size; i++) grid[r][c+i] = 1;
-                    placed = true;
-                }
-            } else if (dir === 'V' && r + size <= 10) {
-                let clear = true;
-                for(let i=0; i<size; i++) if(grid[r+i][c] !== 0) clear = false;
-                if(clear) {
-                    for(let i=0; i<size; i++) grid[r+i][c] = 1;
-                    placed = true;
-                }
-            }
-        }
-    }
-    return grid;
-}
-
-window.openNavalWar = function(mesh) {
-  if (!window.isRedSkin) return;
-  SFX.playClick();
-  window.navalWarState = { 
-     active: true, humanHp: 17, aiHp: 17, boatMesh: mesh,
-     humanGrid: generateBattleshipGrid(),
-     aiGrid: generateBattleshipGrid()
-  };
-  
-  document.getElementById('naval-hp-human').textContent = '17';
-  document.getElementById('naval-bar-human').style.width = '100%';
-  document.getElementById('naval-hp-ai').textContent = '17';
-  document.getElementById('naval-bar-ai').style.width = '100%';
-  
-  const log = document.getElementById('naval-log');
-  log.innerHTML = '<div style="opacity:0.7;">Sonar contact acquired. Awaiting firing coordinates...</div>';
-  
-  window.renderNavalGrids();
-  document.getElementById('naval-modal').classList.add('show');
-};
-
-window.renderNavalGrids = function() {
-    const pGrid = document.getElementById('human-grid');
-    const aGrid = document.getElementById('ai-grid');
-    if (!pGrid || !aGrid) return;
-    pGrid.innerHTML = '';
-    aGrid.innerHTML = '';
-    
-    for(let r=0; r<10; r++) {
-        for(let c=0; c<10; c++) {
-            // Human cell
-            const cellH = document.createElement('div');
-            cellH.style.border = '1px solid rgba(0,170,255,0.3)';
-            cellH.style.cursor = 'default';
-            let valH = window.navalWarState.humanGrid[r][c];
-            if (valH === 0) cellH.style.background = 'transparent'; // empty water
-            else if (valH === 1) cellH.style.background = 'rgba(0,170,255,0.5)'; // ship
-            else if (valH === 2) cellH.style.background = '#f55'; // hit
-            else if (valH === 3) cellH.style.background = 'rgba(255,255,255,0.3)'; // miss
-            pGrid.appendChild(cellH);
-            
-            // AI cell
-            const cellA = document.createElement('div');
-            cellA.style.border = '1px solid rgba(255,85,85,0.3)';
-            cellA.style.cursor = 'pointer';
-            let valA = window.navalWarState.aiGrid[r][c];
-            
-            if (valA === 0 || valA === 1) {
-                cellA.style.background = 'transparent'; // hid AI ships
-                cellA.onmouseover = function() { cellA.style.background = 'rgba(255,85,85,0.2)'; };
-                cellA.onmouseout = function() { cellA.style.background = 'transparent'; };
-                cellA.onclick = function() { window.fireAtAI(r, c); };
-            } else if (valA === 2) {
-                cellA.style.background = '#0f8'; // Player hit AI
-                cellA.style.cursor = 'default';
-            } else if (valA === 3) {
-                cellA.style.background = 'rgba(255,255,255,0.3)'; // miss
-                cellA.style.cursor = 'default';
-            }
-            aGrid.appendChild(cellA);
-        }
-    }
-};
-
-window.fireAtAI = function(r, c) {
-    if (!window.navalWarState.active) return;
-    
-    let aGrid = window.navalWarState.aiGrid;
-    let hit = (aGrid[r][c] === 1);
-    aGrid[r][c] = hit ? 2 : 3;
-    
-    const log = document.getElementById('naval-log');
-    if (hit) {
-        if(typeof SFX.playExplosion === 'function') SFX.playExplosion();
-        else SFX.playSiren();
-        window.navalWarState.aiHp--;
-        log.innerHTML += `<div><span style="color:#0f8">DIRECT HIT! Rainclaude vessel damaged at [${r},${c}].</span></div>`;
-    } else {
-        SFX.playClick();
-        log.innerHTML += `<div><span style="color:#aaa">Miss! Torpedo detonated in open water at [${r},${c}].</span></div>`;
-    }
-    
-    // Update AI HP bar
-    document.getElementById('naval-hp-ai').textContent = window.navalWarState.aiHp;
-    document.getElementById('naval-bar-ai').style.width = ((window.navalWarState.aiHp / 17) * 100) + '%';
-    log.scrollTop = log.scrollHeight;
-    
-    window.renderNavalGrids();
-    
-    // Check win
-    if (window.navalWarState.aiHp <= 0) {
-        window.endNavalWar('human');
-        return;
-    }
-    
-    // AI Turn (Disable player input briefly by disabling active flag)
-    window.navalWarState.active = false;
-    setTimeout(() => {
-        let pGrid = window.navalWarState.humanGrid;
-        
-        // simple random AI
-        let aiR, aiC;
-        do {
-            aiR = Math.floor(Math.random() * 10);
-            aiC = Math.floor(Math.random() * 10);
-        } while(pGrid[aiR][aiC] === 2 || pGrid[aiR][aiC] === 3);
-        
-        let aiHit = (pGrid[aiR][aiC] === 1);
-        pGrid[aiR][aiC] = aiHit ? 2 : 3;
-        
-        if (aiHit) {
-             if(typeof SFX.playExplosion === 'function') SFX.playExplosion();
-             else SFX.playSiren();
-             window.navalWarState.humanHp--;
-             log.innerHTML += `<div><span style="color:#f55">WARNING! Human vessel hit at [${aiR},${aiC}]!</span></div>`;
-        } else {
-             SFX.playClick();
-             log.innerHTML += `<div><span style="color:#aaa">Rainclaude missed at [${aiR},${aiC}].</span></div>`;
-        }
-        
-        document.getElementById('naval-hp-human').textContent = window.navalWarState.humanHp;
-        document.getElementById('naval-bar-human').style.width = ((window.navalWarState.humanHp / 17) * 100) + '%';
-        log.scrollTop = log.scrollHeight;
-        
-        window.renderNavalGrids();
-        
-        if (window.navalWarState.humanHp <= 0) {
-            window.endNavalWar('ai');
-        } else {
-            window.navalWarState.active = true; // allow player to shoot again
-        }
-    }, 600);
-}
-
-window.endNavalWar = function(winner) {
-    window.navalWarState.active = false;
-    const log = document.getElementById('naval-log');
-    if (winner === 'human') {
-      log.innerHTML += `<div style="color:#0f8; font-weight:bold; font-size:14px; margin-top:10px;">TACTICAL VICTORY! Rainclaude fleet sunk. +50,000 Troops gained!</div>`;
-      if (typeof GS !== 'undefined' && GS.players[GS.myIndex]) {
-        GS.reinforceLeft += 5; 
-        updateDashboard();
-        if (typeof setLog === 'function') setLog("🎁 Naval Victory! +50,000 reserve troops added.");
-      }
-      if (typeof scene !== 'undefined' && window.navalWarState.boatMesh) {
-         scene.remove(window.navalWarState.boatMesh);
-         if (typeof boatMarkers !== 'undefined') {
-            boatMarkers = boatMarkers.filter(b => b !== window.navalWarState.boatMesh);
-         }
-      }
-    } else {
-      log.innerHTML += `<div style="color:#f55; font-weight:bold; font-size:14px; margin-top:10px;">DEFEAT! Human fleet destroyed.</div>`;
-      if (typeof setLog === 'function') setLog("💥 Naval Defeat! Fleet lost to Rainclaude.");
-    }
-    log.scrollTop = log.scrollHeight;
-}
-
-// ================= AIRPLANE SHOOTER MINI-GAME =================
-
-window.planeMarkers = [];
-window.planeData = [];
-window.shooterState = { active: false, ammo: 3, aiHp: 100, planeMesh: null };
-window.satelliteWarState = { active: false, humanHp: 100, aiHp: 100, satMesh: null };
-
-window.openSatelliteWar = function(mesh) {
-  if (!window.isRedSkin) return;
-  SFX.playClick();
-  window.satelliteWarState = { active: true, humanHp: 100, aiHp: 100, satMesh: mesh };
-  
-  document.getElementById('sat-hp-human').textContent = '100';
-  document.getElementById('sat-bar-human').style.width = '100%';
-  document.getElementById('sat-hp-ai').textContent = '100';
-  document.getElementById('sat-bar-ai').style.width = '100%';
-  
-  const log = document.getElementById('sat-log');
-  log.innerHTML = '<div style="opacity:0.7;">Orbital target locked. Commencing cyber-attack...</div>';
-  
-  document.getElementById('btn-fire-laser').style.display = 'block';
-  document.getElementById('satellite-war-modal').classList.add('show');
-};
-
-window.fireSatelliteLaser = function() {
-  if (!window.satelliteWarState.active) return;
-  SFX.playLaser(); // Future beam sound mapping, falls back to click if undefined
-  
-  // RNG Combat
-  const humanDmg = Math.floor(15 + Math.random() * 20);
-  const aiDmg = Math.floor(10 + Math.random() * 25);
-  
-  window.satelliteWarState.humanHp = Math.max(0, window.satelliteWarState.humanHp - aiDmg);
-  window.satelliteWarState.aiHp = Math.max(0, window.satelliteWarState.aiHp - humanDmg);
-  
-  // Update UI
-  document.getElementById('sat-hp-human').textContent = window.satelliteWarState.humanHp;
-  document.getElementById('sat-bar-human').style.width = window.satelliteWarState.humanHp + '%';
-  document.getElementById('sat-hp-ai').textContent = window.satelliteWarState.aiHp;
-  document.getElementById('sat-bar-ai').style.width = window.satelliteWarState.aiHp + '%';
-  
-  const log = document.getElementById('sat-log');
-  log.innerHTML += `<div><span style="color:#0af">HUMAN EMP hits for ${humanDmg} DMG!</span> | <span style="color:#f55">RAINCLAUDE EMP hits for ${aiDmg} DMG!</span></div>`;
-  log.scrollTop = log.scrollHeight;
-  
-  // Check Win/Loss Condition
-  if (window.satelliteWarState.humanHp <= 0 || window.satelliteWarState.aiHp <= 0) {
-    window.satelliteWarState.active = false;
-    document.getElementById('btn-fire-laser').style.display = 'none';
-    
-    if (window.satelliteWarState.humanHp > window.satelliteWarState.aiHp) {
-      log.innerHTML += `<div style="color:#0f8; font-weight:bold; font-size:14px; margin-top:10px;">TACTICAL VICTORY! Rainclaude satellite neutralized. +20,000 Troops gained!</div>`;
-      // Grant Reward
-      if (GS.players[GS.myIndex]) {
-        GS.reinforceLeft += 2; // 2 x 10k troops
-        updateDashboard();
-        setLog("🎁 Orbital Victory! +20,000 reserve troops added.");
-      }
-      
-      // Remove satellite from map
-      if (typeof scene !== 'undefined' && window.satelliteWarState.satMesh) {
-         scene.remove(window.satelliteWarState.satMesh.userData.parent);
-         if (typeof redSatMarkers !== 'undefined') {
-            redSatMarkers = redSatMarkers.filter(b => b !== window.satelliteWarState.satMesh);
-         }
-      }
-    } else if (window.satelliteWarState.aiHp > window.satelliteWarState.humanHp) {
-      log.innerHTML += `<div style="color:#f55; font-weight:bold; font-size:14px; margin-top:10px;">DEFEAT! Human satellite destroyed.</div>`;
-      setLog("💥 Orbital Defeat! Cyber-link severed.");
-    } else {
-      log.innerHTML += `<div style="color:#fa0; font-weight:bold; font-size:14px; margin-top:10px;">DRAW! Mutually assured network destruction.</div>`;
-    }
-    log.scrollTop = log.scrollHeight;
-  }
-};
-
-window.spawnRedPlanes = function() {
-  if (typeof scene === 'undefined' || typeof THREE === 'undefined') return;
-  
-  // Clear old planes
-  if (window.planeData) {
-     window.planeData.forEach(p => scene.remove(p.pivot));
-  }
-  window.planeMarkers = [];
-  window.planeData = [];
-  
-  if (!window.isRedSkin) return;
-  
-  const R = typeof GLOBE_R !== 'undefined' ? GLOBE_R + 0.045 : 1.045; // Fly slightly higher than boats
-  const planeMatNeutral = new THREE.MeshBasicMaterial({ color: 0xffffff, depthTest: true });
-  const planeMatRaincloud = new THREE.MeshBasicMaterial({ color: 0xff0000, depthTest: true });
-  const planeMatHumanity = new THREE.MeshBasicMaterial({ color: 0x0000ff, depthTest: true });
-  
-  // Reduced to 10 airplanes to dramatically aid GPU rendering on RED skin
-  for (let i = 0; i < 10; i++) {
-    let planeMat = planeMatNeutral;
-    if (i < 3) {
-      planeMat = planeMatRaincloud;
-    } else if (i < 9) {
-      planeMat = planeMatHumanity;
-    }
-    const planeGroup = new THREE.Group();
-    
-    // Plane flies in local -Y direction.
-    // Up is +Z
-    
-    // Fuselage (Cylinder height is along Y)
-    const bodyGeo = new THREE.CylinderGeometry(0.005, 0.005, 0.06, 8);
-    const body = new THREE.Mesh(bodyGeo, planeMat);
-    
-    // Wings (Span X, thickness Z, chord length Y)
-    const wingGeo = new THREE.BoxGeometry(0.08, 0.015, 0.002);
-    const wings = new THREE.Mesh(wingGeo, planeMat);
-    wings.position.set(0, -0.01, 0); // slightly forward
-    
-    // Tail
-    const tailGeo = new THREE.BoxGeometry(0.025, 0.01, 0.002);
-    const tail = new THREE.Mesh(tailGeo, planeMat);
-    tail.position.set(0, 0.025, 0); // back towards +Y
-    
-    // Fin (Up +Z)
-    const finGeo = new THREE.BoxGeometry(0.002, 0.01, 0.015);
-    const fin = new THREE.Mesh(finGeo, planeMat);
-    fin.position.set(0, 0.025, 0.0075);
-    
-    planeGroup.add(body);
-    planeGroup.add(wings);
-    planeGroup.add(tail);
-    planeGroup.add(fin);
-    
-    // Create pivot and position it
-    const pivot = new THREE.Group();
-    scene.add(pivot);
-    
-    // Add plane to pivot, offset by radius length (so local origin is at Globe's core)
-    planeGroup.position.set(0, 0, R);
-    
-    // Ensure no extra rotations so travel axis matches perfectly
-    planeGroup.rotation.set(0, 0, 0);
-    
-    pivot.add(planeGroup);
-    
-    // Randomize initial starting point on the globe
-    pivot.rotation.set(
-       Math.random() * Math.PI * 2,
-       Math.random() * Math.PI * 2,
-       Math.random() * Math.PI * 2
-    );
-
-    // Generous but appropriately-sized invisible hitbox for clicking (0.12x0.12x0.12)
-    const hitBoxGeo = new THREE.BoxGeometry(0.12, 0.12, 0.12);
-    const hitBoxMat = new THREE.MeshBasicMaterial({visible: false});
-    const hitBox = new THREE.Mesh(hitBoxGeo, hitBoxMat);
-    planeGroup.add(hitBox);
-    
-    // Set user data for raycaster
-    hitBox.userData = { isPlane: true, pivot: pivot };
-
-    window.planeMarkers.push(hitBox); // Raycast against the hitbox
-    
-    // Save orbital mechanics (rotate around X-axis now that plane is offset on Z)
-    // Rotating around +X causes movement in -Y locally (Nose First)
-    const axis = new THREE.Vector3(1, 0, 0); 
-    const speed = Math.random() * 0.002 + 0.001; 
-    window.planeData.push({ pivot, axis, speed });
-  }
-};
-
-window.openShooterGame = function(hitBoxMesh) {
-  if (!window.isRedSkin) return;
-  SFX.playClick();
-  
-  const parentPlane = hitBoxMesh.parent;
-  window.shooterState = { active: true, ammo: 3, aiHp: 100, planeMesh: parentPlane };
-  
-  document.getElementById('shooter-ammo').textContent = '3';
-  document.getElementById('shooter-hp-ai').textContent = '100';
-  document.getElementById('shooter-bar-ai').style.width = '100%';
-  
-  const log = document.getElementById('shooter-log');
-  log.innerHTML = '<div style="opacity:0.7;">RPG-7 armed. Target aircraft locked.</div>';
-  
-  document.getElementById('btn-fire-rpg').style.display = 'block';
-  document.getElementById('shooter-modal').classList.add('show');
-};
-
-window.fireRPG = function() {
-  if (!window.shooterState.active || window.shooterState.ammo <= 0) return;
-  SFX.playClick();
-  
-  // Hide shooter modal and open the manual RPG mini-game overlay
-  document.getElementById('shooter-modal').classList.remove('show');
-  const screen = document.getElementById('rpg-aim-screen');
-  screen.style.display = 'block';
-  screen.style.background = 'radial-gradient(circle at center, rgba(100,150,250,0.6) 0%, rgba(10,20,40,0.95) 100%)';
-  
-  window.rpgState = { 
-     active: true, 
-     time: 0, 
-     targetX: 0, targetY: 0, 
-     mouseX: 0, mouseY: 0, 
-     animId: null 
-  };
-  
-  // Track mouse bounded to approx 1/3 viewport from center
-  window._rpgMouseListener = function(e) {
-      if (!window.rpgState.active) return;
-      const mw = window.innerWidth / 2;
-      const mh = window.innerHeight / 2;
-      
-      // Calculate offset from center
-      let dX = e.clientX - mw;
-      let dY = e.clientY - mh;
-      
-      // Clamp to 1/3 viewport
-      const limitX = window.innerWidth / 3;
-      const limitY = window.innerHeight / 3;
-      
-      if (dX > limitX) dX = limitX;
-      if (dX < -limitX) dX = -limitX;
-      if (dY > limitY) dY = limitY;
-      if (dY < -limitY) dY = -limitY;
-      
-      window.rpgState.mouseX = dX;
-      window.rpgState.mouseY = dY;
-  };
-  document.addEventListener('mousemove', window._rpgMouseListener);
-  
-  window.rpgLoop();
-};
-
-window.clearWTRBlocks = function() {
-    if (window.wtrBlocksData) {
-        window.wtrBlocksData.forEach(b => {
-            if (b.pivot) scene.remove(b.pivot);
-        });
-    }
-    window.wtrBlocksData = [];
-};
-
-window.spawnWTRBlocks = function() {
-  // Disabled per user request (no blocks on WTR skin)
-  return;
-};
-
-window.rpgLoop = function() {
-  if (!window.rpgState.active) return;
-  window.rpgState.time += 0.04; // Speed of the aircraft
-  
-  const t = window.rpgState.time;
-  
-  // Complex sweeping motion with erratic shaking
-  window.rpgState.targetX = Math.sin(t * 1.2) * 400 + Math.sin(t * 3.5) * 80 + (Math.random() * 30 - 15);
-  window.rpgState.targetY = Math.cos(t * 0.9) * 250 + Math.cos(t * 4.2) * 60 + (Math.random() * 30 - 15);
-  
-  const targetEl = document.getElementById('rpg-target');
-  targetEl.style.transform = `translate(calc(-50% + ${window.rpgState.targetX}px), calc(-50% + ${window.rpgState.targetY}px)) rotate(${window.rpgState.targetX * 0.05 + 45}deg)`;
-  
-  // Move crosshair
-  const crosshairEl = document.getElementById('rpg-crosshair');
-  crosshairEl.style.transform = `translate(calc(-50% + ${window.rpgState.mouseX}px), calc(-50% + ${window.rpgState.mouseY}px))`;
-  
-  // Crosshair color feedback if hovering over target (relative distance)
-  const relX = window.rpgState.targetX - window.rpgState.mouseX;
-  const relY = window.rpgState.targetY - window.rpgState.mouseY;
-  const dist = Math.sqrt(relX * relX + relY * relY);
-  
-  const dot = document.getElementById('rpg-crosshair-dot');
-  if (dist < 60) {
-     dot.style.background = '#0f8'; // Locked on
-     dot.style.boxShadow = '0 0 15px #0f8';
-  } else {
-     dot.style.background = '#f00';
-     dot.style.boxShadow = '0 0 10px #f00';
-  }
-  
-  window.rpgState.animId = requestAnimationFrame(window.rpgLoop);
-};
-
-window.onRpgFire = function() {
-  if (!window.rpgState.active) return;
-  window.rpgState.active = false;
-  cancelAnimationFrame(window.rpgState.animId);
-  document.removeEventListener('mousemove', window._rpgMouseListener);
-  
-  SFX.playClick();
-  
-  const relX = window.rpgState.targetX - window.rpgState.mouseX;
-  const relY = window.rpgState.targetY - window.rpgState.mouseY;
-  const dist = Math.sqrt(relX * relX + relY * relY);
-  const isHit = dist < 65; // Tolerance radius (slightly larger than visual crosshair)
-  
-  // Flashbang effect
-  const screen = document.getElementById('rpg-aim-screen');
-  screen.style.background = '#fff';
-  
-  setTimeout(() => {
-    screen.style.display = 'none';
-    window.resolveRpgShot(isHit);
-  }, 120);
-};
+// ================= NAVAL & RED SKIN MINIGAMES REMOVED =================
+// Minigame logic historically associated with the RED skin has been deprecated.
 
 // --- SOLANA D3X STAKING CONTRACT PLACEHOLDERS ---
 window.handleStakeDeposit = function() {
@@ -15190,8 +14716,7 @@ window.currentSkinIndex = 0;
 window.isRedSkin = false; // Legacy flag preserved for scripts that might check it directly
 
 const SKINS = [
-  { name: 'LIVE',  color: 0xffffff, btnText: '🔴 RED SKIN',    btnClass: '',              showOverlays: false, cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
-  { name: 'RED',   color: 0xff2222, btnText: '🟢 GRN SKIN',  btnClass: 'active-normal', showOverlays: true,  cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: true, isPremium: false },
+  { name: 'LIVE',  color: 0xffffff, btnText: '🟢 GRN SKIN',    btnClass: '',              showOverlays: false, cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
   { name: 'GREEN', color: 0x22ff22, btnText: '💠 CYBR SKIN',   btnClass: 'active-normal', showOverlays: false, cleanGlobe: true,  hideTroops: true,  showResources: true,  showArms: true, showBoats: false, isPremium: false },
   { name: 'CYBER', color: 0x00f0ff, btnText: '⬛ BLK SKIN',    btnClass: 'active-premium',showOverlays: false,  cleanGlobe: true, hideTroops: true,  showResources: false,  showArms: false,  showBoats: false,  isPremium: false },
   { name: 'BLK',   color: 0x050505, btnText: '💧 WTR SKIN',    btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true,  showResources: false, showArms: false, showBoats: false, isPremium: false },
