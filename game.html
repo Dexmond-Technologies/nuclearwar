@@ -2935,6 +2935,98 @@ function initGreenMountains() {
 }
 initGreenMountains();
 
+let blueBuildingsGroup = new THREE.Group();
+blueBuildingsGroup.visible = false;
+scene.add(blueBuildingsGroup);
+window.blueBuildingsGroup = blueBuildingsGroup;
+
+function initBlueBuildings() {
+    // High-poly shiny metallic materials
+    const silverMat = new THREE.MeshStandardMaterial({
+        color: 0xaaaaaa, roughness: 0.2, metalness: 0.8
+    });
+    const blueMat = new THREE.MeshStandardMaterial({
+        color: 0x0055ff, roughness: 0.2, metalness: 0.8
+    });
+    const redMat = new THREE.MeshStandardMaterial({
+        color: 0xff1111, roughness: 0.3, metalness: 0.6
+    });
+
+    // 1. Rocket Building (Washington DC)
+    const rocketGroup = new THREE.Group();
+    // Body
+    const rBody = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.2, 32), silverMat);
+    rBody.position.y = 0.1;
+    rocketGroup.add(rBody);
+    // Nose
+    const rNose = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.08, 32), redMat);
+    rNose.position.y = 0.24;
+    rocketGroup.add(rNose);
+    // Fins
+    for (let i=0; i<4; i++) {
+        const fin = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, 0.01), redMat);
+        fin.position.y = 0.03;
+        fin.rotation.y = (Math.PI / 2) * i;
+        fin.position.x = Math.cos((Math.PI / 2) * i) * 0.04;
+        fin.position.z = Math.sin((Math.PI / 2) * i) * 0.04;
+        rocketGroup.add(fin);
+    }
+    // Boosters
+    const rBooster = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.04, 0.04, 32), blueMat);
+    rBooster.position.y = -0.02;
+    rocketGroup.add(rBooster);
+
+    const rocketPos = ll2v(38.89, -77.03, GLOBE_R);
+    rocketGroup.position.copy(rocketPos);
+    rocketGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), rocketPos.clone().normalize());
+    blueBuildingsGroup.add(rocketGroup);
+
+    // 2. Bomb Building (Moscow)
+    const bombGroup = new THREE.Group();
+    // Main Body
+    const bBody = new THREE.Mesh(new THREE.SphereGeometry(0.06, 32, 32), silverMat);
+    bBody.position.y = 0.08;
+    bBody.scale.y = 1.2; // Stretch slightly like a teardrop
+    bombGroup.add(bBody);
+    // Tail
+    const bTail = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.05, 0.08, 32), silverMat);
+    bTail.position.y = 0.18;
+    bombGroup.add(bTail);
+    // Tail box / Stabilizers
+    const bBox = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.02, 0.08), redMat);
+    bBox.position.y = 0.23;
+    bombGroup.add(bBox);
+    const bombPos = ll2v(55.75, 37.61, GLOBE_R);
+    bombGroup.position.copy(bombPos);
+    bombGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), bombPos.clone().normalize());
+    blueBuildingsGroup.add(bombGroup);
+
+    // 3. Command Center Tower (London)
+    const cmdGroup = new THREE.Group();
+    // Base
+    const cBase = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.09, 0.05, 32), silverMat);
+    cBase.position.y = 0.025;
+    cmdGroup.add(cBase);
+    // Core (Glowing)
+    const cCore = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.15, 32), blueMat);
+    cCore.position.y = 0.1;
+    cmdGroup.add(cCore);
+    // Top Ring
+    const cRing = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.015, 16, 64), silverMat);
+    cRing.position.y = 0.15;
+    cRing.rotation.x = Math.PI / 2;
+    cmdGroup.add(cRing);
+    // Antenna
+    const cAnt = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.1, 16), silverMat);
+    cAnt.position.y = 0.22;
+    cmdGroup.add(cAnt);
+    const cmdPos = ll2v(51.50, -0.12, GLOBE_R);
+    cmdGroup.position.copy(cmdPos);
+    cmdGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), cmdPos.clone().normalize());
+    blueBuildingsGroup.add(cmdGroup);
+}
+initBlueBuildings();
+
 function initD3XCaves() {
   const coords = [
     {lat: 40, lon: -100, name: "NA D3X Mine"},
@@ -14689,6 +14781,11 @@ window.toggleRedSkin = function() {
   // Toggle Green Shiny Mountains exclusively on Green Skin
   if (typeof window.greenMountainsGroup !== 'undefined') {
       window.greenMountainsGroup.visible = (skin.name === 'GREEN');
+  }
+  
+  // Toggle High Detailed Blue Buildings exclusively on Blue Skin
+  if (typeof window.blueBuildingsGroup !== 'undefined') {
+      window.blueBuildingsGroup.visible = (skin.name === 'BLUE');
   }
   
   // Toggle Metals Trade  // Elements normally toggled by specific skins
