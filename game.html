@@ -1112,7 +1112,7 @@ body {
         <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
           <div style="font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:2px; color:rgba(0,212,255,0.5); text-transform:uppercase;">Override Code</div>
           <input type="password" id="dev-unlock-in" placeholder="ENTER OVERRIDE CODE" style="background:transparent; border:none; border-bottom:1px solid rgba(0,212,255,0.3); color:#0dc; text-align:center; outline:none; font-family:'Share Tech Mono',monospace; width:150px; font-size:12px;"
-                 onkeyup="const val=this.value.toLowerCase(); if(val==='unlock'){ document.getElementById('lobby-auth-status').innerHTML='✓ OVERRIDE ACCEPTED'; document.getElementById('auth-container-flex').style.display='none'; joinGlobalWar(); } else if(val==='terminal'){ document.getElementById('lobby-auth-status').innerHTML='✓ ADMIN TERMINAL ACCESS GRANTED'; document.getElementById('auth-container-flex').style.display='none'; if(typeof openAdminTerminal==='function') openAdminTerminal(); } else if(val==='market' || val==='markets'){ document.getElementById('lobby-auth-status').innerHTML='✓ MARKET LOGS ACCESSED'; document.getElementById('auth-container-flex').style.display='none'; document.getElementById('lobby').style.display='none'; document.getElementById('c').style.display='none'; document.getElementById('hud').style.display='none'; document.body.style.background='#000'; setTimeout(() => { if(typeof window.openMarketLogs==='function') window.openMarketLogs(); }, 500); } else if(val==='aiwallet' || val==='ai wallet'){ document.getElementById('lobby-auth-status').innerHTML='✓ AI WALLET OVERRIDE ACCESSED'; document.getElementById('auth-container-flex').style.display='none'; joinGlobalWar(); setTimeout(() => { if(ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({type: 'get_ai_wallets'})); }, 1500); }">
+                 onkeyup="const val=this.value.toLowerCase(); if(val==='unlock'){ document.getElementById('lobby-auth-status').innerHTML='✓ OVERRIDE ACCEPTED'; document.getElementById('auth-container-flex').style.display='none'; joinGlobalWar(); } else if(val==='terminal'){ document.getElementById('lobby-auth-status').innerHTML='✓ ADMIN TERMINAL ACCESS GRANTED'; document.getElementById('auth-container-flex').style.display='none'; if(typeof openAdminTerminal==='function') openAdminTerminal(); } else if(val==='market' || val==='markets'){ document.getElementById('lobby-auth-status').innerHTML='✓ MARKET LOGS ACCESSED'; document.getElementById('auth-container-flex').style.display='none'; document.getElementById('lobby').style.display='none'; document.getElementById('c').style.display='none'; document.getElementById('hud').style.display='none'; document.body.style.background='#000'; setTimeout(() => { if(typeof window.openMarketLogs==='function') window.openMarketLogs(); }, 500); } else if(val==='aiwallet' || val==='ai wallet'){ document.getElementById('lobby-auth-status').innerHTML='✓ AI WALLET OVERRIDE ACCESSED'; document.getElementById('auth-container-flex').style.display='none'; joinGlobalWar(); setTimeout(() => { window.isAIWalletOverride = true; if(ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({type: 'get_ai_wallets'})); }, 1500); }">
         </div>
     
     <script>
@@ -11423,8 +11423,9 @@ function initWS() {
           }
 
           // Render full screen AI wallets GUI if requested via override
-          if (typeof window.openAIWalletScreen === 'function') {
+          if (typeof window.openAIWalletScreen === 'function' && window.isAIWalletOverride) {
               window.openAIWalletScreen(msg);
+              window.isAIWalletOverride = false;
           }
           break;
           

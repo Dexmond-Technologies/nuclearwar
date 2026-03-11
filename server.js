@@ -1539,6 +1539,7 @@ function initWebSockets() {
             const res = await pgPool.query("SELECT gemini_hp, claude_hp, gemini_portfolio, claude_portfolio, gemini_weapon_inventory, claude_weapon_inventory FROM ai_combat_state WHERE id = 1");
             if (res.rows.length > 0) {
                 const row = res.rows[0];
+                console.log("SENDING AI WALLETS DATA TO CLIENT:", client.name || "unknown");
                 ws.send(JSON.stringify({
                     type: 'ai_wallets_data',
                     gemini: {
