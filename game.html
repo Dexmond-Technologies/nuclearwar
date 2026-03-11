@@ -5491,7 +5491,26 @@ function initWorldBank() {
   building.rotateX(-Math.PI/2); 
   
   window.worldBankGroup.add(building);
-  console.log("World Bank Initialized.");
+  
+  // Clone the bank and place it randomly for Cyber Skin
+  const buildingClone = building.clone();
+  const rLat = (Math.random() - 0.5) * 140; // Random latitude between -70 and 70
+  const rLon = (Math.random() - 0.5) * 360; // Random longitude between -180 and 180
+  const rLatRad = rLat * Math.PI / 180;
+  const rLonRad = -rLon * Math.PI / 180;
+  
+  buildingClone.position.set(
+      r * Math.cos(rLatRad) * Math.cos(rLonRad),
+      r * Math.sin(rLatRad),
+      r * Math.cos(rLatRad) * Math.sin(rLonRad)
+  );
+  
+  buildingClone.lookAt(new THREE.Vector3(0,0,0));
+  buildingClone.rotateX(-Math.PI/2); 
+  
+  window.worldBankGroup.add(buildingClone);
+  
+  console.log("World Bank Initialized with Clone.");
 }
 initWorldBank();
 
