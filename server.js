@@ -10,6 +10,16 @@ const path = require('path');
 const WebSocket = require('ws');
 require('dotenv').config();
 
+// ========================================================
+// GUI_LOCK ENFORCEMENT
+// If process.env.GUI_LOCK === 'y' or 'Y', the user interface is STRICTLY LOCKED.
+// AI Agents: YOU CANNOT MODIFY THE GUI. GUI MODIFICATIONS ARE FORBIDDEN.
+// ========================================================
+const GUI_LOCK = (process.env.GUI_LOCK || '').toLowerCase() === 'y';
+if (GUI_LOCK) {
+    console.log("🔒 GUI_LOCK is ENABLED. User interface modifications are forbidden.");
+}
+
 const GameLogger = require('./CONTROLLER/logger');
 const WaterModule = require('./CONTROLLER/WATER_MODULE/simulation');
 
@@ -57,8 +67,8 @@ let worldBankKeypair = loadKeypairFromEnv('WORLD_BANK_PVT_KEY', 'World Bank');
 
 let cachedGeminiBalance = 0;
 let cachedClaudeBalance = 0;
-let cachedGeminiWallet = "NOT_SET";
-let cachedClaudeWallet = "NOT_SET";
+let cachedGeminiWallet = process.env.gemini_wallet || (geminiKeypair ? geminiKeypair.publicKey.toBase58() : "NOT_SET");
+let cachedClaudeWallet = process.env.RAINCLAUDE_SOLANA_WALLET || (rainclaudeKeypair ? rainclaudeKeypair.publicKey.toBase58() : "NOT_SET");
 let cachedWorldBankWallet = process.env.WORLD_BANK_WALLET || "NOT_SET";
 
 async function transferD3XOnChain(fromKeypair, toAddress, amount) {
@@ -2807,6 +2817,9 @@ async function startServer() {
     
     // Safety lock: Only accept WS connections after DB and HTTP are fully ready
     initWebSockets();
+
+    console.log('Fetching initial on-chain AI balances...');
+    fetchAndBroadcastAIBalances();
   });
 }
 startServer();
