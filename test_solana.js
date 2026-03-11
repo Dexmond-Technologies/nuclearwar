@@ -2,7 +2,7 @@ const web3 = require('@solana/web3.js');
 const bs58 = require('bs58');
 require('dotenv').config();
 
-const secretKeyString = process.env.SOLANA_WALLET_PRIVATE_KEY;
+const secretKeyString = process.env.EARTH_WALLET_PRIVATE_KEY;
 try {
     const decodedKey = bs58.decode(secretKeyString);
     console.log("Decoded length:", decodedKey.length);

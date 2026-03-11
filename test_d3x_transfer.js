@@ -9,8 +9,8 @@ const solanaConnection = new web3.Connection(web3.clusterApiUrl('mainnet-beta'),
 async function run() {
   try {
     const decode = bs58.decode || (bs58.default && bs58.default.decode);
-    const secretKey = process.env.SOLANA_WALLET_PRIVATE_KEY;
-    if (!secretKey) throw new Error("Missing SOLANA_WALLET_PRIVATE_KEY in .env");
+    const secretKey = process.env.EARTH_WALLET_PRIVATE_KEY;
+    if (!secretKey) throw new Error("Missing EARTH_WALLET_PRIVATE_KEY in .env");
     
     const authorityKeypair = web3.Keypair.fromSecretKey(decode(secretKey));
     console.log("Authority Wallet:", authorityKeypair.publicKey.toBase58());

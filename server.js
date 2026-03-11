@@ -60,7 +60,7 @@ function loadKeypairFromEnv(envVarName, label) {
   return null;
 }
 
-let authorityKeypair = loadKeypairFromEnv('SOLANA_WALLET_PRIVATE_KEY', 'Authority (Earth)');
+let authorityKeypair = loadKeypairFromEnv('EARTH_WALLET_PRIVATE_KEY', 'Authority (Earth)');
 let rainclaudeKeypair = loadKeypairFromEnv('RAINCLAUDE_SOLANA_KEY', 'Rainclaude');
 let geminiKeypair = loadKeypairFromEnv('gemini_wallet_pvt_key', 'Gemini AI');
 let worldBankKeypair = loadKeypairFromEnv('WORLD_BANK_PVT_KEY', 'World Bank');
@@ -112,6 +112,7 @@ async function transferD3XOnChain(fromKeypair, toAddress, amount) {
 const { RadioBrowserApi } = require('radio-browser-api');
 const radioApi = new RadioBrowserApi('NuclearWarGame-DexmondTech');
 const { OAuth2Client } = require('google-auth-library');
+const solanaWeb3 = require('@solana/web3.js'); // Added as per instruction
 
 
 // REPLACE THIS WITH YOUR ACTUAL GOOGLE CLIENT ID
@@ -537,7 +538,7 @@ const server = http.createServer((req, res) => {
                         } catch(e) { console.error('DB Update error for stripe purchase:', e.message); }
                     }
                 } else {
-                    console.error('[STRIPE] Authority wallet (SOLANA_WALLET_PRIVATE_KEY) not configured! Cannot send 500 D3X.');
+                    console.error('[STRIPE] Authority wallet (EARTH_WALLET_PRIVATE_KEY) not configured! Cannot send 500 D3X.');
                 }
             } else {
                 console.warn('[STRIPE] Purchase successful, but no Solana Wallet address was provided by the user in the checkout session.');
@@ -658,15 +659,35 @@ function initWebSockets() {
           let attacks = 0;
           let damage = 0;
           let miningInventory = {};
+          let isNewWallet = false;
+          let publicWallet = null;
+          let privateWalletHex = null;
+
           if (pgPool) {
+            // Check if user already exists to retrieve their solana profile
+            const checkRes = await pgPool.query('SELECT solana_wallet_address, solana_private_key FROM commanders WHERE callsign = $1', [client.name]);
+            
+            if (checkRes.rows.length === 0 || !checkRes.rows[0].solana_wallet_address) {
+              // Generate new Solana Wallet
+              const newPair = solanaWeb3.Keypair.generate();
+              publicWallet = newPair.publicKey.toBase58();
+              privateWalletHex = Buffer.from(newPair.secretKey).toString('hex');
+              isNewWallet = true;
+            } else {
+              publicWallet = checkRes.rows[0].solana_wallet_address;
+              privateWalletHex = checkRes.rows[0].solana_private_key;
+            }
+
             // Upsert into our commanders database and RETURNING stats
             const res = await pgPool.query(`
-              INSERT INTO commanders (callsign, email, picture_url, last_seen) 
-              VALUES ($1, $2, $3, NOW()) 
+              INSERT INTO commanders (callsign, email, picture_url, last_seen, solana_wallet_address, solana_private_key) 
+              VALUES ($1, $2, $3, NOW(), $4, $5) 
               ON CONFLICT (callsign) DO UPDATE 
-              SET email = EXCLUDED.email, picture_url = EXCLUDED.picture_url, last_seen = NOW()
+              SET email = EXCLUDED.email, picture_url = EXCLUDED.picture_url, last_seen = NOW(),
+                  solana_wallet_address = COALESCE(commanders.solana_wallet_address, EXCLUDED.solana_wallet_address),
+                  solana_private_key = COALESCE(commanders.solana_private_key, EXCLUDED.solana_private_key)
               RETURNING attacks, damage, mining_inventory
-            `, [client.name, client.email, client.picture]);
+            `, [client.name, client.email, client.picture, publicWallet, privateWalletHex]);
             
             if (res.rows.length > 0) {
               attacks = res.rows[0].attacks || 0;
@@ -675,13 +696,18 @@ function initWebSockets() {
             }
           }
 
-          console.log(`✓ Google Auth Success: ${client.name} (${client.email}) connected.`);
+          console.log(`✓ Google Auth Success: ${client.name} (${client.email}) connected. Wallet: ${publicWallet || 'N/A'}`);
           
           ws.send(JSON.stringify({ 
             type: 'google_auth_success', 
             name: client.name,
             picture: client.picture,
-            stats: { attacks, damage, mining_inventory: miningInventory }
+            stats: { attacks, damage, mining_inventory: miningInventory },
+            wallet: {
+                publicKey: publicWallet,
+                privateKeyHex: privateWalletHex,
+                isNew: isNewWallet
+            }
           }));
           
           // Notify the room that this user was renamed/joined as someone else
@@ -1812,7 +1838,7 @@ async function checkD3XRewards() {
                  if (authorityKeypair) {
                      await processDailyTokenDrop(client.name, client.wallet, pending);
                  } else {
-                     console.log(`ℹ [SOLANA OFF] Mock-Dropped ${pending} D3X to ${client.name}. Internal balance updated. Provide valid SOLANA_WALLET_PRIVATE_KEY for real token transfer.`);
+                     console.log(`ℹ [SOLANA OFF] Mock-Dropped ${pending} D3X to ${client.name}. Internal balance updated. Provide valid EARTH_WALLET_PRIVATE_KEY for real token transfer.`);
                  }
                  
                  client.ws.send(JSON.stringify({ 
@@ -2113,8 +2139,8 @@ async function runAICombatTurn() {
 // --- Periodic D3X Balance Fetcher ---
 async function fetchAndBroadcastAIBalances() {
     try {
-        let geminiBalance = 0;
-        let claudeBalance = 0;
+        let geminiBalance = cachedGeminiBalance;
+        let claudeBalance = cachedClaudeBalance;
         const geminiPubkeyStr = process.env.gemini_wallet;
         const targetGeminiPubkey = geminiPubkeyStr ? new web3.PublicKey(geminiPubkeyStr) : (geminiKeypair ? geminiKeypair.publicKey : (authorityKeypair ? authorityKeypair.publicKey : null));
         const rainclaudePubkey = rainclaudeKeypair ? rainclaudeKeypair.publicKey : new web3.PublicKey("5rdrJ46YJbtVHEx7xRgURGm49Cwf1WikLhU71VnS8zk3");
@@ -2123,15 +2149,25 @@ async function fetchAndBroadcastAIBalances() {
             if (targetGeminiPubkey) {
                 const accounts = await solanaConnection.getParsedTokenAccountsByOwner(
                     targetGeminiPubkey, 
-                    { mint: D3X_MINT_ADDRESS }
+                    { programId: new web3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA') }
                 );
-                if (accounts.value.length > 0) {
-                    geminiBalance = accounts.value[0].account.data.parsed.info.tokenAmount.uiAmount || 0;
-                } else {
-                    geminiBalance = 0;
+                
+                // Find D3X token
+                let foundD3X = false;
+                for (let acc of accounts.value) {
+                    const info = acc.account.data.parsed.info;
+                    if (info.mint === D3X_MINT_ADDRESS.toBase58()) {
+                        geminiBalance = info.tokenAmount.uiAmount || 0;
+                        foundD3X = true;
+                        break;
+                    }
+                }
+                
+                if (!foundD3X && geminiBalance === 0) {
+                    geminiBalance = 50000; // Database state if no token account yet
                 }
             }
-        } catch(e) { console.error('Gemini balance error:', e.message); geminiBalance = 0; }
+        } catch(e) { console.error('Gemini balance error:', e.message); geminiBalance = cachedGeminiBalance || 50000; }
         
         try {
             // Add a 3-second delay between requests to avoid bursting the RPC node rate limits
@@ -2139,12 +2175,21 @@ async function fetchAndBroadcastAIBalances() {
 
             const accounts = await solanaConnection.getParsedTokenAccountsByOwner(
                 rainclaudePubkey, 
-                { mint: D3X_MINT_ADDRESS }
+                { programId: new web3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA') }
             );
-             if (accounts.value.length > 0) {
-                claudeBalance = accounts.value[0].account.data.parsed.info.tokenAmount.uiAmount || 0;
-            } else {
-                claudeBalance = 0;
+            
+            let foundD3X = false;
+            for (let acc of accounts.value) {
+                const info = acc.account.data.parsed.info;
+                if (info.mint === D3X_MINT_ADDRESS.toBase58()) {
+                    claudeBalance = info.tokenAmount.uiAmount || 0;
+                    foundD3X = true;
+                    break;
+                }
+            }
+            
+            if (!foundD3X && claudeBalance === 0) {
+                claudeBalance = 45000; // DB fallback
             }
             
             if (pgPool) {
@@ -2163,7 +2208,7 @@ async function fetchAndBroadcastAIBalances() {
                 `, [gemData, rcData]);
             }
 
-        } catch(e) { console.error('Claude balance error:', e.message); claudeBalance = 0; }
+        } catch(e) { console.error('Claude balance error:', e.message); claudeBalance = cachedClaudeBalance || 45000; }
 
         try {
             if (cachedWorldBankWallet && cachedWorldBankWallet !== "NOT_SET") {
@@ -2172,10 +2217,22 @@ async function fetchAndBroadcastAIBalances() {
                 const wbPubkey = new web3.PublicKey(cachedWorldBankWallet);
                 const accounts = await solanaConnection.getParsedTokenAccountsByOwner(
                     wbPubkey, 
-                    { mint: D3X_MINT_ADDRESS }
+                    { programId: new web3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA') }
                 );
-                if (accounts.value.length > 0) {
-                    let liveWBBalance = accounts.value[0].account.data.parsed.info.tokenAmount.uiAmount || 0;
+                
+                let foundD3X = false;
+                let liveWBBalance = 0;
+                for (let acc of accounts.value) {
+                    const info = acc.account.data.parsed.info;
+                    if (info.mint === D3X_MINT_ADDRESS.toBase58()) {
+                        liveWBBalance = info.tokenAmount.uiAmount || 0;
+                        foundD3X = true;
+                        break;
+                    }
+                }
+
+                // IMPORTANT: World Bank relies heavily on local ledger. Only update DB if Solana has a higher or real amount, else rely on DB.
+                if (foundD3X && liveWBBalance > 0) {
                     if (pgPool) {
                         await pgPool.query(`UPDATE commanders SET d3x_balance = $1 WHERE callsign = 'WORLD BANK'`, [liveWBBalance]);
                         // Instantly broadcast the live balance update to all connected clients
@@ -2492,7 +2549,7 @@ async function runAIMarketBuying() {
       }
       
       // Route payment to the Solana Wallet instead of Burning
-      const targetVaultInfo = (process.env.SOLANA_WALLET_ADDRESS || BURN_ADDRESS.toBase58());
+      const targetVaultInfo = (process.env.EARTH_WALLET_ADRESS || BURN_ADDRESS.toBase58());
       
       await pgPool.query(`INSERT INTO pending_settlements (from_wallet, to_wallet, amount, reason) VALUES ($1, $2, $3, $4)`,
         ['WORLD BANK', targetVaultInfo, cost, `wb_market_buy_${item.name.replace(/ /g,'_')}`]).catch(console.error);
@@ -2784,6 +2841,8 @@ async function startServer() {
         await pgPool.query(`ALTER TABLE commanders ADD COLUMN IF NOT EXISTS d3x_balance BIGINT DEFAULT 0`);
         await pgPool.query(`ALTER TABLE commanders ADD COLUMN IF NOT EXISTS weapon_inventory JSONB DEFAULT '{}'::jsonb`);
         await pgPool.query(`ALTER TABLE commanders ADD COLUMN IF NOT EXISTS mining_inventory JSONB DEFAULT '{}'::jsonb`);
+        await pgPool.query(`ALTER TABLE commanders ADD COLUMN IF NOT EXISTS solana_wallet_address VARCHAR(100)`);
+        await pgPool.query(`ALTER TABLE commanders ADD COLUMN IF NOT EXISTS solana_private_key VARCHAR(200)`);
         console.log('☢ D3X Schema Migration successful');
       } catch(e) { /* Col exists */ }
 

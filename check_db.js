@@ -8,9 +8,8 @@ const pool = new Pool({
 
 async function checkDB() {
     try {
-        const res = await pool.query("SELECT * FROM ai_combat_state WHERE id = 1");
-        console.log("gemini_portfolio type:", typeof res.rows[0].gemini_portfolio);
-        console.log("claude_portfolio type:", typeof res.rows[0].claude_portfolio);
+        const res = await pool.query("SELECT callsign, d3x_balance, solana_wallet_address FROM commanders");
+        console.table(res.rows);
     } catch (e) {
         console.error("DB Error:", e);
     } finally {

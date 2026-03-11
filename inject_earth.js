@@ -8,8 +8,8 @@ const pgPool = new Pool({
 
 async function main() {
     try {
-        const earthWallet = process.env.SOLANA_WALLET_ADDRESS;
-        if (!earthWallet) throw new Error("SOLANA_WALLET_ADDRESS not found in .env");
+        const earthWallet = process.env.EARTH_WALLET_ADRESS;
+        if (!earthWallet) throw new Error("EARTH_WALLET_ADRESS not found in .env");
 
         console.log(`Injecting Earth Authority Wallet: ${earthWallet}`);
 
