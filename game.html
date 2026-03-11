@@ -7822,8 +7822,8 @@ function handleGlobeClick(e) {
     }
   }
 
-  // Intercept clicks on Company Markers
-  if (true) {
+  // Intercept clicks on Company Markers (Black Skin only)
+  if (currentSkinName === 'BLK') {
     let allCompanies = [];
     if (window.companiesGroup && window.companiesGroup.visible) allCompanies = allCompanies.concat(window.companiesGroup.children);
     if (window.mediumCompaniesGroup && window.mediumCompaniesGroup.visible) allCompanies = allCompanies.concat(window.mediumCompaniesGroup.children);
@@ -7843,8 +7843,8 @@ function handleGlobeClick(e) {
       }
     }
     
-    // Disable interaction with countries/borders if Black Skin
-    if (currentSkinName === 'BLK') return;
+    // Disable any interaction with countries/borders on the Black Skin
+    return;
   }
 
 window.loadExchangeIframe = function(url) {
@@ -8369,8 +8369,8 @@ window.triggerSolanaDonation = async function() {
     }
 };
 
-  // Intercept clicks on World Bank
-  if (window.worldBankGroup && window.worldBankGroup.visible && window.worldBankGroup.children.length > 0) {
+  // Intercept clicks on World Bank (Cyber Skin)
+  if (window.currentSkinIndex === 3 && window.worldBankGroup && window.worldBankGroup.visible && window.worldBankGroup.children.length > 0) {
     const wbHits = ray.intersectObjects(window.worldBankGroup.children, true);
     if (wbHits.length > 0) {
       if (typeof _sfxClick !== 'undefined') _sfxClick();
@@ -8393,8 +8393,8 @@ window.triggerSolanaDonation = async function() {
     }
   }
 
-  // Intercept clicks on Datacenters
-  if (window.datacentersGroup && window.datacentersGroup.visible && window.datacentersGroup.children.length > 0) {
+  // Intercept clicks on Datacenters (Cyber Skin)
+  if (window.currentSkinIndex === 3 && window.datacentersGroup && window.datacentersGroup.visible && window.datacentersGroup.children.length > 0) {
     // Search children heavily because of auras and inner sprites on staking towers
     const dcHits = ray.intersectObjects(window.datacentersGroup.children, true);
     if (dcHits.length > 0) {
