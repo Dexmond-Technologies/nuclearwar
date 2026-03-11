@@ -3117,13 +3117,40 @@ function initGreenMountains() {
         side2.rotation.x = 0.15;
         side2.renderOrder = 9999;
         group.add(side2);
-        // Intense Aura for mountain (Green Glow)
-        const mAuraGeo = new THREE.SphereGeometry(0.12 * scaleMulti, 32, 32); 
-        const mAuraMat = new THREE.MeshBasicMaterial({ color: 0x00ff44, transparent: true, opacity: 1.0, blending: THREE.AdditiveBlending });
-        const mAura = new THREE.Mesh(mAuraGeo, mAuraMat);
-        mAura.position.set(0, 0.15 * scaleMulti, 0);
-        group.add(mAura);
+        // Green Lightning Effect (instead of solid aura)
+        const lightningGroup = new THREE.Group();
+        const lightningMat = new THREE.LineBasicMaterial({ color: 0x88ffaa, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
         
+        const bolts = [];
+        for(let i=0; i<3; i++) {
+            const points = [];
+            let y = 0.4 * scaleMulti;
+            let x = (Math.random() - 0.5) * 0.1;
+            let z = (Math.random() - 0.5) * 0.1;
+            points.push(new THREE.Vector3(x, y, z));
+            while(y > 0) {
+                y -= 0.08 * scaleMulti;
+                x += (Math.random() - 0.5) * 0.15 * scaleMulti;
+                z += (Math.random() - 0.5) * 0.15 * scaleMulti;
+                points.push(new THREE.Vector3(x, Math.max(0, y), z));
+            }
+            const geo = new THREE.BufferGeometry().setFromPoints(points);
+            const line = new THREE.Line(geo, lightningMat);
+            line.visible = false;
+            lightningGroup.add(line);
+            bolts.push(line);
+        }
+        group.add(lightningGroup);
+        
+        // Randomly flash lightning bolts
+        setInterval(() => {
+            if (window.currentSkinIndex === 2 && Math.random() > 0.7) {
+                const bolt = bolts[Math.floor(Math.random() * bolts.length)];
+                bolt.visible = true;
+                setTimeout(() => { bolt.visible = false; }, 50 + Math.random() * 100);
+            }
+        }, 500 + Math.random()*500);
+
         // Add point light to cast real intense green glow on surrounding geometry
         const mLight = new THREE.PointLight(0x00ff44, 3, 2);
         mLight.position.set(0, 0.15 * scaleMulti, 0);
@@ -3352,129 +3379,81 @@ function initWTRBuildings() {
         color: 0xff0000, emissive: 0x550000, roughness: 0.1, metalness: 0.5
     });
 
-    const mineGroup = new THREE.Group();
-    
-    // Main circular body
-    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.03, 32), darkMetalMat);
-    base.position.y = 0.015;
-    mineGroup.add(base);
-    
-    // Sloped upper casing
-    const casing = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.08, 0.02, 32), darkMetalMat);
-    casing.position.y = 0.04;
-    mineGroup.add(casing);
-    
-    // Center pressure plate (brass)
-    const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.01, 32), brassMat);
-    plate.position.y = 0.055;
-    mineGroup.add(plate);
-    
-    // Blinking armed indicator
-    const led = new THREE.Mesh(new THREE.SphereGeometry(0.005, 16, 16), redGlowMat);
-    led.position.set(0, 0.06, 0);
-    mineGroup.add(led);
-    
-    // Outer prongs/triggers
-    for (let i = 0; i < 6; i++) {
-        const prong = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.003, 0.02, 8), brassMat);
-        const angle = (Math.PI / 3) * i;
-        prong.position.x = Math.cos(angle) * 0.06;
-        prong.position.z = Math.sin(angle) * 0.06;
-        prong.position.y = 0.04;
-        prong.rotation.x = Math.PI / 2; // Flat initially
-        prong.rotation.z = angle; // Pointing outward
-        // Tilt slightly upward
-        prong.rotateY(Math.PI / 8); 
-        mineGroup.add(prong);
+    function createLandmine() {
+        const mineGroup = new THREE.Group();
+        const base = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.03, 32), darkMetalMat);
+        base.position.y = 0.015;
+        mineGroup.add(base);
+        const casing = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.08, 0.02, 32), darkMetalMat);
+        casing.position.y = 0.04;
+        mineGroup.add(casing);
+        const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.01, 32), brassMat);
+        plate.position.y = 0.055;
+        mineGroup.add(plate);
+        const led = new THREE.Mesh(new THREE.SphereGeometry(0.005, 16, 16), redGlowMat);
+        led.position.set(0, 0.06, 0);
+        mineGroup.add(led);
+        for (let i = 0; i < 6; i++) {
+            const prong = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.003, 0.02, 8), brassMat);
+            const angle = (Math.PI / 3) * i;
+            prong.position.x = Math.cos(angle) * 0.06;
+            prong.position.z = Math.sin(angle) * 0.06;
+            prong.position.y = 0.04;
+            prong.rotation.x = Math.PI / 2;
+            prong.rotation.z = angle;
+            prong.rotateY(Math.PI / 8); 
+            mineGroup.add(prong);
+        }
+        mineGroup.userData = { isWeaponBuilding: true, tier: 2, buildingName: "EXPLOSIVES" };
+        return mineGroup;
     }
 
-    const mLabel = createTextSprite("TIER 2: EXPLOSIVES", "#00aaff");
-    mLabel.position.y = 0.15;
-    mineGroup.add(mLabel);
+    function createBlueNeonSpikeCluster() {
+        const spikeGroup = new THREE.Group();
+        const blueGlowMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
+        const coreMat = new THREE.MeshStandardMaterial({ color: 0x0055ff, emissive: 0x002288, metalness: 0.8, roughness: 0.2 });
+        
+        const base = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 0.05, 8), coreMat);
+        base.position.y = 0.025;
+        spikeGroup.add(base);
 
-    mineGroup.userData = { isWeaponBuilding: true, tier: 2, buildingName: "EXPLOSIVES" };
+        for (let i=0; i<8; i++) {
+            const spike = new THREE.Mesh(new THREE.ConeGeometry(0.015, 0.25 + Math.random()*0.15, 5), blueGlowMat);
+            spike.position.y = 0.1;
+            spike.rotation.x = (Math.random() - 0.5) * 1.0;
+            spike.rotation.z = (Math.random() - 0.5) * 1.0;
+            spikeGroup.add(spike);
+        }
 
-    const minePos = ll2v(0, -20, GLOBE_R); 
-    mineGroup.position.copy(minePos);
-    mineGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), minePos.clone().normalize());
-    wtrBuildingsGroup.add(mineGroup);
+        const pLight = new THREE.PointLight(0x00ffff, 2, 0.6);
+        pLight.position.y = 0.15;
+        spikeGroup.add(pLight);
 
-    // 1. Command Center Tower (Tier 1 Small Arms) ported to WTR Skin
-    const cmdGroup = new THREE.Group();
-    const silverMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.4, metalness: 0.8 });
-    const blueMat = new THREE.MeshStandardMaterial({ color: 0x00aaff, emissive: 0x002255, metalness: 0.5 });
-    const redMat = new THREE.MeshStandardMaterial({ color: 0xff3333, emissive: 0x550000 });
-
-    const cBase = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.09, 0.05, 32), silverMat);
-    cBase.position.y = 0.025;
-    cmdGroup.add(cBase);
-    const cCore = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.15, 32), blueMat);
-    cCore.position.y = 0.1;
-    cmdGroup.add(cCore);
-    const cRing = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.015, 16, 64), silverMat);
-    cRing.position.y = 0.15;
-    cRing.rotation.x = Math.PI / 2;
-    cmdGroup.add(cRing);
-    const cAnt = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.1, 16), silverMat);
-    cAnt.position.y = 0.22;
-    cmdGroup.add(cAnt);
-    const cLabel = createTextSprite("TIER 1: SMALL ARMS", "#00ffff");
-    cLabel.position.y = 0.35;
-    cmdGroup.add(cLabel);
-    cmdGroup.userData = { isWeaponBuilding: true, tier: 1, buildingName: "SMALL ARMS" };
-    const cmdPos = ll2v(51.50, -0.12, GLOBE_R);
-    cmdGroup.position.copy(cmdPos);
-    cmdGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), cmdPos.clone().normalize());
-    wtrBuildingsGroup.add(cmdGroup);
-
-    // 2. Heavy Weapons Silo (Tier 3) ported to WTR Skin
-    const rocketGroup = new THREE.Group();
-    const rBody = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.2, 32), silverMat);
-    rBody.position.y = 0.1;
-    rocketGroup.add(rBody);
-    const rNose = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.08, 32), redMat);
-    rNose.position.y = 0.24;
-    rocketGroup.add(rNose);
-    for (let i=0; i<4; i++) {
-        const fin = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, 0.01), redMat);
-        fin.position.y = 0.03;
-        fin.rotation.y = (Math.PI / 2) * i;
-        fin.position.x = Math.cos((Math.PI / 2) * i) * 0.04;
-        fin.position.z = Math.sin((Math.PI / 2) * i) * 0.04;
-        rocketGroup.add(fin);
+        spikeGroup.userData = { isWeaponBuilding: true, tier: 4, buildingName: "STRATEGIC WEAPONS" };
+        return spikeGroup;
     }
-    const rBooster = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.04, 0.04, 32), blueMat);
-    rBooster.position.y = -0.02;
-    rocketGroup.add(rBooster);
-    const rLabel = createTextSprite("TIER 3: HEAVY WEAPONS", "#00ffff");
-    rLabel.position.y = 0.35;
-    rocketGroup.add(rLabel);
-    rocketGroup.userData = { isWeaponBuilding: true, tier: 3, buildingName: "HEAVY WEAPONS" };
-    const rocketPos = ll2v(38.89, -77.03, GLOBE_R);
-    rocketGroup.position.copy(rocketPos);
-    rocketGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), rocketPos.clone().normalize());
-    wtrBuildingsGroup.add(rocketGroup);
 
-    // 3. Strategic Weapons Bomb (Tier 4) ported to WTR Skin
-    const bombGroup = new THREE.Group();
-    const bBody = new THREE.Mesh(new THREE.SphereGeometry(0.06, 32, 32), silverMat);
-    bBody.position.y = 0.08;
-    bBody.scale.y = 1.2;
-    bombGroup.add(bBody);
-    const bTail = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.05, 0.08, 32), silverMat);
-    bTail.position.y = 0.18;
-    bombGroup.add(bTail);
-    const bBox = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.02, 0.08), redMat);
-    bBox.position.y = 0.23;
-    bombGroup.add(bBox);
-    const bLabel = createTextSprite("TIER 4: STRATEGIC WEAPONS", "#00ffff");
-    bLabel.position.y = 0.35;
-    bombGroup.add(bLabel);
-    bombGroup.userData = { isWeaponBuilding: true, tier: 4, buildingName: "STRATEGIC WEAPONS" };
-    const bombPos = ll2v(55.75, 37.61, GLOBE_R);
-    bombGroup.position.copy(bombPos);
-    bombGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), bombPos.clone().normalize());
-    wtrBuildingsGroup.add(bombGroup);
+    // Generate 20 Landmines (Tier 2) scattered randomly
+    for(let i=0; i<20; i++) {
+        const mine = createLandmine();
+        const lat = (Math.random() - 0.5) * 140; // Avoid extreme poles
+        const lon = (Math.random() - 0.5) * 360;
+        const pos = ll2v(lat, lon, GLOBE_R); 
+        mine.position.copy(pos);
+        mine.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pos.clone().normalize());
+        wtrBuildingsGroup.add(mine);
+    }
+
+    // Generate 20 Blue Neon Spikes (Tier 4) scattered randomly
+    for(let i=0; i<20; i++) {
+        const spike = createBlueNeonSpikeCluster();
+        const lat = (Math.random() - 0.5) * 140; // Avoid extreme poles
+        const lon = (Math.random() - 0.5) * 360;
+        const pos = ll2v(lat, lon, GLOBE_R); 
+        spike.position.copy(pos);
+        spike.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pos.clone().normalize());
+        wtrBuildingsGroup.add(spike);
+    }
 }
 initWTRBuildings();
 
