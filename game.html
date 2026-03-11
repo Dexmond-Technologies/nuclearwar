@@ -12618,6 +12618,10 @@ function spawnAmbients() {
   const matSub = new THREE.SpriteMaterial({map: texSub, color: 0xffffff, transparent: true, blending: THREE.AdditiveBlending});
   const matShip = new THREE.SpriteMaterial({map: texShip, color: 0xffffff});
   const matSat = new THREE.SpriteMaterial({map: texSat, color: 0xffffff});
+
+  for(let i=0; i<240; i++) { // Doubled again from 120 to 240
+    const type = i % 3; // 0: Jet, 1: Sub, 2: Ship
+    const mat = type === 0 ? matJet : type === 1 ? matSub : matShip;
     // slightly adjusted orbital heights so they don't clip through the globe as often
     const radius = type === 0 ? 10.8 : (type === 1 ? 10.15 : 10.1);
     
