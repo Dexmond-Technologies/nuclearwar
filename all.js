@@ -6201,7 +6201,7 @@ function slerp3D(a,b,t){
 }
 
 function launchMissile3D(fromIso, toIso, col) {
-  if (window.currentSkinIndex === 2 || window.currentSkinIndex === 3 || window.currentSkinIndex === 4) return;
+  if (window.currentSkinIndex === 1 || window.currentSkinIndex === 2 || window.currentSkinIndex === 3 || window.currentSkinIndex === 4 || window.currentSkinIndex === 5) return;
   SFX.playLaunch();
   const fc=countryData[fromIso], tc=countryData[toIso];
   if(!fc||!tc) return;
@@ -6849,8 +6849,7 @@ function createSpaceRocketCanvas() {
 }
 
 function spawnSpaceRocket3D(lat, lon) {
-  if (window.currentSkinIndex === 4 || window.currentSkinIndex === 3) return; // No rockets on BLK or CYBER skins
-  if (window.currentSkinIndex === 2) return; // Explicitly ignoring rockets on the Green Skin as previously requested
+  if (window.currentSkinIndex === 1 || window.currentSkinIndex === 2 || window.currentSkinIndex === 3 || window.currentSkinIndex === 4 || window.currentSkinIndex === 5) return; // No rockets on these skins
   if (lat === undefined || lon === undefined) return;
   const c = ll2v(lat, lon, GLOBE_R + 0.005);
   
