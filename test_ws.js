@@ -1,24 +1,21 @@
-const { Client } = require('pg');
+const WebSocket = require('ws');
 
-const client = new Client({
-  connectionString: 'postgresql://nuclearwar_db_user:Kg5fnacbBT1wwukMwvJ2zSm03eRNbze5@dpg-d6j5m8kr85hc73fqe70g-a.oregon-postgres.render.com/nuclearwar_db',
-  ssl: { rejectUnauthorized: false }
+const ws = new WebSocket('ws://localhost:8888');
+
+ws.on('open', function open() {
+  ws.send(JSON.stringify({ type: 'get_ai_wallets' }));
 });
 
-async function run() {
-  await client.connect();
-  
-  try {
-    const res = await client.query("SELECT gemini_hp, claude_hp, gemini_portfolio, claude_portfolio, gemini_weapon_inventory, claude_weapon_inventory FROM ai_combat_state WHERE id = 1");
-    if (res.rows.length > 0) {
-        console.log("PAYLOAD:");
-        console.log(JSON.stringify(res.rows[0], null, 2));
-    }
-  } catch (err) {
-    console.error(err);
-  } finally {
-    await client.end();
+ws.on('message', function incoming(data) {
+  const msg = JSON.parse(data);
+  if (msg.type === 'ai_wallets_data') {
+      console.log("RECEIVED ai_wallets_data");
+      console.log(JSON.stringify(msg, null, 2));
+      process.exit(0);
   }
-}
+});
 
-run();
+setTimeout(() => {
+    console.error("Timeout waiting for message");
+    process.exit(1);
+}, 5000);

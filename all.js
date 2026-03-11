@@ -759,9 +759,9 @@ function showCompanyInfo(compData) {
   
     // Multi-Tier Strategic Asset labeling based on Company Color
     let assetClassStr = "STRATEGIC ASSET DETECTED";
-    if (window.currentSkinIndex === 3) {
+    if (window.currentSkinIndex === 4) {
       assetClassStr = 'ASSET: ' + assetLabel;
-    } else if (window.currentSkinIndex === 4) {
+    } else if (window.currentSkinIndex === 5) {
       if (compData.color === '#00f0ff') {
         assetClassStr = "GLOBAL TECH HUB DETECTED"; 
       } else if (compData.color === '#ffff00') {
@@ -4303,7 +4303,7 @@ function handleGlobeClick(e) {
   }
 
   // 1.5 Intercept clicks on Satellites for Hacking Minigame
-  if (window.currentSkinIndex === 1 || window.currentSkinIndex === 2) {
+  if (window.currentSkinIndex === 2 || window.currentSkinIndex === 3) {
     mouse.x = (e.clientX/innerWidth)*2-1;
     mouse.y = -(e.clientY/innerHeight)*2+1;
     ray.setFromCamera(mouse, camera);
@@ -4402,7 +4402,7 @@ function handleGlobeClick(e) {
   }
 
   // Intercept clicks on D3X Mining Caves (Green Skin)
-  if (window.currentSkinIndex === 2 && typeof d3xCaveMarkers !== 'undefined' && d3xCaveMarkers.length > 0) {
+  if (window.currentSkinIndex === 3 && typeof d3xCaveMarkers !== 'undefined' && d3xCaveMarkers.length > 0) {
     const caveHits = ray.intersectObjects(d3xCaveMarkers, false);
     if (caveHits.length > 0) {
       const caveName = caveHits[0].object.userData.name;
@@ -4434,7 +4434,7 @@ function handleGlobeClick(e) {
   }
 
   // Intercept clicks on Company Markers (Black Skin only)
-  if (window.currentSkinIndex === 4) {
+  if (window.currentSkinIndex === 5) {
     let allCompanies = [];
     if (window.companiesGroup && window.companiesGroup.visible) allCompanies = allCompanies.concat(window.companiesGroup.children);
     if (window.mediumCompaniesGroup && window.mediumCompaniesGroup.visible) allCompanies = allCompanies.concat(window.mediumCompaniesGroup.children);
@@ -4981,7 +4981,7 @@ window.triggerSolanaDonation = async function() {
 };
 
   // Intercept clicks on Datacenters (Cyber Skin)
-  if (window.currentSkinIndex === 3 && window.datacentersGroup && window.datacentersGroup.visible && window.datacentersGroup.children.length > 0) {
+  if (window.currentSkinIndex === 4 && window.datacentersGroup && window.datacentersGroup.visible && window.datacentersGroup.children.length > 0) {
     // Search children heavily because of auras and inner sprites on staking towers
     const dcHits = ray.intersectObjects(window.datacentersGroup.children, true);
     if (dcHits.length > 0) {
@@ -5127,7 +5127,7 @@ function initGreenMarketUI() {
 }
 
 function updateGreenMarket() {
-  const isGreen = (window.currentSkinIndex === 2);
+  const isGreen = (window.currentSkinIndex === 3);
 
   let totalWorth = 0;
   let holdingsHtml = '';
@@ -5580,12 +5580,12 @@ function selectCountry(iso) {
   GS.selected = iso;
   highlightCountry(iso,true);
 
-  if (window.currentSkinIndex === 2) { // Green Skin exclusively ignores normal ops
+  if (window.currentSkinIndex === 3) { // Green Skin exclusively ignores normal ops
     showGreenSkinResourceModal(iso);
     return;
   }
 
-  if (window.currentSkinIndex === 3) { // Cyber Skin exclusively ignores normal ops
+  if (window.currentSkinIndex === 4) { // Cyber Skin exclusively ignores normal ops
     return;
   }
 
@@ -6201,7 +6201,7 @@ function slerp3D(a,b,t){
 }
 
 function launchMissile3D(fromIso, toIso, col) {
-  if (window.currentSkinIndex === 1 || window.currentSkinIndex === 2 || window.currentSkinIndex === 3 || window.currentSkinIndex === 4 || window.currentSkinIndex === 5) return;
+  if (window.currentSkinIndex === 2 || window.currentSkinIndex === 3 || window.currentSkinIndex === 4 || window.currentSkinIndex === 5 || window.currentSkinIndex === 6) return;
   SFX.playLaunch();
   const fc=countryData[fromIso], tc=countryData[toIso];
   if(!fc||!tc) return;
@@ -6275,7 +6275,7 @@ function spawnFakeTroops() {
 }
 
 function spawnFakeJets() {
-  if (window.currentSkinIndex === 4 || window.currentSkinIndex === 3) return; // Completely disabled on BLK and CYBER Skins
+  if (window.currentSkinIndex === 5 || window.currentSkinIndex === 4) return; // Completely disabled on BLK and CYBER Skins
   const count = Math.floor(Math.random() * 3) + 4; // 4 to 6 jets
   const isos = Object.keys(countryData);
   if (isos.length < 2) return;
@@ -6315,7 +6315,7 @@ function spawnFakeJets() {
 }
 
 function spawnSquadron() {
-  if (window.currentSkinIndex === 4 || window.currentSkinIndex === 3) return; // No squadrons on BLK or CYBER skin
+  if (window.currentSkinIndex === 5 || window.currentSkinIndex === 4) return; // No squadrons on BLK or CYBER skin
 
   const isos = Object.keys(countryData);
   if (isos.length < 2) return;
@@ -6365,7 +6365,7 @@ function spawnSquadron() {
 }
 
 function spawnExplosion3D(lat,lon,col){
-  if(window.currentSkinIndex === 4 || window.currentSkinIndex === 3) return;
+  if(window.currentSkinIndex === 5 || window.currentSkinIndex === 4) return;
   if(lat===undefined||lon===undefined) return;
   SFX.playExplosion();
   const c=ll2v(lat,lon,GLOBE_R+.003);
@@ -6445,7 +6445,7 @@ function spawnFloatingText3D(lat, lon, text, colorHex) {
 // VISUAL EFFECTS FOR MEGA BOMB
 // =====================================================================
 function spawnMegaBombExplosion3D(lat, lon, col) {
-  if (window.currentSkinIndex === 4 || window.currentSkinIndex === 3) return;
+  if (window.currentSkinIndex === 5 || window.currentSkinIndex === 4) return;
   if (lat === undefined || lon === undefined) return;
   SFX.playExplosion();
   const c = ll2v(lat, lon, GLOBE_R + .003);
@@ -6506,7 +6506,7 @@ function scheduleRandomMegaBomb() {
 // VISUAL EFFECTS FOR EMP AND GROUND BOMB
 // =====================================================================
 function spawnEMP3D(lat, lon) {
-  if (window.currentSkinIndex === 4) return;
+  if (window.currentSkinIndex === 5) return;
   if (lat === undefined || lon === undefined) return;
   SFX.playExplosion(); // Consider a custom EMP sound if available
   const c = ll2v(lat, lon, GLOBE_R + .003);
@@ -6562,7 +6562,7 @@ function scheduleRandomEMP() {
 }
 
 function spawnGroundBomb3D(lat, lon) {
-  if (window.currentSkinIndex === 4) return;
+  if (window.currentSkinIndex === 5) return;
   if (lat === undefined || lon === undefined) return;
   SFX.playExplosion();
   const c = ll2v(lat, lon, GLOBE_R + .003);
@@ -6849,7 +6849,7 @@ function createSpaceRocketCanvas() {
 }
 
 function spawnSpaceRocket3D(lat, lon) {
-  if (window.currentSkinIndex === 1 || window.currentSkinIndex === 2 || window.currentSkinIndex === 3 || window.currentSkinIndex === 4 || window.currentSkinIndex === 5) return; // No rockets on these skins
+  if (window.currentSkinIndex === 2 || window.currentSkinIndex === 3 || window.currentSkinIndex === 4 || window.currentSkinIndex === 5 || window.currentSkinIndex === 6) return; // No rockets on these skins
   if (lat === undefined || lon === undefined) return;
   const c = ll2v(lat, lon, GLOBE_R + 0.005);
   
@@ -6952,7 +6952,7 @@ function pulseGreenCountry(iso) {
 }
 
 function cyberFlashingEffect() {
-  if (window.currentSkinIndex !== 5 || typeof countryBorders === 'undefined') return;
+  if (window.currentSkinIndex !== 6 || typeof countryBorders === 'undefined') return;
   const isos = Object.keys(countryBorders);
   if (isos.length === 0) return;
   
@@ -6974,7 +6974,7 @@ function cyberFlashingEffect() {
     const iv = setInterval(() => {
       ticks++;
       // Stop flashing if we switch away from black skin
-      if (window.currentSkinIndex !== 5) {
+      if (window.currentSkinIndex !== 6) {
         clearInterval(iv);
         refreshBorder(randomIso);
         return;
@@ -8022,7 +8022,7 @@ function animate() {
   }
 
   // Animate Cyber Skin Master Datacenter Aura & Color Pulse
-  if (window.currentSkinIndex === 3 && window.datacentersGroup && window.datacentersGroup.visible) {
+  if (window.currentSkinIndex === 4 && window.datacentersGroup && window.datacentersGroup.visible) {
       window.datacentersGroup.children.forEach(dc => {
           if (dc.userData && dc.userData.isD3XExchange) {
               if (dc.userData.aura) {
@@ -8102,7 +8102,7 @@ function animate() {
       });
       
       // Elaborate Electricity Bridges Animation
-      if (npTowers.length === 3 && window.npLightningGroup && window.currentSkinIndex === 3) { // CYBER skin
+      if (npTowers.length === 3 && window.npLightningGroup && window.currentSkinIndex === 4) { // CYBER skin
           window.npLightningGroup.visible = true;
           window.npLightningGroup.children.forEach(bridge => {
               bridge.userData.timer -= dt;
@@ -8175,7 +8175,7 @@ function animate() {
   } // <-- RESTORED MISSING BRACKET
   
   // D3X Mining Caves LGBT Rainbow Oscillator
-  if (window.currentSkinIndex === 2 && typeof d3xCaveGroup !== 'undefined' && d3xCaveGroup.visible) {
+  if (window.currentSkinIndex === 3 && typeof d3xCaveGroup !== 'undefined' && d3xCaveGroup.visible) {
       const hue = (time3 * 0.2) % 1.0; // cycle through colors every 5 seconds
       const rainbowColor = new THREE.Color().setHSL(hue, 1.0, 0.5);
       
@@ -8675,7 +8675,7 @@ function animate() {
   }
 
   // Animate D3X Exchange Arrows (Cyber Skin)
-  if (window.currentSkinIndex === 3 && window.datacentersGroup && window.datacentersGroup.visible) {
+  if (window.currentSkinIndex === 4 && window.datacentersGroup && window.datacentersGroup.visible) {
     window.datacentersGroup.children.forEach(mesh => {
       if (mesh.userData.isD3XExchange && mesh.userData.arrowGroup) {
         mesh.userData.arrowGroup.rotation.y += 0.02; // Rotate the arrows continuously
@@ -12025,7 +12025,7 @@ function processHackCommand(cmd) {
 window.internalD3XMiningAmount = 0.0;
 
 window.openD3XMiningCave = function(caveName) {
-    if (window.currentSkinIndex !== 2) return;
+    if (window.currentSkinIndex !== 3) return;
     SFX.playClick();
     document.getElementById('mining-cave-title').textContent = caveName.toUpperCase();
     document.getElementById('internal-mining-amount').textContent = window.internalD3XMiningAmount.toFixed(2);

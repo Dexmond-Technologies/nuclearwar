@@ -1,76 +1,139 @@
 nohup: ignoring input
-
-> nuclear-risk-server@1.0.0 start
-> node server.js
-
-[dotenv@17.3.1] injecting env (12) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
-✅ Solana Authority Wallet Loaded: GTCJmbURDU42opNv7nzjT5dZ4SJ2VoYLr2r9LQYbB5uW
-(node:7390) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+[dotenv@17.3.1] injecting env (22) from .env -- tip: 🛡️ auth for agents: https://vestauth.com
+💧 WATER MODULE: Initializing 360x180 hydrology grid...
+✅ Solana Authority (Earth) Wallet Loaded: GTCJmbURDU42opNv7nzjT5dZ4SJ2VoYLr2r9LQYbB5uW
+✅ Solana Rainclaude Wallet Loaded: 5rdrJ46YJbtVHEx7xRgURGm49Cwf1WikLhU71VnS8zk3
+✅ Solana Gemini AI Wallet Loaded: 2hF5Z3JPa5Feo4zdHWhcgdQv8RerDcBAk1LkhoYW8TBj
+✅ Solana World Bank Wallet Loaded: 37De9qFqKoyPDoM4eCWCGKkgAFFxBtJYQNJjHmL9wK8k
+(node:8609) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
 ☢ D3X Schema Migration successful
+☢ PostgreSQL Initialized WORLD BANK profile
 ☢ PostgreSQL connected — game_state and commanders tables ready
+☢ GameLogger (CONTROLLER) -> Online & Connected to PostgreSQL
 ✓ Loaded persisted game state from PostgreSQL
 ☢ Game state recovery complete. World is active.
 ☢ NUCLEAR WAR Multi-Service running on port 8888
+[AI MARKET] Gemini spent 53,203 D3X, Rainclaude spent 60,005 D3X today.
+[AI MARKET] Gemini spent 94,811 D3X, Rainclaude spent 91,999 D3X today.
+[AI MARKET] Gemini spent 118,433 D3X, Rainclaude spent 121,745 D3X today.
+[AI MARKET] Gemini spent 137,105 D3X, Rainclaude spent 137,089 D3X today.
 Commander 1 joined. Total Commanders: 1
+[AI MARKET] Gemini spent 152,236 D3X, Rainclaude spent 151,729 D3X today.
+Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 4000ms delay...
+[AI MARKET] Gemini spent 161,390 D3X, Rainclaude spent 163,206 D3X today.
+World Bank balance fetch error: 429 Too Many Requests:  {"jsonrpc":"2.0","error":{"code": 429, "message":"Too many requests for a specific RPC call"}, "id": "73d7d597-8116-4fbd-acbd-709900c45d29" } 
+
+[AI MARKET] Gemini spent 183,448 D3X, Rainclaude spent 171,625 D3X today.
+[AI MARKET] Gemini spent 186,816 D3X, Rainclaude spent 178,008 D3X today.
 Commander 1 disconnected. Remaining: 0
 Commander 2 joined. Total Commanders: 1
+[AI MARKET] Gemini spent 189,555 D3X, Rainclaude spent 182,705 D3X today.
+[AI MARKET] Gemini spent 191,219 D3X, Rainclaude spent 191,121 D3X today.
 Commander 2 disconnected. Remaining: 0
+[AI MARKET] Gemini spent 195,172 D3X, Rainclaude spent 192,467 D3X today.
+[AI MARKET] Gemini spent 196,138 D3X, Rainclaude spent 193,358 D3X today.
 Commander 3 joined. Total Commanders: 1
+[AI MARKET] Gemini spent 198,661 D3X, Rainclaude spent 199,814 D3X today.
+[AI MARKET] Gemini spent 199,549 D3X, Rainclaude spent 200,180 D3X today.
+[AI MARKET] Gemini spent 201,736 D3X, Rainclaude spent 200,180 D3X today.
+Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
 Commander 3 disconnected. Remaining: 0
-Claude API Returned Error: invalid x-api-key
-[AI COMBAT] [RAINCLAUDE: KINETIC_STRIKE] Rainclaude API Quota Limit. Initiating automated countermeasures. | Gemini HP: 4100, Claude HP: 9055
+Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
 Commander 4 joined. Total Commanders: 1
 Commander 4 disconnected. Remaining: 0
 Commander 5 joined. Total Commanders: 1
-[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
+Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
 Commander 5 disconnected. Remaining: 0
-⚠ Failed to save game state to PG: getaddrinfo EAI_AGAIN dpg-d6j5m8kr85hc73fqe70g-a.oregon-postgres.render.com
 Commander 6 joined. Total Commanders: 1
-[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
 Commander 6 disconnected. Remaining: 0
 Commander 7 joined. Total Commanders: 1
-[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
-[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
-[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
+Gemini API Error: Invalid response format {
+  error: {
+    code: 404,
+    message: 'models/gemini-1.5-pro-latest is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.',
+    status: 'NOT_FOUND'
+  }
+}
+[AI COMBAT] [GEMINI: KINETIC_STRIKE] Gemini tactical subsystem offline. Firing blind. | Gemini HP: 0, Claude HP: 6700
+Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 4000ms delay...
 Commander 7 disconnected. Remaining: 0
 Commander 8 joined. Total Commanders: 1
-[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
-[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
 Commander 8 disconnected. Remaining: 0
 Commander 9 joined. Total Commanders: 1
+Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 4000ms delay...
 Commander 9 disconnected. Remaining: 0
 Commander 10 joined. Total Commanders: 1
+Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 4000ms delay...
+World Bank balance fetch error: 429 Too Many Requests:  {"jsonrpc":"2.0","error":{"code": 429, "message":"Too many requests for a specific RPC call"}, "id": "e80727ce-8a87-408b-9792-26a8889b3a4d" } 
+
 Commander 10 disconnected. Remaining: 0
 Commander 11 joined. Total Commanders: 1
 Commander 11 disconnected. Remaining: 0
 Commander 12 joined. Total Commanders: 1
-Claude API Returned Error: invalid x-api-key
-[AI COMBAT] [RAINCLAUDE: KINETIC_STRIKE] Rainclaude API Quota Limit. Initiating automated countermeasures. | Gemini HP: 3950, Claude HP: 8905
+Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 4000ms delay...
+World Bank balance fetch error: 429 Too Many Requests:  {"jsonrpc":"2.0","error":{"code": 429, "message":"Too many requests for a specific RPC call"}, "id": "296b741f-b8e9-4f5c-969d-ec64b73dce06" } 
+
 Commander 12 disconnected. Remaining: 0
 Commander 13 joined. Total Commanders: 1
-[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
+Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 4000ms delay...
+World Bank balance fetch error: 429 Too Many Requests:  {"jsonrpc":"2.0","error":{"code": 429, "message":"Too many requests for a specific RPC call"}, "id": "903c9b89-6de2-44c9-8c2c-77937a34dae6" } 
+
+Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
 Commander 13 disconnected. Remaining: 0
 Commander 14 joined. Total Commanders: 1
+⚙️ [SETTLEMENT] Initiating hourly on-chain D3X settlement...
+🔗 [ON-CHAIN] Settling 200 D3X from 5rdrJ46YJbtVHEx7xRgURGm49Cwf1WikLhU71VnS8zk3 to 11111111111111111111111111111111...
+Gemini API Error: Invalid response format {
+  error: {
+    code: 404,
+    message: 'models/gemini-1.5-pro-latest is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.',
+    status: 'NOT_FOUND'
+  }
+}
+[AI COMBAT] [GEMINI: KINETIC_STRIKE] Gemini tactical subsystem offline. Firing blind. | Gemini HP: 0, Claude HP: 6550
+🔗 [Solana Mainnet] Physical Tx Sent! Burned 200 D3X. Signature: GETsLr4NYag8197RcUhZf6hDqJFFNgZn9okPhRdhXLoiLfSr4SNeAADt7w88tT3VAt9jiD9e2dhoKRCGiBC4nRa
+✅ [SETTLEMENT] Complete: GETsLr4NYag8197RcUhZf6hDqJFFNgZn9okPhRdhXLoiLfSr4SNeAADt7w88tT3VAt9jiD9e2dhoKRCGiBC4nRa
+⚠ Failed to save game state to PG: Connection terminated unexpectedly
+⚠ Failed to save game state to PG: Connection terminated unexpectedly
+Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 4000ms delay...
 Commander 14 disconnected. Remaining: 0
+Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 4000ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+Server responded with 429 Too Many Requests.  Retrying after 4000ms delay...
+World Bank balance fetch error: 429 Too Many Requests:  {"jsonrpc":"2.0","error":{"code": 429, "message":"Too many requests for a specific RPC call"}, "id": "e917411a-0444-48e0-9776-cffcd0084a02" } 
+
 Commander 15 joined. Total Commanders: 1
+DB Error on get_ai_wallets: client.send is not a function
 Commander 15 disconnected. Remaining: 0
-Claude API Returned Error: invalid x-api-key
-[AI COMBAT] [RAINCLAUDE: KINETIC_STRIKE] Rainclaude API Quota Limit. Initiating automated countermeasures. | Gemini HP: 3800, Claude HP: 8755
-[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
-[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
-[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
-[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
-[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
-[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
-[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
-Gemini API Error: Cannot read properties of undefined (reading '0')
-[AI COMBAT] [GEMINI: KINETIC_STRIKE] Gemini tactical subsystem offline. Firing blind. | Gemini HP: 3800, Claude HP: 8605
-[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
-Commander 16 joined. Total Commanders: 1
-Commander 16 disconnected. Remaining: 0
-Commander 17 joined. Total Commanders: 1
-Commander 17 disconnected. Remaining: 0
-[KEEP-ALIVE] Failed to ping World Monitor: fetch failed
-Claude API Returned Error: invalid x-api-key
-[AI COMBAT] [RAINCLAUDE: KINETIC_STRIKE] Rainclaude API Quota Limit. Initiating automated countermeasures. | Gemini HP: 3650, Claude HP: 8605

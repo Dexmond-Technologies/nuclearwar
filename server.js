@@ -1539,7 +1539,7 @@ function initWebSockets() {
             const res = await pgPool.query("SELECT gemini_hp, claude_hp, gemini_portfolio, claude_portfolio, gemini_weapon_inventory, claude_weapon_inventory FROM ai_combat_state WHERE id = 1");
             if (res.rows.length > 0) {
                 const row = res.rows[0];
-                client.send(JSON.stringify({
+                ws.send(JSON.stringify({
                     type: 'ai_wallets_data',
                     gemini: {
                         balance: cachedGeminiBalance || 100000000,
@@ -2327,6 +2327,8 @@ async function runAIMarketBuying() {
           geminiAccount.balances.D3X = Math.max(0, geminiAccount.balances.D3X - cost);
           
           if (!geminiAccount.portfolio) geminiAccount.portfolio = { commodities: {}, tradeLogs: [] };
+          if (!geminiAccount.portfolio.commodities) geminiAccount.portfolio.commodities = {};
+          if (!geminiAccount.portfolio.tradeLogs) geminiAccount.portfolio.tradeLogs = [];
           
           if (!geminiAccount.portfolio.commodities[item.name]) {
               geminiAccount.portfolio.commodities[item.name] = { shares: 0, avgCost: 0, totalSpent: 0 };
@@ -2387,6 +2389,8 @@ async function runAIMarketBuying() {
           claudeAccount.balances.D3X = Math.max(0, claudeAccount.balances.D3X - cost);
           
           if (!claudeAccount.portfolio) claudeAccount.portfolio = { commodities: {}, tradeLogs: [] };
+          if (!claudeAccount.portfolio.commodities) claudeAccount.portfolio.commodities = {};
+          if (!claudeAccount.portfolio.tradeLogs) claudeAccount.portfolio.tradeLogs = [];
           
           if (!claudeAccount.portfolio.commodities[item.name]) {
               claudeAccount.portfolio.commodities[item.name] = { shares: 0, avgCost: 0, totalSpent: 0 };

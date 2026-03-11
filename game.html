@@ -1485,7 +1485,7 @@ body {
   <div id="right-hud-group" style="position:absolute; bottom:55px; right:calc(25px + 30vw); display:flex; flex-direction:column; gap:8px; width:115px; z-index:100; align-items:stretch; pointer-events:none;">
       <div id="skin-hint-arrow" style="position:absolute; top:35px; left:-40px; font-size:32px; color:#ff5577; text-shadow:0 0 15px rgba(255,-85,119,0.8); opacity:0; pointer-events:none; z-index:9999; transition:opacity 0.5s; animation:bounceRight 0.5s infinite alternate;">➔</div>
       <button id="btn-toggle-skin" onclick="toggleRedSkin()">🔴 RED SKIN</button>
-      <div id="wtr-skin-label" style="display:none; color:#00aaff; font-family:'Orbitron', sans-serif; font-size:9px; text-shadow:0 0 5px #00aaff; margin-top:2px; margin-bottom:4px; text-align:center; font-weight:bold; letter-spacing:0.5px; opacity:0.8;">DEXMOND SIMULATIONS<br/>blue globe ARENA</div>
+      <div id="wtr-skin-label" style="display:none; color:#00aaff; font-family:'Orbitron', sans-serif; font-size:9px; text-shadow:0 0 5px #00aaff; margin-top:2px; margin-bottom:4px; text-align:center; font-weight:bold; letter-spacing:0.5px; opacity:0.8;"></div>
       
       <div id="user-stats-box" style="text-align:left;">
         <div class="us-title" id="us-name">COM-—</div>
@@ -3265,7 +3265,7 @@ function initGreenMountains() {
         
         // Randomly flash lightning bolts
         setInterval(() => {
-            if (window.currentSkinIndex === 2 && Math.random() > 0.7) {
+            if (window.currentSkinIndex === 3 && Math.random() > 0.7) {
                 const bolt = bolts[Math.floor(Math.random() * bolts.length)];
                 bolt.visible = true;
                 setTimeout(() => { bolt.visible = false; }, 50 + Math.random() * 100);
@@ -3874,9 +3874,9 @@ function showCompanyInfo(compData) {
   
     // Multi-Tier Strategic Asset labeling based on Company Color
     let assetClassStr = "STRATEGIC ASSET DETECTED";
-    if (window.currentSkinIndex === 3) {
+    if (window.currentSkinIndex === 4) {
       assetClassStr = 'ASSET: ' + assetLabel;
-    } else if (window.currentSkinIndex === 2) {
+    } else if (window.currentSkinIndex === 3) {
       if (compData.color === '#00f0ff') {
         assetClassStr = "GLOBAL TECH HUB DETECTED"; 
       } else if (compData.color === '#ffff00') {
@@ -3914,7 +3914,7 @@ function showCompanyInfo(compData) {
   }
 
   let balanceHtml = '';
-  if (window.currentSkinIndex === 2) { // Black Skin only
+  if (window.currentSkinIndex === 3) { // Black Skin only
       if (typeof compData.d3xBalance === 'undefined') {
           compData.d3xBalance = (compData.name === 'WORLD BANK') ? 12300000 : (200000 + Math.random() * 1800000);
       }
@@ -5668,7 +5668,7 @@ const globeMat  = new THREE.MeshPhongMaterial({
 });
 
 // Update globeMat color for WTR skin
-if (window.currentSkinIndex === 5) {
+if (window.currentSkinIndex === 6) {
   globeMat.color = new THREE.Color(0x00aaff); // Neon cyan for WTR
   globeMat.specular = new THREE.Color(0x00ffff);
   globeMat.shininess = 50;
@@ -7067,7 +7067,7 @@ function buildTroopSprites() {
     sprite.scale.set(.12,.06,1);
     
     // Hide if currently on a clean skin, BLK skin, CYBER skin, or WTR skin
-    sprite.visible = !(window.SKINS && window.SKINS[window.currentSkinIndex] && (window.SKINS[window.currentSkinIndex].cleanGlobe || window.SKINS[window.currentSkinIndex].hideTroops || window.currentSkinIndex === 5));
+    sprite.visible = !(window.SKINS && window.SKINS[window.currentSkinIndex] && (window.SKINS[window.currentSkinIndex].cleanGlobe || window.SKINS[window.currentSkinIndex].hideTroops || window.currentSkinIndex === 6));
     
     sprite.userData = {iso};
     scene.add(sprite);
@@ -7485,7 +7485,7 @@ function openSatelliteHackMinigame() {
     setLog(`⚠ SATELLITE HACK IS INCOMPATIBLE WITH GREEN MARKET SKIN. SWITCH TO RED.`);
     return;
   }
-  if (window.currentSkinIndex === 2) {
+  if (window.currentSkinIndex === 3) {
     setLog(`⚠ SATELLITE HACK IS INCOMPATIBLE WITH GREEN MARKET SKIN. SWITCH TO RED.`);
     return;
   }
@@ -7702,7 +7702,7 @@ function handleGlobeClick(e) {
   }
 
   // 1.5 Intercept clicks on Satellites for Hacking Minigame
-  if (window.currentSkinIndex === 1 || window.currentSkinIndex === 2) {
+  if (window.currentSkinIndex === 2 || window.currentSkinIndex === 3) {
     mouse.x = (e.clientX/innerWidth)*2-1;
     mouse.y = -(e.clientY/innerHeight)*2+1;
     ray.setFromCamera(mouse, camera);
@@ -8418,7 +8418,7 @@ window.triggerSolanaDonation = async function() {
 };
 
   // Intercept clicks on World Bank (Cyber Skin)
-  if (window.currentSkinIndex === 2 && window.worldBankGroup && window.worldBankGroup.visible && window.worldBankGroup.children.length > 0) {
+  if (window.currentSkinIndex === 3 && window.worldBankGroup && window.worldBankGroup.visible && window.worldBankGroup.children.length > 0) {
     const wbHits = ray.intersectObjects(window.worldBankGroup.children, true);
     if (wbHits.length > 0) {
       if (typeof _sfxClick !== 'undefined') _sfxClick();
@@ -8442,7 +8442,7 @@ window.triggerSolanaDonation = async function() {
   }
 
   // Intercept clicks on Datacenters (Cyber Skin)
-  if (window.currentSkinIndex === 2 && window.datacentersGroup && window.datacentersGroup.visible && window.datacentersGroup.children.length > 0) {
+  if (window.currentSkinIndex === 3 && window.datacentersGroup && window.datacentersGroup.visible && window.datacentersGroup.children.length > 0) {
     // Search children heavily because of auras and inner sprites on staking towers
     const dcHits = ray.intersectObjects(window.datacentersGroup.children, true);
     if (dcHits.length > 0) {
@@ -8606,7 +8606,7 @@ function initGreenMarketUI() {
 }
 
 function updateGreenMarket() {
-  const isGreen = (window.currentSkinIndex === 2);
+  const isGreen = (window.currentSkinIndex === 3);
 
   let totalWorth = 0;
   let holdingsHtml = '';
@@ -8815,7 +8815,7 @@ window.simulateGreenMarketAI = function() {
         }
 
         // Just to visually show that SOME trade happened if the user is looking at the terminal
-        if (Math.random() < 0.05 && window.currentSkinIndex === 2) {
+        if (Math.random() < 0.05 && window.currentSkinIndex === 3) {
             const termBox = document.getElementById('d1-reasoning');
             if (termBox) {
                 const action = isBuy ? '<span style="color:#0f8">BOUGHT</span>' : '<span style="color:#f55">SOLD</span>';
@@ -9215,12 +9215,12 @@ function selectCountry(iso) {
   GS.selected = iso;
   highlightCountry(iso,true);
 
-  if (window.currentSkinIndex === 2) { // Green Skin exclusively ignores normal ops
+  if (window.currentSkinIndex === 3) { // Green Skin exclusively ignores normal ops
     showGreenSkinResourceModal(iso);
     return;
   }
 
-  if (window.currentSkinIndex === 2) { // Cyber Skin exclusively ignores normal ops
+  if (window.currentSkinIndex === 3) { // Cyber Skin exclusively ignores normal ops
     return;
   }
 
@@ -9858,7 +9858,7 @@ function slerp3D(a,b,t){
 }
 
 function launchMissile3D(fromIso, toIso, col) {
-  if (window.currentSkinIndex === 1 || window.currentSkinIndex === 2 || window.currentSkinIndex === 3 || window.currentSkinIndex === 4 || window.currentSkinIndex === 5) return;
+  if (window.currentSkinIndex === 2 || window.currentSkinIndex === 3 || window.currentSkinIndex === 4 || window.currentSkinIndex === 5 || window.currentSkinIndex === 6) return;
   SFX.playLaunch();
   const fc=countryData[fromIso], tc=countryData[toIso];
   if(!fc||!tc) return;
@@ -9897,7 +9897,7 @@ function launchMissile3D(fromIso, toIso, col) {
 }
 
 function spawnFakeTroops() {
-  if (window.currentSkinIndex === 5) return; // Completely disabled on WTR Skin
+  if (window.currentSkinIndex === 6) return; // Completely disabled on WTR Skin
   const count = Math.floor(Math.random() * 4) + 4; // 4 to 7
   const isos = Object.keys(countryData);
   if (isos.length < 2) return;
@@ -9933,7 +9933,7 @@ function spawnFakeTroops() {
 }
 
 function spawnFakeJets() {
-  if (window.currentSkinIndex === 4 || window.currentSkinIndex === 3 || window.currentSkinIndex === 5) return; // Completely disabled on BLK, CYBER, and WTR Skins
+  if (window.currentSkinIndex === 5 || window.currentSkinIndex === 4 || window.currentSkinIndex === 6) return; // Completely disabled on BLK, CYBER, and WTR Skins
   const count = Math.floor(Math.random() * 3) + 4; // 4 to 6 jets
   const isos = Object.keys(countryData);
   if (isos.length < 2) return;
@@ -9973,7 +9973,7 @@ function spawnFakeJets() {
 }
 
 function spawnSquadron() {
-  if (window.currentSkinIndex === 4 || window.currentSkinIndex === 3 || window.currentSkinIndex === 5) return; // No squadrons on BLK, CYBER or WTR skin
+  if (window.currentSkinIndex === 5 || window.currentSkinIndex === 4 || window.currentSkinIndex === 6) return; // No squadrons on BLK, CYBER or WTR skin
 
   const isos = Object.keys(countryData);
   if (isos.length < 2) return;
@@ -10023,7 +10023,7 @@ function spawnSquadron() {
 }
 
 function spawnExplosion3D(lat,lon,col){
-  if(window.currentSkinIndex === 4 || window.currentSkinIndex === 3) return;
+  if(window.currentSkinIndex === 5 || window.currentSkinIndex === 4) return;
   if(lat===undefined||lon===undefined) return;
   SFX.playExplosion();
   const c=ll2v(lat,lon,GLOBE_R+.003);
@@ -10103,7 +10103,7 @@ function spawnFloatingText3D(lat, lon, text, colorHex) {
 // VISUAL EFFECTS FOR MEGA BOMB
 // =====================================================================
 function spawnMegaBombExplosion3D(lat, lon, col) {
-  if (window.currentSkinIndex === 4 || window.currentSkinIndex === 3) return;
+  if (window.currentSkinIndex === 5 || window.currentSkinIndex === 4) return;
   if (lat === undefined || lon === undefined) return;
   SFX.playExplosion();
   const c = ll2v(lat, lon, GLOBE_R + .003);
@@ -10164,7 +10164,7 @@ function scheduleRandomMegaBomb() {
 // VISUAL EFFECTS FOR EMP AND GROUND BOMB
 // =====================================================================
 function spawnEMP3D(lat, lon) {
-  if (window.currentSkinIndex === 4) return;
+  if (window.currentSkinIndex === 5) return;
   if (lat === undefined || lon === undefined) return;
   SFX.playExplosion(); // Consider a custom EMP sound if available
   const c = ll2v(lat, lon, GLOBE_R + .003);
@@ -10220,7 +10220,7 @@ function scheduleRandomEMP() {
 }
 
 function spawnGroundBomb3D(lat, lon) {
-  if (window.currentSkinIndex === 4) return;
+  if (window.currentSkinIndex === 5) return;
   if (lat === undefined || lon === undefined) return;
   SFX.playExplosion();
   const c = ll2v(lat, lon, GLOBE_R + .003);
@@ -10507,7 +10507,7 @@ function createSpaceRocketCanvas() {
 }
 
 function spawnSpaceRocket3D(lat, lon) {
-  if (window.currentSkinIndex === 1 || window.currentSkinIndex === 2 || window.currentSkinIndex === 3 || window.currentSkinIndex === 4 || window.currentSkinIndex === 5) return; // No rockets on these skins
+  if (window.currentSkinIndex === 2 || window.currentSkinIndex === 3 || window.currentSkinIndex === 4 || window.currentSkinIndex === 5 || window.currentSkinIndex === 6) return; // No rockets on these skins
   if (lat === undefined || lon === undefined) return;
   const c = ll2v(lat, lon, GLOBE_R + 0.005);
   
@@ -10610,7 +10610,7 @@ function pulseGreenCountry(iso) {
 }
 
 function cyberFlashingEffect() {
-  if (window.currentSkinIndex !== 5 || typeof countryBorders === 'undefined') return;
+  if (window.currentSkinIndex !== 6 || typeof countryBorders === 'undefined') return;
   const isos = Object.keys(countryBorders);
   if (isos.length === 0) return;
   
@@ -10632,7 +10632,7 @@ function cyberFlashingEffect() {
     const iv = setInterval(() => {
       ticks++;
       // Stop flashing if we switch away from black skin
-      if (window.currentSkinIndex !== 5) {
+      if (window.currentSkinIndex !== 6) {
         clearInterval(iv);
         refreshBorder(randomIso);
         return;
@@ -11019,7 +11019,7 @@ function initWS() {
       }
       case 'water_physics_update': {
           const wtrInfo = document.getElementById('wtr-skin-info');
-          if (wtrInfo && window.currentSkinIndex === 5) {
+          if (wtrInfo && window.currentSkinIndex === 6) {
               if (msg.volume) document.getElementById('wtr-vol').innerText = msg.volume;
               if (msg.flow) document.getElementById('wtr-flow').innerText = msg.flow;
               if (msg.power) document.getElementById('wtr-pwr').innerText = msg.power;
@@ -11234,7 +11234,7 @@ function initWS() {
                 
                 // Print to terminal if looking at the Cyber Simulation log
                 const termBox = document.getElementById('d1-reasoning');
-                if (termBox && window.currentSkinIndex === 2) {
+                if (termBox && window.currentSkinIndex === 3) {
                     const aiNamePlain = buy.aiName === 'gemini' ? 'GEMINI' : 'RAINCLAUDE';
                     const div = document.createElement('div');
                     div.innerHTML = `> [MARKET] <span style="color:#fff">${aiNamePlain}</span> <span style="color:#0f8">BOUGHT</span> ${buy.units}x ${buy.item} @ ${buy.cost.toLocaleString()} D3X`;
@@ -11994,7 +11994,7 @@ function updateDroneBattle(dt) {
     if (window.droneMatchTimer === undefined) window.droneMatchTimer = 60.0;
     window.droneMatchTimer -= dt;
     
-    const isWTR = window.currentSkinIndex === 5;
+    const isWTR = window.currentSkinIndex === 6;
     if (isWTR) {
         let timerEl = document.getElementById('drone-match-timer');
         if (!timerEl) {
@@ -12654,7 +12654,7 @@ function animate() {
   }
 
   // Animate Cyber Skin Master Datacenter Aura & Color Pulse
-  if (window.currentSkinIndex === 2 && window.datacentersGroup && window.datacentersGroup.visible) {
+  if (window.currentSkinIndex === 3 && window.datacentersGroup && window.datacentersGroup.visible) {
       window.datacentersGroup.children.forEach(dc => {
           if (dc.userData && dc.userData.isD3XExchange) {
               if (dc.userData.aura) {
@@ -12734,7 +12734,7 @@ function animate() {
       });
       
       // Elaborate Electricity Bridges Animation
-      if (npTowers.length === 3 && window.npLightningGroup && window.currentSkinIndex === 2) { // CYBER skin
+      if (npTowers.length === 3 && window.npLightningGroup && window.currentSkinIndex === 3) { // CYBER skin
           window.npLightningGroup.visible = true;
           window.npLightningGroup.children.forEach(bridge => {
               bridge.userData.timer -= dt;
@@ -12804,12 +12804,12 @@ function animate() {
       } else if (window.npLightningGroup) {
           window.npLightningGroup.visible = false;
       }
-  } else if (window.npLightningGroup && window.currentSkinIndex !== 2) {
+  } else if (window.npLightningGroup && window.currentSkinIndex !== 3) {
       window.npLightningGroup.visible = false;
   } // <-- End of Cyber Skin Block
   
   // D3X Mining Caves LGBT Rainbow Oscillator
-  if (window.currentSkinIndex === 2 && typeof d3xCaveGroup !== 'undefined' && d3xCaveGroup.visible) {
+  if (window.currentSkinIndex === 3 && typeof d3xCaveGroup !== 'undefined' && d3xCaveGroup.visible) {
       const hue = (time3 * 0.2) % 1.0; // cycle through colors every 5 seconds
       const rainbowColor = new THREE.Color().setHSL(hue, 1.0, 0.5);
       
@@ -13139,7 +13139,7 @@ function animate() {
     }
 
     const _skin = window.SKINS && window.SKINS[window.currentSkinIndex];
-    fj.group.visible = !(_skin && (_skin.name === 'BLK' || _skin.name === 'GRN' || _skin.name === 'WTR' || window.currentSkinIndex === 5));
+    fj.group.visible = !(_skin && (_skin.name === 'BLK' || _skin.name === 'GRN' || _skin.name === 'WTR' || window.currentSkinIndex === 6));
 
     if(fj.progress>=1){
       scene.remove(fj.group);
@@ -13189,7 +13189,7 @@ function animate() {
     });
 
     const _skinSq = window.SKINS && window.SKINS[window.currentSkinIndex];
-    sq.group.visible = !(_skinSq && (_skinSq.name === 'BLK' || _skinSq.name === 'GRN' || _skinSq.name === 'WTR' || window.currentSkinIndex === 5));
+    sq.group.visible = !(_skinSq && (_skinSq.name === 'BLK' || _skinSq.name === 'GRN' || _skinSq.name === 'WTR' || window.currentSkinIndex === 6));
 
     if(sq.progress>=1){
       sq.jets.forEach(j=>{if(j.trailLine){sq.group.remove(j.trailLine); j.trailLine.geometry.dispose();}});
@@ -13275,7 +13275,7 @@ function animate() {
     }
     
     // Backface culling and WTR skin override
-    if (window.currentSkinIndex === 5) {
+    if (window.currentSkinIndex === 6) {
       amb.sprite.visible = false;
     } else {
       const pos = new THREE.Vector3();
@@ -13322,7 +13322,7 @@ function animate() {
   }
 
   // Animate D3X Exchange Arrows (Cyber Skin)
-  if (window.currentSkinIndex === 2 && window.datacentersGroup && window.datacentersGroup.visible) {
+  if (window.currentSkinIndex === 3 && window.datacentersGroup && window.datacentersGroup.visible) {
     window.datacentersGroup.children.forEach(mesh => {
       if (mesh.userData.isD3XExchange && mesh.userData.arrowGroup) {
         mesh.userData.arrowGroup.rotation.y += 0.02; // Rotate the arrows continuously
@@ -14778,7 +14778,8 @@ window.currentSkinIndex = 0;
 window.isRedSkin = false; // Legacy flag preserved for scripts that might check it directly
 
 const SKINS = [
-  { name: 'LIVE',  color: 0xffffff, btnText: '🟢 GRN SKIN',    btnClass: '',              showOverlays: false, cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
+  { name: 'LIVE',  color: 0xffffff, btnText: '🔴 RED EARTH SKIN', btnClass: '',              showOverlays: false, cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
+  { name: 'RED',   color: 0xff0000, btnText: '🟢 GRN SKIN',    btnClass: 'active-premium',showOverlays: false, cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
   { name: 'GREEN', color: 0x22ff22, btnText: '💠 CYBR SKIN',   btnClass: 'active-normal', showOverlays: false, cleanGlobe: true,  hideTroops: true,  showResources: true,  showArms: true, showBoats: false, isPremium: false },
   { name: 'CYBER', color: 0x00f0ff, btnText: '⬛ BLK SKIN',    btnClass: 'active-premium',showOverlays: false,  cleanGlobe: true, hideTroops: true,  showResources: false,  showArms: false,  showBoats: false,  isPremium: false },
   { name: 'BLK',   color: 0x050505, btnText: '💧 WTR SKIN',    btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true,  showResources: false, showArms: false, showBoats: false, isPremium: false },
@@ -16030,7 +16031,7 @@ window.launchCyberAttack = function() {
 };
 
 window.simulateCompanyD3XTrading = function() {
-    if (window.currentSkinIndex !== 2) return; // Only process on Black Skin
+    if (window.currentSkinIndex !== 3) return; // Only process on Black Skin
 
     const groups = [window.companiesGroup, window.mediumCompaniesGroup, window.africaCompaniesGroup, window.microCompaniesGroup, window.russiaAsiaCompaniesGroup];
     const allCompanies = [];
@@ -16419,7 +16420,7 @@ function processHackCommand(cmd) {
 window.internalD3XMiningAmount = 0.0;
 
 window.openD3XMiningCave = function(caveName) {
-    if (window.currentSkinIndex !== 2) return;
+    if (window.currentSkinIndex !== 3) return;
     SFX.playClick();
     document.getElementById('mining-cave-title').textContent = caveName.toUpperCase();
     document.getElementById('internal-mining-amount').textContent = window.internalD3XMiningAmount.toFixed(2);
