@@ -1101,6 +1101,12 @@ body {
                onclick="openVanillaWalletModal()">
             CONNECT WALLET
           </div>
+          <div id="btn-direct-phantom" style="position:relative; min-width:190px; height:40px; display:flex; align-items:center; justify-content:center; background:rgba(20,0,40,0.8); border:1px solid rgba(171,159,242,0.4); border-radius:4px; overflow:hidden; cursor:pointer; color:#ab9ff2; font-family:'Courier New', monospace; font-size:13px; font-weight:bold; letter-spacing:1px; transition:all 0.2s; box-shadow:0 0 10px rgba(171,159,242,0.1); margin-top:5px;"
+               onmouseover="this.style.background='rgba(40,0,80,0.9)'; this.style.borderColor='#ab9ff2'; this.style.boxShadow='0 0 15px rgba(171,159,242,0.5)';"
+               onmouseout="this.style.background='rgba(20,0,40,0.8)'; this.style.borderColor='rgba(171,159,242,0.4)'; this.style.boxShadow='0 0 10px rgba(171,159,242,0.1)';"
+               onclick="connectDirectPhantom()">
+            DIRECT PHANTOM
+          </div>
         </div>
 
         <!-- Dev/Offline Bypass -->
@@ -15930,6 +15936,7 @@ window.buyOrbitalStrike = function() {
 
 // ========================================================
 // Removed hover listeners for ops-sidebar (now permanently displayed)
+</script>
 
 <script src="/dist/improve_earth.js" defer></script>
 <script src="public/vanilla-wallet.bundle.js" defer></script>
@@ -15942,8 +15949,40 @@ window.buyOrbitalStrike = function() {
       } else {
           alert("Solana Wallet Connectors are still loading. Please wait a moment.");
       }
-  }
+  };
 
+  window.connectDirectPhantom = async function() {
+    const btn = document.getElementById('btn-direct-phantom');
+    if (btn) btn.innerText = 'CONNECTING...';
+    
+    if (window.solana && window.solana.isPhantom) {
+      try {
+        await window.solana.disconnect(); 
+        const resp = await window.solana.connect();
+        const address = resp.publicKey.toString();
+        
+        const statusEl = document.getElementById('lobby-auth-status');
+        if (statusEl) {
+          statusEl.innerHTML = '✓ DATA LINK ESTABLISHED: ' + address.substring(0,4) + '...' + address.substring(address.length-4);
+        }
+        const authFlex = document.getElementById('auth-container-flex');
+        if (authFlex) {
+          authFlex.style.display = 'none';
+        }
+        window.pendingSolanaAddress = address;
+        if (typeof window.joinGlobalWar === 'function') {
+          window.joinGlobalWar();
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Phantom Connection Failed or Rejected.');
+        if (btn) btn.innerText = 'DIRECT PHANTOM';
+      }
+    } else {
+      alert("Phantom extension not detected in browser.");
+      if (btn) btn.innerText = 'DIRECT PHANTOM';
+    }
+  };
 // =====================================================================
 // MOCK GLOBAL TRADE ECONOMY (GREEN & YELLOW SKINS)
 // =====================================================================
