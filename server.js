@@ -598,8 +598,8 @@ function initWebSockets() {
   // Immediately send cached AI balances
   ws.send(JSON.stringify({
     type: 'ai_d3x_balances',
-    gemini: cachedGeminiBalance,
-    claude: cachedClaudeBalance,
+    gemini: cachedGeminiBalance || 100000000,
+    claude: cachedClaudeBalance || 100000000,
     geminiWallet: cachedGeminiWallet,
     claudeWallet: cachedClaudeWallet
   }));
