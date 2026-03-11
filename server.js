@@ -1904,6 +1904,10 @@ async function fetchGeminiStrike(myStats, claudeStats) {
       })
     });
     const data = await res.json();
+    if (!data || !data.candidates || data.candidates.length === 0) {
+        console.error("Gemini API Error: Invalid response format", data);
+        return { action: "KINETIC_STRIKE", damage: 150, log: "Gemini tactical subsystem offline. Firing blind." };
+    }
     const text = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
     return JSON.parse(text);
   } catch (err) {
@@ -1930,8 +1934,8 @@ async function fetchClaudeStrike(myStats, geminiStats) {
       })
     });
     const data = await res.json();
-    if (data.error) {
-      console.error("Claude API Returned Error:", data.error.message);
+    if (data.error || !data.content || data.content.length === 0) {
+      console.error("Claude API Returned Error or Empty Content:", data.error ? data.error.message : data);
       return { action: "KINETIC_STRIKE", damage: 150, log: "Rainclaude API Quota Limit. Initiating automated countermeasures." };
     }
     const text = data.content[0].text.trim();
