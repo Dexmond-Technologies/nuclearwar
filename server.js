@@ -1536,7 +1536,7 @@ function initWebSockets() {
       case 'get_ai_wallets': {
         if (!pgPool) break;
         try {
-            const res = await pgPool.query("SELECT gemini_hp, claude_hp, gemini_portfolio, claude_portfolio FROM ai_combat_state WHERE id = 1");
+            const res = await pgPool.query("SELECT gemini_hp, claude_hp, gemini_portfolio, claude_portfolio, gemini_weapon_inventory, claude_weapon_inventory FROM ai_combat_state WHERE id = 1");
             if (res.rows.length > 0) {
                 const row = res.rows[0];
                 client.send(JSON.stringify({
@@ -1544,12 +1544,14 @@ function initWebSockets() {
                     gemini: {
                         balance: cachedGeminiBalance || 100000000,
                         hp: row.gemini_hp || 10000,
-                        portfolio: row.gemini_portfolio || { commodities: {} }
+                        portfolio: row.gemini_portfolio || { commodities: {}, mining_inventory: {} },
+                        weapons: row.gemini_weapon_inventory || {}
                     },
                     claude: {
                         balance: cachedClaudeBalance || 100000000,
                         hp: row.claude_hp || 10000,
-                        portfolio: row.claude_portfolio || { commodities: {} }
+                        portfolio: row.claude_portfolio || { commodities: {}, mining_inventory: {} },
+                        weapons: row.claude_weapon_inventory || {}
                     }
                 }));
             }
