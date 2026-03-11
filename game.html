@@ -1222,6 +1222,109 @@ body {
           document.body.insertAdjacentHTML('beforeend', uiText);
           setTimeout(() => { makeDraggable(document.getElementById('aiwallet-override-modal')); }, 50);
       };
+    window.showGoogleWalletModal = function() {
+    let existing = document.getElementById('google-wallet-modal');
+    if (existing) existing.remove();
+
+    const m = document.createElement('div');
+    m.id = 'google-wallet-modal';
+    m.style.position = 'fixed';
+    m.style.top = '0'; m.style.left = '0';
+    m.style.width = '100vw'; m.style.height = '100vh';
+    m.style.background = 'rgba(0,0,0,0.85)';
+    m.style.backdropFilter = 'blur(10px)';
+    m.style.display = 'flex';
+    m.style.justifyContent = 'center';
+    m.style.alignItems = 'center';
+    m.style.zIndex = '9999999';
+
+    const box = document.createElement('div');
+    box.style.background = '#0a0a0a';
+    box.style.border = '2px solid #0f8';
+    box.style.borderRadius = '8px';
+    box.style.padding = '30px';
+    box.style.width = '550px';
+    box.style.maxWidth = '90vw';
+    box.style.fontFamily = "'Share Tech Mono', monospace";
+    box.style.color = '#fff';
+    box.style.boxShadow = '0 0 30px rgba(0,255,136,0.2)';
+    box.style.textAlign = 'center';
+
+    const title = document.createElement('div');
+    title.textContent = '🔒 SECURE WALLET GENERATED';
+    title.style.color = '#0f8';
+    title.style.fontSize = '24px';
+    title.style.fontWeight = 'bold';
+    title.style.marginBottom = '20px';
+    title.style.textShadow = '0 0 10px #0f8';
+
+    const desc = document.createElement('div');
+    desc.innerHTML = 'A unique Solana command wallet has been attached to your Google Profile.<br><span style="color:#fa0;">Please copy your Private Key below and store it securely. Do NOT share it with anyone!</span>';
+    desc.style.fontSize = '14px';
+    desc.style.lineHeight = '1.5';
+    desc.style.marginBottom = '20px';
+    desc.style.color = '#ccc';
+
+    const pubContainer = document.createElement('div');
+    pubContainer.style.background = '#111';
+    pubContainer.style.border = '1px solid #444';
+    pubContainer.style.padding = '15px';
+    pubContainer.style.borderRadius = '4px';
+    pubContainer.style.marginBottom = '15px';
+    pubContainer.style.textAlign = 'left';
+    pubContainer.innerHTML = `<div style="color:#0af; font-size:12px; margin-bottom:5px;">PUBLIC ADDRESS (Receive D3X):</div>
+                              <div style="word-break:break-all; font-family:'Courier New', monospace; font-size:14px;">${window.mySolanaAddress || 'N/A'}</div>`;
+
+    const privContainer = document.createElement('div');
+    privContainer.style.background = 'rgba(255,50,50,0.1)';
+    privContainer.style.border = '1px solid #f33';
+    privContainer.style.padding = '15px';
+    privContainer.style.borderRadius = '4px';
+    privContainer.style.marginBottom = '25px';
+    privContainer.style.textAlign = 'left';
+    privContainer.innerHTML = `<div style="color:#f33; font-size:12px; margin-bottom:5px; font-weight:bold;">PRIVATE KEY (Hex - KEEP SECRET):</div>
+                               <div id="gw-priv-key" style="word-break:break-all; font-family:'Courier New', monospace; font-size:13px; color:#aaa; filter:blur(4px); transition:0.3s; cursor:pointer;" title="Click to reveal">
+                                 ${window.mySolanaPrivateKeyHex || 'N/A'}
+                               </div>
+                               <div style="font-size:11px; color:#f88; margin-top:5px; text-align:right;">(Click to reveal)</div>`;
+
+    const btnClose = document.createElement('button');
+    btnClose.textContent = 'I HAVE SAVED MY KEYS';
+    btnClose.style.width = '100%';
+    btnClose.style.padding = '15px';
+    btnClose.style.background = '#0f8';
+    btnClose.style.color = '#000';
+    btnClose.style.border = 'none';
+    btnClose.style.borderRadius = '4px';
+    btnClose.style.fontFamily = "'Share Tech Mono', monospace";
+    btnClose.style.fontSize = '18px';
+    btnClose.style.fontWeight = 'bold';
+    btnClose.style.cursor = 'pointer';
+    btnClose.onclick = () => m.remove();
+
+    box.appendChild(title);
+    box.appendChild(desc);
+    box.appendChild(pubContainer);
+    box.appendChild(privContainer);
+    box.appendChild(btnClose);
+    m.appendChild(box);
+    document.documentElement.appendChild(m);
+
+    // blur toggle
+    const pKeyNode = document.getElementById('gw-priv-key');
+    if (pKeyNode) {
+      pKeyNode.onclick = () => {
+        if (pKeyNode.style.filter.includes('blur')) {
+           pKeyNode.style.filter = 'none';
+           pKeyNode.style.color = '#fff';
+        } else {
+           pKeyNode.style.filter = 'blur(4px)';
+           pKeyNode.style.color = '#aaa';
+        }
+      };
+    }
+};
+
     </script>
       </div>
 
@@ -1355,7 +1458,11 @@ body {
     <div id="log">SYSTEM INITIALIZED // AWAITING COMMAND // AURAL UPLINK SECURED</div>
     <div style="position:absolute; right:20px; display:flex; align-items:center; gap:10px; pointer-events:auto; z-index:100;">
       <span style="font-size:9px; color:rgba(255,255,255,0.5); font-family:'Courier New', monospace; letter-spacing:1px; max-width: 280px; text-align: right; line-height: 1.2;">Servers are provided for free so everyone can have fun.<br>Any support helps keep them running!</span>
-      <button onclick="if(!window.localD3XWallet) { alert('You must connect a Solana Wallet first to receive D3X Coins!'); return; } window.open('https://buy.stripe.com/5kQcN4dP35lO19J7wo2wU00?client_reference_id=' + window.localD3XWallet, '_blank');" style="background:linear-gradient(135deg, #fa0, #d80); color:#000; padding:6px 12px; font-size:11px; font-weight:bold; border-radius:4px; text-decoration:none; font-family:'Courier New', monospace; letter-spacing:1px; border:1px solid #c80; transition:all 0.2s; box-shadow:0 0 10px rgba(255,170,0,0.2); cursor:pointer;" onmouseover="this.style.filter='brightness(1.2)';" onmouseout="this.style.filter='brightness(1)';">☕ SUPPORT</button>
+      <button onclick="
+        const w = window.pendingSolanaAddress || window.localD3XWallet; 
+        if(!w) { alert('You must connect a Solana Wallet first to receive D3X Coins!'); return; } 
+        window.open('https://buy.stripe.com/5kQcN4dP35lO19J7wo2wU00?client_reference_id=' + w, '_blank');
+      " style="background:linear-gradient(135deg, #fa0, #d80); color:#000; padding:6px 12px; font-size:11px; font-weight:bold; border-radius:4px; text-decoration:none; font-family:'Courier New', monospace; letter-spacing:1px; border:1px solid #c80; transition:all 0.2s; box-shadow:0 0 10px rgba(255,170,0,0.2); cursor:pointer;" onmouseover="this.style.filter='brightness(1.2)';" onmouseout="this.style.filter='brightness(1)';">☕ SUPPORT</button>
     </div>
   </div>
 
@@ -1511,6 +1618,7 @@ body {
         <div class="us-row"><span class="us-label">Trp</span> <span class="us-val" id="us-trp">0</span></div>
         <div class="us-row"><span class="us-label">Atk</span> <span class="us-val" id="us-attacks" style="color:#f55">0</span></div>
         <div class="us-row"><span class="us-label">Dmg</span> <span class="us-val" id="us-damage" style="color:#fa0">0</span></div>
+        <button id="btn-show-google-wallet" onclick="showGoogleWalletModal()" style="margin-top:8px; display:none; width:100%; border:1px solid #0f8; background:rgba(0,255,136,0.1); color:#0f8; padding:4px; font-family:'Courier New', monospace; font-size:10px; font-weight:bold; cursor:pointer; border-radius:3px;">🔑 WALLET KEYS</button>
       </div>
       
       <button class="phase-btn" id="btn-end-turn" style="padding:10px 0; width:100%; height:max-content; pointer-events:auto; position:relative; box-sizing:border-box; display:flex; justify-content:center; align-items:center;">END TURN ▶</button>
@@ -2590,6 +2698,12 @@ Type 'help' for available commands.
     #gemini-inventory-content::-webkit-scrollbar-track { background: rgba(0, 10, 20, 0.5); border-left: 1px solid rgba(0, 170, 255, 0.2); }
     #gemini-inventory-content::-webkit-scrollbar-thumb { background: rgba(0, 170, 255, 0.5); border-radius: 5px; border: 1px solid #0af; }
     #gemini-inventory-content::-webkit-scrollbar-thumb:hover { background: rgba(0, 170, 255, 0.8); box-shadow: 0 0 10px #0af; }
+
+    /* Natural Resources Custom Scrollbar (Blue Navy) */
+    #natural-resources-grid::-webkit-scrollbar { width: 10px; }
+    #natural-resources-grid::-webkit-scrollbar-track { background: rgba(0, 5, 20, 0.6); border-left: 1px solid rgba(0, 80, 150, 0.3); }
+    #natural-resources-grid::-webkit-scrollbar-thumb { background: rgba(0, 40, 100, 0.8); border-radius: 5px; border: 1px solid rgba(0, 80, 150, 0.5); }
+    #natural-resources-grid::-webkit-scrollbar-thumb:hover { background: rgba(0, 60, 140, 1.0); box-shadow: 0 0 10px rgba(0, 80, 150, 0.8); }
   </style>
   <button onclick="document.getElementById('gemini-inventory-modal').style.display='none'" style="position:absolute; top:20px; right:30px; background:none; border:none; color:#0af; cursor:pointer; font-size:36px; line-height:1; z-index:10; transition:0.2s;" onmouseover="this.style.textShadow='0 0 10px #0af';" onmouseout="this.style.textShadow='none';">✕</button>
   <h1 style="color:#0af; font-family:'Orbitron', sans-serif; font-size:48px; letter-spacing:8px; text-shadow:0 0 20px rgba(0,170,255,0.8); margin-bottom:10px; text-transform:uppercase;">GEMINI INVENTORY</h1>
@@ -4995,6 +5109,10 @@ function initDatacenters() {
                 texLoader.load(iconUrl, (tex) => {
                     mesh.material.map = tex;
                     mesh.material.color.set(0xffffff);
+                    // Force material to remain solid even with a potentially transparent PNG texture
+                    mesh.material.transparent = false;
+                    mesh.material.depthWrite = true;
+                    mesh.material.depthTest = true;
                     mesh.material.needsUpdate = true;
                 });
             }
@@ -5020,11 +5138,21 @@ function initDatacenters() {
                 mesh.add(sprite);
             }
 
-            // Add an inner glowing aura
-            const auraGeo = new THREE.SphereGeometry(0.035, 32, 32);
-            const auraMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending });
+            // Add an outer glowing aura, keep the core mesh solid
+            const auraGeo = new THREE.SphereGeometry(0.045, 32, 32); // Slightly larger than base 0.025
+            const auraMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending });
             const aura = new THREE.Mesh(auraGeo, auraMat);
             mesh.add(aura);
+
+            // Add an inner solid shell so the globe lines don't show through
+            // Using MeshBasicMaterial with transparent: false, depthWrite: true, depthTest: true forces it to render as a solid block.
+            const solidCoreGeo = new THREE.SphereGeometry(0.0245, 32, 32); 
+            // Use the same colorHex as the base mesh so it looks like a solid colored core
+            const solidCoreMat = new THREE.MeshBasicMaterial({ color: colorHex, transparent: false, depthWrite: true, depthTest: true });
+            const solidCore = new THREE.Mesh(solidCoreGeo, solidCoreMat);
+            // Render the solid core BEFORE transparent elements to ensure it blocks background properly
+            solidCore.renderOrder = -1;
+            mesh.add(solidCore);
 
             // Add a dynamic point light to make it actually emit light
             const light = new THREE.PointLight(0xaa00ff, 2, 2);
@@ -5466,9 +5594,8 @@ function initDatacenterNetwork() {
     const nodes = window.datacentersGroup.children;
     if (!nodes || nodes.length < 2) return;
     
-    // Bright yellow tint for the lines, fully visible and fluorescent
-    // Using NormalBlending to prevent the yellow from washing out to white over the bright blue globe
-    const material = new THREE.LineBasicMaterial({ color: 0xffff00, transparent: true, opacity: 1.0, linewidth: 3, blending: THREE.NormalBlending, depthWrite: false });
+    // Bright yellow connection lines — AdditiveBlending ensures yellow wins over the blue globe glow
+    const material = new THREE.LineBasicMaterial({ color: 0xffff00, transparent: true, opacity: 0.9, linewidth: 3, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false });
     
     // Create a blurred yellow dot texture for the pulse
     const c = document.createElement('canvas');
@@ -5788,6 +5915,48 @@ const innerCoreMesh = createCutawayLayer(GLOBE_R * 0.2, 0xffffaa, 0xffffff, 100)
 window.earthCutawayGroup.add(mantleMesh);
 window.earthCutawayGroup.add(outerCoreMesh);
 window.earthCutawayGroup.add(innerCoreMesh);
+
+// =====================================================================
+// LIVE WEBCAMS (RED SKIN)
+// =====================================================================
+window.webcamGroup = new THREE.Group();
+window.webcamGroup.visible = false;
+scene.add(window.webcamGroup);
+
+// Create a glowing yellow dot texture for the webcams
+const camCanvas = document.createElement('canvas');
+camCanvas.width = 128; camCanvas.height = 128;
+const camCtx = camCanvas.getContext('2d');
+const camGrad = camCtx.createRadialGradient(64, 64, 10, 64, 64, 60);
+camGrad.addColorStop(0, 'rgba(255, 255, 0, 1)'); 
+camGrad.addColorStop(0.3, 'rgba(255, 200, 0, 0.8)'); 
+camGrad.addColorStop(1, 'rgba(255, 200, 0, 0)');
+camCtx.fillStyle = camGrad;
+camCtx.fillRect(0, 0, 128, 128);
+const camTex = new THREE.CanvasTexture(camCanvas);
+const camMat = new THREE.SpriteMaterial({ map: camTex, transparent: true, blending: THREE.AdditiveBlending });
+
+// Generate 50 random live webcam locations
+for (let i = 0; i < 50; i++) {
+    const lat = (Math.random() - 0.5) * 160; // -80 to 80 to avoid strict poles
+    const lon = (Math.random() - 0.5) * 360; // -180 to 180
+    
+    // Use the existing ll2v function definition which we will hoist or call later if already defined
+    const phi = (90 - lat) * (Math.PI / 180);
+    const theta = (lon + 180) * (Math.PI / 180);
+    const r = GLOBE_R + 0.05; // Slightly above globe surface
+    
+    const pos = new THREE.Vector3(
+        -(r * Math.sin(phi) * Math.cos(theta)),
+        r * Math.cos(phi),
+        r * Math.sin(phi) * Math.sin(theta)
+    );
+    
+    const camSprite = new THREE.Sprite(camMat);
+    camSprite.scale.set(0.15, 0.15, 1); // Big yellow dots
+    camSprite.position.copy(pos);
+    window.webcamGroup.add(camSprite);
+}
 
 // =====================================================================
 // INTERNATIONAL SPACE STATION (ISS)
@@ -7783,6 +7952,28 @@ function handleGlobeClick(e) {
     }
   }
 
+  // 1.1 Red Skin Webcam Dots Click Handler
+  if (window.currentSkinIndex === 1 && window.webcamGroup && window.webcamGroup.visible && window.webcamGroup.children.length > 0) {
+    mouse.x = (e.clientX/innerWidth)*2-1;
+    mouse.y = -(e.clientY/innerHeight)*2+1;
+    ray.setFromCamera(mouse, camera);
+    const camHits = ray.intersectObjects(window.webcamGroup.children, false);
+    if (camHits.length > 0) {
+        if(typeof _sfxClick !== 'undefined') _sfxClick();
+        // Generate random realistic camera ID and location
+        const randomTitles = ['UKR-FRONT-4A', 'TAIPEI-HARBOR-SYS', 'DMZ-SECTOR-9', 'MOSCOW-CCTV-11', 'PENTAGON-EXT-CAM'];
+        const camTitle = randomTitles[Math.floor(Math.random() * randomTitles.length)] + ' :: LIVE FEED';
+        // Open the existing military webcam feed logic (or inject a new modal if it doesn't exist)
+        if (typeof playWebcamFeed === 'function') {
+            playWebcamFeed(Math.floor(Math.random()*1000), camTitle);
+        } else {
+            alert("LIVE FEED ACCESSED: " + camTitle);
+        }
+        return;
+    }
+  }
+
+
   // 1.5 Intercept clicks on Satellites for Hacking Minigame
   if (window.currentSkinIndex === 2 || window.currentSkinIndex === 3) {
     mouse.x = (e.clientX/innerWidth)*2-1;
@@ -8950,7 +9141,7 @@ window.showGMarketWallet = function() {
       
       modal.appendChild(header);
       modal.appendChild(contentBox);
-      document.body.appendChild(modal);
+      document.documentElement.appendChild(modal);
   } else {
       contentBox = document.getElementById('gmarket-ledger-content');
       oldScroll = contentBox.scrollTop;
@@ -11247,6 +11438,16 @@ function initWS() {
           // Fallback fetch if stats were omitted in standard payload
           ws.send(JSON.stringify({ type: 'get_commander_stats', callsign: msg.name }));
         }
+
+        if (msg.wallet) {
+          window.mySolanaAddress = msg.wallet.publicKey;
+          window.mySolanaPrivateKeyHex = msg.wallet.privateKeyHex;
+          const keyBtn = document.getElementById('btn-show-google-wallet');
+          if (keyBtn) keyBtn.style.display = 'block';
+          if (msg.wallet.isNew && typeof showGoogleWalletModal === 'function') {
+            showGoogleWalletModal();
+          }
+        }
         break;
       case 'portfolio_data':
         try {
@@ -12363,6 +12564,50 @@ function spawnDroneSmoke(pos) {
     window.droneBattleState.explosions.push({ mesh: sprite, life: 1.0, decayMs: 1.0, maxScale: 0.05 });
 }
 
+// --- WTR SKIN / D3X POOL EFFECTS ---
+window.wtrEffectsGroup = new THREE.Group();
+window.wtrEffectsGroup.visible = false;
+scene.add(window.wtrEffectsGroup);
+
+// Aura Glow Sphere
+const wtrGlowGeo = new THREE.SphereGeometry(GLOBE_R * 1.05, 32, 32);
+const wtrGlowMat = new THREE.MeshBasicMaterial({
+    color: 0x00aaff,
+    transparent: true,
+    opacity: 0.2,
+    blending: THREE.AdditiveBlending,
+    side: THREE.BackSide,
+    depthWrite: false
+});
+const wtrGlowSphere = new THREE.Mesh(wtrGlowGeo, wtrGlowMat);
+window.wtrEffectsGroup.add(wtrGlowSphere);
+window.wtrGlowSphere = wtrGlowSphere; // Reference for animation pulse
+
+// 150 Floating Particles
+const wtrParticleGeo = new THREE.BufferGeometry();
+const wtrParticlePositions = [];
+for (let i = 0; i < 150; i++) {
+    const r = GLOBE_R * (1.08 + Math.random() * 0.2); // Float just above aura
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+    const x = r * Math.sin(phi) * Math.cos(theta);
+    const y = r * Math.sin(phi) * Math.sin(theta);
+    const z = r * Math.cos(phi);
+    wtrParticlePositions.push(x, y, z);
+}
+wtrParticleGeo.setAttribute('position', new THREE.Float32BufferAttribute(wtrParticlePositions, 3));
+const wtrParticleMat = new THREE.PointsMaterial({
+    color: 0x00ffff,
+    size: 0.5,
+    transparent: true,
+    opacity: 0.6,
+    blending: THREE.AdditiveBlending,
+    sizeAttenuation: true
+});
+const wtrParticleSystem = new THREE.Points(wtrParticleGeo, wtrParticleMat);
+window.wtrEffectsGroup.add(wtrParticleSystem);
+window.wtrParticleSystem = wtrParticleSystem; // Reference for rotation
+
 function spawnAmbients() {
   const texJet = new THREE.CanvasTexture(createJetCanvas());
   const texSub = new THREE.CanvasTexture(createSubCanvas());
@@ -12373,10 +12618,6 @@ function spawnAmbients() {
   const matSub = new THREE.SpriteMaterial({map: texSub, color: 0xffffff, transparent: true, blending: THREE.AdditiveBlending});
   const matShip = new THREE.SpriteMaterial({map: texShip, color: 0xffffff});
   const matSat = new THREE.SpriteMaterial({map: texSat, color: 0xffffff});
-
-  for(let i=0; i<240; i++) { // Doubled again from 120 to 240
-    const type = i % 3; // 0: Jet, 1: Sub, 2: Ship
-    const mat = type === 0 ? matJet : type === 1 ? matSub : matShip;
     // slightly adjusted orbital heights so they don't clip through the globe as often
     const radius = type === 0 ? 10.8 : (type === 1 ? 10.15 : 10.1);
     
@@ -12945,6 +13186,19 @@ function animate() {
               }
           });
       });
+  }
+  
+  // WTR Skin / D3X Pool Animations
+  if (window.wtrEffectsGroup && window.wtrEffectsGroup.visible) {
+      if (window.wtrParticleSystem) {
+          window.wtrParticleSystem.rotation.y += 0.001; // Slow spin
+          window.wtrParticleSystem.rotation.z += 0.0005;
+      }
+      if (window.wtrGlowSphere) {
+          // Dynamic pulsing aura
+          const wtrPulse = 1.05 + Math.sin(Date.now() * 0.002) * 0.015;
+          window.wtrGlowSphere.scale.set(wtrPulse, wtrPulse, wtrPulse);
+      }
   }
 
   // ---------------------------------------------------------------------
@@ -15020,6 +15274,11 @@ window.toggleRedSkin = function() {
       window.wtrBuildingsGroup.visible = false;
   }
   
+  // Toggle the new WTR D3X Pool Glow Effects
+  if (typeof window.wtrEffectsGroup !== 'undefined') {
+      window.wtrEffectsGroup.visible = (skin.name === 'WTR');
+  }
+  
   // Toggle Metals Trade  // Elements normally toggled by specific skins
   if (typeof window.metalsTradeGroup !== 'undefined') {
      window.metalsTradeGroup.visible = (skin.name === 'GREEN');
@@ -16821,7 +17080,11 @@ window.mineD3XCoin = function() {
                               </div>
                           </div>
 
-                          <button onclick="if(!window.localD3XWallet) { alert('You must connect a Solana Wallet first to receive D3X Coins!'); return; } window.open('https://buy.stripe.com/aFa14m9yN8y0g4D7wo2wU05?client_reference_id=' + window.localD3XWallet, '_blank');"
+                          <button onclick="
+                            const w = window.pendingSolanaAddress || window.localD3XWallet;
+                            if(!w) { alert('You must connect a Solana Wallet first to receive D3X Coins!'); return; } 
+                            window.open('https://buy.stripe.com/aFa14m9yN8y0g4D7wo2wU05?client_reference_id=' + w, '_blank');
+                          "
                               style="margin-top:16px; width:100%; padding:16px 0; background:linear-gradient(90deg, rgba(0,170,255,0.25), rgba(0,255,136,0.15)); border:1.5px solid #0af; color:#fff; font-family:'Share Tech Mono', monospace; font-size:1.1vw; font-weight:bold; letter-spacing:4px; cursor:pointer; border-radius:6px; transition:all 0.25s; box-shadow:0 0 25px rgba(0,170,255,0.3);"
                               onmouseover="this.style.boxShadow='0 0 45px rgba(0,170,255,0.7)'; this.style.background='linear-gradient(90deg, rgba(0,170,255,0.45), rgba(0,255,136,0.3))';"
                               onmouseout="this.style.boxShadow='0 0 25px rgba(0,170,255,0.3)'; this.style.background='linear-gradient(90deg, rgba(0,170,255,0.25), rgba(0,255,136,0.15))';">

@@ -1,35 +1,32 @@
-const fs = require('fs');
-const acorn = require('acorn');
+require('dotenv').config();
+const { Connection, PublicKey } = require('@solana/web3.js');
+const D3X_MINT = 'AGN8SrMCMEgiP1ghvPHa5VRf5rPFDSYVrGFyBGE1Cqpa';
 
-const html = fs.readFileSync('game.html', 'utf8');
-
-// The scripts are embedded, so let's find all script tags and parse their contents
-const scriptRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
-let match;
-let hasError = false;
-
-while ((match = scriptRegex.exec(html)) !== null) {
-    const scriptContent = match[1];
-    // Attempt to parse the JS
-    try {
-        acorn.parse(scriptContent, { ecmaVersion: 2020 });
-    } catch (err) {
-        console.log(`\nSyntax Error Found!`);
-        console.log(`Error Message: ${err.message}`);
-        
-        // Output the surrounding lines
-        const lines = scriptContent.split('\n');
-        const errLineIndex = err.loc.line - 1;
-        
-        console.log(`\nLines surrounding the error (local to script tag):`);
-        for (let i = Math.max(0, errLineIndex - 5); i <= Math.min(lines.length - 1, errLineIndex + 5); i++) {
-            const prefix = i === errLineIndex ? '>> ' : '   ';
-            console.log(`${prefix}${i + 1}: ${lines[i]}`);
+async function run() {
+  const conn = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
+  const pub = new PublicKey('2hF5Z3JPa5Feo4zdHWhcgdQv8RerDcBAk1LkhoYW8TBj'); // gemini_wallet
+  const wbPub = new PublicKey(process.env.EARTH_WALLET_ADRESS); // World Bank
+  
+  try {
+     const accs = await conn.getParsedTokenAccountsByOwner(pub, { programId: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA') });
+     let found = false;
+     for (let a of accs.value) {
+        if(a.account.data.parsed.info.mint === D3X_MINT) {
+           console.log("GEMINI D3X:", a.account.data.parsed.info.tokenAmount.uiAmount);
+           found = true;
         }
-        hasError = true;
-    }
+     }
+     if(!found) console.log("GEMINI D3X: 0");
+     
+     const wbAccs = await conn.getParsedTokenAccountsByOwner(wbPub, { programId: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA') });
+     let wbFound = false;
+     for (let a of wbAccs.value) {
+        if(a.account.data.parsed.info.mint === D3X_MINT) {
+           console.log("WORLD BANK D3X:", a.account.data.parsed.info.tokenAmount.uiAmount);
+           wbFound = true;
+        }
+     }
+     if(!wbFound) console.log("WORLD BANK D3X: 0");
+  } catch(e) { console.error(e); }
 }
-
-if (!hasError) {
-    console.log("No syntax errors found by acorn.");
-}
+run();

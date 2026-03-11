@@ -1,0 +1,2 @@
+ line ~739 Issue: When a player hacks a company, the server simply runs d3x_balance + reward. There is no Faucet transfer, no deduction from the World Bank, and no cap on frequency. A player with a script can hack repeatedly, minting real database D3X from nowhere, and accumulate enough to trigger a Blockchain Faucet drop completely for free. Fix: Either cap hack rewards to a hard max per day, or deduct the reward amount from the WORLD_BANK d3x_balance in the same query.
+
