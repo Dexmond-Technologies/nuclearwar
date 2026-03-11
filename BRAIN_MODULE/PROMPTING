@@ -1,0 +1,29 @@
+Putting it all together
+Let’s run through a quick example where we want to summarize a product announcement into three bullet points, using all the tips and tricks we’ve learned so far.
+
+1. Simply define the Task
+
+“Generate three concise bullet points summarizing the following announcement.” 2. Choose model parameters
+
+P = 0.95, K = 30, T = 0.2 for that sweet spot between clarity and creativity . 3. Select prompting technique
+
+We’ll use Chain-of-Thought (CoT) to guide the model through its reasoning and include a one-shot example to show the model the output format and tone we want. 4. Best practices to keep in mind
+
+Provide a high-quality example: Show the format and tone we want.
+Be specific about output format: “three bullet points.”
+Use positive instructions: “Generate three bullet points…” rather than “Don’t write paragraphs.”
+Use variables: insert the announcement text as a placeholder so you can reuse this prompt. 5. Sample Prompt
+
+‍
+
+A prompt template in PromptHub platform
+Check out the prompt here
+‍
+
+6. Iterate & Test
+
+Review the bullets for accuracy and tone, test across different models and with different data for the product announcements
+Tweak the model and model parameters
+Log each version and its results automatically in PromptHub
+Conclusion
+The prompt engineering white paper from Google is an awesome resource for anyone interested in LLMs and prompt engineering. Whether you’re just getting started or have some experience, you'll learn a lot from it!

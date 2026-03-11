@@ -1114,6 +1114,30 @@ body {
                onclick="connectDirectPhantom()">
             DIRECT PHANTOM
           </div>
+
+          <!-- Multi-Chain Integrations -->
+          <div style="font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:2px; color:rgba(255,215,0,0.5); text-transform:uppercase; margin-top:15px; margin-bottom:5px;">Multi-Chain Access</div>
+
+          <div id="btn-login-bnb" style="position:relative; min-width:190px; height:40px; display:flex; align-items:center; justify-content:center; background:rgba(30,30,0,0.8); border:1px solid rgba(243,186,47,0.4); border-radius:4px; overflow:hidden; cursor:pointer; color:#f3ba2f; font-family:'Courier New', monospace; font-size:13px; font-weight:bold; letter-spacing:1px; transition:all 0.2s; box-shadow:0 0 10px rgba(243,186,47,0.1);"
+               onmouseover="this.style.background='rgba(60,60,0,0.9)'; this.style.borderColor='#f3ba2f'; this.style.boxShadow='0 0 15px rgba(243,186,47,0.5)';"
+               onmouseout="this.style.background='rgba(30,30,0,0.8)'; this.style.borderColor='rgba(243,186,47,0.4)'; this.style.boxShadow='0 0 10px rgba(243,186,47,0.1)';"
+               onclick="loginWithBNB()">
+            LOGIN BNB
+          </div>
+
+          <div id="btn-login-ronin" style="position:relative; min-width:190px; height:40px; display:flex; align-items:center; justify-content:center; background:rgba(0,20,50,0.8); border:1px solid rgba(18,99,241,0.4); border-radius:4px; overflow:hidden; cursor:pointer; color:#1263F1; font-family:'Courier New', monospace; font-size:13px; font-weight:bold; letter-spacing:1px; transition:all 0.2s; box-shadow:0 0 10px rgba(18,99,241,0.1); margin-top:5px;"
+               onmouseover="this.style.background='rgba(0,40,100,0.9)'; this.style.borderColor='#1263F1'; this.style.boxShadow='0 0 15px rgba(18,99,241,0.5)';"
+               onmouseout="this.style.background='rgba(0,20,50,0.8)'; this.style.borderColor='rgba(18,99,241,0.4)'; this.style.boxShadow='0 0 10px rgba(18,99,241,0.1)';"
+               onclick="loginWithRonin()">
+            LOGIN RONIN
+          </div>
+
+          <div id="btn-login-polkadot" style="position:relative; min-width:190px; height:40px; display:flex; align-items:center; justify-content:center; background:rgba(40,0,20,0.8); border:1px solid rgba(230,0,122,0.4); border-radius:4px; overflow:hidden; cursor:pointer; color:#E6007A; font-family:'Courier New', monospace; font-size:13px; font-weight:bold; letter-spacing:1px; transition:all 0.2s; box-shadow:0 0 10px rgba(230,0,122,0.1); margin-top:5px;"
+               onmouseover="this.style.background='rgba(80,0,40,0.9)'; this.style.borderColor='#E6007A'; this.style.boxShadow='0 0 15px rgba(230,0,122,0.5)';"
+               onmouseout="this.style.background='rgba(40,0,20,0.8)'; this.style.borderColor='rgba(230,0,122,0.4)'; this.style.boxShadow='0 0 10px rgba(230,0,122,0.1)';"
+               onclick="loginWithPolkadot()">
+            LOGIN POLKADOT
+          </div>
         </div>
 
         <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
@@ -1489,7 +1513,7 @@ body {
   </div>
 
   <!-- STAKING TOWER MODAL -->
-  <div id="staking-tower-modal" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:840px; min-height:340px; flex-direction:column; background:rgba(20,0,0,0.95); border:1px solid #ff0033; border-radius:8px; box-shadow:0 0 30px rgba(255,0,50,0.3); padding:20px; pointer-events:auto; backdrop-filter:blur(10px); z-index:99999;">
+  <div id="staking-tower-modal" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:1092px; min-height:442px; flex-direction:column; background:rgba(20,0,0,0.95); border:1px solid #ff0033; border-radius:8px; box-shadow:0 0 30px rgba(255,0,50,0.3); padding:20px; pointer-events:auto; backdrop-filter:blur(10px); z-index:99999;">
     <button onclick="document.getElementById('staking-tower-modal').style.display='none'; window.selectedStakingTower=null;" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#f55;font-size:16px;cursor:pointer;line-height:1;padding:4px;">✕</button>
     <h2 style="margin:0 0 5px 0; color:#ff0033; font-family:'Orbitron', sans-serif; font-size:22px; text-transform:uppercase; letter-spacing:2px; text-shadow:0 0 10px rgba(255,0,50,0.5);">STAKING TERMINAL</h2>
     <div style="color:#aaa; font-family:'Share Tech Mono', monospace; font-size:12px; margin-bottom:20px;">NODE PROTOCOL: <span style="color:#fff;" id="staking-tower-node-name">D3X CORE NETWORK</span></div>
@@ -2726,7 +2750,10 @@ Type 'help' for available commands.
         }
 
         // Crypto
-        let commodities = aiData.portfolio ? aiData.portfolio.commodities : null;
+        let portfolio = aiData.portfolio;
+        if (typeof portfolio === 'string') { try { portfolio = JSON.parse(portfolio); } catch(e){} }
+        
+        let commodities = portfolio ? portfolio.commodities : null;
         if (typeof commodities === 'string') { try { commodities = JSON.parse(commodities); } catch(e){} }
         
         if (commodities && Object.keys(commodities).length > 0) {
@@ -2736,14 +2763,14 @@ Type 'help' for available commands.
                 if (amount > 0) {
                     h += `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(${themeColor},0.1); border:1px solid rgba(${themeColor},0.5); padding:10px 15px; border-radius:4px; width:300px; font-family:'Courier New', monospace; font-size:16px; margin-bottom:10px;">
                             <span style="color:#fff; text-transform:uppercase; letter-spacing:1px;">${item}</span>
-                            <span style="font-weight:bold; color:rgb(${themeColor}); text-shadow:0 0 10px rgba(${themeColor},0.8);">${amount.toLocaleString()} UNITS</span>
+                            <span style="font-weight:bold; color:rgb(${themeColor}); text-shadow:0 0 10px rgba(${themeColor},0.8);">${amount.toLocaleString(undefined, { maximumFractionDigits: 1 })} UNITS</span>
                           </div>`;
                 }
             }
         }
 
         // Metals / Mining Inventory
-        let mining = aiData.portfolio ? aiData.portfolio.mining_inventory : null;
+        let mining = portfolio ? portfolio.mining_inventory : null;
         if (typeof mining === 'string') { try { mining = JSON.parse(mining); } catch(e){} }
         
         if (mining && Object.keys(mining).length > 0) {
@@ -4971,6 +4998,12 @@ function initDatacenters() {
     const xrpTex = new THREE.CanvasTexture(xrpCanvas);
     const xrpSpriteMat = new THREE.SpriteMaterial({ map: xrpTex, transparent: true, depthTest: false });
 
+    const texLoaderDC = new THREE.TextureLoader();
+    const cyberTex = texLoaderDC.load('/scifi_solid_metal.png');
+    cyberTex.wrapS = THREE.RepeatWrapping;
+    cyberTex.wrapT = THREE.RepeatWrapping;
+    cyberTex.repeat.set(2, 2);
+
     const dcGeo = new THREE.SphereGeometry(0.025, 32, 32); 
 
     dcData.forEach(dc => {
@@ -4999,7 +5032,7 @@ function initDatacenters() {
         const owner = isRainclaude ? 'RAINCLAUDE' : 'GEMINI';
 
         const dcMat = (isMaster || isD3XExchange) 
-            ? new THREE.MeshPhongMaterial({ color: colorHex, shininess: 100, specular: 0xffffff }) 
+            ? new THREE.MeshPhongMaterial({ color: colorHex, shininess: 100, specular: 0xffffff, map: cyberTex }) 
             : new THREE.MeshBasicMaterial({ color: colorHex });
         
         const mesh = new THREE.Mesh(dcGeo, dcMat);
@@ -5153,8 +5186,8 @@ function initDatacenters() {
             // Add an inner solid shell so the globe lines don't show through
             // Using MeshBasicMaterial with transparent: false, depthWrite: true, depthTest: true forces it to render as a solid block.
             const solidCoreGeo = new THREE.SphereGeometry(0.0245, 32, 32); 
-            // Use the same colorHex as the base mesh so it looks like a solid colored core
-            const solidCoreMat = new THREE.MeshBasicMaterial({ color: colorHex, transparent: false, depthWrite: true, depthTest: true });
+            // Apply the cyber metal texture to the inner core explicitly requested by the user
+            const solidCoreMat = new THREE.MeshStandardMaterial({ color: colorHex, map: cyberTex, roughness: 0.8, metalness: 0.2, transparent: false, depthWrite: true, depthTest: true });
             const solidCore = new THREE.Mesh(solidCoreGeo, solidCoreMat);
             // Render the solid core BEFORE transparent elements to ensure it blocks background properly
             solidCore.renderOrder = -1;
@@ -5316,7 +5349,7 @@ function initDatacenters() {
                     const towerLonRad = -(npLon + off.lon) * Math.PI / 180;
                     const towerGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.245, 32);
                     towerGeo.translate(0, 0.1225, 0);
-                    const towerMat = new THREE.MeshPhongMaterial({ color: 0x00aaff, shininess: 100, specular: 0xffffff });
+                    const towerMat = new THREE.MeshPhongMaterial({ color: 0x00aaff, shininess: 100, specular: 0xffffff, map: cyberTex });
                     const towerMesh = new THREE.Mesh(towerGeo, towerMat);
                     
                     const lowerAmt = 0.0245;
@@ -5415,9 +5448,15 @@ window.worldBankGroup.visible = false;
 scene.add(window.worldBankGroup);
 
 function initWorldBank() {
+  const textureLoader = new THREE.TextureLoader();
+  const cyberTex = textureLoader.load('/scifi_solid_metal.png');
+  cyberTex.wrapS = THREE.RepeatWrapping;
+  cyberTex.wrapT = THREE.RepeatWrapping;
+  cyberTex.repeat.set(4, 4);
+
   const bankColor = 0xffffff; 
-  const mat = new THREE.MeshPhongMaterial({ color: bankColor, shininess: 50, specular: 0x555555 });
-  const roofMat = new THREE.MeshPhongMaterial({ color: 0x8b0000, shininess: 10 });
+  const mat = new THREE.MeshStandardMaterial({ color: bankColor, roughness: 0.6, metalness: 0.7, map: cyberTex });
+  const roofMat = new THREE.MeshStandardMaterial({ color: 0x8b0000, roughness: 0.8, metalness: 0.2, map: cyberTex });
 
   const building = new THREE.Group();
 
@@ -5514,9 +5553,33 @@ function initWorldBank() {
   buildingClone.lookAt(new THREE.Vector3(0,0,0));
   buildingClone.rotateX(-Math.PI/2); 
   
-  window.worldBankGroup.add(buildingClone);
+  // Transform clone into Treasury (replace label)
+  const cloneLabel = buildingClone.children.find(c => c.type === 'Sprite');
+  if (cloneLabel) {
+      const tc = document.createElement('canvas');
+      tc.width = 512; tc.height = 128;
+      const tctx = tc.getContext('2d');
+      tctx.font = 'bold 70px "Orbitron", sans-serif';
+      tctx.fillStyle = '#00ffaa'; // Treasury neon cyan
+      tctx.textAlign = 'center';
+      tctx.textBaseline = 'middle';
+      tctx.shadowColor = '#00ffaa';
+      tctx.shadowBlur = 10;
+      tctx.fillText('TREASURY', 256, 64);
+      cloneLabel.material.map = new THREE.CanvasTexture(tc);
+      cloneLabel.material.needsUpdate = true;
+  }
   
-  console.log("World Bank Initialized with Clone.");
+  // Change Treasury lights to Cyan to differentiate
+  const cloneLight = buildingClone.children.find(c => c.type === 'PointLight');
+  if (cloneLight) { cloneLight.color.setHex(0x00ffaa); }
+  
+  window.treasuryGroup = new THREE.Group();
+  window.treasuryGroup.visible = false;
+  scene.add(window.treasuryGroup);
+  window.treasuryGroup.add(buildingClone);
+  
+  console.log("World Bank & Treasury Initialized.");
 }
 initWorldBank();
 
@@ -8735,6 +8798,29 @@ window.triggerSolanaDonation = async function() {
       if (typeof ws !== 'undefined' && ws.readyState === WebSocket.OPEN) {
           ws.send(JSON.stringify({ type: 'get_world_bank_stats' }));
       }
+      return; 
+    }
+  }
+
+  // Intercept clicks on Treasury (Cyber Skin)
+  if (window.currentSkinIndex === 3 && window.treasuryGroup && window.treasuryGroup.visible && window.treasuryGroup.children.length > 0) {
+    const treasuryHits = ray.intersectObjects(window.treasuryGroup.children, true);
+    if (treasuryHits.length > 0) {
+      if (typeof _sfxClick !== 'undefined') _sfxClick();
+      let tsModal = document.getElementById('treasury-modal');
+      if (!tsModal) {
+          // If the user hasn't defined the treasury modal UI yet, alert temporarily.
+          alert("TREASURY PROTOCOLS: ONLINE. Interface pending connection...");
+          return;
+      }
+      const scale = 0.75;
+      const trueW = window.screen.width / scale;
+      const trueH = window.screen.height / scale;
+      tsModal.style.width = trueW + 'px';
+      tsModal.style.height = trueH + 'px';
+      tsModal.style.left = '0px';
+      tsModal.style.top = '0px';
+      tsModal.style.display = 'flex';
       return; 
     }
   }
@@ -15341,6 +15427,10 @@ window.toggleRedSkin = function() {
       window.worldBankGroup.visible = (skin.name === 'CYBER');
   }
   
+  if (typeof window.treasuryGroup !== 'undefined') {
+      window.treasuryGroup.visible = (skin.name === 'CYBER');
+  }
+  
   // Ensure the White 'D' Dexmond Hub only appears on the CYBER skin
   if (typeof window.dexmondHubGroup !== 'undefined') {
       window.dexmondHubGroup.visible = (skin.name === 'CYBER');
@@ -16108,6 +16198,102 @@ window.buyOrbitalStrike = function() {
           authFlex.style.display = 'none';
         }
         window.pendingSolanaAddress = address;
+        if (window.onSuccessfulWalletAuth) {
+           window.onSuccessfulWalletAuth(address);
+        }
+      } catch (err) {
+        console.error("Phantom custom connect failed:", err);
+      }
+    } else {
+      window.open("https://phantom.app/", "_blank");
+    }
+  };
+
+  // ------------------------------------------------------------------
+  // MULTI-CHAIN LOGIN LOGIC
+  // ------------------------------------------------------------------
+
+  window.loginWithBNB = async function() {
+    const btn = document.getElementById('btn-login-bnb');
+    if (btn) btn.innerText = 'CONNECTING...';
+    
+    if (typeof window.ethereum !== 'undefined') {
+      try {
+        // Request BNB Smart Chain (Chain ID 56 / 0x38)
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x38' }], 
+        });
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+        if (accounts.length > 0) {
+           const address = accounts[0];
+           const statusEl = document.getElementById('lobby-auth-status');
+           if (statusEl) statusEl.innerHTML = '✓ BNB LINK ESTABLISHED: ' + address.substring(0,4) + '...' + address.substring(address.length-4);
+           document.getElementById('auth-container-flex').style.display = 'none';
+           window.pendingSolanaAddress = address; // Routing EVM address into primary auth state
+           if (window.onSuccessfulWalletAuth) window.onSuccessfulWalletAuth(address);
+        }
+      } catch (err) {
+        console.error("BNB connect failed:", err);
+        if (btn) btn.innerText = 'LOGIN BNB';
+      }
+    } else {
+      alert("MetaMask (or EVM provider) not detected for BNB login.");
+      if (btn) btn.innerText = 'LOGIN BNB';
+    }
+  };
+
+  window.loginWithRonin = async function() {
+    const btn = document.getElementById('btn-login-ronin');
+    if (btn) btn.innerText = 'CONNECTING...';
+
+    if (window.ronin && window.ronin.provider) {
+      try {
+        const accounts = await window.ronin.provider.request({ method: 'eth_requestAccounts' });
+        if (accounts.length > 0) {
+           const address = accounts[0];
+           const statusEl = document.getElementById('lobby-auth-status');
+           if (statusEl) statusEl.innerHTML = '✓ RONIN LINK ESTABLISHED: ' + address.substring(0,4) + '...' + address.substring(address.length-4);
+           document.getElementById('auth-container-flex').style.display = 'none';
+           window.pendingSolanaAddress = address; 
+           if (window.onSuccessfulWalletAuth) window.onSuccessfulWalletAuth(address);
+        }
+      } catch (err) {
+        console.error("Ronin connect failed:", err);
+        if (btn) btn.innerText = 'LOGIN RONIN';
+      }
+    } else {
+      alert("Ronin Wallet extension not detected.");
+      if (btn) btn.innerText = 'LOGIN RONIN';
+    }
+  };
+
+  window.loginWithPolkadot = async function() {
+    const btn = document.getElementById('btn-login-polkadot');
+    if (btn) btn.innerText = 'CONNECTING...';
+
+    if (window.injectedWeb3 && window.injectedWeb3['polkadot-js']) {
+      try {
+        const extension = await window.injectedWeb3['polkadot-js'].enable('Dexmond Technologies');
+        const accounts = await extension.accounts.get();
+        if (accounts.length > 0) {
+           const address = accounts[0].address;
+           const statusEl = document.getElementById('lobby-auth-status');
+           if (statusEl) statusEl.innerHTML = '✓ DOT LINK ESTABLISHED: ' + address.substring(0,4) + '...' + address.substring(address.length-4);
+           document.getElementById('auth-container-flex').style.display = 'none';
+           window.pendingSolanaAddress = address; 
+           if (window.onSuccessfulWalletAuth) window.onSuccessfulWalletAuth(address);
+        }
+      } catch (err) {
+        console.error("Polkadot connect failed:", err);
+        if (btn) btn.innerText = 'LOGIN POLKADOT';
+      }
+    } else {
+      alert("Polkadot.js extension not detected.");
+      if (btn) btn.innerText = 'LOGIN POLKADOT';
+    }
+  };
         if (typeof window.joinGlobalWar === 'function') {
           window.joinGlobalWar();
         }
@@ -17065,6 +17251,23 @@ window.mineD3XCoin = function() {
 };
 
 </script>
+
+  <!-- TREASURY MODAL (CYBER SKIN) -->
+  <div id="treasury-modal" style="display:none; position:fixed; top:0; left:0; width:100vw !important; height:100vh !important; background:rgba(0,10,20,0.98); z-index:9000; flex-direction:column; align-items:center; justify-content:center; backdrop-filter:blur(15px); transform:none !important; transform-origin:top left; zoom:1 !important; margin:0 !important; padding:0 !important; max-width:none !important; min-width:100vw !important;">
+      <div style="width:100%; height:100%; display:flex; flex-direction:column; padding:2vw 4vw; position:relative; overflow-y:auto; box-sizing:border-box;">
+          <button onclick="document.getElementById('treasury-modal').style.display='none'" style="position:absolute; top:20px; right:30px; background:transparent; border:none; color:#f55; font-size:40px; cursor:pointer; text-shadow:0 0 10px #f00;">×</button>
+          
+          <h1 style="color:#00ffaa; text-align:center; font-family:'Share Tech Mono', monospace; letter-spacing:8px; font-size: 3vw; margin-top:0; text-shadow:0 0 20px #00ffaa;">FEDERAL TREASURY</h1>
+          <h3 style="color:#0f8; text-align:center; font-family:'Share Tech Mono', monospace; font-weight:normal; font-size: 1.5vw; text-shadow:0 0 10px #0f8;">BOND ADDRESS: <span style="color:#fff;">[ PENDING CONNECTION ]</span></h3>
+          
+          <div style="display:flex; flex:1; justify-content:center; align-items:center; margin-top:20px; gap:40px; height: 100%;">
+              <div style="text-align:center; font-family:'Courier New', monospace; color:#00ffaa; font-size:1.5vw; animation: pulse 2s infinite;">
+                  ESTABLISHING SECURE HANDSHAKE WITH TREASURY MAINNET...<br/><br/>
+                  <span style="font-size:1vw; color:#aaa;">(Treasury issuance and reserve systems coming online shortly)</span>
+              </div>
+          </div>
+      </div>
+  </div>
 
   <!-- WORLD BANK MODAL (CYBER SKIN) -->
   <div id="world-bank-modal" style="display:none; position:fixed; top:0; left:0; width:100vw !important; height:100vh !important; background:rgba(0,10,20,0.98); z-index:9000; flex-direction:column; align-items:center; justify-content:center; backdrop-filter:blur(15px); transform:none !important; transform-origin:top left; zoom:1 !important; margin:0 !important; padding:0 !important; max-width:none !important; min-width:100vw !important;">

@@ -1,6 +1,19 @@
+require('dotenv').config();
 const { Pool } = require('pg');
-const pool = new Pool({ connectionString: 'postgresql://nuclearwar_db_user:Kg5fnacbBT1wwukMwvJ2zSm03eRNbze5@dpg-d6j5m8kr85hc73fqe70g-a.oregon-postgres.render.com/nuclearwar_db', ssl: { rejectUnauthorized: false }  });
-pool.query("SELECT portfolio FROM commanders WHERE callsign = 'WORLD BANK'").then(res => {
-  console.log(JSON.stringify(res.rows[0], null, 2));
-  pool.end();
-}).catch(e => console.error(e));
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
+
+async function run() {
+  try {
+    const res = await pool.query("SELECT gemini_portfolio, claude_portfolio FROM ai_combat_state WHERE id = 1");
+    if (res.rows.length > 0) {
+      const type = typeof res.rows[0].gemini_portfolio;
+      console.log("DB Type of gemini_portfolio:", type);
+      console.log("Is Stringified?", type === 'string');
+    }
+  } catch(e) { console.error("Database connection error:", e.message); } 
+  finally { pool.end(); }
+}
+run();

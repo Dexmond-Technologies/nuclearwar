@@ -607,11 +607,12 @@ function initWebSockets() {
     totalPlayers: connectedClients.size
   }, ws);
 
+  const isMockAllowed = process.env.MOCK_VALUES !== 'n' && process.env.MOCK_VALUES !== 'N';
   // Immediately send cached AI balances
   ws.send(JSON.stringify({
     type: 'ai_d3x_balances',
-    gemini: cachedGeminiBalance || 100000000,
-    claude: cachedClaudeBalance || 100000000,
+    gemini: cachedGeminiBalance || (isMockAllowed ? 100000000 : 0),
+    claude: cachedClaudeBalance || (isMockAllowed ? 100000000 : 0),
     geminiWallet: cachedGeminiWallet,
     claudeWallet: cachedClaudeWallet
   }));
@@ -829,10 +830,11 @@ function initWebSockets() {
             if (rand < 0.04) resources.lithium = 1;
             if (rand < 0.01) resources.rare_earth = 1;
 
-            // Load, Update, Save
+            let inv = { iron: 0, copper: 0, gold: 0, silver: 0, coal: 0, titanium: 0, lithium: 0, rare_earth: 0 };
+            
             const res = await pgPool.query(`SELECT mining_inventory FROM commanders WHERE callsign = $1`, [client.name]);
             if (res.rows.length > 0) {
-                let inv = res.rows[0].mining_inventory || { iron: 0, copper: 0, gold: 0, silver: 0, coal: 0, titanium: 0, lithium: 0, rare_earth: 0 };
+                inv = res.rows[0].mining_inventory || inv;
                 
                 // Merge new resources into total inventory
                 Object.keys(resources).forEach(k => {
@@ -841,9 +843,11 @@ function initWebSockets() {
                 
                 // Persist
                 await pgPool.query(`UPDATE commanders SET mining_inventory = $1 WHERE callsign = $2`, [inv, client.name]);
-                
-                ws.send(JSON.stringify({ type: 'mountain_dig_result', items: resources, inventory: inv }));
             }
+            
+            // Always return result so the UI unfreezes
+            ws.send(JSON.stringify({ type: 'mountain_dig_result', items: resources, inventory: inv }));
+            
         } catch(e) {
             console.error('Mountain Dig Error:', e);
         }
@@ -1687,19 +1691,20 @@ function initWebSockets() {
             if (res.rows.length > 0) {
                 const row = res.rows[0];
                 console.log("SENDING AI WALLETS DATA TO CLIENT:", client.name || "unknown");
+                const isMockAllowed = process.env.MOCK_VALUES !== 'n' && process.env.MOCK_VALUES !== 'N';
                 ws.send(JSON.stringify({
                     type: 'ai_wallets_data',
                     geminiWallet: process.env.GEMINI_WALLET || null,
                     claudeWallet: process.env.CLAUDE_WALLET || null,
                     gemini: {
-                        balance: cachedGeminiBalance || 100000000,
-                        hp: row.gemini_hp || 10000,
+                        balance: cachedGeminiBalance || (isMockAllowed ? 100000000 : 0),
+                        hp: row.gemini_hp || (isMockAllowed ? 10000 : 0),
                         portfolio: row.gemini_portfolio || { commodities: {}, mining_inventory: {} },
                         weapons: row.gemini_weapon_inventory || {}
                     },
                     claude: {
-                        balance: cachedClaudeBalance || 100000000,
-                        hp: row.claude_hp || 10000,
+                        balance: cachedClaudeBalance || (isMockAllowed ? 100000000 : 0),
+                        hp: row.claude_hp || (isMockAllowed ? 10000 : 0),
                         portfolio: row.claude_portfolio || { commodities: {}, mining_inventory: {} },
                         weapons: row.claude_weapon_inventory || {}
                     }
@@ -2090,33 +2095,50 @@ async function fetchGeminiStrike(myStats, claudeStats) {
 }
 
 async function fetchClaudeStrike(myStats, geminiStats) {
-  if (!process.env.CLAUDE_API) return { action: "KINETIC_STRIKE", damage: 100, log: "Rainclaude executes a default EMP burst." };
-  try {
-    const prompt = buildAIPrompt("Rainclaude", "Gemini", myStats, geminiStats);
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": process.env.CLAUDE_API,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "claude-opus-4-6",
-        max_tokens: 150,
-        messages: [{ role: "user", content: prompt }]
-      })
-    });
-    const data = await res.json();
-    if (data.error || !data.content || data.content.length === 0) {
-      console.error("Claude API Returned Error or Empty Content:", data.error ? data.error.message : data);
-      return { action: "KINETIC_STRIKE", damage: 150, log: "Rainclaude API Quota Limit. Initiating automated countermeasures." };
+  const primaryKey = process.env.CLAUDE_API;
+  const backupKey = process.env.CLAUDE_API_BACKUP;
+  
+  if (!primaryKey && !backupKey) return { action: "KINETIC_STRIKE", damage: 100, log: "Rainclaude executes a default EMP burst." };
+
+  const prompt = buildAIPrompt("Rainclaude", "Gemini", myStats, geminiStats);
+  const keysToTry = [primaryKey, backupKey].filter(Boolean); // Only try defined keys
+
+  for (let i = 0; i < keysToTry.length; i++) {
+    const apiKey = keysToTry[i];
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+          "content-type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "claude-opus-4-6",
+          max_tokens: 150,
+          messages: [{ role: "user", content: prompt }]
+        })
+      });
+      
+      const data = await res.json();
+      
+      if (data.error || !data.content || data.content.length === 0) {
+        console.error(`Claude API (Key ${i + 1}) Returned Error:`, data.error ? data.error.message : data);
+        // If this isn't the last key, loop continues to the next key
+        continue;
+      }
+      
+      const text = data.content[0].text.trim();
+      return JSON.parse(text);
+      
+    } catch (err) {
+      console.error(`Claude API Parse Error (Key ${i + 1}):`, err.message);
+      // Continue to backup key if available
     }
-    const text = data.content[0].text.trim();
-    return JSON.parse(text);
-  } catch (err) {
-    console.error("Claude API Parse Error:", err.message);
-    return { action: "KINETIC_STRIKE", damage: 150, log: "Rainclaude uplink severed. Initiating fallback measures." };
   }
+
+  // If all keys fail, return the fallback
+  return { action: "KINETIC_STRIKE", damage: 150, log: "Rainclaude uplink severed despite backup API. Initiating fallback measures." };
 }
 
 function processAIAction(result, actor, victim, actorName) {
@@ -2311,9 +2333,12 @@ async function fetchAndBroadcastAIBalances() {
             }
             
             if (!foundD3X && claudeBalance === 0) {
-                claudeBalance = 45000; // DB fallback
+                // If the token account doesn't exist yet, it's truly 0.
             }
-            
+
+        } catch(e) { console.error('Claude balance error:', e.message); claudeBalance = cachedClaudeBalance || 0; }
+
+        try {
             if (pgPool) {
                 const res = await pgPool.query("SELECT gemini_portfolio, claude_portfolio FROM ai_combat_state WHERE id = 1");
                 let gemData = res.rows.length > 0 && res.rows[0].gemini_portfolio ? res.rows[0].gemini_portfolio : { commodities: {}, tradeLogs: [] };
@@ -2329,8 +2354,9 @@ async function fetchAndBroadcastAIBalances() {
                   WHERE id = 1
                 `, [gemData, rcData]);
             }
-
-        } catch(e) { console.error('Claude balance error:', e.message); claudeBalance = cachedClaudeBalance || 45000; }
+        } catch(e) {
+            console.error('AI DB Portfolio Sync Error:', e.message);
+        }
 
         try {
             if (cachedWorldBankWallet && cachedWorldBankWallet !== "NOT_SET") {
