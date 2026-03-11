@@ -7710,7 +7710,7 @@ function handleGlobeClick(e) {
   }
 
   // 0.6 Check Weapon Tier Structures
-  if (window.currentSkinIndex === 5 && window.blueBuildingsGroup && window.blueBuildingsGroup.visible) {
+  if (window.currentSkinIndex === 4 && window.blueBuildingsGroup && window.blueBuildingsGroup.visible) {
       const blueHits = ray.intersectObjects(window.blueBuildingsGroup.children, true);
       if (blueHits.length > 0) {
           // Identify which building was clicked based on custom userdata logic
@@ -7735,7 +7735,7 @@ function handleGlobeClick(e) {
           }
       }
   }
-  if (window.currentSkinIndex === 4 && window.wtrBuildingsGroup && window.wtrBuildingsGroup.visible) {
+  if (window.currentSkinIndex === 5 && window.wtrBuildingsGroup && window.wtrBuildingsGroup.visible) {
       const wtrHits = ray.intersectObjects(window.wtrBuildingsGroup.children, true);
       if (wtrHits.length > 0) {
           let current = wtrHits[0].object;
