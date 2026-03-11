@@ -12008,11 +12008,11 @@ function spawnAmbients() {
   const matSatRed = new THREE.SpriteMaterial({map: texSatRed, color: 0xffffff});
   const matSatBlue = new THREE.SpriteMaterial({map: texSatBlue, color: 0xffffff});
 
-  for(let i=0; i<600; i++) { // Doubled from 150 to 600
-    let currentMat = matSat; // 40% white (neutral)
-    if (i < 180) { // 30% red (rainclaude)
+  for(let i=0; i<50; i++) { // Massively simplified from 600 to 50 for poor-GPU laptops
+    let currentMat = matSat;
+    if (i < 15) { 
       currentMat = matSatRed;
-    } else if (i < 360) { // 30% blue (humanity)
+    } else if (i < 30) {
       currentMat = matSatBlue;
     }
     const sprite = new THREE.Sprite(currentMat);
@@ -12177,8 +12177,8 @@ function animate() {
            p.pivot.children[0].getWorldPosition(planeWorldPos);
            
            if (window.isRedSkin) {
-               // Leave thick contrails behind the planes frequently
-               if (Math.random() < 0.3) {
+               // Diminish heavy particles natively to secure performance
+               if (Math.random() < 0.03) {
                    if (!window.redWarfareParticles) window.redWarfareParticles = [];
                    const trailMat = new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(createGlowCanvas('#ffffff')), color: 0xffffff, transparent: true, opacity: 0.8 });
                    const trail = new THREE.Sprite(trailMat);
@@ -12188,8 +12188,8 @@ function animate() {
                    redWarfareParticles.push({ mesh: trail, life: 1.0, decay: 0.03, scaleMax: 0.08 });
                }
 
-               // Rapid fire bombs from planes
-               if (Math.random() < 0.05) {
+               // Greatly reduce bomb drops
+               if (Math.random() < 0.005) {
                
                const bombGeo = new THREE.CylinderGeometry(0.006, 0.006, 0.02, 8);
                const bombMat = new THREE.MeshBasicMaterial({ color: 0x555555 });
@@ -14244,7 +14244,7 @@ function fetchAndRenderBoats() {
   ];
 
   const data = [];
-  for (let loop = 0; loop < 2; loop++) { // Double from 10 to 20
+  for (let loop = 0; loop < 1; loop++) { // Single loop (10 boats) for optimized Red Skin rendering
       baseData.forEach(b => {
           data.push({
               lat: b.lat + (loop > 0 ? (Math.random() - 0.5) * 8 : 0),
@@ -14639,12 +14639,12 @@ window.spawnRedPlanes = function() {
   const planeMatRaincloud = new THREE.MeshBasicMaterial({ color: 0xff0000, depthTest: true });
   const planeMatHumanity = new THREE.MeshBasicMaterial({ color: 0x0000ff, depthTest: true });
   
-  // Build a generic airplane group (half the size of the boat markers)
-  for (let i = 0; i < 60; i++) {
+  // Reduced to 10 airplanes to dramatically aid GPU rendering on RED skin
+  for (let i = 0; i < 10; i++) {
     let planeMat = planeMatNeutral;
-    if (i < 18) { // 30% of 60
+    if (i < 3) {
       planeMat = planeMatRaincloud;
-    } else if (i < 54) { // 60% of 60
+    } else if (i < 9) {
       planeMat = planeMatHumanity;
     }
     const planeGroup = new THREE.Group();
