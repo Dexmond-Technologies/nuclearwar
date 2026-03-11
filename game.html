@@ -1472,6 +1472,7 @@ body {
       <button class="phase-btn" id="btn-end-turn" style="padding:10px 0; width:100%; height:max-content; pointer-events:auto; position:relative; box-sizing:border-box; display:flex; justify-content:center; align-items:center;">END TURN ▶</button>
   </div>
   <button id="btn-toggle-soundtrack" onclick="toggleSoundtrack()">🎵 SOUNDTRACK</button>
+  <button id="btn-toggle-soundtrack-next" onclick="playNextCustomSoundtrack()">➔</button>
   <button id="btn-toggle-radio" onclick="toggleRadio()">📻 ON</button>
   <button id="btn-toggle-radio-lock" onclick="toggleRadioLock()" style="display:none;">🔒 LOCK RADIO</button>
   <div id="infinite-world-radio-label" style="position:absolute; bottom:28px; left:calc(20px + 30vw - 34px); transform:translateX(-50%); width:max-content; color:white; font-family:'Share Tech Mono', monospace; font-size:9px; letter-spacing:1px; z-index:20; opacity:0.8; pointer-events:none; display:none;">INFINITE WORLD RADIO</div>
@@ -1601,6 +1602,37 @@ body {
   color: #0f8;
 }
 #btn-toggle-soundtrack.soundtrack-on:hover {
+  background: rgba(0,255,136,0.3);
+  border-color: #0f8;
+}
+
+#btn-toggle-soundtrack-next {
+  position: absolute;
+  bottom: 3px;
+  left: calc(20px + 30vw - 138px);
+  padding: 4px 6px;
+  border: 1px solid rgba(255,50,50,0.5);
+  background: rgba(255,50,50,0.1);
+  color: #f55;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  z-index: 20;
+  pointer-events: auto;
+  transition: 0.2s;
+  outline: none;
+}
+#btn-toggle-soundtrack-next:hover {
+  background: rgba(255,50,50,0.3);
+  border-color: #f55;
+}
+#btn-toggle-soundtrack-next.soundtrack-on {
+  border: 1px solid rgba(0,255,136,0.5);
+  background: rgba(0,255,136,0.1);
+  color: #0f8;
+}
+#btn-toggle-soundtrack-next.soundtrack-on:hover {
   background: rgba(0,255,136,0.3);
   border-color: #0f8;
 }
@@ -3264,6 +3296,83 @@ function initWTRBuildings() {
     mineGroup.position.copy(minePos);
     mineGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), minePos.clone().normalize());
     wtrBuildingsGroup.add(mineGroup);
+
+    // 1. Command Center Tower (Tier 1 Small Arms) ported to WTR Skin
+    const cmdGroup = new THREE.Group();
+    const silverMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.4, metalness: 0.8 });
+    const blueMat = new THREE.MeshStandardMaterial({ color: 0x00aaff, emissive: 0x002255, metalness: 0.5 });
+    const redMat = new THREE.MeshStandardMaterial({ color: 0xff3333, emissive: 0x550000 });
+
+    const cBase = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.09, 0.05, 32), silverMat);
+    cBase.position.y = 0.025;
+    cmdGroup.add(cBase);
+    const cCore = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.15, 32), blueMat);
+    cCore.position.y = 0.1;
+    cmdGroup.add(cCore);
+    const cRing = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.015, 16, 64), silverMat);
+    cRing.position.y = 0.15;
+    cRing.rotation.x = Math.PI / 2;
+    cmdGroup.add(cRing);
+    const cAnt = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.1, 16), silverMat);
+    cAnt.position.y = 0.22;
+    cmdGroup.add(cAnt);
+    const cLabel = createTextSprite("TIER 1: SMALL ARMS", "#00ffff");
+    cLabel.position.y = 0.35;
+    cmdGroup.add(cLabel);
+    cmdGroup.userData = { isWeaponBuilding: true, tier: 1, buildingName: "SMALL ARMS" };
+    const cmdPos = ll2v(51.50, -0.12, GLOBE_R);
+    cmdGroup.position.copy(cmdPos);
+    cmdGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), cmdPos.clone().normalize());
+    wtrBuildingsGroup.add(cmdGroup);
+
+    // 2. Heavy Weapons Silo (Tier 3) ported to WTR Skin
+    const rocketGroup = new THREE.Group();
+    const rBody = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.2, 32), silverMat);
+    rBody.position.y = 0.1;
+    rocketGroup.add(rBody);
+    const rNose = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.08, 32), redMat);
+    rNose.position.y = 0.24;
+    rocketGroup.add(rNose);
+    for (let i=0; i<4; i++) {
+        const fin = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, 0.01), redMat);
+        fin.position.y = 0.03;
+        fin.rotation.y = (Math.PI / 2) * i;
+        fin.position.x = Math.cos((Math.PI / 2) * i) * 0.04;
+        fin.position.z = Math.sin((Math.PI / 2) * i) * 0.04;
+        rocketGroup.add(fin);
+    }
+    const rBooster = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.04, 0.04, 32), blueMat);
+    rBooster.position.y = -0.02;
+    rocketGroup.add(rBooster);
+    const rLabel = createTextSprite("TIER 3: HEAVY WEAPONS", "#00ffff");
+    rLabel.position.y = 0.35;
+    rocketGroup.add(rLabel);
+    rocketGroup.userData = { isWeaponBuilding: true, tier: 3, buildingName: "HEAVY WEAPONS" };
+    const rocketPos = ll2v(38.89, -77.03, GLOBE_R);
+    rocketGroup.position.copy(rocketPos);
+    rocketGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), rocketPos.clone().normalize());
+    wtrBuildingsGroup.add(rocketGroup);
+
+    // 3. Strategic Weapons Bomb (Tier 4) ported to WTR Skin
+    const bombGroup = new THREE.Group();
+    const bBody = new THREE.Mesh(new THREE.SphereGeometry(0.06, 32, 32), silverMat);
+    bBody.position.y = 0.08;
+    bBody.scale.y = 1.2;
+    bombGroup.add(bBody);
+    const bTail = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.05, 0.08, 32), silverMat);
+    bTail.position.y = 0.18;
+    bombGroup.add(bTail);
+    const bBox = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.02, 0.08), redMat);
+    bBox.position.y = 0.23;
+    bombGroup.add(bBox);
+    const bLabel = createTextSprite("TIER 4: STRATEGIC WEAPONS", "#00ffff");
+    bLabel.position.y = 0.35;
+    bombGroup.add(bLabel);
+    bombGroup.userData = { isWeaponBuilding: true, tier: 4, buildingName: "STRATEGIC WEAPONS" };
+    const bombPos = ll2v(55.75, 37.61, GLOBE_R);
+    bombGroup.position.copy(bombPos);
+    bombGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), bombPos.clone().normalize());
+    wtrBuildingsGroup.add(bombGroup);
 }
 initWTRBuildings();
 
@@ -15374,6 +15483,17 @@ function playCustomSoundtrack() {
   };
 }
 
+window.playNextCustomSoundtrack = function() {
+  if (soundtrackPlaylist.length === 0) return;
+  soundtrackCurrentIdx++;
+  if (soundtrackCurrentIdx >= soundtrackPlaylist.length) soundtrackCurrentIdx = 0;
+  const track = soundtrackPlaylist[soundtrackCurrentIdx];
+  customSoundtrack.src = '/soundtrack/' + encodeURIComponent(track);
+  customSoundtrack.play().catch(e => console.error("Soundtrack play failed:", e));
+  // Keep button states in sync if moving manually
+  if (!isSoundtrackOn) toggleSoundtrack();
+};
+
 // ================= AMBIENT RADIO FEED =================
 let radioAudio = new Audio();
 let radioStations = [];
@@ -15462,9 +15582,19 @@ window.toggleSoundtrack = function() {
         }
       }, 4000);
     }
+    
+    // Toggle active CSS class for the NEXT button
+    const nextBtn = document.getElementById('btn-toggle-soundtrack-next');
+    if (nextBtn) nextBtn.classList.add('soundtrack-on');
+
     playCustomSoundtrack();
   } else {
     btn.classList.remove('soundtrack-on');
+    
+    // Remove active CSS class on NEXT button
+    const nextBtn = document.getElementById('btn-toggle-soundtrack-next');
+    if (nextBtn) nextBtn.classList.remove('soundtrack-on');
+
     customSoundtrack.pause();
   }
 };
@@ -15759,10 +15889,7 @@ window.buyOrbitalStrike = function() {
 // ========================================================
 // Removed hover listeners for ops-sidebar (now permanently displayed)
 
-</script>
 <script src="/dist/improve_earth.js" defer></script>
-
-// Load the Official Solana Wallet Adapter Bundle (Vanilla JS)
 <script src="public/vanilla-wallet.bundle.js" defer></script>
 
 <!-- Vanilla Wallet Integration (Phantom / Solflare) -->
