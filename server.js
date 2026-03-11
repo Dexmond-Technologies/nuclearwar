@@ -2739,7 +2739,7 @@ async function startServer() {
     console.log('☢ No previous state found. Waiting for first commander to initialize world.');
   }
   
-  server.listen(PORT, () => {
+  server.listen(PORT, '0.0.0.0', () => {
     console.log(`☢ NUCLEAR WAR Multi-Service running on port ${PORT}`);
     
     // Safety lock: Only accept WS connections after DB and HTTP are fully ready
