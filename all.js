@@ -2018,6 +2018,8 @@ function initDatacenters() {
                 window.npLightningGroup = new THREE.Group();
                 scene.add(window.npLightningGroup);
                 const bridgeMat = new THREE.LineBasicMaterial({ color: 0x00eaff, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
+                const auraMat = new THREE.LineBasicMaterial({ color: 0x00aaff, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending });
+                const bigAuraMat = new THREE.LineBasicMaterial({ color: 0x0055ff, transparent: true, opacity: 0.25, blending: THREE.AdditiveBlending });
                 
                 const numBridges = 3;
                 const braidsPerBridge = 3;
@@ -2032,6 +2034,20 @@ function initDatacenters() {
                         const line = new THREE.Line(geo, bridgeMat);
                         line.userData = { braidIdx: i, phaseOff: Math.random() * Math.PI * 2, freq1: 2+Math.random()*3, freq2: 4+Math.random()*5, radius: 0.03 + Math.random()*0.02 };
                         bridgeGroup.add(line);
+
+                        // Added Aura/Glow line
+                        const geoAura = new THREE.BufferGeometry();
+                        geoAura.setAttribute('position', new THREE.BufferAttribute(new Float32Array((segments+1) * 3), 3));
+                        const auraLine = new THREE.Line(geoAura, auraMat);
+                        auraLine.userData = { braidIdx: i, phaseOff: line.userData.phaseOff + 0.1, freq1: line.userData.freq1 * 0.95, freq2: line.userData.freq2 * 0.95, radius: line.userData.radius * 2.5 };
+                        bridgeGroup.add(auraLine);
+
+                        // Added Big Aura/Glow line for extreme glow
+                        const geoBigAura = new THREE.BufferGeometry();
+                        geoBigAura.setAttribute('position', new THREE.BufferAttribute(new Float32Array((segments+1) * 3), 3));
+                        const bigAuraLine = new THREE.Line(geoBigAura, bigAuraMat);
+                        bigAuraLine.userData = { braidIdx: i, phaseOff: line.userData.phaseOff - 0.1, freq1: line.userData.freq1 * 1.05, freq2: line.userData.freq2 * 1.05, radius: line.userData.radius * 5.0 };
+                        bridgeGroup.add(bigAuraLine);
                     }
                     window.npLightningGroup.add(bridgeGroup);
                 }
@@ -3961,12 +3977,12 @@ function startTurn(playerIndex) {
   });
   if(GS.globalMetrics.commJamTurns>0 && playerIndex===1) GS.globalMetrics.commJamTurns--;
 
-  // Auto-deploy 60% of troops for Human player
+  // Auto-deploy 100% of troops for Human player (user request)
   let autoDeployed = 0;
   if (playerIndex === GS.myIndex && GS.reinforceLeft > 0) {
     const ownedTerritories = Object.entries(GS.countries).filter(([,c])=>c.owner===playerIndex).map(([iso])=>iso);
     if (ownedTerritories.length > 0) {
-      autoDeployed = Math.floor(GS.reinforceLeft * 0.6);
+      autoDeployed = GS.reinforceLeft;
       if (autoDeployed > 0) {
         let remainingAuto = autoDeployed;
         while (remainingAuto > 0) {
@@ -3983,7 +3999,9 @@ function startTurn(playerIndex) {
   document.getElementById('side-panel').classList.remove('open');
   updatePhaseUI();
   
-  if (autoDeployed > 0) {
+  if (autoDeployed > 0 && GS.reinforceLeft === 0) {
+    setLog(`▶ AUTO-DEPLOYED all ${autoDeployed} troops globally. Switch to ATTACK or END TURN.`);
+  } else if (autoDeployed > 0) {
     setLog(`▶ AUTO-DEPLOYED ${autoDeployed} troops globally. Place remaining ${GS.reinforceLeft} troops manually.`);
   } else {
     setLog(`▶ ${GS.players[playerIndex].name}'s turn — Place ${GS.reinforceLeft} troops`);

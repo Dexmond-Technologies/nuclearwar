@@ -579,12 +579,12 @@ function startTurn(playerIndex) {
   });
   if(GS.globalMetrics.commJamTurns>0 && playerIndex===1) GS.globalMetrics.commJamTurns--;
 
-  // Auto-deploy 60% of troops for Human player
+  // Auto-deploy 100% of troops for Human player (user request)
   let autoDeployed = 0;
   if (playerIndex === GS.myIndex && GS.reinforceLeft > 0) {
     const ownedTerritories = Object.entries(GS.countries).filter(([,c])=>c.owner===playerIndex).map(([iso])=>iso);
     if (ownedTerritories.length > 0) {
-      autoDeployed = Math.floor(GS.reinforceLeft * 0.6);
+      autoDeployed = GS.reinforceLeft;
       if (autoDeployed > 0) {
         let remainingAuto = autoDeployed;
         while (remainingAuto > 0) {
@@ -601,7 +601,9 @@ function startTurn(playerIndex) {
   document.getElementById('side-panel').classList.remove('open');
   updatePhaseUI();
   
-  if (autoDeployed > 0) {
+  if (autoDeployed > 0 && GS.reinforceLeft === 0) {
+    setLog(`▶ AUTO-DEPLOYED all ${autoDeployed} troops globally. Switch to ATTACK or END TURN.`);
+  } else if (autoDeployed > 0) {
     setLog(`▶ AUTO-DEPLOYED ${autoDeployed} troops globally. Place remaining ${GS.reinforceLeft} troops manually.`);
   } else {
     setLog(`▶ ${GS.players[playerIndex].name}'s turn — Place ${GS.reinforceLeft} troops`);

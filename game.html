@@ -1277,17 +1277,6 @@ body {
   <div id="topbar">
     <div id="topleft-stats" style="display:flex; gap:15px; align-items:center;">
       <div style="margin-top: 25px; width: 30vw; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-        <!-- RADIO CONTROLS -->
-        <div style="display:flex; flex-direction:column; align-items:center; gap:4px; margin-bottom: 18px;">
-            <div id="infinite-world-radio-label" style="color:white; font-family:'Share Tech Mono', monospace; font-size:9px; letter-spacing:1px; z-index:20; opacity:0.8; pointer-events:none; display:none;">INFINITE WORLD RADIO</div>
-            <div style="display:flex; gap:6px;">
-                <button id="btn-toggle-soundtrack" onclick="toggleSoundtrack()" style="position:relative; bottom:auto; left:auto; display:inline-block;">🎵 SOUNDTRACK</button>
-                <button id="btn-toggle-soundtrack-next" onclick="playNextCustomSoundtrack()" style="position:relative; bottom:auto; left:auto; display:inline-block;">➔</button>
-                <button id="btn-toggle-radio" onclick="toggleRadio()" style="position:relative; bottom:auto; left:auto; display:inline-block;">📻 ON</button>
-                <button id="btn-toggle-radio-lock" onclick="toggleRadioLock()" style="position:relative; bottom:auto; left:auto; display:none;">🔒 LOCK RADIO</button>
-                <button id="btn-toggle-radio-next" onclick="playNextRadio()" style="position:relative; bottom:auto; left:auto; display:none;">NEXT ➔</button>
-            </div>
-        </div>
       </div>
       <!-- BUTTON MOVED -->
     </div>
@@ -1318,6 +1307,22 @@ body {
   </div>
   
   <div id="botbar">
+    <!-- RADIO CONTROLS -->
+    <div id="sound-control-container" style="position:absolute; bottom:990px; left:calc(20px + 30vw - 390px); display:flex; gap:6px; z-index:20; align-items:flex-end;">
+      <div style="display:flex; gap:6px;">
+        <button id="btn-toggle-soundtrack" onclick="toggleSoundtrack()">🎵 SOUNDTRACKS</button>
+        <button id="btn-toggle-soundtrack-next" onclick="playNextCustomSoundtrack()">➔</button>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-start;">
+        <div id="infinite-world-radio-label" style="color:white; font-family:'Share Tech Mono', monospace; font-size:9px; letter-spacing:1px; opacity:0.8; pointer-events:none; display:none; padding-left:2px;">INFINITE WORLD RADIO</div>
+        <div style="display:flex; gap:6px;">
+          <button id="btn-toggle-radio" onclick="toggleRadio()">📻 ON</button>
+          <button id="btn-toggle-radio-lock" onclick="toggleRadioLock()" style="display:none;">🔒 LOCK RADIO</button>
+          <button id="btn-toggle-radio-next" onclick="playNextRadio()" style="display:none;">NEXT ➔</button>
+        </div>
+      </div>
+    </div>
+    
     <div id="cybercrime-map-label">CYBER-WARFARE</div>
     <div id="global-player-count" style="position: absolute; bottom: 75px; left: 50%; transform: translateX(-50%); font-family:'Courier New', monospace; font-size:11px; font-weight:bold; letter-spacing:2px; color:#0af; text-shadow:0 0 8px rgba(0,170,255,0.6); z-index: 100; pointer-events: none;">
       🟢 <span id="gpc-val">0</span> ACTIVE COMMANDERS
@@ -1617,9 +1622,6 @@ body {
 }
 
 #btn-toggle-soundtrack {
-  position: absolute;
-  bottom: 13px;
-  left: calc(20px + 30vw - 235px);
   padding: 4px 8px;
   border: 1px solid rgba(255,50,50,0.5);
   background: rgba(255,50,50,0.1);
@@ -1648,9 +1650,6 @@ body {
 }
 
 #btn-toggle-soundtrack-next {
-  position: absolute;
-  bottom: 13px;
-  left: calc(20px + 30vw - 138px);
   padding: 4px 6px;
   border: 1px solid rgba(255,50,50,0.5);
   background: rgba(255,50,50,0.1);
@@ -1679,9 +1678,6 @@ body {
 }
 
 #btn-toggle-radio {
-  position: absolute;
-  bottom: 3px;
-  left: calc(20px + 30vw - 128px);
   padding: 4px 8px;
   border: 1px solid rgba(0,255,136,0.5);
   background: rgba(0,255,136,0.1);
@@ -1710,9 +1706,6 @@ body {
 }
 
 #btn-toggle-radio-lock {
-  position: absolute;
-  bottom: 3px;
-  left: calc(20px + 30vw - 78px);
   padding: 4px 8px;
   border: 1px solid rgba(255,170,0,0.5);
   background: rgba(255,170,0,0.1);
@@ -1741,9 +1734,6 @@ body {
 }
 
 #btn-toggle-radio-next {
-  position: absolute;
-  bottom: 3px;
-  left: calc(20px + 30vw + 10px);
   padding: 4px 8px;
   border: 1px solid rgba(255,170,0,0.5);
   background: rgba(255,170,0,0.1);
@@ -2577,7 +2567,7 @@ Type 'help' for available commands.
 </div>
 
 <!-- AI INVENTORY MODALS -->
-<div id="rainclaude-inventory-modal" style="display:none; position:fixed; top:0; right:0; left:auto; width:100vw; height:133.33vh; z-index:9999999; background:rgba(20,0,0,0.9); backdrop-filter:blur(10px); justify-content:flex-start; padding-top:50px; box-sizing:border-box; align-items:center; flex-direction:column;">
+<div id="rainclaude-inventory-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:133.33vh; z-index:9999999; background:rgba(20,0,0,0.9); backdrop-filter:blur(10px); justify-content:flex-start; padding-top:50px; box-sizing:border-box; align-items:center; flex-direction:column;">
   <style>
     /* Rainclaude Inventory Custom Scrollbar */
     #rainclaude-inventory-content::-webkit-scrollbar { width: 10px; }
@@ -2593,7 +2583,7 @@ Type 'help' for available commands.
   </div>
 </div>
 
-<div id="gemini-inventory-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:133.33vh; z-index:9999999; background:rgba(0,10,20,0.9); backdrop-filter:blur(10px); justify-content:flex-start; padding-top:50px; box-sizing:border-box; align-items:center; flex-direction:column;">
+<div id="gemini-inventory-modal" style="display:none; position:fixed; top:0; right:0; left:auto; width:100vw; height:133.33vh; z-index:9999999; background:rgba(0,10,20,0.9); backdrop-filter:blur(10px); justify-content:flex-start; padding-top:50px; box-sizing:border-box; align-items:center; flex-direction:column;">
   <style>
     /* Gemini Inventory Custom Scrollbar */
     #gemini-inventory-content::-webkit-scrollbar { width: 10px; }
@@ -5234,6 +5224,19 @@ function initDatacenters() {
                 scene.add(window.npLightningGroup);
                 const bridgeMat = new THREE.LineBasicMaterial({ color: 0x00eaff, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
                 
+                // Neon Light Blue glow texture for the strings
+                const cAura = document.createElement('canvas');
+                cAura.width = 64; cAura.height = 64;
+                const ctxAura = cAura.getContext('2d');
+                const gradAura = ctxAura.createRadialGradient(32, 32, 0, 32, 32, 32);
+                gradAura.addColorStop(0, 'rgba(150, 255, 255, 1.0)'); // Bright white-blue core
+                gradAura.addColorStop(0.3, 'rgba(0, 150, 255, 0.8)'); // Neon light blue glow
+                gradAura.addColorStop(1, 'rgba(0, 150, 255, 0)');     // Transparent edge
+                ctxAura.fillStyle = gradAura;
+                ctxAura.fillRect(0, 0, 64, 64);
+                const neonAuraTex = new THREE.CanvasTexture(cAura);
+                const neonAuraMat = new THREE.SpriteMaterial({ map: neonAuraTex, color: 0xffffff, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending });
+                
                 const numBridges = 3;
                 const braidsPerBridge = 3;
                 const segments = 30;
@@ -5246,7 +5249,23 @@ function initDatacenters() {
                         geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array((segments+1) * 3), 3));
                         const line = new THREE.Line(geo, bridgeMat);
                         // Increased randomness of freq1 and freq2 by 20%
-                        line.userData = { braidIdx: i, phaseOff: Math.random() * Math.PI * 2, freq1: (2+Math.random()*3)*1.2, freq2: (4+Math.random()*5)*1.2, radius: 0.03 + Math.random()*0.02 };
+                        line.userData = { 
+                            braidIdx: i, 
+                            phaseOff: Math.random() * Math.PI * 2, 
+                            freq1: (2+Math.random()*3)*1.2, 
+                            freq2: (4+Math.random()*5)*1.2, 
+                            radius: 0.03 + Math.random()*0.02,
+                            auras: []
+                        };
+                        
+                        // Attach glowing aura sprites mapped along the interpolation points
+                        for(let k=0; k<=15; k++) {
+                            const sprite = new THREE.Sprite(neonAuraMat);
+                            sprite.scale.set(0.12, 0.12, 1);
+                            line.add(sprite);
+                            line.userData.auras.push(sprite);
+                        }
+                        
                         bridgeGroup.add(line);
                     }
                     window.npLightningGroup.add(bridgeGroup);
@@ -5447,8 +5466,9 @@ function initDatacenterNetwork() {
     const nodes = window.datacentersGroup.children;
     if (!nodes || nodes.length < 2) return;
     
-    // Bright cyan tint for the lines, fully visible and fluorescent
-    const material = new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.9, linewidth: 3, blending: THREE.AdditiveBlending, depthWrite: false });
+    // Bright yellow tint for the lines, fully visible and fluorescent
+    // Using NormalBlending to prevent the yellow from washing out to white over the bright blue globe
+    const material = new THREE.LineBasicMaterial({ color: 0xffff00, transparent: true, opacity: 1.0, linewidth: 3, blending: THREE.NormalBlending, depthWrite: false });
     
     // Create a blurred yellow dot texture for the pulse
     const c = document.createElement('canvas');
@@ -5462,7 +5482,8 @@ function initDatacenterNetwork() {
     ctx.fillRect(0, 0, 128, 128);
     
     const pulseTex = new THREE.CanvasTexture(c);
-    const pulseMat = new THREE.SpriteMaterial({ map: pulseTex, color: 0xffffff, transparent: true, blending: THREE.AdditiveBlending });
+    // Use NormalBlending to ensure the exact yellow gradient renders even on bright backgrounds
+    const pulseMat = new THREE.SpriteMaterial({ map: pulseTex, color: 0xffff00, transparent: true, opacity: 1.0, blending: THREE.NormalBlending, depthWrite: false });
     
     nodes.forEach((node, i) => {
         const numConnections = Math.floor(Math.random() * 3) + 1; // 1 to 3 connections
@@ -11706,7 +11727,17 @@ document.getElementById('chat-inp').addEventListener('keydown',e=>{if(e.key==='E
 // =====================================================================
 // LOBBY BUTTON HANDLERS
 // =====================================================================
-function hideLobby(){document.getElementById('lobby').style.display='none';}
+function hideLobby() {
+    document.getElementById('lobby').style.display='none';
+    
+    // Auto-play the cinematic soundtrack and trigger the welcome overlay upon entering the globe
+    if (typeof window.toggleSoundtrack === 'function') {
+        if (window.isRadioOn && typeof window.toggleRadio === 'function') window.toggleRadio();
+        if (typeof isSoundtrackOn !== 'undefined' && !isSoundtrackOn) {
+            window.toggleSoundtrack();
+        }
+    }
+}
 
 window.openLeaderboard = function() {
   SFX.playClick();
@@ -11813,8 +11844,12 @@ function closeOnboarding() {
   }
   
   // Auto-play the cinematic soundtrack upon entering the globe
-  if (typeof window.toggleSoundtrack === 'function' && typeof isSoundtrackOn !== 'undefined' && !isSoundtrackOn) {
-      window.toggleSoundtrack();
+  // User specifically requested this to autoplay. We forcefully disable radio and toggle on soundtrack.
+  if (typeof window.toggleSoundtrack === 'function') {
+      if (window.isRadioOn && typeof window.toggleRadio === 'function') window.toggleRadio();
+      if (typeof isSoundtrackOn !== 'undefined' && !isSoundtrackOn) {
+          window.toggleSoundtrack();
+      }
   }
 }
 
@@ -12867,6 +12902,15 @@ function animate() {
                           posArray[i*3] = bx + dx;
                           posArray[i*3+1] = by + dy;
                           posArray[i*3+2] = bz + dz;
+                          
+                          // Track neon aura sprites to lightning positional vectors
+                          if (i % 2 === 0) {
+                              const aIdx = i / 2;
+                              if (aIdx < braid.userData.auras.length) {
+                                  braid.userData.auras[aIdx].position.set(bx + dx, by + dy, bz + dz);
+                                  braid.userData.auras[aIdx].visible = true;
+                              }
+                          }
                       }
                       braid.geometry.attributes.position.needsUpdate = true;
                   });
@@ -12875,6 +12919,7 @@ function animate() {
                      const posArray = braid.geometry.attributes.position.array;
                      for(let i=0; i<posArray.length; i++) posArray[i] = 0;
                      braid.geometry.attributes.position.needsUpdate = true;
+                     braid.userData.auras.forEach(a => a.visible = false); // Hide auras when not zapping
                   });
               }
           });
@@ -15075,7 +15120,7 @@ window.toggleRedSkin = function() {
   // Toggle Datacenter Power Display
   const datacenterPowerBox = document.getElementById('datacenter-power-display');
   if (datacenterPowerBox) {
-      datacenterPowerBox.style.display = (skin.name === 'CYBER') ? 'block' : 'none';
+      datacenterPowerBox.style.display = (skin.name === 'WTR') ? 'block' : 'none';
   }
   
   // Toggle Datacenter Co-Op UI
@@ -15242,9 +15287,17 @@ soundtrackWarningOverlay.innerHTML = "<div style='color:#ff0033; font-family:\"O
 document.body.appendChild(soundtrackWarningOverlay);
 
 let customSoundtrack = new Audio();
-let soundtrackPlaylist = [];
-// Eager-load the playlist globally to bypass browser async autoplay restrictions on the UNLOCK click
-fetch('/api/soundtrack').then(r => r.json()).then(files => { soundtrackPlaylist = files; }).catch(e => console.error("Could not load local soundtrack", e));
+let soundtrackPlaylist = [
+  "Adam Beyer & Joseph Capriati - Family Matters (Original Mix).mp3",
+  "4235213_Broken_Circuits_Original_Mix.mp3",
+  "Eat It Raw [145 BPM]-Infected Mushroom.mp3",
+  "Odd Parents - Learn To Fly (Maceo_s 808 Dub) [Ellum Audio].mp3",
+  "Symphonix - People Of The Dawn (ARW Remix).mp3",
+  "04A - 124 - NERVO - Haute Mess (ANNA Remix).mp3",
+  "Deadly Mind Trip-20X.mp3"
+];
+// Eager-load to update playlist globally if files change on the backend
+fetch('/api/soundtrack').then(r => r.json()).then(files => { if(files.length > 0) soundtrackPlaylist = files; }).catch(e => console.error("Could not load local soundtrack", e));
 let soundtrackCurrentIdx = 0;
 let soundtrackWelcomed = false;
 let isSoundtrackOn = false;

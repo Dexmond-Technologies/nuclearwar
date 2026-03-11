@@ -67,6 +67,7 @@ let worldBankKeypair = loadKeypairFromEnv('WORLD_BANK_PVT_KEY', 'World Bank');
 
 let cachedGeminiBalance = 0;
 let cachedClaudeBalance = 0;
+let cachedWorldBankBalance = 0;
 let cachedGeminiWallet = process.env.gemini_wallet || (geminiKeypair ? geminiKeypair.publicKey.toBase58() : "NOT_SET");
 let cachedClaudeWallet = process.env.RAINCLAUDE_SOLANA_WALLET || (rainclaudeKeypair ? rainclaudeKeypair.publicKey.toBase58() : "NOT_SET");
 let cachedWorldBankWallet = process.env.WORLD_BANK_WALLET || "NOT_SET";
@@ -849,10 +850,19 @@ function initWebSockets() {
                     break;
                 }
                 
-                const borrowedAmount = Math.floor(collateral * 0.60);
+                let ltv = 0.50; // default to 50%
+                if (collateral === 5000) ltv = 0.50;
+                else if (collateral === 10000) ltv = 0.52;
+                else if (collateral === 20000) ltv = 0.54;
+                else if (collateral === 50000) ltv = 0.56;
+                else if (collateral === 100000) ltv = 0.58;
+                else if (collateral === 200000) ltv = 0.59;
+                else if (collateral === 500000) ltv = 0.60;
                 
-                // Subtract collateral and add borrowed amount = net change is subtract 40%
-                const netBalanceChange = borrowedAmount - collateral; 
+                const borrowedAmount = Math.floor(collateral * ltv);
+                
+                // Subtract collateral and add borrowed amount = net change
+                const netBalanceChange = borrowedAmount - collateral;
                 
                 portfolio.active_loan = {
                     collateral: collateral,
@@ -2211,8 +2221,9 @@ setInterval(runAICombatTurn, 1800000);
 // Track how much each AI has spent today
 let geminiDailySpent = 0;
 let claudeDailySpent = 0;
+let worldBankDailySpent = 0;
 // Reset daily budgets at midnight UTC
-setInterval(() => { geminiDailySpent = 0; claudeDailySpent = 0; console.log('[AI MARKET] Daily spend caps reset.'); }, 24 * 60 * 60 * 1000);
+setInterval(() => { geminiDailySpent = 0; claudeDailySpent = 0; worldBankDailySpent = 0; console.log('[AI MARKET] Daily spend caps reset.'); }, 24 * 60 * 60 * 1000);
 
 // Full commodity catalog (items the AIs can autonomously purchase)
 const AI_MARKET_CATALOG = [
@@ -2273,16 +2284,19 @@ async function runAIMarketBuying() {
   // Use the cached on-chain balances (set by fetchAndBroadcastAIBalances)
   const geminiBalance = cachedGeminiBalance || 100000000; // Default 100M if not yet fetched
   const claudeBalance = cachedClaudeBalance || 100000000;
+  const worldBankBalance = cachedWorldBankBalance || 100000000;
   
   const dailyCapMultiplier = (parseFloat(process.env.PERCENTAGE_DAILY_WALLET) || 1) / 100;
   const geminiDailyCap = geminiBalance * dailyCapMultiplier; 
   const claudeDailyCap = claudeBalance * dailyCapMultiplier;
+  const worldBankDailyCap = worldBankBalance * dailyCapMultiplier;
   
   const buys = [];
   
   // Read localized JSON accounts
   let geminiAccount = { balances: { D3X: 0 }, portfolio: { commodities: {}, tradeLogs: [] }, weapon_inventory: {} };
   let claudeAccount = { balances: { D3X: 0 }, portfolio: { commodities: {}, tradeLogs: [] }, weapon_inventory: {} };
+  let wbAccount = { portfolio: { commodities: {}, tradeLogs: [] } };
   
   try {
       const res = await pgPool.query("SELECT gemini_portfolio, claude_portfolio, gemini_weapon_inventory, claude_weapon_inventory FROM ai_combat_state WHERE id = 1");
@@ -2291,6 +2305,11 @@ async function runAIMarketBuying() {
           if (res.rows[0].claude_portfolio) claudeAccount.portfolio = res.rows[0].claude_portfolio;
           if (res.rows[0].gemini_weapon_inventory) geminiAccount.weapon_inventory = res.rows[0].gemini_weapon_inventory;
           if (res.rows[0].claude_weapon_inventory) claudeAccount.weapon_inventory = res.rows[0].claude_weapon_inventory;
+      }
+      
+      const wbRes = await pgPool.query("SELECT portfolio FROM commanders WHERE callsign = 'WORLD BANK'");
+      if (wbRes.rows.length > 0 && wbRes.rows[0].portfolio) {
+          wbAccount.portfolio = wbRes.rows[0].portfolio;
       }
   } catch(e) {
       console.error("[AI MARKET] Error reading portfolios from DB:", e);
@@ -2428,6 +2447,59 @@ async function runAIMarketBuying() {
       claudePurchasesThisCycle++;
   }
   
+  // -- WORLD BANK buys (No weapons, routed to SOLANA vault) --
+  let wbPurchasesThisCycle = 0;
+  while (worldBankDailySpent < worldBankDailyCap && wbPurchasesThisCycle < 50) {
+      const remainingBudgetWB = worldBankDailyCap - worldBankDailySpent;
+      const item = validCatalog[Math.floor(Math.random() * validCatalog.length)];
+      const variance = 0.95 + (Math.random() * 0.1); 
+      const effectivePrice = item.basePrice * variance;
+      
+      let affordableUnits = Math.floor((remainingBudgetWB / 100) / effectivePrice);
+      
+      if (affordableUnits < 1) {
+          if (wbPurchasesThisCycle === 0) affordableUnits = 1;
+          else { wbPurchasesThisCycle++; continue; }
+      }
+      
+      const unitsToBuy = Math.max(1, Math.floor(affordableUnits * (0.5 + Math.random() * 0.5)));
+      const cost = Math.round(effectivePrice * unitsToBuy);
+      
+      if (worldBankDailySpent + cost > worldBankDailyCap && wbPurchasesThisCycle > 0) break; 
+      
+      worldBankDailySpent += cost;
+      buys.push({ aiName: 'worldbank', item: item.name, category: item.category, units: unitsToBuy, cost, unit: item.unit });
+      
+      if (wbAccount) {
+          if (!wbAccount.portfolio) wbAccount.portfolio = { commodities: {}, tradeLogs: [] };
+          if (!wbAccount.portfolio.commodities) wbAccount.portfolio.commodities = {};
+          if (!wbAccount.portfolio.tradeLogs) wbAccount.portfolio.tradeLogs = [];
+          
+          if (!wbAccount.portfolio.commodities[item.name]) {
+              wbAccount.portfolio.commodities[item.name] = { shares: 0, avgCost: 0, totalSpent: 0 };
+          }
+          
+          let c = wbAccount.portfolio.commodities[item.name];
+          let totalShares = c.shares + unitsToBuy;
+          let newTotalSpent = c.totalSpent + cost;
+          c.avgCost = newTotalSpent / totalShares;
+          c.totalSpent = newTotalSpent;
+          c.shares += unitsToBuy;
+          
+          const tString = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
+          wbAccount.portfolio.tradeLogs.push(`[${tString}] BOUGHT ${unitsToBuy} ${item.name} for ${cost.toLocaleString()} D3X`);
+          if (wbAccount.portfolio.tradeLogs.length > 50) wbAccount.portfolio.tradeLogs.shift();
+      }
+      
+      // Route payment to the Solana Wallet instead of Burning
+      const targetVaultInfo = (process.env.SOLANA_WALLET_ADDRESS || BURN_ADDRESS.toBase58());
+      
+      await pgPool.query(`INSERT INTO pending_settlements (from_wallet, to_wallet, amount, reason) VALUES ($1, $2, $3, $4)`,
+        ['WORLD BANK', targetVaultInfo, cost, `wb_market_buy_${item.name.replace(/ /g,'_')}`]).catch(console.error);
+        
+      wbPurchasesThisCycle++;
+  }
+  
   // AI Weapon Autonomous Purchasing Hook
   const wCat = AI_WEAPONS_CATALOG;
   
@@ -2457,13 +2529,16 @@ async function runAIMarketBuying() {
           SET gemini_portfolio = $1, claude_portfolio = $2, gemini_weapon_inventory = $3, claude_weapon_inventory = $4, updated_at = NOW() 
           WHERE id = 1
         `, [geminiAccount.portfolio, claudeAccount.portfolio, geminiAccount.weapon_inventory, claudeAccount.weapon_inventory]);
+        
+        // Also save World Bank portfolio
+        await pgPool.query(`UPDATE commanders SET portfolio = $1 WHERE callsign = 'WORLD BANK'`, [wbAccount.portfolio]);
     } catch(e) {
         console.error("[AI MARKET] Error saving portfolios to DB:", e);
     }
 
     // Broadcast all purchases to all connected clients
-    broadcastAll({ type: 'ai_market_purchases', buys, geminiDailySpent, claudeDailySpent, geminiDailyCap, claudeDailyCap });
-    console.log(`[AI MARKET] Gemini spent ${geminiDailySpent.toLocaleString()} D3X, Rainclaude spent ${claudeDailySpent.toLocaleString()} D3X today.`);
+    broadcastAll({ type: 'ai_market_purchases', buys, geminiDailySpent, claudeDailySpent, worldBankDailySpent, geminiDailyCap, claudeDailyCap, worldBankDailyCap });
+    console.log(`[AI MARKET] Gemini spent ${geminiDailySpent.toLocaleString()} D3X, Rainclaude spent ${claudeDailySpent.toLocaleString()} D3X, World Bank spent ${worldBankDailySpent.toLocaleString()} D3X today.`);
   }
 }
 
