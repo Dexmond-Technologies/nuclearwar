@@ -3057,33 +3057,75 @@ scene.add(greenMountainsGroup);
 window.greenMountainsGroup = greenMountainsGroup;
 
 function initGreenMountains() {
-    // Generate a shiny, detailed green material
+    // Generate a shiny, detailed green material rendering OVER other visual layers 
     const mat = new THREE.MeshStandardMaterial({
         color: 0x00ff33,
-        roughness: 0.1, // Shiny
-        metalness: 0.7, // Distinct metallic glint
-        flatShading: true
+        roughness: 0.1, 
+        metalness: 0.7, 
+        flatShading: true,
+        transparent: true,
+        opacity: 0.99,
+        depthTest: true,
+        depthWrite: true
     });
     
-    // Base mountain geometry (detailed icosahedron stretched on Y-axis)
-    const geom1 = new THREE.IcosahedronGeometry(0.12, 2);
-    const geom2 = new THREE.IcosahedronGeometry(0.15, 2);
+    // Jagged geometric compilation for realistic steep mountain peaks
+    function createJaggedMountain(scaleMulti) {
+        const group = new THREE.Group();
+        
+        // Base center peak
+        const centerGeo = new THREE.ConeGeometry(0.12 * scaleMulti, 0.4 * scaleMulti, 5);
+        const center = new THREE.Mesh(centerGeo, mat);
+        center.position.y = 0.2 * scaleMulti;
+        center.renderOrder = 9999;
+        group.add(center);
+        
+        // Secondary side peak A
+        const side1Geo = new THREE.ConeGeometry(0.08 * scaleMulti, 0.25 * scaleMulti, 4);
+        const side1 = new THREE.Mesh(side1Geo, mat);
+        side1.position.set(0.06 * scaleMulti, 0.125 * scaleMulti, 0.05 * scaleMulti);
+        side1.rotation.z = -0.15;
+        side1.renderOrder = 9999;
+        group.add(side1);
+        
+        // Secondary side peak B
+        const side2Geo = new THREE.ConeGeometry(0.07 * scaleMulti, 0.2 * scaleMulti, 4);
+        const side2 = new THREE.Mesh(side2Geo, mat);
+        side2.position.set(-0.07 * scaleMulti, 0.1 * scaleMulti, -0.05 * scaleMulti);
+        side2.rotation.x = 0.15;
+        side2.renderOrder = 9999;
+        group.add(side2);
+        
+        return group;
+    }
     
     // 1. First Mountain (Alps)
-    const mount1 = new THREE.Mesh(geom1, mat);
-    mount1.scale.set(1, 2.5, 1); // stretch into a mountain
+    const mount1 = createJaggedMountain(1.2);
     const pos1 = ll2v(46.8, 8.2, GLOBE_R); 
     mount1.position.copy(pos1);
     mount1.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pos1.clone().normalize());
     greenMountainsGroup.add(mount1);
     
     // 2. Second Mountain (Himalayas)
-    const mount2 = new THREE.Mesh(geom2, mat);
-    mount2.scale.set(1, 3.2, 1); // taller/larger mountain
+    const mount2 = createJaggedMountain(1.6);
     const pos2 = ll2v(27.9, 86.9, GLOBE_R);
     mount2.position.copy(pos2);
     mount2.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pos2.clone().normalize());
     greenMountainsGroup.add(mount2);
+    
+    // 3. Third Mountain (Andes)
+    const mount3 = createJaggedMountain(1.4);
+    const pos3 = ll2v(-32.6, -70.0, GLOBE_R);
+    mount3.position.copy(pos3);
+    mount3.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pos3.clone().normalize());
+    greenMountainsGroup.add(mount3);
+    
+    // 4. Fourth Mountain (Rockies)
+    const mount4 = createJaggedMountain(1.1);
+    const pos4 = ll2v(43.0, -109.0, GLOBE_R);
+    mount4.position.copy(pos4);
+    mount4.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pos4.clone().normalize());
+    greenMountainsGroup.add(mount4);
 }
 initGreenMountains();
 
