@@ -2539,7 +2539,16 @@ async function fetchAndBroadcastAIBalances() {
                     geminiBalance = 50000; // Database state if no token account yet
                 }
             }
-        } catch(e) { console.error('Gemini balance error:', e.message); geminiBalance = cachedGeminiBalance || 50000; }
+        } catch(e) { 
+            console.error('Gemini balance error:', e.message); 
+            if (pgPool) {
+                try {
+                    const res = await pgPool.query("SELECT d3x_balance FROM commanders WHERE callsign = 'GEMINI CORE'");
+                    if (res.rows.length > 0) geminiBalance = parseInt(res.rows[0].d3x_balance);
+                } catch(dbErr) { console.error('Gemini DB fallback error:', dbErr.message); }
+            }
+            if (geminiBalance === 0) geminiBalance = cachedGeminiBalance || 50000; 
+        }
         
         try {
             // Add a 3-second delay between requests to avoid bursting the RPC node rate limits
@@ -2561,10 +2570,18 @@ async function fetchAndBroadcastAIBalances() {
             }
             
             if (!foundD3X && claudeBalance === 0) {
-                // If the token account doesn't exist yet, it's truly 0.
+               claudeBalance = 50000;
             }
-
-        } catch(e) { console.error('Claude balance error:', e.message); claudeBalance = cachedClaudeBalance || 0; }
+        } catch(e) { 
+            console.error('Claude balance error:', e.message); 
+            if (pgPool) {
+                try {
+                    const res = await pgPool.query("SELECT d3x_balance FROM commanders WHERE callsign = 'RAINCLAUDE'");
+                    if (res.rows.length > 0) claudeBalance = parseInt(res.rows[0].d3x_balance);
+                } catch(dbErr) { console.error('Rainclaude DB fallback error:', dbErr.message); }
+            }
+            if (claudeBalance === 0) claudeBalance = cachedClaudeBalance || 0; 
+        }
 
         try {
             if (pgPool) {
