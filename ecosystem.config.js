@@ -1,6 +1,13 @@
 module.exports = {
   apps: [
     {
+      name: "NuclearWarServer",
+      script: "./server.js",
+      env: {
+        NODE_ENV: "production",
+      }
+    },
+    {
       name: "BrainModuleTelemetry",
       script: "./BRAIN_MODULE/DashboardServer.js",
       watch: ["./BRAIN_MODULE"],

@@ -110,7 +110,8 @@ class AntigravityErrorSystem {
 }
 
 // Instantiate and attach globally so the developer can manually trigger errors via console
-window.telemetryLink = new GameTelemetryClient(`ws://${window.location.host}`);
+const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+window.telemetryLink = new GameTelemetryClient(`${protocol}//${window.location.host}`);
 window.antigravityBrain = new AntigravityErrorSystem(window.telemetryLink);
 
 // Example local rule

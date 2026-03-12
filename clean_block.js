@@ -6149,7 +6149,7 @@ window.handleCollectD3X = function(mineId) {
 // ========================================================
 // D3X STORE LOGIC
 // ========================================================
-window.d3xBalance = 1000; // Mock starting balance for testing
+window.d3xBalance = 0; // Strictly enforced: Awaiting real DB data
 window.unlockedCyberSkin = false;
 window.hasLaserVFX = false;
 

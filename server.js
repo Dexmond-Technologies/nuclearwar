@@ -275,6 +275,28 @@ const PORT = 8888; // Hardcoded to 8888 per user request
 
 // Create HTTP server to serve the static frontend
 const server = http.createServer((req, res) => {
+  if (req.method === 'POST' && req.url === '/webhook') {
+    // Reverse Proxy webhook requests to the Brain Module (DashboardServer.js) running on port 8086
+    const options = {
+      hostname: '127.0.0.1',
+      port: process.env.PORT || 8086,
+      path: '/webhook',
+      method: 'POST',
+      headers: req.headers
+    };
+    const proxy = http.request(options, (proxyRes) => {
+      res.writeHead(proxyRes.statusCode, proxyRes.headers);
+      proxyRes.pipe(res);
+    });
+    proxy.on('error', (err) => {
+      console.error('[WEBHOOK PROXY ERROR] Failed to reach Brain Module:', err.message);
+      res.writeHead(502);
+      res.end('Bad Gateway');
+    });
+    req.pipe(proxy);
+    return;
+  }
+
   if (req.url === '/' || req.url === '/index.html' || req.url === '/game.html') {
     fs.readFile(path.join(__dirname, 'game.html'), (err, data) => {
       if (err) {
@@ -843,12 +865,11 @@ function initWebSockets() {
     totalPlayers: connectedClients.size
   }, ws);
 
-  const isMockAllowed = process.env.MOCK_VALUES !== 'n' && process.env.MOCK_VALUES !== 'N';
-  // Immediately send cached AI balances
+  // Immediately send cached AI balances (Strictly enforced RPC values, MOCKS FORBIDDEN)
   ws.send(JSON.stringify({
     type: 'ai_d3x_balances',
-    gemini: cachedGeminiBalance || (isMockAllowed ? 100000000 : 0),
-    claude: cachedClaudeBalance || (isMockAllowed ? 100000000 : 0),
+    gemini: cachedGeminiBalance || 0,
+    claude: cachedClaudeBalance || 0,
     geminiWallet: cachedGeminiWallet,
     claudeWallet: cachedClaudeWallet
   }));
@@ -3539,28 +3560,24 @@ async function startServer() {
           console.error("Failed to inject World Bank into DB:", e.message);
       }
 
-      // Initialize Treasury wallet row and inject random mock metals
+      // Initialize Treasury wallet row (Mocks removed)
       try {
-          const mockMetals = {
-              "GOLD (XAU)": { amount: 450 + Math.floor(Math.random() * 500) },
-              "SILVER (XAG)": { amount: 15000 + Math.floor(Math.random() * 10000) },
-              "PLATINUM (XPT)": { amount: 120 + Math.floor(Math.random() * 150) },
-              "PALLADIUM (XPD)": { amount: 85 + Math.floor(Math.random() * 80) }
-          };
+          // Initialize empty, must be dynamically populated via DB interactions/world flow
+          const initialMetals = {};
           
           await pgPool.query(`
               INSERT INTO commanders (callsign, d3x_balance, portfolio, mining_inventory) 
               VALUES ($1, $2, $3, $4) 
               ON CONFLICT (callsign) DO NOTHING
-          `, ['TREASURY', 0, JSON.stringify({ name: 'Treasury', faction: 'System', wallet: TREASURY_WALLET }), JSON.stringify(mockMetals)]);
+          `, ['TREASURY', 0, JSON.stringify({ name: 'Treasury', faction: 'System', wallet: TREASURY_WALLET }), JSON.stringify(initialMetals)]);
           
-          // Ensure existing Treasury rows get the mock metals if empty
+          // Ensure existing Treasury rows get initialized correctly without mock values
           await pgPool.query(`
               UPDATE commanders SET mining_inventory = $1 
-              WHERE callsign = 'TREASURY' AND (mining_inventory IS NULL OR mining_inventory::text = '{}'::text)
-          `, [JSON.stringify(mockMetals)]);
+              WHERE callsign = 'TREASURY' AND (mining_inventory IS NULL)
+          `, [JSON.stringify(initialMetals)]);
           
-          console.log('☢ PostgreSQL Initialized TREASURY profile with mock metals');
+          console.log('☢ PostgreSQL Initialized TREASURY profile with empty verified registry');
       } catch(e) {
           console.error("Failed to inject Treasury into DB:", e.message);
       }
