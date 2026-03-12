@@ -1509,27 +1509,6 @@ body {
     <button id="btn-dig-action" onclick="startMountainDig()" style="width:100%; padding:15px; background:rgba(0,255,136,0.15); border:1px solid #0f8; color:#0f8; font-family:'Orbitron', sans-serif; font-size:16px; font-weight:bold; cursor:pointer; letter-spacing:2px; transition:all 0.2s; border-radius:4px; box-shadow:inset 0 0 15px rgba(0,255,136,0.1);" onmouseover="this.style.background='rgba(0,255,136,0.3)'; this.style.boxShadow='0 0 20px rgba(0,255,136,0.4)';" onmouseout="this.style.background='rgba(0,255,136,0.15)'; this.style.boxShadow='inset 0 0 15px rgba(0,255,136,0.1)';">COMMENCE EXCAVATION</button>
   </div>
 
-  <!-- STAKING TOWER MODAL -->
-  <div id="staking-tower-modal" style="display:none; position:fixed; top:0; left:0; width:100vw !important; height:100vh !important; flex-direction:column; background:rgba(20,0,0,0.95); border:1px solid #ff0033; box-sizing:border-box; margin:0; padding:4vw; pointer-events:auto; backdrop-filter:blur(10px); z-index:2147483647; overflow-y:auto;">
-    <button onclick="document.getElementById('staking-tower-modal').style.display='none'; window.selectedStakingTower=null;" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#f55;font-size:16px;cursor:pointer;line-height:1;padding:4px;">✕</button>
-    <h2 style="margin:0 0 5px 0; color:#ff0033; font-family:'Orbitron', sans-serif; font-size:22px; text-transform:uppercase; letter-spacing:2px; text-shadow:0 0 10px rgba(255,0,50,0.5);">STAKING TERMINAL</h2>
-    <div style="color:#aaa; font-family:'Share Tech Mono', monospace; font-size:12px; margin-bottom:20px;">NODE PROTOCOL: <span style="color:#fff;" id="staking-tower-node-name">D3X CORE NETWORK</span></div>
-    
-    <div style="display:flex; gap:15px; flex:1; align-items:flex-start;">
-      <div style="flex:1; border:1px solid rgba(255,0,50,0.3); padding:15px; background:rgba(40,0,0,0.5); border-radius:4px; display:flex; flex-direction:column; justify-content:center;">
-        <div style="color:#fa0; font-family:'Share Tech Mono', monospace; font-size:14px; margin-bottom:10px;">AVAILABLE D3X: <span style="color:#fff;" id="staking-tower-balance">100</span></div>
-        <div style="color:#0f0; font-family:'Share Tech Mono', monospace; font-size:14px; margin-bottom:20px;">ESTIMATED APY: <span style="color:#fff;">12.5%</span></div>
-        <input type="number" id="staking-tower-amount-input" placeholder="Amount to Stake" style="width:100%; box-sizing:border-box; padding:8px; background:rgba(255,255,255,0.05); border:1px solid #ff0033; color:#fff; font-family:'Courier New', monospace; outline:none; margin-bottom:10px; border-radius:2px;">
-        <button id="btn-stake-deposit" onclick="handleStakeDeposit()" style="width:100%; padding:10px; background:rgba(255,0,50,0.2); border:1px solid #ff0033; color:#ff0033; font-family:'Share Tech Mono', monospace; cursor:pointer; font-weight:bold; transition:all 0.2s; border-radius:2px;">DEPOSIT STAKE</button>
-      </div>
-      <div style="flex:1; border:1px solid rgba(255,0,50,0.3); padding:15px; background:rgba(40,0,0,0.5); border-radius:4px; display:flex; flex-direction:column; justify-content:center;">
-        <div style="color:#0af; font-family:'Share Tech Mono', monospace; font-size:14px; margin-bottom:10px;">ACTIVE STAKED: <span style="color:#fff;" id="staking-tower-active">0 D3X</span></div>
-        <div style="color:#f0f; font-family:'Share Tech Mono', monospace; font-size:14px; margin-bottom:20px;">UNCLAIMED REWARDS: <span style="color:#fff;">0.00 D3X</span></div>
-        <button id="btn-stake-claim" onclick="handleStakeClaim()" style="width:100%; padding:10px; background:rgba(0,170,255,0.1); border:1px solid #0af; color:#0af; font-family:'Share Tech Mono', monospace; cursor:pointer; font-weight:bold; transition:all 0.2s; margin-bottom:10px; border-radius:2px;">CLAIM REWARDS</button>
-        <button id="btn-stake-unstake" onclick="handleStakeUnstake()" style="width:100%; padding:10px; background:transparent; border:1px solid #777; color:#ccc; font-family:'Share Tech Mono', monospace; cursor:pointer; transition:all 0.2s; border-radius:2px;">UNSTAKE ALL</button>
-      </div>
-    </div>
-  </div>
 
   <div id="datacenter-coop-ui" style="display:none; pointer-events:none; position:absolute; top:0; left:0; width:100%; height:100%; z-index:90;">
 
@@ -17996,6 +17975,27 @@ document.getElementById('pool-modal-overlay').addEventListener('click', function
 });
 </script>
 
+  <!-- STAKING TOWER MODAL -->
+  <div id="staking-tower-modal" style="display:none; position:fixed; top:0; left:0; width:100vw !important; height:100vh !important; flex-direction:column; background:rgba(20,0,0,0.95); border:1px solid #ff0033; box-sizing:border-box; margin:0; padding:4vw; pointer-events:auto; backdrop-filter:blur(10px); z-index:2147483647; overflow-y:auto;">
+    <button onclick="document.getElementById('staking-tower-modal').style.display='none'; window.selectedStakingTower=null;" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#f55;font-size:16px;cursor:pointer;line-height:1;padding:4px;z-index:999999999;">✕</button>
+    <h2 style="margin:0 0 5px 0; color:#ff0033; font-family:'Orbitron', sans-serif; font-size:22px; text-transform:uppercase; letter-spacing:2px; text-shadow:0 0 10px rgba(255,0,50,0.5);">STAKING TERMINAL</h2>
+    <div style="color:#aaa; font-family:'Share Tech Mono', monospace; font-size:12px; margin-bottom:20px;">NODE PROTOCOL: <span style="color:#fff;" id="staking-tower-node-name">D3X CORE NETWORK</span></div>
+    
+    <div style="display:flex; gap:15px; flex:1; align-items:flex-start;">
+      <div style="flex:1; border:1px solid rgba(255,0,50,0.3); padding:15px; background:rgba(40,0,0,0.5); border-radius:4px; display:flex; flex-direction:column; justify-content:center;">
+        <div style="color:#fa0; font-family:'Share Tech Mono', monospace; font-size:14px; margin-bottom:10px;">AVAILABLE D3X: <span style="color:#fff;" id="staking-tower-balance">100</span></div>
+        <div style="color:#0f0; font-family:'Share Tech Mono', monospace; font-size:14px; margin-bottom:20px;">ESTIMATED APY: <span style="color:#fff;">12.5%</span></div>
+        <input type="number" id="staking-tower-amount-input" placeholder="Amount to Stake" style="width:100%; box-sizing:border-box; padding:8px; background:rgba(255,255,255,0.05); border:1px solid #ff0033; color:#fff; font-family:'Courier New', monospace; outline:none; margin-bottom:10px; border-radius:2px;">
+        <button id="btn-stake-deposit" onclick="handleStakeDeposit()" style="width:100%; padding:10px; background:rgba(255,0,50,0.2); border:1px solid #ff0033; color:#ff0033; font-family:'Share Tech Mono', monospace; cursor:pointer; font-weight:bold; transition:all 0.2s; border-radius:2px;">DEPOSIT STAKE</button>
+      </div>
+      <div style="flex:1; border:1px solid rgba(255,0,50,0.3); padding:15px; background:rgba(40,0,0,0.5); border-radius:4px; display:flex; flex-direction:column; justify-content:center;">
+        <div style="color:#0af; font-family:'Share Tech Mono', monospace; font-size:14px; margin-bottom:10px;">ACTIVE STAKED: <span style="color:#fff;" id="staking-tower-active">0 D3X</span></div>
+        <div style="color:#f0f; font-family:'Share Tech Mono', monospace; font-size:14px; margin-bottom:20px;">UNCLAIMED REWARDS: <span style="color:#fff;">0.00 D3X</span></div>
+        <button id="btn-stake-claim" onclick="handleStakeClaim()" style="width:100%; padding:10px; background:rgba(0,170,255,0.1); border:1px solid #0af; color:#0af; font-family:'Share Tech Mono', monospace; cursor:pointer; font-weight:bold; transition:all 0.2s; margin-bottom:10px; border-radius:2px;">CLAIM REWARDS</button>
+        <button id="btn-stake-unstake" onclick="handleStakeUnstake()" style="width:100%; padding:10px; background:transparent; border:1px solid #777; color:#ccc; font-family:'Share Tech Mono', monospace; cursor:pointer; transition:all 0.2s; border-radius:2px;">UNSTAKE ALL</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
 
