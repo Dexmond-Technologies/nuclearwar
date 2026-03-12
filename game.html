@@ -1510,7 +1510,7 @@ body {
   </div>
 
   <!-- STAKING TOWER MODAL -->
-  <div id="staking-tower-modal" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:1092px; min-height:442px; flex-direction:column; background:rgba(20,0,0,0.95); border:1px solid #ff0033; border-radius:8px; box-shadow:0 0 30px rgba(255,0,50,0.3); padding:20px; pointer-events:auto; backdrop-filter:blur(10px); z-index:99999;">
+  <div id="staking-tower-modal" style="display:none; position:fixed; top:0; left:0; width:100vw !important; height:100vh !important; flex-direction:column; background:rgba(20,0,0,0.95); border:1px solid #ff0033; box-sizing:border-box; margin:0; padding:4vw; pointer-events:auto; backdrop-filter:blur(10px); z-index:2147483647; overflow-y:auto;">
     <button onclick="document.getElementById('staking-tower-modal').style.display='none'; window.selectedStakingTower=null;" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#f55;font-size:16px;cursor:pointer;line-height:1;padding:4px;">✕</button>
     <h2 style="margin:0 0 5px 0; color:#ff0033; font-family:'Orbitron', sans-serif; font-size:22px; text-transform:uppercase; letter-spacing:2px; text-shadow:0 0 10px rgba(255,0,50,0.5);">STAKING TERMINAL</h2>
     <div style="color:#aaa; font-family:'Share Tech Mono', monospace; font-size:12px; margin-bottom:20px;">NODE PROTOCOL: <span style="color:#fff;" id="staking-tower-node-name">D3X CORE NETWORK</span></div>
