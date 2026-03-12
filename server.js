@@ -2106,10 +2106,10 @@ async function checkD3XRewards() {
   for (const client of connectedClients) {
     if (client.wallet && client.connectedAt) {
       
-      // Every 10 mins: add 5 D3X to pending_d3x
-      if ((now - client.connectedAt) >= 600000 /* 10 mins */) {
+      // Every 1 hour: send 5 D3X directly to wallet
+      if ((now - client.connectedAt) >= 3600000 /* 1 hour */) {
         try {
-           client.connectedAt = now; // reset session timer for next 10 mins
+           client.connectedAt = now; // reset session timer for next 1 hour
            
            // Check for active stakes giving the 2x Multiplier (>= 10,000 staked)
            let multiplier = 1;
@@ -2146,20 +2146,31 @@ async function checkD3XRewards() {
                });
                saveGameState(globalGameState);
                
-               console.log(`[REWARD] Commander ${client.name} played 10 mins. +${amountEarned} D3X auto-reinvested (Multiplier: ${multiplier}x).`);
+               console.log(`[REWARD] Commander ${client.name} played 1 hour. +${amountEarned} D3X auto-reinvested (Multiplier: ${multiplier}x).`);
                
                client.ws.send(JSON.stringify({ 
                    type: 'd3x_reward', 
                    amount: amountEarned,
-                   message: `${amountEarned} D3X Auto-Reinvested (10 min session)`
+                   message: `${amountEarned} D3X Auto-Reinvested (1 Hour Session)`
                }));
            } else {
-               await pgPool.query(`UPDATE commanders SET pending_d3x = pending_d3x + $2 WHERE callsign = $1`, [client.name, amountEarned]);
-               console.log(`[REWARD] Commander ${client.name} played 10 mins. +${amountEarned} D3X pending (Multiplier: ${multiplier}x).`);
+               console.log(`[REWARD] Commander ${client.name} played 1 hour. Airdropping ${amountEarned} D3X directly.`);
+               
+               // Deduct from World Bank
+               await pgPool.query(`UPDATE commanders SET d3x_balance = d3x_balance - $1 WHERE callsign = 'WORLD BANK'`, [amountEarned]);
+               await pgPool.query(`UPDATE commanders SET d3x_balance = d3x_balance + $1 WHERE callsign = $2`, [amountEarned, client.name]);
+               
+               // Trigger actual Solana transfer
+               if (typeof worldBankKeypair !== 'undefined' && worldBankKeypair) {
+                   await processDailyTokenDrop(client.name, client.wallet, amountEarned, worldBankKeypair);
+               } else {
+                   console.log(`ℹ [SOLANA OFF] Mock-Dropped ${amountEarned} D3X to ${client.name}. Provide valid WORLD_BANK_PVT_KEY for real token transfer.`);
+               }
+               
                client.ws.send(JSON.stringify({ 
                    type: 'd3x_reward', 
                    amount: amountEarned,
-                   message: `${amountEarned} D3X Accumulated (10 min session)`
+                   message: `Hourly Airdrop: ${amountEarned} D3X Sent to Wallet!`
                }));
            }
            
@@ -2167,46 +2178,8 @@ async function checkD3XRewards() {
                client.ws.send(JSON.stringify({ type: 'd3x_multiplier_active' }));
            }
         } catch(e) {
-           console.error('⚠ Error updating pending D3X:', e.message);
+           console.error('⚠ Error during hourly airdrop:', e.message);
         }
-      }
-
-      // Check 12-hour auto-claim logic:
-      try {
-        const res = await pgPool.query(`SELECT last_d3x_claim, pending_d3x FROM commanders WHERE callsign = $1`, [client.name]);
-        if (res.rows.length > 0) {
-           const lastClaim = res.rows[0].last_d3x_claim;
-           const pending = res.rows[0].pending_d3x;
-           
-           if (pending > 0) {
-              let canClaim = false;
-              if (!lastClaim) canClaim = true;
-              else {
-                 const msSinceClaim = now - new Date(lastClaim).getTime();
-                 if (msSinceClaim >= 43200000 /* 12 hours */) canClaim = true;
-              }
-
-              if (canClaim) {
-                 console.log(`[REWARD] Commander ${client.name} reached 12h threshold. Auto-claiming ${pending} D3X.`);
-                 await pgPool.query(`UPDATE commanders SET last_d3x_claim = NOW(), pending_d3x = 0, d3x_balance = d3x_balance + $2 WHERE callsign = $1`, [client.name, pending]);
-                 
-                 // If Solana World Bank Wallet is loaded, do real crypto drop, else mock drop
-                 if (worldBankKeypair) {
-                     await processDailyTokenDrop(client.name, client.wallet, pending, worldBankKeypair);
-                 } else {
-                     console.log(`ℹ [SOLANA OFF] Mock-Dropped ${pending} D3X to ${client.name}. Internal balance updated. Provide valid WORLD_BANK_PVT_KEY for real token transfer.`);
-                 }
-                 
-                 client.ws.send(JSON.stringify({ 
-                   type: 'd3x_reward', 
-                   amount: pending,
-                   message: `${pending} D3X Coins Airdropped! (12-Hour Batch Claimed)`
-                 }));
-              }
-           }
-        }
-      } catch(e) {
-          console.error('⚠ Error checking D3X db record:', e.message);
       }
     }
   }
