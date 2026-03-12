@@ -304,7 +304,9 @@ const server = http.createServer((req, res) => {
         return res.end('Error loading game.html');
       }
       res.writeHead(200, { 'Content-Type': 'text/html' });
-      res.end(data);
+      const envScript = `<script>window.ENV_RELEASE="${process.env.RELEASE || 'PROD'}";window.ENV_MOCK_VALUES="${process.env.MOCK_VALUES || 'n'}";</script>`;
+      const html = data.toString().replace('<head>', '<head>' + envScript);
+      res.end(html);
     });
   } else if (req.url === '/dist/improve_earth.js') {
     fs.readFile(path.join(__dirname, 'public/dist/improve_earth.js'), (err, data) => {
@@ -2984,12 +2986,11 @@ const AI_WEAPONS_CATALOG = [
 
 async function runAIMarketBuying() {
   if (!pgPool) return;
-
+  const isMockAllowed = process.env.MOCK_VALUES !== 'n' && process.env.MOCK_VALUES !== 'N';
   // Use the cached on-chain balances (set by fetchAndBroadcastAIBalances)
-  const geminiBalance = cachedGeminiBalance || 100000000; // Default 100M if not yet fetched
-  const claudeBalance = cachedClaudeBalance || 100000000;
-  const worldBankBalance = cachedWorldBankBalance || 100000000;
-
+  const geminiBalance = cachedGeminiBalance || (isMockAllowed ? 100000000 : 0); // Default 100M if mock
+  const claudeBalance = cachedClaudeBalance || (isMockAllowed ? 100000000 : 0);
+  const worldBankBalance = cachedWorldBankBalance || (isMockAllowed ? 100000000 : 0);
   const dailyCapMultiplier = (parseFloat(process.env.PERCENTAGE_DAILY_WALLET) || 1) / 100;
   const geminiDailyCap = geminiBalance * dailyCapMultiplier;
   const claudeDailyCap = claudeBalance * dailyCapMultiplier;
@@ -3271,10 +3272,11 @@ async function runAISpendingProtocol() {
   let fileContent = '';
   try {
     fileContent = await fs.promises.readFile(spendingFile, 'utf8');
-  } catch (e) { /* File doesn't exist yet */ }
-
-  // Use cached Gemini balance, fallback to 100M
-  const currentBalance = cachedGeminiBalance || 100000000;
+  } catch(e) { /* File doesn't exist yet */ }
+  
+  // Use cached Gemini balance, fallback to 100M if mock
+  const isMockAllowed = process.env.MOCK_VALUES !== 'n' && process.env.MOCK_VALUES !== 'N';
+  const currentBalance = cachedGeminiBalance || (isMockAllowed ? 100000000 : 0);
   const dailyCapMultiplier = (parseFloat(process.env.PERCENTAGE_DAILY_WALLET) || 1) / 100;
   const dailySpendCap = Math.floor(currentBalance * dailyCapMultiplier);
   if (dailySpendCap <= 0) return;
@@ -3575,9 +3577,14 @@ async function startServer() {
 
       // Initialize Treasury wallet row (Mocks removed)
       try {
-        // Initialize empty, must be dynamically populated via DB interactions/world flow
-        const initialMetals = {};
-
+        const isMockAllowed = process.env.MOCK_VALUES !== 'n' && process.env.MOCK_VALUES !== 'N';
+        const initialMetals = isMockAllowed ? {
+            "GOLD (XAU)": { amount: 450 + Math.floor(Math.random() * 500) },
+            "SILVER (XAG)": { amount: 15000 + Math.floor(Math.random() * 10000) },
+            "PLATINUM (XPT)": { amount: 120 + Math.floor(Math.random() * 150) },
+            "PALLADIUM (XPD)": { amount: 85 + Math.floor(Math.random() * 80) }
+        } : {};
+        
         await pgPool.query(`
               INSERT INTO commanders (callsign, d3x_balance, portfolio, mining_inventory) 
               VALUES ($1, $2, $3, $4) 
