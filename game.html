@@ -8065,7 +8065,7 @@ function handleGlobeClick(e) {
   if (document.getElementById('onboarding-modal').style.display === 'flex') return;
 
   // On WTR (Pool) skin, clicking anywhere on the globe opens the pool modal instead of showing country info
-  if (window.currentSkinIndex === 2) {
+  if (window.SKINS && window.SKINS[window.currentSkinIndex] && window.SKINS[window.currentSkinIndex].name === 'WTR') {
       if (typeof openPoolModal === 'function') openPoolModal();
       return;
   }
@@ -11454,27 +11454,28 @@ function initWS() {
           if (!window.d3xDigState[msg.mineId]) window.d3xDigState[msg.mineId] = { clicks: 0 };
           window.d3xDigState[msg.mineId].clicks = msg.clicks;
           
-          // Deduct the fuel cost from local UI mock balance
+          // Apply changes to local mock balance visually
           window.localD3XBalance -= msg.fuelCost;
+          window.localD3XBalance += msg.rewardAmount;
+          
           if (document.getElementById('cwd-bal')) {
               document.getElementById('cwd-bal').innerText = "| " + window.localD3XBalance.toLocaleString() + " D3X";
+          }
+          if (typeof updateD3XDisplay === 'function') {
+              window.d3xBalance = window.localD3XBalance;
+              updateD3XDisplay();
           }
           
           updateDigUI(msg.clicks);
           
-          let yieldString = "";
-          for (const [metal, amt] of Object.entries(msg.metals || {})) {
-              yieldString += `+${amt} ${metal} `;
-          }
-          
           if (msg.isCoreBreach) {
-              appendDigLog(`<span style="color:#fa0; font-weight:bold;">>>> CORE BREACH JACKPOT! Found: ${yieldString}</span>`);
+              appendDigLog(`<span style="color:#fa0; font-weight:bold;">>>> CORE BREACH JACKPOT! Staked: ${msg.fuelCost} D3X | Reward: +${msg.rewardAmount} D3X</span>`);
               if (typeof spawnFlyingResourceText === 'function') {
-                  spawnFlyingResourceText(`CORE BREACH!`, window.innerWidth/2, window.innerHeight/2, '#fa0');
+                  spawnFlyingResourceText(`+${msg.rewardAmount} D3X!`, window.innerWidth/2, window.innerHeight/2, '#fa0');
               }
               if (typeof _sfxExplosion !== 'undefined') _sfxExplosion(); // Extra punchy sound effect
           } else {
-              appendDigLog(`<span style="color:#f55">-${msg.fuelCost} D3X</span> Fuel Burned. Extracted: <span style="color:#0f8">${yieldString}</span>`);
+              appendDigLog(`<span style="color:#f55">-${msg.fuelCost} D3X</span> Fuel Burned. Extracted: <span style="color:#0f8">+${msg.rewardAmount} D3X</span>`);
           }
           break;
       }
@@ -16206,9 +16207,9 @@ window.handleDigD3X = function() {
     
     if (!window.activeMineModalId) return;
     
-    // Validate we actually have some D3X to afford the 3-6 D3X dig cost
-    if (window.localD3XBalance < 6) {
-        appendDigLog(`<span style="color:#f55">ERROR: Insufficient D3X</span> to power excavation rig (6 D3X required).`);
+    // Validate we actually have some D3X to afford the 2-4 D3X dig cost
+    if (window.localD3XBalance < 4) {
+        appendDigLog(`<span style="color:#f55">ERROR: Insufficient D3X</span> to power excavation rig (up to 4 D3X required).`);
         return;
     }
     
@@ -17976,23 +17977,41 @@ document.getElementById('pool-modal-overlay').addEventListener('click', function
 </script>
 
   <!-- STAKING TOWER MODAL -->
-  <div id="staking-tower-modal" style="display:none; position:fixed; top:0; left:0; width:100vw !important; height:100vh !important; flex-direction:column; background:rgba(20,0,0,0.95); border:1px solid #ff0033; box-sizing:border-box; margin:0; padding:4vw; pointer-events:auto; backdrop-filter:blur(10px); z-index:2147483647; overflow-y:auto;">
+  <div id="staking-tower-modal" style="display:none; position:fixed; inset:0; flex-direction:column; background:rgba(20,0,0,0.95); border:1px solid #ff0033; box-sizing:border-box; margin:0; padding:4vw; pointer-events:auto; backdrop-filter:blur(10px); z-index:2147483647; overflow-y:auto;">
     <button onclick="document.getElementById('staking-tower-modal').style.display='none'; window.selectedStakingTower=null;" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#f55;font-size:16px;cursor:pointer;line-height:1;padding:4px;z-index:999999999;">✕</button>
     <h2 style="margin:0 0 5px 0; color:#ff0033; font-family:'Orbitron', sans-serif; font-size:22px; text-transform:uppercase; letter-spacing:2px; text-shadow:0 0 10px rgba(255,0,50,0.5);">STAKING TERMINAL</h2>
     <div style="color:#aaa; font-family:'Share Tech Mono', monospace; font-size:12px; margin-bottom:20px;">NODE PROTOCOL: <span style="color:#fff;" id="staking-tower-node-name">D3X CORE NETWORK</span></div>
     
-    <div style="display:flex; gap:15px; flex:1; align-items:flex-start;">
-      <div style="flex:1; border:1px solid rgba(255,0,50,0.3); padding:15px; background:rgba(40,0,0,0.5); border-radius:4px; display:flex; flex-direction:column; justify-content:center;">
-        <div style="color:#fa0; font-family:'Share Tech Mono', monospace; font-size:14px; margin-bottom:10px;">AVAILABLE D3X: <span style="color:#fff;" id="staking-tower-balance">100</span></div>
-        <div style="color:#0f0; font-family:'Share Tech Mono', monospace; font-size:14px; margin-bottom:20px;">ESTIMATED APY: <span style="color:#fff;">12.5%</span></div>
-        <input type="number" id="staking-tower-amount-input" placeholder="Amount to Stake" style="width:100%; box-sizing:border-box; padding:8px; background:rgba(255,255,255,0.05); border:1px solid #ff0033; color:#fff; font-family:'Courier New', monospace; outline:none; margin-bottom:10px; border-radius:2px;">
-        <button id="btn-stake-deposit" onclick="handleStakeDeposit()" style="width:100%; padding:10px; background:rgba(255,0,50,0.2); border:1px solid #ff0033; color:#ff0033; font-family:'Share Tech Mono', monospace; cursor:pointer; font-weight:bold; transition:all 0.2s; border-radius:2px;">DEPOSIT STAKE</button>
+    <div style="display:flex; gap:30px; flex:1; align-items:stretch; margin-top:20px;">
+      
+      <!-- LEFT PANEL: DEPOSIT -->
+      <div style="flex:1; border:1px solid rgba(255,0,50,0.5); padding:40px; background:rgba(30,0,10,0.7); box-shadow:0 0 30px rgba(255,0,50,0.15) inset; border-radius:8px; display:flex; flex-direction:column; justify-content:flex-start;">
+        <div style="color:#fa0; font-family:'Share Tech Mono', monospace; font-size:16px; margin-bottom:5px; text-transform:uppercase; letter-spacing:1px;">AVAILABLE D3X</div>
+        <div style="color:#fff; font-family:'Orbitron', sans-serif; font-size:32px; font-weight:bold; margin-bottom:30px; text-shadow:0 0 10px rgba(255,170,0,0.5);" id="staking-tower-balance">100.00</div>
+        
+        <div style="color:#0f0; font-family:'Share Tech Mono', monospace; font-size:16px; margin-bottom:5px; text-transform:uppercase; letter-spacing:1px;">ESTIMATED APY</div>
+        <div style="color:#fff; font-family:'Orbitron', sans-serif; font-size:32px; font-weight:bold; margin-bottom:auto; text-shadow:0 0 10px rgba(0,255,0,0.5);">12.5%</div>
+        
+        <div style="margin-top:40px;">
+            <input type="number" id="staking-tower-amount-input" placeholder="Enter Amount to Stake" style="width:100%; box-sizing:border-box; padding:18px; background:rgba(255,0,50,0.05); border:2px solid #ff0033; color:#fff; font-family:'Share Tech Mono', monospace; font-size:20px; outline:none; margin-bottom:15px; border-radius:4px; transition:border 0.3s; text-align:center;">
+            
+            <button id="btn-stake-deposit" onclick="handleStakeDeposit()" onmouseover="this.style.background='rgba(255,0,50,0.4)'; this.style.boxShadow='0 0 15px rgba(255,0,50,0.8)';" onmouseout="this.style.background='rgba(255,0,50,0.2)'; this.style.boxShadow='none';" style="width:100%; padding:20px; background:rgba(255,0,50,0.2); border:2px solid #ff0033; color:#fff; font-family:'Orbitron', sans-serif; font-size:20px; text-transform:uppercase; letter-spacing:2px; cursor:pointer; font-weight:bold; transition:all 0.2s; border-radius:4px;">DEPOSIT STAKE</button>
+        </div>
       </div>
-      <div style="flex:1; border:1px solid rgba(255,0,50,0.3); padding:15px; background:rgba(40,0,0,0.5); border-radius:4px; display:flex; flex-direction:column; justify-content:center;">
-        <div style="color:#0af; font-family:'Share Tech Mono', monospace; font-size:14px; margin-bottom:10px;">ACTIVE STAKED: <span style="color:#fff;" id="staking-tower-active">0 D3X</span></div>
-        <div style="color:#f0f; font-family:'Share Tech Mono', monospace; font-size:14px; margin-bottom:20px;">UNCLAIMED REWARDS: <span style="color:#fff;">0.00 D3X</span></div>
-        <button id="btn-stake-claim" onclick="handleStakeClaim()" style="width:100%; padding:10px; background:rgba(0,170,255,0.1); border:1px solid #0af; color:#0af; font-family:'Share Tech Mono', monospace; cursor:pointer; font-weight:bold; transition:all 0.2s; margin-bottom:10px; border-radius:2px;">CLAIM REWARDS</button>
-        <button id="btn-stake-unstake" onclick="handleStakeUnstake()" style="width:100%; padding:10px; background:transparent; border:1px solid #777; color:#ccc; font-family:'Share Tech Mono', monospace; cursor:pointer; transition:all 0.2s; border-radius:2px;">UNSTAKE ALL</button>
+      
+      <!-- RIGHT PANEL: REWARDS -->
+      <div style="flex:1; border:1px solid rgba(0,170,255,0.5); padding:40px; background:rgba(0,10,30,0.7); box-shadow:0 0 30px rgba(0,170,255,0.15) inset; border-radius:8px; display:flex; flex-direction:column; justify-content:flex-start;">
+        <div style="color:#0af; font-family:'Share Tech Mono', monospace; font-size:16px; margin-bottom:5px; text-transform:uppercase; letter-spacing:1px;">ACTIVE STAKED</div>
+        <div style="color:#fff; font-family:'Orbitron', sans-serif; font-size:32px; font-weight:bold; margin-bottom:30px; text-shadow:0 0 10px rgba(0,170,255,0.5);" id="staking-tower-active">0.00 D3X</div>
+        
+        <div style="color:#f0f; font-family:'Share Tech Mono', monospace; font-size:16px; margin-bottom:5px; text-transform:uppercase; letter-spacing:1px;">UNCLAIMED REWARDS</div>
+        <div style="color:#fff; font-family:'Orbitron', sans-serif; font-size:32px; font-weight:bold; margin-bottom:auto; text-shadow:0 0 10px rgba(255,0,255,0.5);">0.00 D3X</div>
+        
+        <div style="margin-top:40px; display:flex; flex-direction:column; gap:15px;">
+            <button id="btn-stake-claim" onclick="handleStakeClaim()" onmouseover="this.style.background='rgba(0,170,255,0.3)'; this.style.boxShadow='0 0 15px rgba(0,170,255,0.8)';" onmouseout="this.style.background='rgba(0,170,255,0.1)'; this.style.boxShadow='none';" style="width:100%; padding:20px; background:rgba(0,170,255,0.1); border:2px solid #0af; color:#fff; font-family:'Orbitron', sans-serif; font-size:20px; text-transform:uppercase; letter-spacing:2px; cursor:pointer; font-weight:bold; transition:all 0.2s; border-radius:4px;">CLAIM REWARDS</button>
+            
+            <button id="btn-stake-unstake" onclick="handleStakeUnstake()" onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.borderColor='#fff'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.borderColor='#777'; this.style.color='#ccc';" style="width:100%; padding:20px; background:transparent; border:2px solid #777; color:#ccc; font-family:'Orbitron', sans-serif; font-size:20px; text-transform:uppercase; letter-spacing:2px; cursor:pointer; font-weight:bold; transition:all 0.2s; border-radius:4px;">UNSTAKE ALL</button>
+        </div>
       </div>
     </div>
   </div>

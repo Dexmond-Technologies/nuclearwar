@@ -1718,8 +1718,8 @@ function initWebSockets() {
             const currentBal  = parseInt(res.rows[0].d3x_balance || 0, 10);
             const inv         = res.rows[0].mining_inventory || {};
 
-            // Cost: 3-6 D3X as rig fuel (this is BURNED via splitEconomyFlow)
-            const fuelCost = Math.floor(Math.random() * 4) + 3;
+            // Cost: 2-4 D3X as rig fuel (this is BURNED via splitEconomyFlow)
+            const fuelCost = Math.floor(Math.random() * 3) + 2;
 
             if (currentBal < fuelCost) {
                 ws.send(JSON.stringify({ type: 'error', msg: `Need ${fuelCost} D3X fuel to drill. You have ${currentBal}.` }));
@@ -1733,58 +1733,46 @@ function initWebSockets() {
             const state = globalGameState.digStates[callsign][mineId];
             state.clicks++;
 
-            // Deduct D3X fuel from player first
+            // Route the fuel cost through the economy split (bank/burn/treasury)
             await pgPool.query(
                 `UPDATE commanders SET d3x_balance = d3x_balance - $1 WHERE callsign = $2`,
                 [fuelCost, callsign]
             );
-            // Route the fuel cost through the economy split (bank/burn/treasury)
-            await splitEconomyFlow(fuelCost, callsign, `Mine drill fuel — ${mineId}`);
+            await splitEconomyFlow(fuelCost, callsign, `Staking fuel — ${mineId}`);
 
-            // Determine metal yield for this click
+            // Determine D3X yield for this click
             let isCoreBreach = false;
-            let metalYield = {};
+            let rewardAmount = 0;
 
             if (state.clicks >= 10) {
-                // CORE BREACH — large multi-metal jackpot
+                // CORE BREACH — 35 to 40 D3X
                 isCoreBreach = true;
                 state.clicks = 0;
-                const jackpotMetal1 = METAL_TYPES[Math.floor(Math.random() * METAL_TYPES.length)];
-                const jackpotMetal2 = METAL_TYPES.filter(m => m !== jackpotMetal1)[Math.floor(Math.random() * 4)];
-                const rareBonus     = METAL_TYPES.filter(m => m !== jackpotMetal1 && m !== jackpotMetal2)[Math.floor(Math.random() * 3)];
-                metalYield[jackpotMetal1] = 40 + Math.floor(Math.random() * 20); // 40-60
-                metalYield[jackpotMetal2] = 20 + Math.floor(Math.random() * 10); // 20-30
-                metalYield[rareBonus]     = 5  + Math.floor(Math.random() * 5);  // 5-10
+                rewardAmount = Math.floor(Math.random() * 6) + 35;
             } else {
-                // Normal click — one small metal nugget
-                const metal = METAL_TYPES[Math.floor(Math.random() * METAL_TYPES.length)];
-                metalYield[metal] = Math.floor(Math.random() * 5) + 2; // 2-6 units
+                // Normal click — 2 D3X
+                rewardAmount = 2;
             }
 
-            // Add metal yield to inventory
-            for (const [metal, amount] of Object.entries(metalYield)) {
-                inv[metal] = (inv[metal] || 0) + amount;
-            }
-
+            // Add D3X reward
             await pgPool.query(
-                `UPDATE commanders SET mining_inventory = $1 WHERE callsign = $2`,
-                [JSON.stringify(inv), callsign]
+                `UPDATE commanders SET d3x_balance = d3x_balance + $1 WHERE callsign = $2`,
+                [rewardAmount, callsign]
             );
 
-            await logTokenFlow('mine_metals',
-                Object.values(metalYield).reduce((a,b) => a+b, 0),
-                callsign, 'INVENTORY',
-                `Drill click on ${mineId}: ${JSON.stringify(metalYield)}`
+            await logTokenFlow('d3x_mining',
+                rewardAmount,
+                callsign, 'BANK',
+                `Drill click on ${mineId}: Yielded ${rewardAmount} D3X`
             );
 
-            console.log(`[MINE] ⛏ ${callsign} drilled ${mineId} (click ${state.clicks}). Fuel: ${fuelCost} D3X. Yield: ${JSON.stringify(metalYield)}`);
+            console.log(`[MINE] ⛏ ${callsign} drilled ${mineId} (click ${state.clicks}). Fuel: ${fuelCost} D3X. Yield: ${rewardAmount} D3X.`);
 
             ws.send(JSON.stringify({
                 type: 'mine_click_result',
                 mineId,
                 fuelCost,
-                metals: metalYield,
-                inventory: inv,
+                rewardAmount,
                 isCoreBreach,
                 clicks: state.clicks
             }));
