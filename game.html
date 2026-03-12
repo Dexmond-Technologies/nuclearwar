@@ -16424,24 +16424,7 @@ window.buyWeaponFromShop = function(name, cost) {
     
     if (window.solana && window.solana.isPhantom) {
       try {
-        await window.solana.disconnect();
-        
-        const domain = window.location.host || 'localhost';
-        const uri = window.location.href || 'http://localhost:8888';
-        const currentDateTime = new Date().toISOString();
-        const nonce = Array.from(crypto.getRandomValues(new Uint8Array(8))).map(b => b.toString(16).padStart(2, '0')).join('');
-
-        const input = {
-          domain,
-          statement: "Sign In to Nuclear War command terminal.",
-          version: "1",
-          nonce: nonce,
-          chainId: "mainnet",
-          issuedAt: currentDateTime,
-          resources: ["https://phantom.app/"]
-        };
-        
-        await window.solana.signIn(input);
+        await window.solana.connect();
         const address = window.solana.publicKey.toString();
         
         const statusEl = document.getElementById('lobby-auth-status');
@@ -16455,8 +16438,7 @@ window.buyWeaponFromShop = function(name, cost) {
         window.pendingSolanaAddress = address;
         joinGlobalWar();
       } catch (err) {
-        console.error("Phantom custom connect failed:", err);
-        alert('Phantom Connection Failed or Rejected.');
+        console.error("Phantom connect failed:", err);
         if (btn) btn.innerText = 'DIRECT PHANTOM';
       }
     } else {
