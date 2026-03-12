@@ -68,6 +68,29 @@ let treasuryKeypair  = loadKeypairFromEnv('TREASURY_PVT_KEY', 'Treasury');
 
 let cachedGeminiBalance = 0;
 let cachedClaudeBalance = 0;
+
+// --- Initialize Offline Balances ---
+async function initOfflineBalances() {
+    try {
+        const spendingFile = require('path').join(__dirname, 'AI_Spending.txt');
+        const content = await require('fs').promises.readFile(spendingFile, 'utf8');
+        const lines = content.split('\n').filter(l => l.trim().length > 0);
+        for (let i = lines.length - 1; i >= 0; i--) {
+            if (lines[i].startsWith('REMAINING_BALANCE:')) {
+                const bal = parseFloat(lines[i].replace('REMAINING_BALANCE:', '').trim());
+                if (!isNaN(bal)) {
+                    cachedGeminiBalance = bal;
+                    cachedClaudeBalance = bal;
+                    console.log(`[AI OFFLINE SYNC] Restored AI baseline balance to ${bal} D3X`);
+                    break;
+                }
+            }
+        }
+    } catch(e) {
+        console.log('[AI OFFLINE SYNC] No previous spending file found.');
+    }
+}
+initOfflineBalances();
 let cachedWorldBankBalance = 0;
 let cachedGeminiWallet = process.env.gemini_wallet || (geminiKeypair ? geminiKeypair.publicKey.toBase58() : "NOT_SET");
 let cachedClaudeWallet = process.env.RAINCLAUDE_SOLANA_WALLET || (rainclaudeKeypair ? rainclaudeKeypair.publicKey.toBase58() : "NOT_SET");
@@ -2536,7 +2559,7 @@ async function fetchAndBroadcastAIBalances() {
                 }
                 
                 if (!foundD3X && geminiBalance === 0) {
-                    geminiBalance = 50000; // Database state if no token account yet
+                    geminiBalance = cachedGeminiBalance || 50000; // Database state if no token account yet
                 }
             }
         } catch(e) { 
@@ -2570,7 +2593,7 @@ async function fetchAndBroadcastAIBalances() {
             }
             
             if (!foundD3X && claudeBalance === 0) {
-               claudeBalance = 50000;
+               claudeBalance = cachedClaudeBalance || 50000;
             }
         } catch(e) { 
             console.error('Claude balance error:', e.message); 
