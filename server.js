@@ -21,6 +21,15 @@ if (GUI_LOCK) {
     console.log("🔒 GUI_LOCK or AMBIENT=BACKEND is ENABLED. User interface modifications are forbidden on this machine.");
 }
 
+// ========================================================
+// AI BROWSER AGENT LOCKOUT
+// If process.env.AI_BROWSERAGENTLAUNCH === 'n' or 'N', AI browser agents are FORBIDDEN.
+// ========================================================
+const BLOCK_BROWSER_AGENTS = (process.env.AI_BROWSERAGENTLAUNCH || '').toLowerCase() === 'n';
+if (BLOCK_BROWSER_AGENTS) {
+    console.log("🛑 AI_BROWSERAGENTLAUNCH is set to 'n'. AI Browser Agents are strictly FORBIDDEN from launching.");
+}
+
 const GameLogger = require('./CONTROLLER/logger');
 const WaterModule = require('./CONTROLLER/WATER_MODULE/simulation');
 
