@@ -199,7 +199,8 @@ if (process.env.DATABASE_URL) {
   const { Pool } = require('pg');
   pgPool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
+    ssl: { rejectUnauthorized: false },
+    connectionTimeoutMillis: 5000
   });
 } else {
   console.log('ℹ No DATABASE_URL — running without persistence (state resets on restart)');
@@ -290,6 +291,25 @@ const server = http.createServer((req, res) => {
         return res.end('Not found');
       }
       res.writeHead(200, { 'Content-Type': 'image/png' });
+      res.end(data);
+    });
+
+  } else if (req.url.startsWith('/public/')) {
+    const filename = decodeURIComponent(req.url);
+    const filePath = path.join(__dirname, filename);
+    const ext = path.extname(filePath);
+    let contentType = 'text/plain';
+    if (ext === '.js') contentType = 'application/javascript';
+    else if (ext === '.json') contentType = 'application/json';
+    else if (ext === '.png') contentType = 'image/png';
+    else if (ext === '.css') contentType = 'text/css';
+    
+    fs.readFile(filePath, (err, data) => {
+      if (err) {
+        res.writeHead(404);
+        return res.end('Not found');
+      }
+      res.writeHead(200, { 'Content-Type': contentType });
       res.end(data);
     });
 
@@ -3509,14 +3529,28 @@ async function startServer() {
           console.error("Failed to inject World Bank into DB:", e.message);
       }
 
-      // Initialize Treasury wallet row
+      // Initialize Treasury wallet row and inject random mock metals
       try {
+          const mockMetals = {
+              "GOLD (XAU)": { amount: 450 + Math.floor(Math.random() * 500) },
+              "SILVER (XAG)": { amount: 15000 + Math.floor(Math.random() * 10000) },
+              "PLATINUM (XPT)": { amount: 120 + Math.floor(Math.random() * 150) },
+              "PALLADIUM (XPD)": { amount: 85 + Math.floor(Math.random() * 80) }
+          };
+          
           await pgPool.query(`
-              INSERT INTO commanders (callsign, d3x_balance, portfolio) 
-              VALUES ($1, $2, $3) 
+              INSERT INTO commanders (callsign, d3x_balance, portfolio, mining_inventory) 
+              VALUES ($1, $2, $3, $4) 
               ON CONFLICT (callsign) DO NOTHING
-          `, ['TREASURY', 0, JSON.stringify({ name: 'Treasury', faction: 'System', wallet: TREASURY_WALLET })]);
-          console.log('☢ PostgreSQL Initialized TREASURY profile');
+          `, ['TREASURY', 0, JSON.stringify({ name: 'Treasury', faction: 'System', wallet: TREASURY_WALLET }), JSON.stringify(mockMetals)]);
+          
+          // Ensure existing Treasury rows get the mock metals if empty
+          await pgPool.query(`
+              UPDATE commanders SET mining_inventory = $1 
+              WHERE callsign = 'TREASURY' AND (mining_inventory IS NULL OR mining_inventory::text = '{}'::text)
+          `, [JSON.stringify(mockMetals)]);
+          
+          console.log('☢ PostgreSQL Initialized TREASURY profile with mock metals');
       } catch(e) {
           console.error("Failed to inject Treasury into DB:", e.message);
       }
