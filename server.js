@@ -269,17 +269,17 @@ async function loadGameStateFallback() {
   return null;
 }
 
-const PORT = 8888; // Hardcoded to 8888 per user request
+const PORT = process.env.PORT || 8888; // Render dynamically assigns PORT
 
 // OpenSky API Removed
 
 // Create HTTP server to serve the static frontend
 const server = http.createServer((req, res) => {
   if (req.method === 'POST' && req.url === '/webhook') {
-    // Reverse Proxy webhook requests to the Brain Module (DashboardServer.js) running on port 8086
+    // Reverse Proxy webhook requests to the Brain Module (DashboardServer.js) running strictly on port 8086
     const options = {
       hostname: '127.0.0.1',
-      port: process.env.PORT || 8086,
+      port: 8086, // Hardcoded to avoid circular reference to Render's process.env.PORT
       path: '/webhook',
       method: 'POST',
       headers: req.headers

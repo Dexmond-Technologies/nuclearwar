@@ -97,7 +97,7 @@ console.log("[BRAIN MODULE] Telemetry Engine Online. Listening on Port 8085...")
 // ========================================================
 // RENDER PERSISTENCE & GITHUB WEBHOOK RECEPTOR
 // ========================================================
-const WEBHOOK_PORT = process.env.PORT || 8086;
+const WEBHOOK_PORT = 8086; // Hardcoded to 8086 internal proxy. Do not use process.env.PORT, Render assigns it to the main server.
 
 const httpServer = http.createServer((req, res) => {
     if (req.method === 'POST' && req.url === '/webhook') {

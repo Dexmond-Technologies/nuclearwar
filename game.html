@@ -14648,7 +14648,8 @@ window.simulateGreenMarketAI = function() {
       // WTR 3D Blocks are now static on the globe surface, no animation needed here.
 
       // Auto-rotate when idle (even during missile flight)
-      if (!drag) {
+      const isCurrentlyDragging = typeof window.isDragging !== 'undefined' ? window.isDragging : false;
+      if (!isCurrentlyDragging) {
         // Slow down to almost 0 when a country is selected for easier interaction
         const rotSpeed = GS.selected ? 0.0002 : 0.003;
         sph.theta -= rotSpeed * dt * 60;
