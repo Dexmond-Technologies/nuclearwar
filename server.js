@@ -1252,10 +1252,10 @@ function initWebSockets() {
                       
                       // Auto-update the portfolio with the newly synced tracking watermark
                       port.lastKnownOnChainBalance = liveOnChainBal;
-                      port.localD3XBalance = localLedger;
-                      await pgPool.query(`UPDATE commanders SET portfolio = $1, d3x_balance = $2 WHERE callsign = $3`, [port, localLedger, walletAddr]);
+                      delete port.localD3XBalance; // Clean it up if it persists
+                      await pgPool.query(`UPDATE commanders SET portfolio = $1, d3x_balance = $2 WHERE callsign = $3`, [port, currentD3XBalance, walletAddr]);
                       
-                      ws.send(JSON.stringify({ type: 'my_d3x_balance', amount: localLedger, activeLoan: port.active_loan || null }));
+                      ws.send(JSON.stringify({ type: 'my_d3x_balance', amount: currentD3XBalance, activeLoan: port.active_loan || null }));
                       break; 
                   }
               }
@@ -1858,8 +1858,12 @@ function initWebSockets() {
             if (res.rows.length > 0 && res.rows[0].portfolio) {
                 finalPortfolio = {
                     ...res.rows[0].portfolio,
-                    ...portfolioData // Let client override commodities, logs, and localD3XBalance
+                    ...portfolioData 
                 };
+                // SECURITY: Strip out properties that must be strictly server-managed
+                delete finalPortfolio.localD3XBalance;
+                delete finalPortfolio.commodities;
+                delete finalPortfolio.tradeLogs;
             }
             
             await pgPool.query(`UPDATE commanders SET portfolio = $1 WHERE callsign = $2`, [finalPortfolio, callsign]);
@@ -1883,6 +1887,90 @@ function initWebSockets() {
             }
         } catch (e) {
             console.error('DB Error on save_portfolio:', e.message);
+        }
+        break;
+      }
+
+      case 'trade_green_resource': {
+        const metalName = msg.metal;
+        const amount = parseInt(msg.amount);
+        if (!client.name || !pgPool || !metalName || !amount) break;
+        
+        try {
+            const res = await pgPool.query(`SELECT d3x_balance, portfolio FROM commanders WHERE callsign = $1`, [client.name]);
+            if (res.rows.length === 0) break;
+            
+            let d3xBal = parseInt(res.rows[0].d3x_balance || 0, 10);
+            let portfolio = res.rows[0].portfolio || {};
+            if (!portfolio.commodities) portfolio.commodities = {};
+            if (!portfolio.tradeLogs) portfolio.tradeLogs = [];
+            
+            const cm = globalGreenMarket.commodities[metalName];
+            if (!cm) break;
+            
+            const cost = cm.price;
+            const totalCost = Math.round(cost * Math.abs(amount) * 100) / 100;
+            
+            let pComm = portfolio.commodities[metalName];
+            if (!pComm) pComm = { shares: 0, avgCost: 0, totalSpent: 0 };
+            
+            let success = false;
+            let pnlStr = '';
+            
+            if (amount > 0) { // BUY
+                if (d3xBal >= totalCost) {
+                    let totalShares = pComm.shares + amount;
+                    let newTotalSpent = pComm.totalSpent + totalCost;
+                    pComm.avgCost = newTotalSpent / totalShares;
+                    pComm.totalSpent = newTotalSpent;
+                    pComm.shares += amount;
+                    d3xBal -= totalCost;
+                    
+                    const tString = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
+                    portfolio.tradeLogs.push(`[${tString}] <span style="color:#0f8">BOUGHT</span> 1 ${metalName} @ ${cost.toFixed(2)} D3X`);
+                    success = true;
+                }
+            } else if (amount < 0) { // SELL
+                const absAmount = Math.abs(amount);
+                if (pComm.shares >= absAmount) {
+                    let realizedPnL = (cost - pComm.avgCost) * absAmount;
+                    pnlStr = realizedPnL >= 0 ? `<span style="color:#0f0">+$${realizedPnL.toFixed(2)} D3X</span>` : `<span style="color:#f00">-$${Math.abs(realizedPnL).toFixed(2)} D3X</span>`;
+                    
+                    pComm.totalSpent -= (pComm.avgCost * absAmount);
+                    if (pComm.totalSpent < 0) pComm.totalSpent = 0;
+                    pComm.shares += amount;
+                    
+                    if (pComm.shares === 0) {
+                        pComm.avgCost = 0;
+                        pComm.totalSpent = 0;
+                    }
+                    
+                    d3xBal += totalCost;
+                    
+                    const tString = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
+                    portfolio.tradeLogs.push(`[${tString}] <span style="color:#f55">SOLD</span> 1 ${metalName} @ ${cost.toFixed(2)} D3X | P&L: ${pnlStr}`);
+                    success = true;
+                }
+            }
+            
+            if (success) {
+                if (portfolio.tradeLogs.length > 50) portfolio.tradeLogs.shift();
+                portfolio.commodities[metalName] = pComm;
+                
+                await pgPool.query(`UPDATE commanders SET d3x_balance = $1, portfolio = $2 WHERE callsign = $3`, [d3xBal, portfolio, client.name]);
+                
+                ws.send(JSON.stringify({
+                    type: 'trade_green_result',
+                    success: true,
+                    metal: metalName,
+                    amount: amount,
+                    cost: totalCost,
+                    newD3XBal: d3xBal,
+                    portfolio: portfolio
+                }));
+            }
+        } catch (e) {
+            console.error('Green Market Trade Error:', e);
         }
         break;
       }
@@ -2709,6 +2797,73 @@ let claudeDailySpent = 0;
 let worldBankDailySpent = 0;
 // Reset daily budgets at midnight UTC
 setInterval(() => { geminiDailySpent = 0; claudeDailySpent = 0; worldBankDailySpent = 0; console.log('[AI MARKET] Daily spend caps reset.'); }, 24 * 60 * 60 * 1000);
+
+// -- Green Market Centralized Server Source of Truth --
+let globalGreenMarket = {
+  commodities: {
+    'Copper': { price: 8.50, basePrice: 8.50, vol: 0.02, history: [8.50] }, 
+    'Lithium': { price: 35.00, basePrice: 35.00, vol: 0.05, history: [35.00] }, 
+    'Rare Earth Elements': { price: 120.00, basePrice: 120.00, vol: 0.08, history: [120.00] },
+    'Iron ore': { price: 1.20, basePrice: 1.20, vol: 0.01, history: [1.20] }, 
+    'Gold': { price: 2150.00, basePrice: 2150.00, vol: 0.015, history: [2150.00] }, 
+    'Nickel': { price: 18.50, basePrice: 18.50, vol: 0.03, history: [18.50] }, 
+    'Tin': { price: 27.00, basePrice: 27.00, vol: 0.04, history: [27.00] },
+    'Aluminum (Bauxite)': { price: 2.50, basePrice: 2.50, vol: 0.02, history: [2.50] },
+    'Aluminum': { price: 4.80, basePrice: 4.80, vol: 0.02, history: [4.80] }, 
+    'Cobalt': { price: 28.00, basePrice: 28.00, vol: 0.06, history: [28.00] },
+    'Lumber (Wood)': { price: 0.50, basePrice: 0.50, vol: 0.015, history: [0.50] },
+    'Freshwater': { price: 0.10, basePrice: 0.10, vol: 0.005, history: [0.10] },
+    'Natural Gas': { price: 3.50, basePrice: 3.50, vol: 0.04, history: [3.50] },
+    'Crude Oil': { price: 78.50, basePrice: 78.50, vol: 0.03, history: [78.50] },
+    'Wheat': { price: 0.60, basePrice: 0.60, vol: 0.02, history: [0.60] },
+    'NVIDIA H100 Tensor Core': { price: 35000.00, basePrice: 35000.00, vol: 0.08, history: [35000.00] },
+    'NVIDIA A100 80GB': { price: 12000.00, basePrice: 12000.00, vol: 0.05, history: [12000.00] },
+    'Google Cloud TPU v5e': { price: 9500.00, basePrice: 9500.00, vol: 0.06, history: [9500.00] },
+    'AMD EPYC 9004 CPUs': { price: 4500.00, basePrice: 4500.00, vol: 0.04, history: [4500.00] },
+    'DDR5 ECC RAM (128GB)': { price: 380.00, basePrice: 380.00, vol: 0.03, history: [380.00] },
+    'Enterprise NVMe SSD (15TB)': { price: 1250.00, basePrice: 1250.00, vol: 0.02, history: [1250.00] },
+    'Compute Motherboards (Dual Socket)': { price: 1100.00, basePrice: 1100.00, vol: 0.015, history: [1100.00] },
+    'Titanium Grade PSUs (2000W)': { price: 550.00, basePrice: 550.00, vol: 0.01, history: [550.00] },
+    'Direct-to-Chip Liquid Cooling Units': { price: 5500.00, basePrice: 5500.00, vol: 0.02, history: [5500.00] },
+    'Networking Switches (400GbE)': { price: 18000.00, basePrice: 18000.00, vol: 0.035, history: [18000.00] }
+  }
+};
+
+function updateGreenMarketPrices() {
+  let wsMsg = { type: 'green_market_sync', prices: {}, histories: {} };
+  
+  let warVolMultiplier = 1.0;
+  if (globalGameState && globalGameState.defcon <= 4) warVolMultiplier = 2.5;
+  
+  Object.keys(globalGreenMarket.commodities).forEach(k => {
+    let c = globalGreenMarket.commodities[k];
+    let directionalDrift = 1.0;
+    
+    if (warVolMultiplier > 1.0) {
+        if (k === 'Crude Oil' || k === 'Natural Gas' || k === 'Gold') directionalDrift = 1.002;
+        else if (k.includes('NVIDIA') || k.includes('TPU') || k.includes('EPYC')) directionalDrift = 0.997;
+    }
+    
+    let change = 1 + (Math.random() * (c.vol * warVolMultiplier) * 2 - (c.vol * warVolMultiplier));
+    change *= directionalDrift;
+    
+    if (Math.random() < 0.05) change *= (Math.random() < 0.5 ? 0.85 : 1.15);
+    
+    c.price = Math.max(c.basePrice * 0.1, c.price * change);
+    
+    c.history.push(c.price);
+    if(c.history.length > 20) c.history.shift();
+    
+    wsMsg.prices[k] = c.price;
+    wsMsg.histories[k] = c.history;
+  });
+
+  wss.clients.forEach(c => {
+    if (c.readyState === 1) c.send(JSON.stringify(wsMsg));
+  });
+}
+// Tick every 3 seconds to match client-side legacy refresh rate
+setInterval(updateGreenMarketPrices, 3000);
 
 // Full commodity catalog (items the AIs can autonomously purchase)
 const AI_MARKET_CATALOG = [

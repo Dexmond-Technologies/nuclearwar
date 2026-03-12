@@ -6031,7 +6031,7 @@ const dustPts = [];
 
 // Generate sparse dust particles wrapped tightly around the globe for performance
 const dustBasePos = [];
-for(let i=0; i<6400; i++) {
+for(let i=0; i<12800; i++) {
    const t = Math.random() * Math.PI * 2;
    const p = Math.acos(2 * Math.random() - 1);
    const r = GLOBE_R + 0.002 + (Math.random() * 0.12);
@@ -9118,41 +9118,12 @@ function updateGreenMarket() {
   Object.keys(window.greenMarket.commodities).forEach(k => {
     let c = window.greenMarket.commodities[k];
     
-    // Initialize basePrice if not set for dynamic floors
     if (!c.basePrice) c.basePrice = c.price;
     if (typeof c.avgCost === 'undefined') c.avgCost = 0;
     if (typeof c.totalSpent === 'undefined') c.totalSpent = 0;
     
-    // Process Volatility Random Walk
-    let warVolMultiplier = 1.0;
-    let directionalDrift = 1.0;
-    
-    if (typeof GS !== 'undefined' && GS.globalMetrics) {
-        if (GS.globalMetrics.defcon <= 4 || (GS.catastrophes && GS.catastrophes.active)) {
-            warVolMultiplier = 2.5; // War makes markets 2.5x more volatile
-            
-            // War Asset Correlation Bias
-            if (k === 'Crude Oil' || k === 'Natural Gas' || k === 'Gold') {
-                directionalDrift = 1.002; // Steady upward drift for Energy/Safe Havens
-            } else if (k.includes('NVIDIA') || k.includes('TPU') || k.includes('EPYC')) {
-                directionalDrift = 0.997; // Steady downward drift for Tech Hardware (Supply Chain Shock)
-            }
-        }
-    }
-
-    let change = 1 + (Math.random() * (c.vol * warVolMultiplier) * 2 - (c.vol * warVolMultiplier));
-    // Apply directional correlation drift
-    change *= directionalDrift;
-    
-    // 5% chance of Rainclaude market manipulation (pump or dump)
-    if (Math.random() < 0.05) change *= (Math.random() < 0.5 ? 0.85 : 1.15);
-    
-    // Dynamic Price Floor (10% of original value, so Freshwater 0.10 can drop to 0.01 but not jump to 10)
-    const floor = c.basePrice * 0.1;
-    c.price = Math.max(floor, c.price * change);
-    
-    c.history.push(c.price);
-    if(c.history.length > 20) c.history.shift();
+    // Server now controls all volatility drift and history accumulation!
+    // We just render their provided properties.
 
     let trend = c.history[c.history.length-1] >= c.history[c.history.length-2] ? '<span style="color:#0f0">▲</span>' : '<span style="color:#f00">▼</span>';
     let shareVal = c.price; // Native D3X value
@@ -9178,6 +9149,8 @@ function updateGreenMarket() {
     const priceEl = document.getElementById(`market-price-${safeK}`);
     const sellBtn = document.getElementById(`market-sell-${safeK}`);
     if (priceEl) {
+        priceEl.innerHTML = `${trend} ${shareVal.toFixed(2)} D3X`;
+    }
       priceEl.innerHTML = `${trend} ${shareVal.toFixed(2)} D3X <span style="font-size:10px; color:#aaa; font-weight:normal;">/ UNIT</span>`;
     }
     if (sellBtn) {
@@ -9201,84 +9174,18 @@ function updateGreenMarket() {
 
 window.tradeGreenMetal = function(metalName, amount) {
   if (typeof _sfxClick !== 'undefined') _sfxClick();
-  const c = window.greenMarket.commodities[metalName];
+  const c = window.greenMarket?.commodities[metalName];
   if (!c) return;
-  
-  // Ensure wallet is initialized
-  if (window.localD3XBalance === undefined) window.localD3XBalance = 0;
-  if (typeof c.avgCost === 'undefined') c.avgCost = 0;
-  if (typeof c.totalSpent === 'undefined') c.totalSpent = 0;
-  if (!window.greenMarket.tradeLogs) window.greenMarket.tradeLogs = [];
 
-  const cost = c.price; // Native D3X cost
-  const totalCost = Math.round(cost * Math.abs(amount) * 100) / 100;
-
-  if (amount > 0) {
-    if (window.localD3XBalance >= totalCost) {
-      // Calculate Average Cost Basis
-      let totalShares = c.shares + amount;
-      let newTotalSpent = c.totalSpent + totalCost;
-      c.avgCost = newTotalSpent / totalShares;
-      c.totalSpent = newTotalSpent;
-        
-      window.localD3XBalance -= totalCost;
-      c.shares += amount;
-      
-      const tString = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
-      window.greenMarket.tradeLogs.push(`[${tString}] <span style="color:#0f8">BOUGHT</span> 1 ${metalName} @ ${cost.toFixed(2)} D3X`);
-      if (window.greenMarket.tradeLogs.length > 50) window.greenMarket.tradeLogs.shift();
-      
-      if (typeof setLog === 'function') setLog(`📈 ACQUIRED: ${amount}x ${metalName} stake for ${totalCost} D3X.`);
-    } else {
-      if (typeof setLog === 'function') setLog(`❌ INSUFFICIENT FUNDS: ${totalCost} D3X needed for ${metalName} stake.`);
-    }
-  } else if (amount < 0) {
-    if (c.shares >= Math.abs(amount)) {
-      // Calculate Realized P&L
-      let realizedPnL = (cost - c.avgCost) * Math.abs(amount);
-      let pnlStr = realizedPnL >= 0 ? `<span style="color:#0f0">+$${realizedPnL.toFixed(2)} D3X</span>` : `<span style="color:#f00">-$${Math.abs(realizedPnL).toFixed(2)} D3X</span>`;
-      
-      c.totalSpent -= (c.avgCost * Math.abs(amount));
-      if (c.totalSpent < 0) c.totalSpent = 0;
-      
-      c.shares += amount; 
-      if (c.shares === 0) {
-          c.avgCost = 0;
-          c.totalSpent = 0;
-      }
-      
-      window.localD3XBalance += totalCost;
-      
-      const tString = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
-      window.greenMarket.tradeLogs.push(`[${tString}] <span style="color:#f55">SOLD</span> 1 ${metalName} @ ${cost.toFixed(2)} D3X | P&L: ${pnlStr}`);
-      if (window.greenMarket.tradeLogs.length > 50) window.greenMarket.tradeLogs.shift();
-
-      if (typeof setLog === 'function') setLog(`📉 LIQUIDATED: ${Math.abs(amount)}x ${metalName} stake for a ${totalCost} D3X return.`);
-    } else {
-      if (typeof setLog === 'function') setLog(`❌ NO STAKE: You do not own shares of ${metalName} to sell.`);
-    }
-  }
-
-  updateGreenMarket();
-  if (typeof updateDashboard === 'function') updateDashboard();
-
-  // 💰 PERSIST PORTFOLIO TO DB ON EVERY TRADE
-  if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({
-          type: 'save_portfolio',
-          callsign: window.myCallsign || GS.playerCallsign,
-          portfolio: {
-              commodities: window.greenMarket.commodities,
-              tradeLogs: window.greenMarket.tradeLogs,
-              localD3XBalance: window.localD3XBalance
-          }
+  if (window.ws && window.ws.readyState === WebSocket.OPEN) {
+      // Send secure request to backend instead of calculating locally
+      window.ws.send(JSON.stringify({
+          type: 'trade_green_resource',
+          metal: metalName,
+          amount: amount
       }));
-  }
-
-  // Sync the top-right wallet balance UI
-  const balEl = document.getElementById('cwd-bal');
-  if (balEl) {
-      balEl.innerText = "| " + window.localD3XBalance.toLocaleString(undefined, { maximumFractionDigits: 1 }) + " D3X";
+  } else {
+      if (typeof setLog === 'function') setLog(`❌ NETWORK ERROR: Cannot reach Green Market exchange.`);
   }
 };
 
@@ -9334,7 +9241,7 @@ window.simulateGreenMarketAI = function() {
 };
 
 updateGreenMarket(); // Initial render to prevent 2-3s delay on script load
-setInterval(updateGreenMarket, 3000);
+// NOTE: setInterval(updateGreenMarket, 3000) was removed. UI is now entirely updated via server's 'green_market_sync' WebSockets.
 setInterval(window.simulateGreenMarketAI, 3000);
 
 window.showGMarketWallet = function() {
@@ -11534,6 +11441,49 @@ function initWS() {
           }
           break;
       }
+      case 'green_market_sync': {
+          if (window.greenMarket && window.greenMarket.commodities) {
+              Object.keys(msg.prices).forEach(k => {
+                  if (window.greenMarket.commodities[k]) {
+                      window.greenMarket.commodities[k].price = msg.prices[k];
+                      window.greenMarket.commodities[k].history = msg.histories[k];
+                  }
+              });
+              if (typeof updateGreenMarket === 'function') updateGreenMarket();
+          }
+          break;
+      }
+      
+      case 'trade_green_result': {
+          if (msg.success) {
+              window.localD3XBalance = msg.newD3XBal;
+              if (msg.portfolio) {
+                  if (msg.portfolio.commodities) {
+                      Object.keys(msg.portfolio.commodities).forEach(k => {
+                          if (window.greenMarket.commodities[k]) {
+                              window.greenMarket.commodities[k].shares = msg.portfolio.commodities[k].shares;
+                              window.greenMarket.commodities[k].avgCost = msg.portfolio.commodities[k].avgCost;
+                              window.greenMarket.commodities[k].totalSpent = msg.portfolio.commodities[k].totalSpent;
+                          }
+                      });
+                  }
+                  if (msg.portfolio.tradeLogs) window.greenMarket.tradeLogs = msg.portfolio.tradeLogs;
+              }
+              
+              const balEl = document.getElementById('cwd-bal');
+              if (balEl) balEl.innerText = "| " + window.localD3XBalance.toLocaleString(undefined, { maximumFractionDigits: 1 }) + " D3X";
+              
+              if (typeof setLog === 'function') {
+                  if (msg.amount > 0) setLog(`📈 SECURE ACQUIRE: ${msg.amount}x ${msg.metal} for ${msg.cost} D3X.`);
+                  else setLog(`📉 SECURE LIQUIDATE: ${Math.abs(msg.amount)}x ${msg.metal} for ${msg.cost} D3X.`);
+              }
+              
+              if (typeof updateGreenMarket === 'function') updateGreenMarket();
+              if (typeof updateDashboard === 'function') updateDashboard();
+          }
+          break;
+      }
+
       case 'water_physics_update': {
           const wtrInfo = document.getElementById('wtr-skin-info');
           if (wtrInfo && window.currentSkinIndex === 6) {
