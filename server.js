@@ -2770,10 +2770,13 @@ async function runAIMarketBuying() {
   if (validCatalog.length === 0) return;
 
   // -- GEMINI buys --
-  // Force Gemini to maximize its daily cap
+  const intervalsPerDay = (24 * 60) / marketBuyIntervalMins;
+  const geminiCycleCap = Math.max(1, Math.floor(geminiDailyCap / intervalsPerDay));
   let geminiPurchasesThisCycle = 0;
-  while (geminiDailySpent < geminiDailyCap && geminiPurchasesThisCycle < 50) { // Safety break at 50 iterations
-      const remainingBudgetC = geminiDailyCap - geminiDailySpent;
+  let geminiCycleSpent = 0;
+  
+  while (geminiDailySpent < geminiDailyCap && geminiCycleSpent < geminiCycleCap && geminiPurchasesThisCycle < 50) {
+      const remainingBudgetC = geminiCycleCap - geminiCycleSpent;
       
       // Shuffle catalog to pick a random valid item
       const item = validCatalog[Math.floor(Math.random() * validCatalog.length)];
@@ -2782,8 +2785,7 @@ async function runAIMarketBuying() {
       const variance = 0.95 + (Math.random() * 0.1); // ±5%
       const effectivePrice = item.basePrice * variance;
       
-      // Divide remaining budget by 100 so it can sustain 1-min intervals all day
-      let affordableUnits = Math.floor((remainingBudgetC / 100) / effectivePrice);
+      let affordableUnits = Math.floor(remainingBudgetC / effectivePrice);
       
       // Stop if we literally can't even afford 1 unit of this random item
       if (affordableUnits < 1) {
@@ -2799,9 +2801,11 @@ async function runAIMarketBuying() {
       const unitsToBuy = Math.max(1, Math.floor(affordableUnits * (0.5 + Math.random() * 0.5)));
       const cost = Math.round(effectivePrice * unitsToBuy);
       
-      if (geminiDailySpent + cost > geminiDailyCap && geminiPurchasesThisCycle > 0) break; // Bypass safety check for 1st trade
+      if (geminiDailySpent + cost > geminiDailyCap) break;
+      if (geminiCycleSpent + cost > geminiCycleCap && geminiPurchasesThisCycle > 0) break; 
       
       geminiDailySpent += cost;
+      geminiCycleSpent += cost;
       buys.push({ aiName: 'gemini', item: item.name, category: item.category, units: unitsToBuy, cost, unit: item.unit });
 
       if (geminiAccount) {
@@ -2836,34 +2840,33 @@ async function runAIMarketBuying() {
   }
   
   // -- RAINCLAUDE buys --
-  // Force Rainclaude to maximize its daily cap
+  const claudeCycleCap = Math.max(1, Math.floor(claudeDailyCap / intervalsPerDay));
   let claudePurchasesThisCycle = 0;
-  while (claudeDailySpent < claudeDailyCap && claudePurchasesThisCycle < 50) { // Safety break at 50 iterations
-      const remainingBudgetR = claudeDailyCap - claudeDailySpent;
+  let claudeCycleSpent = 0;
+  
+  while (claudeDailySpent < claudeDailyCap && claudeCycleSpent < claudeCycleCap && claudePurchasesThisCycle < 50) {
+      const remainingBudgetR = claudeCycleCap - claudeCycleSpent;
       
       const item = validCatalog[Math.floor(Math.random() * validCatalog.length)];
       // Calculate how many of this item we can comfortably buy with remaining budget
       const variance = 0.95 + (Math.random() * 0.1); // ±5%
       const effectivePrice = item.basePrice * variance;
       
-      // Divide remaining budget by 100 so it can sustain 1-min intervals all day
-      let affordableUnits = Math.floor((remainingBudgetR / 100) / effectivePrice);
+      let affordableUnits = Math.floor(remainingBudgetR / effectivePrice);
       
       if (affordableUnits < 1) {
-          if (claudePurchasesThisCycle === 0) {
-              affordableUnits = 1;
-          } else {
-              claudePurchasesThisCycle++;
-              continue;
-          }
+          if (claudePurchasesThisCycle === 0) affordableUnits = 1;
+          else { claudePurchasesThisCycle++; continue; }
       }
       
       const unitsToBuy = Math.max(1, Math.floor(affordableUnits * (0.5 + Math.random() * 0.5)));
       const cost = Math.round(effectivePrice * unitsToBuy);
       
-      if (claudeDailySpent + cost > claudeDailyCap && claudePurchasesThisCycle > 0) break; // Final safety check
+      if (claudeDailySpent + cost > claudeDailyCap) break;
+      if (claudeCycleSpent + cost > claudeCycleCap && claudePurchasesThisCycle > 0) break;
       
       claudeDailySpent += cost;
+      claudeCycleSpent += cost;
       buys.push({ aiName: 'claude', item: item.name, category: item.category, units: unitsToBuy, cost, unit: item.unit });
       
       if (claudeAccount) {
@@ -2897,15 +2900,19 @@ async function runAIMarketBuying() {
       claudePurchasesThisCycle++;
   }
   
-  // -- WORLD BANK buys (No weapons, routed to SOLANA vault) --
+  // -- WORLD BANK buys --
+  const worldBankCycleCap = Math.max(1, Math.floor(worldBankDailyCap / intervalsPerDay));
   let wbPurchasesThisCycle = 0;
-  while (worldBankDailySpent < worldBankDailyCap && wbPurchasesThisCycle < 50) {
-      const remainingBudgetWB = worldBankDailyCap - worldBankDailySpent;
+  let wbCycleSpent = 0;
+  
+  while (worldBankDailySpent < worldBankDailyCap && wbCycleSpent < worldBankCycleCap && wbPurchasesThisCycle < 50) {
+      const remainingBudgetW = worldBankCycleCap - wbCycleSpent;
+      
       const item = validCatalog[Math.floor(Math.random() * validCatalog.length)];
       const variance = 0.95 + (Math.random() * 0.1); 
       const effectivePrice = item.basePrice * variance;
       
-      let affordableUnits = Math.floor((remainingBudgetWB / 100) / effectivePrice);
+      let affordableUnits = Math.floor(remainingBudgetW / effectivePrice);
       
       if (affordableUnits < 1) {
           if (wbPurchasesThisCycle === 0) affordableUnits = 1;
@@ -2915,9 +2922,11 @@ async function runAIMarketBuying() {
       const unitsToBuy = Math.max(1, Math.floor(affordableUnits * (0.5 + Math.random() * 0.5)));
       const cost = Math.round(effectivePrice * unitsToBuy);
       
-      if (worldBankDailySpent + cost > worldBankDailyCap && wbPurchasesThisCycle > 0) break; 
+      if (worldBankDailySpent + cost > worldBankDailyCap) break;
+      if (wbCycleSpent + cost > worldBankCycleCap && wbPurchasesThisCycle > 0) break;
       
       worldBankDailySpent += cost;
+      wbCycleSpent += cost;
       buys.push({ aiName: 'worldbank', item: item.name, category: item.category, units: unitsToBuy, cost, unit: item.unit });
       
       if (wbAccount) {
@@ -3048,19 +3057,22 @@ async function runAISpendingProtocol() {
   const catNames = Object.keys(categories);
   
   let transactionTotal = 0;
+  const cycleBudgetLimit = Math.max(100, Math.floor(dailySpendCap / (24 * 60)));
   
   for (let p = 0; p < maxPurchasesThisTick; p++) {
-      if (transactionTotal >= remainingDailyBudget) break;
+      if (transactionTotal >= remainingDailyBudget || transactionTotal >= cycleBudgetLimit) break;
       
       const cat = catNames[Math.floor(Math.random() * catNames.length)];
       const items = categories[cat];
       const item = items[Math.floor(Math.random() * items.length)];
       
-      // Determine cost for this micro-buy (between 5,000 and 15% of remaining budget)
-      const maxMicro = Math.floor(remainingDailyBudget * 0.15);
-      let cost = Math.floor(Math.random() * Math.max(5000, maxMicro)) + 5000;
+      const maxMicro = Math.floor(cycleBudgetLimit * 0.8);
+      let cost = Math.floor(Math.random() * Math.max(500, maxMicro)) + 500;
       
-      // Clamp to remaining budget
+      // Clamp to cycle budget
+      if (transactionTotal + cost > cycleBudgetLimit) {
+          cost = cycleBudgetLimit - transactionTotal;
+      }
       if (transactionTotal + cost > remainingDailyBudget) {
           cost = remainingDailyBudget - transactionTotal;
       }
