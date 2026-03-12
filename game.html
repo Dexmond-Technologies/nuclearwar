@@ -6030,21 +6030,20 @@ const dustGeo = new THREE.BufferGeometry();
 const dustPts = [];
 
 // Generate dense dust particles wrapped tightly around the globe
-for(let i=0; i<500; i++) {
+for(let i=0; i<35000; i++) {
    const t = Math.random() * Math.PI * 2;
    const p = Math.acos(2 * Math.random() - 1);
-   const r = GLOBE_R + 0.15 + (Math.random() * 0.5); // Push the dust storm further out into the atmosphere
+   const r = GLOBE_R + 0.002 + (Math.random() * 0.12);
    dustPts.push(r * Math.sin(p) * Math.cos(t), r * Math.cos(p), r * Math.sin(p) * Math.sin(t));
 }
 dustGeo.setAttribute('position', new THREE.Float32BufferAttribute(dustPts, 3));
 // Use a fine dirt/greyish color for the atmosphere
 const dustMat = new THREE.PointsMaterial({
-    color: 0x8b7355, // Stronger brown/dirt color
-    size: 0.08,      // Massively larger particles
+    color: 0xaa9575, 
+    size: 0.005, 
     transparent: true, 
-    opacity: 0.85,   // More opaque
-    depthWrite: false, // Prevent clipping against the globe surface
-    blending: THREE.NormalBlending // Normal blending so it darkens the sky like real dirt instead of adding light like fire
+    opacity: 0.45, 
+    blending: THREE.AdditiveBlending 
 });
 window.liveDustPoints = new THREE.Points(dustGeo, dustMat);
 window.liveDustGroup.add(window.liveDustPoints);
@@ -6892,42 +6891,8 @@ async function playWebcamFeed(slug, title) {
     contentBox.innerHTML = '<span style="color:#f24">CONNECTION ERROR</span>';
   }
 }
-// =====================================================================
-// UNIVERSAL YELLOW GLOWING DOTS
-// =====================================================================
-window.yellowDotsGroup = new THREE.Group();
-window.yellowDotsGroup.visible = true; // Always visible on every skin!
-scene.add(window.yellowDotsGroup);
-
-function initYellowGlowingDots() {
-    const glowTex = new THREE.CanvasTexture(createGlowCanvas('#ffff00'));
-    const material = new THREE.SpriteMaterial({ 
-        map: glowTex, 
-        color: 0xffffaa, 
-        transparent: true, 
-        opacity: 0.9,
-        depthWrite: false, // Ensure they glow brightly over everything else without clipping
-        blending: THREE.AdditiveBlending 
-    });
-
-    for(let i=0; i<50; i++) {
-        const lat = Math.random() * 160 - 80;
-        const lon = Math.random() * 360 - 180;
-        // Push them WAY out of the surface of the globe so they clearly float outside Earth 
-        const pos = ll2v(lat, lon, GLOBE_R + 2.0 + (Math.random() * 1.5)); 
-        
-        const sprite = new THREE.Sprite(material);
-        sprite.position.copy(pos);
-        // Make them GIGANTIC so they don't look like specks against a massive planet
-        sprite.scale.set(30.0, 30.0, 1); 
-        
-        window.yellowDotsGroup.add(sprite);
-    }
-    console.log("Initialized 50 GIGANTIC Glowing Yellow Dots floating way above the globe.");
-}
 
 initWebcams();
-initYellowGlowingDots();
 initBoats();
 
 async function initBoats() {
