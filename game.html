@@ -5386,7 +5386,7 @@ function initDatacenters() {
                 
                 const numBridges = 3;
                 const braidsPerBridge = 3;
-                const segments = 30;
+                const segments = 60; // Doubled from 30 for 100% more particles!
                 
                 for(let b=0; b<numBridges; b++) {
                     const bridgeGroup = new THREE.Group();
@@ -5406,7 +5406,7 @@ function initDatacenters() {
                         };
                         
                         // Attach glowing aura sprites mapped along the interpolation points
-                        for(let k=0; k<=30; k++) {
+                        for(let k=0; k<=segments; k++) {
                             const sprite = new THREE.Sprite(neonAuraMat);
                             sprite.scale.set(0.36, 0.36, 1); // 3x scale from 0.12
                             line.add(sprite);
@@ -6025,24 +6025,42 @@ window.earthCutawayGroup.add(innerCoreMesh);
 // LIVE SKIN WAR DUST PARTICLES
 // =====================================================================
 window.liveDustGroup = new THREE.Group();
-window.liveDustGroup.visible = false; // Only active on 'LIVE' skin
+window.liveDustGroup.visible = true; // Active by default since 'LIVE' is the initial skin
 const dustGeo = new THREE.BufferGeometry();
 const dustPts = [];
 
-// Generate dense dust particles wrapped tightly around the globe
-for(let i=0; i<35000; i++) {
+// Generate sparse dust particles wrapped tightly around the globe for performance
+const dustBasePos = [];
+for(let i=0; i<3200; i++) {
    const t = Math.random() * Math.PI * 2;
    const p = Math.acos(2 * Math.random() - 1);
    const r = GLOBE_R + 0.002 + (Math.random() * 0.12);
-   dustPts.push(r * Math.sin(p) * Math.cos(t), r * Math.cos(p), r * Math.sin(p) * Math.sin(t));
+   
+   const x = r * Math.sin(p) * Math.cos(t);
+   const y = r * Math.cos(p);
+   const z = r * Math.sin(p) * Math.sin(t);
+   
+   dustPts.push(x, y, z);
+   
+   // Store original position and a random phase for floating math
+   dustBasePos.push({
+       x: x, y: y, z: z,
+       phaseX: Math.random() * Math.PI * 2,
+       phaseY: Math.random() * Math.PI * 2,
+       phaseZ: Math.random() * Math.PI * 2,
+       speed: 0.05 + Math.random() * 0.15,
+       amplitude: 0.01 + Math.random() * 0.02
+   });
 }
 dustGeo.setAttribute('position', new THREE.Float32BufferAttribute(dustPts, 3));
+window.liveDustBasePos = dustBasePos; // Expose for animate loop
+
 // Use a fine dirt/greyish color for the atmosphere
 const dustMat = new THREE.PointsMaterial({
     color: 0xaa9575, 
-    size: 0.005, 
+    size: 0.015, 
     transparent: true, 
-    opacity: 0.45, 
+    opacity: 0.65, 
     blending: THREE.AdditiveBlending 
 });
 window.liveDustPoints = new THREE.Points(dustGeo, dustMat);
@@ -6090,6 +6108,35 @@ for (let i = 0; i < 50; i++) {
     camSprite.position.copy(pos);
     window.webcamGroup.add(camSprite);
 }
+
+// =====================================================================
+// PERSISTENT YELLOW DOTS (EXCEPT LIVE/CYBER)
+// =====================================================================
+window.yellowDotsGroup = new THREE.Group();
+window.yellowDotsGroup.visible = false; // Hidden on 'LIVE' which is default skin
+scene.add(window.yellowDotsGroup);
+
+// Generate 50 random yellow dots
+for (let i = 0; i < 50; i++) {
+    const lat = (Math.random() - 0.5) * 160; 
+    const lon = (Math.random() - 0.5) * 360; 
+    
+    const phi = (90 - lat) * (Math.PI / 180);
+    const theta = (lon + 180) * (Math.PI / 180);
+    const r = GLOBE_R + 0.055; // Slightly above globe 
+    
+    const pos = new THREE.Vector3(
+        -(r * Math.sin(phi) * Math.cos(theta)),
+        r * Math.cos(phi),
+        r * Math.sin(phi) * Math.sin(theta)
+    );
+    
+    const dotSprite = new THREE.Sprite(camMat); // Reusing the yellow glowing texture
+    dotSprite.scale.set(0.12, 0.12, 1); 
+    dotSprite.position.copy(pos);
+    window.yellowDotsGroup.add(dotSprite);
+}
+
 
 // =====================================================================
 // INTERNATIONAL SPACE STATION (ISS)
@@ -13059,9 +13106,28 @@ function animate() {
   
   updateDroneBattle(dt);
 
-  if (window.liveDustGroup && window.liveDustGroup.visible) {
+  if (window.liveDustGroup && window.liveDustGroup.visible && window.liveDustPoints) {
       window.liveDustGroup.rotation.y += 0.015 * dt; // Wind rotation
       window.liveDustGroup.rotation.x += 0.005 * dt;
+      
+      // Animate individual particles for a "floating" effect
+      if (window.liveDustBasePos) {
+          const positions = window.liveDustPoints.geometry.attributes.position.array;
+          let i3 = 0;
+          for(let i=0; i<window.liveDustBasePos.length; i++) {
+              const base = window.liveDustBasePos[i];
+              // Calculate slight offsets using sine waves over time
+              const offsetX = Math.sin(time3 * base.speed + base.phaseX) * base.amplitude;
+              const offsetY = Math.cos(time3 * base.speed + base.phaseY) * base.amplitude;
+              const offsetZ = Math.sin(time3 * base.speed * 1.5 + base.phaseZ) * base.amplitude;
+              
+              positions[i3] = base.x + offsetX;
+              positions[i3+1] = base.y + offsetY;
+              positions[i3+2] = base.z + offsetZ;
+              i3 += 3;
+          }
+          window.liveDustPoints.geometry.attributes.position.needsUpdate = true;
+      }
   }
 
   // Animate World Bank -> SOL Flux Aura
@@ -15535,8 +15601,9 @@ window.toggleRedSkin = function() {
   }
   else btn.className = '';
   
-  // Toggle visibility of overlays (Webcams, Sats)
+  // Toggle visibility of overlays (Webcams, Sats, Yellow Dots)
   if (typeof webcamGroup !== 'undefined') webcamGroup.visible = (window.currentSkinIndex !== 0 && window.currentSkinIndex !== 4); 
+  if (typeof yellowDotsGroup !== 'undefined') yellowDotsGroup.visible = (skin.name !== 'LIVE' && skin.name !== 'CYBER');
   if (typeof boatGroup !== 'undefined') boatGroup.visible = skin.showOverlays;
   if (typeof redSatGroup !== 'undefined') redSatGroup.visible = skin.showOverlays;
   
