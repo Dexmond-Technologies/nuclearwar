@@ -836,7 +836,12 @@ function broadcastAll(msg) {
 }
 
 function initWebSockets() {
-  wss.on('connection', ws => {
+  wss.on('connection', (ws, req) => {
+    if (req && req.url && req.url.includes('/telemetry')) {
+      // Telemetry / Brain Module only - do not assign as a game commander
+      return;
+    }
+
     playerCounter++;
     const client = { ws, id: playerCounter, name: `Commander ${playerCounter}`, isHost: false };
     connectedClients.add(client);
