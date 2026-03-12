@@ -1070,7 +1070,7 @@ function initWebSockets() {
       }
 
       case 'request_loan': {
-        const walletAddr = msg.wallet;
+        const walletAddr = client.wallet; // Enforce authenticated session identity
         const collateral = parseInt(msg.collateral);
         if (!walletAddr || !pgPool) break;
         
@@ -1127,7 +1127,7 @@ function initWebSockets() {
       }
 
       case 'repay_loan': {
-        const walletAddr = msg.wallet;
+        const walletAddr = client.wallet; // Enforce authenticated session identity
         const repayment = parseInt(msg.repayment);
         if (!walletAddr || !pgPool) break;
         
@@ -1200,7 +1200,7 @@ function initWebSockets() {
       }
       
       case 'get_my_d3x_balance': {
-          const walletAddr = msg.wallet;
+          const walletAddr = client.wallet; // Enforce authenticated session identity
           if (!walletAddr) break;
           
           let liveOnChainBal = 0;
@@ -1417,7 +1417,7 @@ function initWebSockets() {
 
 
       case 'datacenter_stake': {
-        const callsign = msg.callsign;
+        const callsign = client.name; // Enforce authenticated session identity
         const plan = msg.plan;
         const amount = msg.amount || 100;
         if (!callsign) break;
@@ -1579,7 +1579,7 @@ function initWebSockets() {
       }
 
       case 'reinvest_earnings': {
-        const callsign = msg.callsign;
+        const callsign = client.name; // Enforce authenticated session identity
         if (!pgPool || !callsign || !globalGameState) break;
 
         try {
@@ -1726,7 +1726,7 @@ function initWebSockets() {
       }
       
       case 'process_mine_click': {
-        const callsign = msg.callsign;
+        const callsign = client.name; // Enforce authenticated session identity
         const mineId = msg.mineId;
         if (!callsign || !mineId) break;
 
@@ -1859,7 +1859,7 @@ function initWebSockets() {
       }
 
       case 'buy_weapon': {
-        const callsign = msg.callsign;
+        const callsign = client.name; // Enforce authenticated session identity
         const weaponName = msg.weaponName;
         const cost = msg.cost;
         if (!pgPool || !callsign || !weaponName || cost === undefined) break;
@@ -2135,6 +2135,21 @@ async function checkD3XRewards() {
       // Every 1 hour: send exactly 5 D3X directly to wallet
       if ((now - client.connectedAt) >= 3600000 /* 1 hour */) {
         try {
+           // Database throttle to prevent multi-tab exploits
+           const claimRes = await pgPool.query(`SELECT last_d3x_claim FROM commanders WHERE callsign = $1`, [client.name]);
+           if (claimRes.rows.length > 0) {
+               const lastClaim = claimRes.rows[0].last_d3x_claim;
+               if (lastClaim && (now - new Date(lastClaim).getTime() < 3600000)) {
+                   // Already claimed within the last hour on another tab
+                   client.connectedAt = now; // Reset timer for this session
+                   console.log(`[REWARD] Commander ${client.name} attempted multi-tab claim. Blocked.`);
+                   continue; // Skip reward
+               }
+           }
+           
+           // Update last claim time immediately
+           await pgPool.query(`UPDATE commanders SET last_d3x_claim = NOW() WHERE callsign = $1`, [client.name]);
+           
            client.connectedAt = now; // reset session timer for next 1 hour
            const amountEarned = 5; // Strict, un-multiplied 5 D3X ruleset.
 
@@ -3400,7 +3415,8 @@ const CRAFTING_RECIPES = {
 // Register the crafting handler in the WebSocket message router
 // (called inside wss.on('connection') via handleCraftMessage)
 async function handleCraftMessage(ws, msg, client) {
-  const { recipe, callsign } = msg;
+  const { recipe } = msg;
+  const callsign = client.name; // Enforce authenticated session identity
   if (!recipe || !callsign || !pgPool) return;
 
   const def = CRAFTING_RECIPES[recipe];

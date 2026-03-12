@@ -6,9 +6,22 @@ console.log("[BRAIN MODULE] Initializing Persistent Telemetry Host...");
 const wss = new WebSocket.Server({ port: 8085 });
 const activeErrors = new Map();
 
-wss.on('connection', (ws) => {
-    console.log("[BRAIN MODULE] New Client Connected to Telemetry Stream.");
+wss.on('connection', (ws, req) => {
+    // Basic Token Authentication
+    const reqUrl = req.url || '';
+    const ADMIN_TOKEN = process.env.DASHBOARD_SECRET || "SUPER_SECRET_ADMIN_TOKEN_123";
     
+    // Extract token from query string (e.g., ws://localhost:8085/?token=...)
+    const urlToken = new URL(reqUrl, `http://${req.headers.host || 'localhost'}`).searchParams.get('token');
+    
+    if (urlToken !== ADMIN_TOKEN) {
+        console.warn("[BRAIN MODULE] Unauthorized connection attempt rejected.");
+        ws.close(1008, "Unauthorized");
+        return;
+    }
+
+    console.log("[BRAIN MODULE] New Authenticated Client Connected to Telemetry Stream.");
+
     ws.on('message', async (message) => {
         try {
             const data = JSON.parse(message);
