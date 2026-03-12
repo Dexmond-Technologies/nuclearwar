@@ -594,6 +594,13 @@ const server = http.createServer((req, res) => {
         // Handle the checkout.session.completed event
         if (event.type === 'checkout.session.completed') {
             const session = event.data.object;
+            
+            if (session.payment_status !== 'paid' || session.amount_total !== 499) {
+                console.warn(`[STRIPE] Ignored checkout session: status=${session.payment_status}, amount=${session.amount_total} (Expected paid/499)`);
+                res.writeHead(200);
+                return res.end(JSON.stringify({received: true}));
+            }
+            
             // Get the user's wallet address from client_reference_id (appended securely to URL)
             let userWallet = session.client_reference_id;
             
@@ -1276,6 +1283,11 @@ function initWebSockets() {
       }
 
       case 'state_update': {
+        if (!client.isHost) {
+            console.warn(`[SECURITY] Unauthorized state_update attempt from non-host ${client.name}`);
+            ws.send(JSON.stringify({ type: 'error', msg: 'Unauthorized: Only the host can update global state.' }));
+            break;
+        }
         // Full state sync — save to DB and relay to other players immediately
         globalGameState = msg.gameState;
         saveGameState(globalGameState);
@@ -1557,6 +1569,14 @@ function initWebSockets() {
             const returnedPrincipal = stake.amountStaked * 0.90;
             globalGameState.stakes.splice(stakeIdx, 1);
             saveGameState(globalGameState);
+            
+            if (pgPool) {
+                try {
+                    await pgPool.query(`UPDATE commanders SET d3x_balance = d3x_balance + $1 WHERE callsign = $2`, [returnedPrincipal, callsign]);
+                } catch(e) {
+                    console.error('DB Error refunding early unstake:', e.message);
+                }
+            }
             
             console.log(`[STAKE] Commander ${callsign} early unstaked ${stake.plan}. Penalty applied. Returned ${returnedPrincipal} D3X.`);
             ws.send(JSON.stringify({
