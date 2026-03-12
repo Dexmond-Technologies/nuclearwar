@@ -1651,6 +1651,7 @@ body {
           <span id="cwd-icon" style="margin-right:5px;">🛡️</span> <span id="cwd-addr"></span> <span id="cwd-bal" style="color:#0f8; margin-left:8px; text-shadow:0 0 5px rgba(0,255,136,0.5);"></span>
       </div>      
       <button id="btn-reinvest-d3x" onclick="toggleReinvest()" style="position:absolute; top:-60px; left:-15px; display:block; width:130px; pointer-events:auto; padding:8px 0; background:rgba(0,255,136,0.15); border:1px solid #0f8; color:#0f8; font-family:'Courier New', monospace; font-size:10px; font-weight:bold; text-align:center; cursor:pointer; border-radius:4px; transition:all 0.2s; box-shadow:0 0 10px rgba(0,255,136,0.2); box-sizing:border-box; z-index:100;">♻️ REINVEST: OFF<br/>AIRDROP 1X</button>
+      <button id="btn-open-pool" onclick="openPoolModal()" style="position:absolute; top:-60px; left:125px; display:block; width:130px; pointer-events:auto; padding:8px 0; background:rgba(0,170,255,0.18); border:1px solid #0af; color:#0af; font-family:'Courier New', monospace; font-size:10px; font-weight:bold; text-align:center; cursor:pointer; border-radius:4px; transition:all 0.2s; box-shadow:0 0 14px rgba(0,170,255,0.35); box-sizing:border-box; z-index:100;" onmouseover="this.style.background='rgba(0,170,255,0.35)';this.style.boxShadow='0 0 25px rgba(0,170,255,0.7)';" onmouseout="this.style.background='rgba(0,170,255,0.18)';this.style.boxShadow='0 0 14px rgba(0,170,255,0.35)';">🏊 SOL/D3X<br/>POOL</button>
       <!-- RAINCLAUDE INVENTORY BUTTON -->
       <button id="btn-rainclaude-inventory" onclick="openRainclaudeInventory()" style="position:absolute; left:-280px; top:-70px; background:rgba(60,0,0,0.9); border:2px solid #f33; border-radius:8px; color:#f33; font-family:'Share Tech Mono', monospace; font-size:12px; font-weight:bold; padding:8px 15px; cursor:pointer; pointer-events:auto; z-index:999999; box-shadow:0 -5px 15px rgba(255,50,50,0.4); transition:0.2s; letter-spacing:2px; text-shadow:0 0 10px #f33; backdrop-filter:blur(5px);" onmouseover="this.style.background='rgba(160,0,0,0.9)'; this.style.color='#fff';" onmouseout="this.style.background='rgba(60,0,0,0.9)'; this.style.color='#f33';">
         RAINCLAUDE INVENTORY ⯆
@@ -5416,20 +5417,20 @@ function initDatacenters() {
                         const geo = new THREE.BufferGeometry();
                         geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array((segments+1) * 3), 3));
                         const line = new THREE.Line(geo, bridgeMat);
-                        // Increased randomness of freq1 and freq2 by 20%
+                        // Increased randomness of freq1 and freq2 by 300%
                         line.userData = { 
                             braidIdx: i, 
                             phaseOff: Math.random() * Math.PI * 2, 
-                            freq1: (2+Math.random()*3)*1.2, 
-                            freq2: (4+Math.random()*5)*1.2, 
-                            radius: 0.03 + Math.random()*0.02,
+                            freq1: (2+Math.random()*3)*3.6, 
+                            freq2: (4+Math.random()*5)*3.6, 
+                            radius: (0.03 + Math.random()*0.02) * 3.0,
                             auras: []
                         };
                         
                         // Attach glowing aura sprites mapped along the interpolation points
-                        for(let k=0; k<=15; k++) {
+                        for(let k=0; k<=30; k++) {
                             const sprite = new THREE.Sprite(neonAuraMat);
-                            sprite.scale.set(0.12, 0.12, 1);
+                            sprite.scale.set(0.36, 0.36, 1); // 3x scale from 0.12
                             line.add(sprite);
                             line.userData.auras.push(sprite);
                         }
@@ -6006,10 +6007,10 @@ window.earthCutawayGroup.add(outerCoreMesh);
 window.earthCutawayGroup.add(innerCoreMesh);
 
 // =====================================================================
-// LIVE WEBCAMS (RED SKIN)
+// LIVE WEBCAMS
 // =====================================================================
 window.webcamGroup = new THREE.Group();
-window.webcamGroup.visible = false;
+window.webcamGroup.visible = true; // Always true
 scene.add(window.webcamGroup);
 
 // Create a glowing yellow dot texture for the webcams
@@ -6753,9 +6754,9 @@ async function initWebcams() {
       
       const mat = new THREE.SpriteMaterial({ map: tex, color: 0xffffff, transparent: true, depthTest: true });
       const sprite = new THREE.Sprite(mat);
-      sprite.scale.set(0.05, 0.05, 1); // Moderate yellow dot
+      sprite.scale.set(0.18, 0.18, 1); // Large prominent yellow dot
       
-      const pos = ll2v(parseFloat(cam.latitude), parseFloat(cam.longitude), GLOBE_R + 0.05);
+      const pos = ll2v(parseFloat(cam.latitude), parseFloat(cam.longitude), GLOBE_R + 0.15); // Lifted well above surface
       sprite.position.copy(pos);
       
       sprite.userData = { 
@@ -8020,8 +8021,8 @@ function handleGlobeClick(e) {
   if (document.getElementById('attack-modal').classList.contains('show')) return; // Block clicks if attack modal is open
   if (document.getElementById('onboarding-modal').style.display === 'flex') return;
 
-  // 1. Check Webcams and Boats first if Red Skin is active
-  if (window.isRedSkin && (webcamSprites.length > 0 || boatMeshes.length > 0)) {
+  // 1. Check Webcams and Boats first (for all skins where they exist)
+  if (webcamSprites.length > 0 || boatMeshes.length > 0) {
     mouse.x = (e.clientX/innerWidth)*2-1;
     mouse.y = -(e.clientY/innerHeight)*2+1;
     ray.setFromCamera(mouse, camera);
@@ -8034,6 +8035,7 @@ function handleGlobeClick(e) {
         return; // Consume click
       }
       if (objData.isBoat) {
+        // Boats might still be limited by showOverlays anyway, but checking won't hurt
         if(typeof _sfxClick !== 'undefined') _sfxClick();
         showBoatInfo(objData, intersects[0].object);
         return; // Consume click
@@ -8041,8 +8043,8 @@ function handleGlobeClick(e) {
     }
   }
 
-  // 1.1 Red Skin Webcam Dots Click Handler
-  if (window.currentSkinIndex === 1 && window.webcamGroup && window.webcamGroup.visible && window.webcamGroup.children.length > 0) {
+  // 1.1 Webcam Dots Click Handler (All Skins)
+  if (window.webcamGroup && window.webcamGroup.visible && window.webcamGroup.children.length > 0) {
     mouse.x = (e.clientX/innerWidth)*2-1;
     mouse.y = -(e.clientY/innerHeight)*2+1;
     ray.setFromCamera(mouse, camera);
@@ -8203,7 +8205,7 @@ function handleGlobeClick(e) {
       const hubHits = ray.intersectObjects(window.dexmondHubGroup.children, true);
       if (hubHits.length > 0) {
           if(typeof _sfxClick !== 'undefined') _sfxClick();
-          openWeaponArsenal('DEXMOND', 'GLOBAL DEXMOND');
+          if (typeof openSoftwareShop === 'function') openSoftwareShop();
           return;
       }
   }
@@ -10560,32 +10562,39 @@ function spawnEMP3D(lat, lon) {
   const t2 = new THREE.Vector3().crossVectors(up, t1);
   const rings = [];
   
-  // Outer rings (Green EMP wave)
+  // Outer rings (Neon Blue EMP wave for Black Skin)
   for (let r = 0; r < 4; r++) {
     const pts = Array.from({ length: 90 }, (_, i) => {
       const a = (i / 89) * Math.PI * 2;
       return c.clone().addScaledVector(t1, Math.cos(a) * .007).addScaledVector(t2, Math.sin(a) * .007);
     });
     const geo = new THREE.BufferGeometry().setFromPoints(pts);
-    let color = 0x00ff00; // Bright Green
-    if (r % 2 === 1) color = 0x00cc00; // Darker Green
-    const mat = new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 0.8, linewidth: 4 });
+    let color = 0x00aaff; // Neon Blue
+    if (r % 2 === 1) color = 0x0055ff; // Darker Neon Blue
+    const mat = new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 0.9, linewidth: 8 });
     const ring = new THREE.Line(geo, mat);
     scene.add(ring);
     rings.push({ ring, mat, pts, t1, t2, c, delay: r * .05 });
   }
 
   // Inner huge flash
-  const flashGeo = new THREE.SphereGeometry(.05, 16, 16); // Reduced to 1/3 size
-  const flashMat = new THREE.MeshBasicMaterial({ color: 0x00ff66, transparent: true, opacity: 0.4 });
+  const flashGeo = new THREE.SphereGeometry(.05, 16, 16); 
+  const flashMat = new THREE.MeshBasicMaterial({ color: 0x00aaff, transparent: true, opacity: 0.8 });
   const flash = new THREE.Mesh(flashGeo, flashMat);
   flash.position.copy(c); scene.add(flash);
-  explosions3D.push({ rings, flash, flashMat, life: 1.2, maxLife:1.2, maxRadius:0.060, flashGrowth:2.0, maxRingOpacity:0.4, maxFlashOpacity:0.4 }); // Reduced radius to 1/3 (0.180 -> 0.060)
+  explosions3D.push({ rings, flash, flashMat, life: 1.2, maxLife:1.2, maxRadius:0.060, flashGrowth:2.0, maxRingOpacity:0.8, maxFlashOpacity:0.8 });
 }
 
 function scheduleRandomEMP() {
-  const minDelay = 30 * 1000; // 30s (was 60)
-  const maxDelay = 60 * 1000; // 60s (was 120)
+  let minDelay = 30 * 1000; // 30s 
+  let maxDelay = 60 * 1000; // 60s 
+  
+  // Massively increase EMP frequency on BLACK SKIN (index 4)
+  if (window.currentSkinIndex === 4) {
+      minDelay = 1000; // 1 second
+      maxDelay = 3000; // 3 seconds
+  }
+  
   const delay = minDelay + Math.random() * (maxDelay - minDelay);
   
   setTimeout(() => {
@@ -12697,6 +12706,19 @@ window.wtrGlowSphere = wtrGlowSphere; // Reference for animation pulse
 
 // 1. Supernova Core (High Polygon)
 const supernovaGeo = new THREE.IcosahedronGeometry(GLOBE_R * 1.02, 6); // Detail level 6 = very high poly
+function createCloudCanvas() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 128;
+    const context = canvas.getContext('2d');
+    const gradient = context.createRadialGradient(64, 64, 0, 64, 64, 64);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, 128, 128);
+    return canvas;
+}
+
 const supernovaMat = new THREE.MeshPhongMaterial({
     color: 0x0055ff,
     emissive: 0x00aaff,
@@ -15396,7 +15418,7 @@ window.toggleRedSkin = function() {
   else btn.className = '';
   
   // Toggle visibility of overlays (Webcams, Sats)
-  if (typeof webcamGroup !== 'undefined') webcamGroup.visible = skin.showOverlays;
+  if (typeof webcamGroup !== 'undefined') webcamGroup.visible = (window.currentSkinIndex !== 0); // Hide on Live skin
   if (typeof boatGroup !== 'undefined') boatGroup.visible = skin.showOverlays;
   if (typeof redSatGroup !== 'undefined') redSatGroup.visible = skin.showOverlays;
   
@@ -16226,6 +16248,94 @@ window.buyOrbitalStrike = function() {
 };
 
 // ========================================================
+// CYBER BLACK MARKET SOFTWARE SHOP (DEXMOND HUB)
+// ========================================================
+window.openSoftwareShop = function() {
+    if (typeof _sfxClick !== 'undefined') _sfxClick();
+    if (document.getElementById('software-shop-modal')) return;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'software-shop-modal';
+    overlay.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: rgba(10, 0, 15, 0.85); backdrop-filter: blur(8px);
+        z-index: 10000; display: flex; align-items: center; justify-content: center;
+        font-family: 'Orbitron', sans-serif;
+    `;
+
+    const softwares = [
+        {name: "Zero-Day Exploit Framework", cost: 5000},
+        {name: "Neural Network Scrambler", cost: 3500},
+        {name: "Cryptographic Key Logger", cost: 2000},
+        {name: "Quantum Decryption Algorithm", cost: 8000},
+        {name: "Satellite Uplink Hijacker", cost: 6000},
+        {name: "Deep-Web Data Scraper", cost: 1500},
+        {name: "Logic Bomb Payload", cost: 4500},
+        {name: "Autonomous Botnet Swarm", cost: 7000},
+        {name: "Firewall Breach Protocol", cost: 2500},
+        {name: "Identity Spoofing Toolkit", cost: 3000}
+    ];
+
+    // Randomize the order of the software shop for each visit
+    const shuffled = softwares.sort(() => 0.5 - Math.random());
+
+    let itemsHtml = '';
+    shuffled.forEach(sw => {
+        itemsHtml += `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,170,255,0.05); border:1px solid rgba(0,170,255,0.3); padding:15px; border-radius:4px; margin-bottom:10px;">
+                <span style="color:#fff; font-size:16px;">${sw.name}</span>
+                <button onclick="buyWeaponFromShop('${sw.name}', ${sw.cost})" style="background:rgba(0,170,255,0.2); border:1px solid #0af; color:#0af; padding:8px 15px; cursor:pointer; font-weight:bold; border-radius:4px; transition:0.2s;" onmouseover="this.style.background='rgba(0,170,255,0.4)'" onmouseout="this.style.background='rgba(0,170,255,0.2)'">ACQUIRE - ${sw.cost} D3X</button>
+            </div>
+        `;
+    });
+
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        width: 80%; max-width: 800px; height: 80vh; max-height: 800px;
+        background: linear-gradient(135deg, rgba(0,40,80,0.8) 0%, rgba(0,10,20,0.9) 100%);
+        border: 2px solid #0af; border-radius: 12px;
+        box-shadow: 0 0 40px rgba(0,170,255,0.4), inset 0 0 20px rgba(0,170,255,0.2);
+        padding: 30px; display: flex; flex-direction: column; position: relative;
+    `;
+
+    modal.innerHTML = `
+        <button id="close-software-shop" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#0af; font-size:30px; cursor:pointer; font-weight:bold; transition:0.2s;">&times;</button>
+        <h1 style="color:#0af; font-size:32px; text-shadow: 0 0 10px #0af; margin-top:0; border-bottom:1px solid rgba(0,170,255,0.5); padding-bottom:15px; text-align:center; letter-spacing:4px;">
+            CYBER BLACK MARKET SOFTWARE
+        </h1>
+        <div id="software-shop-list" style="flex-grow:1; overflow-y:auto; padding-right:10px; margin-top:20px;">
+            <style>
+                #software-shop-list::-webkit-scrollbar { width: 8px; }
+                #software-shop-list::-webkit-scrollbar-track { background: rgba(0, 10, 20, 0.5); border-left: 1px solid rgba(0,170,255,0.2); }
+                #software-shop-list::-webkit-scrollbar-thumb { background: rgba(0,170,255,0.5); border-radius: 4px; border: 1px solid #0af; }
+                #software-shop-list::-webkit-scrollbar-thumb:hover { background: rgba(0,170,255,0.8); }
+            </style>
+            ${itemsHtml}
+        </div>
+    `;
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    document.getElementById('close-software-shop').onclick = () => {
+        overlay.remove();
+        if(typeof _sfxClick !== 'undefined') _sfxClick();
+    };
+};
+
+window.buyWeaponFromShop = function(name, cost) {
+    if (typeof _sfxClick !== 'undefined') _sfxClick();
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+            type: 'buy_weapon',
+            callsign: window.myCallsign || window.pendingCallsign || 'GUEST',
+            weaponName: name,
+            cost: cost
+        }));
+    }
+};
+
+// ========================================================
 // Removed hover listeners for ops-sidebar (now permanently displayed)
 </script>
 
@@ -16248,9 +16358,25 @@ window.buyOrbitalStrike = function() {
     
     if (window.solana && window.solana.isPhantom) {
       try {
-        await window.solana.disconnect(); 
-        const resp = await window.solana.connect();
-        const address = resp.publicKey.toString();
+        await window.solana.disconnect();
+        
+        const domain = window.location.host || 'localhost';
+        const uri = window.location.href || 'http://localhost:8888';
+        const currentDateTime = new Date().toISOString();
+        const nonce = Array.from(crypto.getRandomValues(new Uint8Array(8))).map(b => b.toString(16).padStart(2, '0')).join('');
+
+        const input = {
+          domain,
+          statement: "Sign In to Nuclear War command terminal.",
+          version: "1",
+          nonce: nonce,
+          chainId: "mainnet",
+          issuedAt: currentDateTime,
+          resources: ["https://phantom.app/"]
+        };
+        
+        await window.solana.signIn(input);
+        const address = window.solana.publicKey.toString();
         
         const statusEl = document.getElementById('lobby-auth-status');
         if (statusEl) {
@@ -16264,8 +16390,12 @@ window.buyOrbitalStrike = function() {
         joinGlobalWar();
       } catch (err) {
         console.error("Phantom custom connect failed:", err);
+        alert('Phantom Connection Failed or Rejected.');
+        if (btn) btn.innerText = 'DIRECT PHANTOM';
       }
     } else {
+      alert("Phantom extension not detected in browser.");
+      if (btn) btn.innerText = 'DIRECT PHANTOM';
       window.open("https://phantom.app/", "_blank");
     }
   };
@@ -16355,19 +16485,7 @@ window.buyOrbitalStrike = function() {
       if (btn) btn.innerText = 'LOGIN POLKADOT';
     }
   };
-        if (typeof window.joinGlobalWar === 'function') {
-          window.joinGlobalWar();
-        }
-      } catch (err) {
-        console.error(err);
-        alert('Phantom Connection Failed or Rejected.');
-        if (btn) btn.innerText = 'DIRECT PHANTOM';
-      }
-    } else {
-      alert("Phantom extension not detected in browser.");
-      if (btn) btn.innerText = 'DIRECT PHANTOM';
-    }
-  };
+
 // =====================================================================
 // MOCK GLOBAL TRADE ECONOMY (GREEN & YELLOW SKINS)
 // =====================================================================
@@ -17496,5 +17614,273 @@ function updateWorldBankModal() {
 <!-- ANTIGRAVITY BRAIN MODULE: REAL-TIME ERROR TELEMETRY & HOTFIX ENGINE -->
 <script src="public/brain_client.js"></script>
 
+<!-- ============================================================ -->
+<!-- SOL/D3X LIQUIDITY POOL MODAL -->
+<!-- ============================================================ -->
+<div id="pool-modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,5,20,0.88); z-index:9999999; backdrop-filter:blur(6px); justify-content:center; align-items:center;">
+  <div id="pool-modal" style="
+    position:relative; width:640px; max-width:96vw;
+    background:linear-gradient(135deg, #020d1f 0%, #010a18 100%);
+    border:1px solid rgba(0,170,255,0.5);
+    border-radius:12px;
+    box-shadow: 0 0 60px rgba(0,170,255,0.25), 0 0 120px rgba(0,80,200,0.1), inset 0 0 40px rgba(0,170,255,0.04);
+    font-family:'Share Tech Mono', 'Courier New', monospace;
+    overflow:hidden;
+  ">
+    <!-- Header -->
+    <div style="background:linear-gradient(90deg, rgba(0,170,255,0.15), rgba(0,80,200,0.1)); padding:18px 24px; border-bottom:1px solid rgba(0,170,255,0.3); display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div style="color:#0af; font-size:18px; font-weight:bold; letter-spacing:3px; text-shadow:0 0 15px rgba(0,170,255,0.8);">🏊 SOL / D3X LIQUIDITY POOL</div>
+        <div style="color:rgba(0,170,255,0.6); font-size:10px; letter-spacing:2px; margin-top:3px;">DECENTRALIZED MARKET DEPTH PROGRAM</div>
+      </div>
+      <button onclick="closePoolModal()" style="background:none; border:1px solid rgba(255,50,50,0.4); color:#f55; padding:6px 14px; cursor:pointer; font-family:inherit; font-size:12px; border-radius:4px; letter-spacing:2px; transition:0.2s;" onmouseover="this.style.background='rgba(255,50,50,0.2)'" onmouseout="this.style.background='none'">✕ CLOSE</button>
+    </div>
+
+    <!-- Pool Stats Row -->
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:rgba(0,170,255,0.1); border-bottom:1px solid rgba(0,170,255,0.2);">
+      <div style="background:#020d1f; padding:16px; text-align:center;">
+        <div style="color:rgba(0,170,255,0.5); font-size:9px; letter-spacing:2px; margin-bottom:4px;">TREASURY D3X</div>
+        <div id="pool-treasury-bal" style="color:#0af; font-size:18px; font-weight:bold; text-shadow:0 0 10px rgba(0,170,255,0.6);">LOADING...</div>
+      </div>
+      <div style="background:#020d1f; padding:16px; text-align:center;">
+        <div style="color:rgba(0,255,136,0.5); font-size:9px; letter-spacing:2px; margin-bottom:4px;">POOL PARTICIPANTS</div>
+        <div id="pool-participants" style="color:#0f8; font-size:18px; font-weight:bold; text-shadow:0 0 10px rgba(0,255,136,0.6);">—</div>
+      </div>
+      <div style="background:#020d1f; padding:16px; text-align:center;">
+        <div style="color:rgba(255,200,0,0.5); font-size:9px; letter-spacing:2px; margin-bottom:4px;">24H VOLUME</div>
+        <div id="pool-volume-24h" style="color:#fa0; font-size:18px; font-weight:bold; text-shadow:0 0 10px rgba(255,200,0,0.6);">—</div>
+      </div>
+    </div>
+
+    <!-- Explanation -->
+    <div style="padding:20px 24px; border-bottom:1px solid rgba(0,170,255,0.1); color:rgba(180,220,255,0.75); font-size:11px; line-height:1.7; letter-spacing:0.5px;">
+      When you join the <span style="color:#0af; font-weight:bold;">SOL/D3X Pool</span>, your SOL and D3X are paired as liquidity on-market. The Treasury continuously injects D3X into this pool — your position grows with every spend, burn, and crafting action by all commanders.
+      <br/><br/>
+      <span style="color:#fa0;">⚡ Treasury feeds 15% of all in-game D3X flows into the pool.</span> LP providers earn a proportional share.
+    </div>
+
+    <!-- Your Position -->
+    <div style="padding:16px 24px; border-bottom:1px solid rgba(0,170,255,0.1);">
+      <div style="color:rgba(0,170,255,0.5); font-size:9px; letter-spacing:2px; margin-bottom:10px;">YOUR CURRENT POSITION</div>
+      <div id="pool-user-position" style="color:#0af; font-size:13px; letter-spacing:1px;">Connect wallet to view position</div>
+    </div>
+
+    <!-- Join / Add Liquidity Form -->
+    <div style="padding:20px 24px;">
+      <div style="color:rgba(0,170,255,0.5); font-size:9px; letter-spacing:2px; margin-bottom:14px;">ADD LIQUIDITY</div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+        <div>
+          <label style="color:rgba(0,170,255,0.7); font-size:10px; letter-spacing:1px; display:block; margin-bottom:5px;">SOL AMOUNT</label>
+          <input id="pool-sol-input" type="number" min="0.01" step="0.01" placeholder="0.00 SOL"
+            style="width:100%; background:rgba(0,170,255,0.05); border:1px solid rgba(0,170,255,0.3); color:#0af; padding:10px 12px; font-family:inherit; font-size:14px; border-radius:6px; outline:none; box-sizing:border-box;"
+            oninput="syncPoolInputs('sol')"
+          />
+        </div>
+        <div>
+          <label style="color:rgba(0,255,136,0.7); font-size:10px; letter-spacing:1px; display:block; margin-bottom:5px;">D3X AMOUNT</label>
+          <input id="pool-d3x-input" type="number" min="1" step="1" placeholder="0 D3X"
+            style="width:100%; background:rgba(0,255,136,0.05); border:1px solid rgba(0,255,136,0.3); color:#0f8; padding:10px 12px; font-family:inherit; font-size:14px; border-radius:6px; outline:none; box-sizing:border-box;"
+            oninput="syncPoolInputs('d3x')"
+          />
+        </div>
+      </div>
+
+      <div id="pool-ratio-display" style="color:rgba(180,220,255,0.5); font-size:10px; letter-spacing:1px; margin-bottom:16px; text-align:center;">
+        Enter SOL amount to calculate D3X pairing
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <button onclick="joinLiquidityPool()" style="
+          padding:14px; background:linear-gradient(135deg, rgba(0,170,255,0.2), rgba(0,100,200,0.15));
+          border:1px solid #0af; color:#0af; font-family:inherit; font-size:13px; font-weight:bold;
+          letter-spacing:2px; cursor:pointer; border-radius:6px; transition:0.2s;
+          text-shadow:0 0 8px rgba(0,170,255,0.6); box-shadow:0 0 15px rgba(0,170,255,0.2);
+        " onmouseover="this.style.background='rgba(0,170,255,0.3)'" onmouseout="this.style.background='linear-gradient(135deg, rgba(0,170,255,0.2), rgba(0,100,200,0.15))'">
+          🏊 JOIN POOL
+        </button>
+        <button onclick="withdrawFromPool()" style="
+          padding:14px; background:linear-gradient(135deg, rgba(255,200,0,0.1), rgba(200,150,0,0.08));
+          border:1px solid rgba(255,200,0,0.4); color:#fa0; font-family:inherit; font-size:13px; font-weight:bold;
+          letter-spacing:2px; cursor:pointer; border-radius:6px; transition:0.2s;
+        " onmouseover="this.style.background='rgba(255,200,0,0.2)'" onmouseout="this.style.background='linear-gradient(135deg, rgba(255,200,0,0.1), rgba(200,150,0,0.08))'">
+          ⬆ WITHDRAW
+        </button>
+      </div>
+
+      <div id="pool-status-msg" style="margin-top:14px; color:#0f8; font-size:11px; letter-spacing:1px; text-align:center; min-height:20px;"></div>
+    </div>
+
+    <!-- Footer note -->
+    <div style="padding:12px 24px; background:rgba(0,0,0,0.3); color:rgba(100,160,220,0.4); font-size:9px; letter-spacing:1px; border-top:1px solid rgba(0,170,255,0.1); text-align:center;">
+      POOL FEES GO TO TREASURY → REDISTRIBUTION EVERY 24H TO TOP COMMANDERS + AI AGENTS
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// SOL/D3X LIQUIDITY POOL LOGIC
+// ============================================================
+const POOL_SOL_D3X_RATIO = 4200; // 1 SOL = ~4200 D3X (approximate — refresh from oracle in real impl)
+
+async function openPoolModal() {
+  const overlay = document.getElementById('pool-modal-overlay');
+  overlay.style.display = 'flex';
+
+  // Load live treasury stats
+  try {
+    const res = await fetch('/api/treasury/status');
+    const data = await res.json();
+    document.getElementById('pool-treasury-bal').textContent =
+      (data.treasury_balance || 0).toLocaleString() + ' D3X';
+    const burned  = data.last_24h_flows?.burn          || 0;
+    const spent   = data.last_24h_flows?.spend         || 0;
+    const minted  = data.last_24h_flows?.mine_metals   || 0;
+    const vol = Math.round(burned + spent + minted);
+    document.getElementById('pool-volume-24h').textContent = vol.toLocaleString() + ' D3X';
+  } catch(e) {
+    document.getElementById('pool-treasury-bal').textContent = 'ERR';
+  }
+
+  // Load participant count from DB
+  try {
+    const res = await fetch('/api/pool/participants');
+    const data = await res.json();
+    document.getElementById('pool-participants').textContent = (data.count || 0).toLocaleString();
+  } catch(e) {
+    document.getElementById('pool-participants').textContent = '—';
+  }
+
+  // Load user's pool position if wallet connected
+  const walletAddr = window._connectedWalletAddress || null;
+  if (walletAddr) {
+    try {
+      const res = await fetch('/api/pool/position?wallet=' + walletAddr);
+      const pos = await res.json();
+      if (pos && pos.sol_contributed) {
+        document.getElementById('pool-user-position').innerHTML =
+          `<span style="color:#0af">${pos.sol_contributed} SOL</span> + <span style="color:#0f8">${pos.d3x_contributed?.toLocaleString()} D3X</span> &nbsp;&nbsp; | &nbsp;&nbsp; Share: <span style="color:#fa0">${(pos.share_pct || 0).toFixed(2)}%</span>`;
+      } else {
+        document.getElementById('pool-user-position').textContent = 'No active position — join below';
+      }
+    } catch(e) {
+      document.getElementById('pool-user-position').textContent = 'Connect wallet to view position';
+    }
+  } else {
+    document.getElementById('pool-user-position').textContent = 'Connect Phantom wallet to participate';
+  }
+}
+
+function closePoolModal() {
+  document.getElementById('pool-modal-overlay').style.display = 'none';
+}
+
+function syncPoolInputs(changed) {
+  const solInput = document.getElementById('pool-sol-input');
+  const d3xInput = document.getElementById('pool-d3x-input');
+  const ratio    = document.getElementById('pool-ratio-display');
+  if (changed === 'sol') {
+    const sol = parseFloat(solInput.value) || 0;
+    const d3x = Math.round(sol * POOL_SOL_D3X_RATIO);
+    if (sol > 0) { d3xInput.value = d3x; }
+    ratio.textContent = sol > 0
+      ? `Ratio: 1 SOL = ${POOL_SOL_D3X_RATIO.toLocaleString()} D3X — you provide ${sol} SOL + ${d3x.toLocaleString()} D3X`
+      : 'Enter SOL amount to calculate D3X pairing';
+  } else {
+    const d3x = parseFloat(d3xInput.value) || 0;
+    const sol = +(d3x / POOL_SOL_D3X_RATIO).toFixed(4);
+    if (d3x > 0) { solInput.value = sol; }
+    ratio.textContent = d3x > 0
+      ? `Ratio: ${POOL_SOL_D3X_RATIO.toLocaleString()} D3X = 1 SOL — you provide ${sol} SOL + ${d3x.toLocaleString()} D3X`
+      : 'Enter SOL amount to calculate D3X pairing';
+  }
+}
+
+async function joinLiquidityPool() {
+  const msg = document.getElementById('pool-status-msg');
+  const solAmt = parseFloat(document.getElementById('pool-sol-input').value);
+  const d3xAmt = parseFloat(document.getElementById('pool-d3x-input').value);
+
+  if (!solAmt || !d3xAmt || solAmt <= 0 || d3xAmt <= 0) {
+    msg.style.color = '#f55';
+    msg.textContent = '⚠ Enter valid SOL and D3X amounts';
+    return;
+  }
+
+  const walletAddr = window._connectedWalletAddress;
+  const callsign   = window._loggedInCallsign || localStorage.getItem('callsign');
+
+  if (!walletAddr) {
+    msg.style.color = '#fa0';
+    msg.textContent = '⚠ Connect Phantom wallet first';
+    return;
+  }
+
+  msg.style.color = '#0af';
+  msg.textContent = '⏳ SUBMITTING POSITION TO POOL...';
+
+  // Submit position to server — server validates D3X balance in DB
+  try {
+    const res = await fetch('/api/pool/join', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ wallet: walletAddr, callsign, sol_amount: solAmt, d3x_amount: d3xAmt })
+    });
+    const data = await res.json();
+    if (data.success) {
+      msg.style.color = '#0f8';
+      msg.textContent = `✅ JOINED POOL — ${solAmt} SOL + ${d3xAmt.toLocaleString()} D3X committed. Position logged.`;
+      document.getElementById('pool-participants').textContent =
+        parseInt(document.getElementById('pool-participants').textContent.replace(/,/g,'') || 0) + 1;
+    } else {
+      msg.style.color = '#f55';
+      msg.textContent = '✗ ' + (data.error || 'Failed. Check D3X balance.');
+    }
+  } catch(e) {
+    msg.style.color = '#f55';
+    msg.textContent = '✗ Server error: ' + e.message;
+  }
+}
+
+async function withdrawFromPool() {
+  const msg = document.getElementById('pool-status-msg');
+  const walletAddr = window._connectedWalletAddress;
+  const callsign   = window._loggedInCallsign || localStorage.getItem('callsign');
+  if (!walletAddr) {
+    msg.style.color = '#fa0';
+    msg.textContent = '⚠ Connect Phantom wallet first';
+    return;
+  }
+  msg.style.color = '#fa0';
+  msg.textContent = '⏳ PROCESSING WITHDRAWAL...';
+  try {
+    const res = await fetch('/api/pool/withdraw', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ wallet: walletAddr, callsign })
+    });
+    const data = await res.json();
+    if (data.success) {
+      msg.style.color = '#0f8';
+      msg.textContent = `✅ WITHDRAWN — ${data.sol_returned} SOL + ${(data.d3x_returned||0).toLocaleString()} D3X returned`;
+    } else {
+      msg.style.color = '#f55';
+      msg.textContent = '✗ ' + (data.error || 'No active position found');
+    }
+  } catch(e) {
+    msg.style.color = '#f55';
+    msg.textContent = '✗ Server error: ' + e.message;
+  }
+}
+
+// Close modal when clicking outside
+document.getElementById('pool-modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closePoolModal();
+});
+</script>
+
 </body>
 </html>
+

@@ -1,0 +1,159 @@
+1. Gemini Real-Time Economic Auditor Prompt
+You are Gemini, the autonomous economic auditor for the platform. Your task is to maintain the stability and sustainability of the system's tokenomics by continuously monitoring live data and historical trends.
+
+TASK:
+1. Fetch historical transaction and balance data from the platform.
+2. Monitor all economic modules (wallets, rewards, mining, trading).
+3. Compute key metrics:
+   - Liquidity ratio = reserves / token_supply
+   - Token velocity = avg transactions per unit time
+   - Reward-to-penalty ratio = rewards_given / penalties_taken
+   - Historical volatility = deviation of metrics from past trends
+4. Generate a stability index (0.0–1.0) weighted by liquidity, velocity, and reward/penalty balance.
+5. Identify anomalies, potential imbalances, and sustainability risks.
+6. Produce actionable recommendations for maintaining economic stability.
+7. Output results in structured JSON for integration into dashboards.
+
+CONSTRAINTS:
+- No modifications to tokenomics; reporting only.
+- Must operate reliably under low computational load.
+- Use historical data to contextualize live metrics.
+- Update metrics and recommendations continuously (real-time).
+2. Algorithm/Workflow
+
+Step A: Data Acquisition
+
+Fetch token_supply, reserves, transactions (live + historical)
+
+Fetch rewards_given, penalties_taken
+
+Store last n intervals for trend analysis
+
+Step B: Compute Metrics
+
+liquidity_ratio = reserves / token_supply
+token_velocity = sum(transactions[-interval]) / token_supply
+reward_penalty_ratio = rewards_given / max(penalties_taken, 1)
+historical_volatility = compute_std_dev(historical_metrics)
+
+Step C: Stability Index
+
+Weighted formula (can adjust weights over time):
+
+stability_index = 0.5*min(liquidity_ratio,1.0) + \
+                  0.3*max(0,1-abs(token_velocity - target_velocity)) + \
+                  0.2*min(reward_penalty_ratio,1.0)
+# Optionally reduce index if historical volatility > threshold
+
+Step D: Connectivity Check
+
+Ping each module: wallet, reward system, mining, marketplace
+
+Report status: connected / disconnected
+
+Step E: Recommendation Engine
+
+If liquidity < threshold → "Inject reserves or reduce rewards"
+
+If velocity high → "Monitor transaction load"
+
+If reward/penalty ratio imbalanced → "Adjust reward or penalty distribution"
+
+Include trend context from historical data
+
+Step F: JSON Output
+
+{
+  "connectivity": {...},
+  "metrics": {
+    "token_supply": 1000000,
+    "reserves": 500000,
+    "liquidity_ratio": 0.5,
+    "token_velocity": 0.02,
+    "reward_penalty_ratio": 1.2,
+    "historical_volatility": 0.03
+  },
+  "stability_index": 0.68,
+  "recommendations": [
+    "Maintain liquidity above 40%",
+    "Monitor token velocity near 0.02",
+    "Adjust rewards if reward/penalty ratio > 1.5"
+  ]
+}
+3. Python Prototype (Live + Historical)
+import json
+from statistics import stdev
+
+# ----- Live + Historical Inputs -----
+token_supply = 1_000_000
+reserves = 500_000
+transactions_history = [
+    [100, 50, 200],  # oldest interval
+    [120, 80, 150],  # recent
+    [110, 60, 170]   # live
+]
+rewards_given = 1000
+penalties_taken = 800
+target_velocity = 0.02
+liquidity_threshold = 0.4
+
+# ----- Metrics -----
+transactions = transactions_history[-1]  # live interval
+token_velocity = sum(transactions) / token_supply
+liquidity_ratio = reserves / token_supply
+reward_penalty_ratio = rewards_given / max(penalties_taken, 1)
+# historical volatility
+all_velocity = [sum(interval)/token_supply for interval in transactions_history]
+historical_volatility = stdev(all_velocity)
+
+# ----- Stability Index -----
+stability_index = 0.5*min(liquidity_ratio,1.0) + \
+                  0.3*max(0,1-abs(token_velocity - target_velocity)) + \
+                  0.2*min(reward_penalty_ratio,1.0)
+# penalize if volatility too high
+if historical_volatility > 0.05:
+    stability_index *= 0.9
+
+# ----- Connectivity -----
+connectivity = {
+    "wallet": "connected",
+    "reward_system": "connected",
+    "mining_system": "connected",
+    "marketplace": "connected"
+}
+
+# ----- Recommendations -----
+recommendations = []
+if liquidity_ratio < liquidity_threshold:
+    recommendations.append("Liquidity below threshold; consider injecting reserves.")
+if abs(token_velocity - target_velocity) > 0.01:
+    recommendations.append("Token velocity deviates from target; monitor transactions.")
+if reward_penalty_ratio > 1.5:
+    recommendations.append("Reward/Penalty ratio high; adjust distribution.")
+
+# ----- JSON Report -----
+report = {
+    "connectivity": connectivity,
+    "metrics": {
+        "token_supply": token_supply,
+        "reserves": reserves,
+        "liquidity_ratio": liquidity_ratio,
+        "token_velocity": token_velocity,
+        "reward_penalty_ratio": reward_penalty_ratio,
+        "historical_volatility": historical_volatility
+    },
+    "stability_index": round(stability_index, 2),
+    "recommendations": recommendations
+}
+
+print(json.dumps(report, indent=2))
+
+This system allows Gemini to:
+
+Continuously monitor live tokenomics
+
+Compare against historical data for trends
+
+Report stability index + actionable recommendations
+
+Operate under low computational load, safe for production

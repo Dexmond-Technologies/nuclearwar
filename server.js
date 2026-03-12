@@ -64,6 +64,7 @@ let authorityKeypair = loadKeypairFromEnv('EARTH_WALLET_PRIVATE_KEY', 'Authority
 let rainclaudeKeypair = loadKeypairFromEnv('RAINCLAUDE_SOLANA_KEY', 'Rainclaude');
 let geminiKeypair = loadKeypairFromEnv('gemini_wallet_pvt_key', 'Gemini AI');
 let worldBankKeypair = loadKeypairFromEnv('WORLD_BANK_PVT_KEY', 'World Bank');
+let treasuryKeypair  = loadKeypairFromEnv('TREASURY_PVT_KEY', 'Treasury');
 
 let cachedGeminiBalance = 0;
 let cachedClaudeBalance = 0;
@@ -71,6 +72,56 @@ let cachedWorldBankBalance = 0;
 let cachedGeminiWallet = process.env.gemini_wallet || (geminiKeypair ? geminiKeypair.publicKey.toBase58() : "NOT_SET");
 let cachedClaudeWallet = process.env.RAINCLAUDE_SOLANA_WALLET || (rainclaudeKeypair ? rainclaudeKeypair.publicKey.toBase58() : "NOT_SET");
 let cachedWorldBankWallet = process.env.WORLD_BANK_WALLET || "NOT_SET";
+const TREASURY_WALLET   = process.env.TREASURY_WALLET || "NOT_SET";
+
+// ====================================================================
+// TOKEN LEDGER — Production economy tracker
+// All token flows: emit, spend, burn, treasury_fee, reinjection
+// ====================================================================
+async function logTokenFlow(type, amount, fromCommander, toCommander, note) {
+    if (!pgPool) return;
+    try {
+        await pgPool.query(
+            `INSERT INTO token_ledger (flow_type, amount, from_commander, to_commander, note, created_at)
+             VALUES ($1, $2, $3, $4, $5, NOW())`,
+            [type, amount, fromCommander || 'SYSTEM', toCommander || 'SYSTEM', note || '']
+        );
+    } catch (e) {
+        // Non-fatal — don't crash game if ledger write fails
+        console.error('[LEDGER] Write failed:', e.message);
+    }
+}
+
+// Split a D3X amount across the three economy buckets:
+//   70% → World Bank (operational/redeployable)
+//   15% → Burn (deflation)
+//   15% → Treasury (reserve)
+// Returns { bankCut, burnCut, treasuryCut }
+async function splitEconomyFlow(amount, fromCallsign, note) {
+    const bankCut     = Math.round(amount * 0.70);
+    const burnCut     = Math.round(amount * 0.15);
+    const treasuryCut = amount - bankCut - burnCut;
+
+    if (!pgPool) return { bankCut, burnCut, treasuryCut };
+
+    // Credit World Bank internal balance
+    await pgPool.query(
+        `UPDATE commanders SET d3x_balance = d3x_balance + $1 WHERE callsign = 'WORLD BANK'`,
+        [bankCut]
+    );
+    // Credit Treasury internal balance
+    await pgPool.query(
+        `UPDATE commanders SET d3x_balance = d3x_balance + $1 WHERE callsign = 'TREASURY'`,
+        [treasuryCut]
+    );
+
+    await logTokenFlow('spend',   amount,     fromCallsign,  'WORLD BANK', note);
+    await logTokenFlow('burn',    burnCut,    'SYSTEM',       'BURN',       note + ' — deflationary burn');
+    await logTokenFlow('treasury_fee', treasuryCut, 'SYSTEM', 'TREASURY',  note + ' — treasury cut');
+
+    return { bankCut, burnCut, treasuryCut };
+}
+
 
 async function transferD3XOnChain(fromKeypair, toAddress, amount) {
     if (!fromKeypair) return;
@@ -548,11 +599,119 @@ const server = http.createServer((req, res) => {
         res.writeHead(200);
         res.end(JSON.stringify({received: true}));
     });
+  } else if (req.url === '/api/crafting/recipes') {
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ recipes: CRAFTING_RECIPES }));
+
+  } else if (req.url === '/api/treasury/status') {
+    res.setHeader('Content-Type', 'application/json');
+    if (!pgPool) { res.statusCode = 503; res.end(JSON.stringify({ error: 'DB unavailable' })); return; }
+    (async () => {
+      try {
+        const [treasuryRow, bankRow, ledgerSummary] = await Promise.all([
+          pgPool.query(`SELECT d3x_balance FROM commanders WHERE callsign = 'TREASURY'`),
+          pgPool.query(`SELECT d3x_balance FROM commanders WHERE callsign = 'WORLD BANK'`),
+          pgPool.query(`SELECT flow_type, SUM(amount)::numeric AS total FROM token_ledger WHERE created_at > NOW() - INTERVAL '24 hours' GROUP BY flow_type`)
+        ]);
+        const flows = {};
+        ledgerSummary.rows.forEach(r => { flows[r.flow_type] = parseFloat(r.total); });
+        res.end(JSON.stringify({
+          treasury_balance: parseInt(treasuryRow.rows[0]?.d3x_balance || 0),
+          world_bank_balance: parseInt(bankRow.rows[0]?.d3x_balance || 0),
+          treasury_wallet: TREASURY_WALLET,
+          last_24h_flows: flows,
+          timestamp: new Date().toISOString()
+        }));
+      } catch(e) { res.statusCode = 500; res.end(JSON.stringify({ error: e.message })); }
+    })();
+
+  } else if (req.url === '/api/pool/participants') {
+    res.setHeader('Content-Type', 'application/json');
+    if (!pgPool) { res.end(JSON.stringify({ count: 0 })); return; }
+    pgPool.query(`SELECT COUNT(*) FROM pool_positions WHERE active = TRUE`)
+      .then(r => res.end(JSON.stringify({ count: parseInt(r.rows[0].count) })))
+      .catch(e => res.end(JSON.stringify({ count: 0, error: e.message })));
+
+  } else if (req.url.startsWith('/api/pool/position')) {
+    res.setHeader('Content-Type', 'application/json');
+    if (!pgPool) { res.end(JSON.stringify({})); return; }
+    const urlObj = new URL(req.url, 'http://localhost');
+    const wallet = urlObj.searchParams.get('wallet');
+    if (!wallet) { res.statusCode = 400; res.end(JSON.stringify({ error: 'wallet required' })); return; }
+    (async () => {
+      try {
+        const r = await pgPool.query(
+          `SELECT sol_contributed, d3x_contributed, joined_at FROM pool_positions WHERE wallet = $1 AND active = TRUE`, [wallet]
+        );
+        if (!r.rows.length) { res.end(JSON.stringify({ active: false })); return; }
+        const totalRes = await pgPool.query(`SELECT SUM(sol_contributed) AS total FROM pool_positions WHERE active = TRUE`);
+        const mySOL = parseFloat(r.rows[0].sol_contributed);
+        const totalSOL = parseFloat(totalRes.rows[0].total || 1);
+        res.end(JSON.stringify({ ...r.rows[0], share_pct: ((mySOL / totalSOL) * 100).toFixed(4), active: true }));
+      } catch(e) { res.statusCode = 500; res.end(JSON.stringify({ error: e.message })); }
+    })();
+
+  } else if (req.url === '/api/pool/join' && req.method === 'POST') {
+    res.setHeader('Content-Type', 'application/json');
+    if (!pgPool) { res.statusCode = 503; res.end(JSON.stringify({ error: 'DB unavailable' })); return; }
+    let body = '';
+    req.on('data', d => body += d);
+    req.on('end', async () => {
+      try {
+        const { wallet, callsign, sol_amount, d3x_amount } = JSON.parse(body);
+        if (!wallet || !sol_amount || !d3x_amount || sol_amount <= 0 || d3x_amount <= 0) {
+          res.statusCode = 400; res.end(JSON.stringify({ error: 'wallet, sol_amount, d3x_amount required' })); return;
+        }
+        if (callsign) {
+          const balRes = await pgPool.query(`SELECT d3x_balance FROM commanders WHERE callsign = $1`, [callsign]);
+          const bal = parseInt(balRes.rows[0]?.d3x_balance || 0);
+          if (bal < d3x_amount) { res.end(JSON.stringify({ success: false, error: `Need ${d3x_amount} D3X. Have ${bal}.` })); return; }
+          await pgPool.query(`UPDATE commanders SET d3x_balance = d3x_balance - $1 WHERE callsign = $2`, [d3x_amount, callsign]);
+          await logTokenFlow('pool_join', d3x_amount, callsign, 'POOL', `LP: ${sol_amount} SOL + ${d3x_amount} D3X`);
+        }
+        await pgPool.query(`
+          INSERT INTO pool_positions (wallet, callsign, sol_contributed, d3x_contributed, active)
+          VALUES ($1, $2, $3, $4, TRUE)
+          ON CONFLICT (wallet) DO UPDATE SET
+            sol_contributed = pool_positions.sol_contributed + EXCLUDED.sol_contributed,
+            d3x_contributed = pool_positions.d3x_contributed + EXCLUDED.d3x_contributed,
+            active = TRUE, joined_at = NOW()
+        `, [wallet, callsign, sol_amount, d3x_amount]);
+        console.log(`[POOL] 🏊 ${callsign || wallet} joined LP: ${sol_amount} SOL + ${d3x_amount} D3X`);
+        res.end(JSON.stringify({ success: true }));
+      } catch(e) { res.statusCode = 500; res.end(JSON.stringify({ error: e.message })); }
+    });
+
+  } else if (req.url === '/api/pool/withdraw' && req.method === 'POST') {
+    res.setHeader('Content-Type', 'application/json');
+    if (!pgPool) { res.statusCode = 503; res.end(JSON.stringify({ error: 'DB unavailable' })); return; }
+    let body = '';
+    req.on('data', d => body += d);
+    req.on('end', async () => {
+      try {
+        const { wallet, callsign } = JSON.parse(body);
+        if (!wallet) { res.statusCode = 400; res.end(JSON.stringify({ error: 'wallet required' })); return; }
+        const existing = await pgPool.query(
+          `SELECT sol_contributed, d3x_contributed, callsign FROM pool_positions WHERE wallet = $1 AND active = TRUE`, [wallet]
+        );
+        if (!existing.rows.length) { res.end(JSON.stringify({ success: false, error: 'No active position' })); return; }
+        const pos = existing.rows[0];
+        await pgPool.query(`UPDATE pool_positions SET active = FALSE WHERE wallet = $1`, [wallet]);
+        const cs = callsign || pos.callsign;
+        if (cs) {
+          await pgPool.query(`UPDATE commanders SET d3x_balance = d3x_balance + $1 WHERE callsign = $2`, [pos.d3x_contributed, cs]);
+          await logTokenFlow('pool_withdraw', pos.d3x_contributed, 'POOL', cs, `LP withdrawal ${wallet}`);
+        }
+        res.end(JSON.stringify({ success: true, sol_returned: parseFloat(pos.sol_contributed), d3x_returned: parseFloat(pos.d3x_contributed) }));
+      } catch(e) { res.statusCode = 500; res.end(JSON.stringify({ error: e.message })); }
+    });
+
   } else {
     res.writeHead(404);
     res.end('Not found');
   }
 });
+
 
 const wss = new WebSocket.Server({ server });
 
@@ -1463,15 +1622,37 @@ function initWebSockets() {
       case 'human_combat_support': {
         const target = msg.target; // 'gemini' or 'claude'
         const amount = msg.amount || 50;
+        const COMBAT_ENTRY_FEE = 20; // D3X required to take a combat action
         if (!pgPool) return;
         try {
+          // Check player can afford the combat fee
+          const feeRes = await pgPool.query(
+            `SELECT d3x_balance FROM commanders WHERE callsign = $1`, [client.name]
+          );
+          const balance = parseInt(feeRes.rows[0]?.d3x_balance || 0, 10);
+          if (balance < COMBAT_ENTRY_FEE) {
+            ws.send(JSON.stringify({ type: 'error', msg: `Combat costs ${COMBAT_ENTRY_FEE} D3X. You have ${balance}.` }));
+            break;
+          }
+
+          // Deduct fee from player
+          await pgPool.query(
+            `UPDATE commanders SET d3x_balance = d3x_balance - $1 WHERE callsign = $2`,
+            [COMBAT_ENTRY_FEE, client.name]
+          );
+          // Route through economy split
+          await splitEconomyFlow(COMBAT_ENTRY_FEE, client.name, `Combat action entry fee — target: ${target}`);
+
+          // Apply the combat effect
           if (target === 'gemini') {
             await pgPool.query("UPDATE ai_combat_state SET gemini_hp = gemini_hp + $1 WHERE id = 1", [amount]);
-            console.log(`[HUMAN SUPPORT] ${client.name} healed Gemini (+${amount} HP).`);
+            console.log(`[HUMAN SUPPORT] ${client.name} healed Gemini (+${amount} HP). Fee: ${COMBAT_ENTRY_FEE} D3X.`);
           } else if (target === 'claude') {
             await pgPool.query("UPDATE ai_combat_state SET claude_hp = claude_hp - $1 WHERE id = 1", [amount]);
-            console.log(`[HUMAN SUPPORT] ${client.name} attacked Rainclaude (-${amount} HP).`);
+            console.log(`[HUMAN SUPPORT] ${client.name} attacked Rainclaude (-${amount} HP). Fee: ${COMBAT_ENTRY_FEE} D3X.`);
           }
+
+          ws.send(JSON.stringify({ type: 'combat_fee_paid', fee: COMBAT_ENTRY_FEE, target }));
         } catch (e) {
           console.error('DB Error on human_combat_support:', e.message);
         }
@@ -1483,93 +1664,105 @@ function initWebSockets() {
         const mineId = msg.mineId;
         if (!callsign || !mineId) break;
 
-        // Ensure server-side memory for this commander's dig state exists
         if (!globalGameState.digStates) globalGameState.digStates = {};
         if (!globalGameState.digStates[callsign]) globalGameState.digStates[callsign] = {};
         if (!pgPool) break;
-        
+
         try {
-            // First: Prevent the user from mining if they can't afford the click
-            const res = await pgPool.query(`SELECT d3x_balance, portfolio FROM commanders WHERE callsign = $1`, [callsign]);
+            // Read D3X balance and mining inventory
+            const res = await pgPool.query(
+                `SELECT d3x_balance, mining_inventory FROM commanders WHERE callsign = $1`, [callsign]
+            );
             if (res.rows.length === 0) break;
-            
-            let currentBal = parseInt(res.rows[0].d3x_balance || 0, 10);
-            
-            // Cost: 3 to 6 coins
-            const cost = Math.floor(Math.random() * 4) + 3;
-            // Reward: 2 coins
-            const baseReward = 2;
-            
-            if (currentBal < cost && !isJackpot) { // Allow jackpot to resolve if they hit 0 exactly on click 9
-                ws.send(JSON.stringify({ type: 'error', msg: 'Insufficient D3X for excavation fuel.' }));
+
+            const currentBal  = parseInt(res.rows[0].d3x_balance || 0, 10);
+            const inv         = res.rows[0].mining_inventory || {};
+
+            // Cost: 3-6 D3X as rig fuel (this is BURNED via splitEconomyFlow)
+            const fuelCost = Math.floor(Math.random() * 4) + 3;
+
+            if (currentBal < fuelCost) {
+                ws.send(JSON.stringify({ type: 'error', msg: `Need ${fuelCost} D3X fuel to drill. You have ${currentBal}.` }));
                 break;
             }
-            
+
+            // Initialize dig state for this mine
             if (!globalGameState.digStates[callsign][mineId]) {
                 globalGameState.digStates[callsign][mineId] = { clicks: 0 };
             }
-            
             const state = globalGameState.digStates[callsign][mineId];
-            
-            let treasure = 0;
-            let isJackpot = false;
-            
             state.clicks++;
-            
+
+            // Deduct D3X fuel from player first
+            await pgPool.query(
+                `UPDATE commanders SET d3x_balance = d3x_balance - $1 WHERE callsign = $2`,
+                [fuelCost, callsign]
+            );
+            // Route the fuel cost through the economy split (bank/burn/treasury)
+            await splitEconomyFlow(fuelCost, callsign, `Mine drill fuel — ${mineId}`);
+
+            // Determine metal yield for this click
+            let isCoreBreach = false;
+            let metalYield = {};
+
             if (state.clicks >= 10) {
-                treasure = 35;
-                isJackpot = true;
-                state.clicks = 0; // Reset dig cycle
+                // CORE BREACH — large multi-metal jackpot
+                isCoreBreach = true;
+                state.clicks = 0;
+                const jackpotMetal1 = METAL_TYPES[Math.floor(Math.random() * METAL_TYPES.length)];
+                const jackpotMetal2 = METAL_TYPES.filter(m => m !== jackpotMetal1)[Math.floor(Math.random() * 4)];
+                const rareBonus     = METAL_TYPES.filter(m => m !== jackpotMetal1 && m !== jackpotMetal2)[Math.floor(Math.random() * 3)];
+                metalYield[jackpotMetal1] = 40 + Math.floor(Math.random() * 20); // 40-60
+                metalYield[jackpotMetal2] = 20 + Math.floor(Math.random() * 10); // 20-30
+                metalYield[rareBonus]     = 5  + Math.floor(Math.random() * 5);  // 5-10
+            } else {
+                // Normal click — one small metal nugget
+                const metal = METAL_TYPES[Math.floor(Math.random() * METAL_TYPES.length)];
+                metalYield[metal] = Math.floor(Math.random() * 5) + 2; // 2-6 units
             }
-            
-            const netChange = baseReward + treasure - cost;
-            
-            // SECURITY: Explicitly update the PostgreSQL ledger with the click's Net Change immediately
-            await pgPool.query(`UPDATE commanders SET d3x_balance = d3x_balance + $1 WHERE callsign = $2`, [netChange, callsign]);
-            
-            // Respond to client so they can update their local memory and UI
+
+            // Add metal yield to inventory
+            for (const [metal, amount] of Object.entries(metalYield)) {
+                inv[metal] = (inv[metal] || 0) + amount;
+            }
+
+            await pgPool.query(
+                `UPDATE commanders SET mining_inventory = $1 WHERE callsign = $2`,
+                [JSON.stringify(inv), callsign]
+            );
+
+            await logTokenFlow('mine_metals',
+                Object.values(metalYield).reduce((a,b) => a+b, 0),
+                callsign, 'INVENTORY',
+                `Drill click on ${mineId}: ${JSON.stringify(metalYield)}`
+            );
+
+            console.log(`[MINE] ⛏ ${callsign} drilled ${mineId} (click ${state.clicks}). Fuel: ${fuelCost} D3X. Yield: ${JSON.stringify(metalYield)}`);
+
             ws.send(JSON.stringify({
                 type: 'mine_click_result',
-                mineId: mineId,
-                cost: cost,
-                baseReward: baseReward,
-                treasure: treasure,
-                isJackpot: isJackpot,
-                netChange: netChange,
+                mineId,
+                fuelCost,
+                metals: metalYield,
+                inventory: inv,
+                isCoreBreach,
                 clicks: state.clicks
             }));
-            
-            if (isJackpot && authorityKeypair) {
-                // Faucet: Send 10 D3X from World Bank (using worldBankKeypair)
-                pgPool.query(`SELECT solana_wallet_address, portfolio FROM commanders WHERE callsign = $1`, [callsign])
-                   .then(async (dbRes) => {
-                       if (dbRes.rows.length > 0 && dbRes.rows[0].solana_wallet_address) {
-                           const toPub = new web3.PublicKey(dbRes.rows[0].solana_wallet_address);
-                           // Send 10 D3X explicitly
-                           console.log(`[FAUCET] Dispatching ${netChange} D3X Net Jackpot to ${callsign} (${toPub.toBase58()})`);
-                           
-                           // Using worldBankKeypair (as fixed in prior flaw)
-                           const targetKp = typeof worldBankKeypair !== 'undefined' && worldBankKeypair ? worldBankKeypair : authorityKeypair;
-                           
-                           transferD3XOnChain(targetKp, toPub, netChange).catch(console.error);
-                           
-                           // Crucial Parity Sync: Advance their internal `lastKnownOnChainBalance` by 10
-                           // so that when `get_my_d3x_balance` runs, it doesn't add +10 Delta on top of the +10 SQL we just ran.
-                           let port = dbRes.rows[0].portfolio || {};
-                           if (port.lastKnownOnChainBalance !== undefined) {
-                               port.lastKnownOnChainBalance += netChange;
-                               await pgPool.query(`UPDATE commanders SET portfolio = $1 WHERE callsign = $2`, [port, callsign]);
-                           }
-                       }
-                   }).catch(console.error);
-            }
+
         } catch (e) {
             console.error('Excavation error:', e.message);
         }
-        
+
         break;
       }
+
       
+      case 'craft_item': {
+        // Crafting: metals + D3X burn → weapon item
+        await handleCraftMessage(ws, msg, client);
+        break;
+      }
+
       case 'save_portfolio': {
         const callsign = msg.callsign;
         const portfolioData = msg.portfolio;
@@ -1691,20 +1884,19 @@ function initWebSockets() {
             if (res.rows.length > 0) {
                 const row = res.rows[0];
                 console.log("SENDING AI WALLETS DATA TO CLIENT:", client.name || "unknown");
-                const isMockAllowed = process.env.MOCK_VALUES !== 'n' && process.env.MOCK_VALUES !== 'N';
                 ws.send(JSON.stringify({
                     type: 'ai_wallets_data',
                     geminiWallet: process.env.GEMINI_WALLET || null,
                     claudeWallet: process.env.CLAUDE_WALLET || null,
                     gemini: {
-                        balance: cachedGeminiBalance || (isMockAllowed ? 100000000 : 0),
-                        hp: row.gemini_hp || (isMockAllowed ? 10000 : 0),
+                        balance: cachedGeminiBalance || 0,
+                        hp: row.gemini_hp || 0,
                         portfolio: row.gemini_portfolio || { commodities: {}, mining_inventory: {} },
                         weapons: row.gemini_weapon_inventory || {}
                     },
                     claude: {
-                        balance: cachedClaudeBalance || (isMockAllowed ? 100000000 : 0),
-                        hp: row.claude_hp || (isMockAllowed ? 10000 : 0),
+                        balance: cachedClaudeBalance || 0,
+                        hp: row.claude_hp || 0,
                         portfolio: row.claude_portfolio || { commodities: {}, mining_inventory: {} },
                         weapons: row.claude_weapon_inventory || {}
                     }
@@ -1765,7 +1957,10 @@ function initWebSockets() {
 // GLOBAL BACKGROUND LOOPS
 // ============================================================================
 
-// 1. D3X MINING LOOP (Checks every 5 seconds for completed 1-hour mines)
+// 1. D3X MINING LOOP — Awards raw metals (NOT direct D3X) on completion
+// Players earn metals → craft items with metals + D3X burn → deflationary pressure
+const METAL_TYPES = ['Iron', 'Copper', 'Lithium', 'Titanium', 'Uranium'];
+
 setInterval(async () => {
     if (!pgPool) return;
     const now = Date.now();
@@ -1773,40 +1968,56 @@ setInterval(async () => {
     for (const client of connectedClients) {
         if (client.miningEndTime && now >= client.miningEndTime) {
             const callsign = client.name;
-            const reward = 10.0;
-            
+
             // Clear their timer so it doesn't loop
             client.miningEndTime = null;
             
             try {
-                // Award the 10 D3X directly to their balance
-                await pgPool.query(`UPDATE commanders SET d3x_balance = d3x_balance + $1 WHERE callsign = $2`, [reward, callsign]);
-                console.log(`[MINING] 💎 Commander ${callsign} finished 1-hour mining! Awarded ${reward} D3X.`);
+                // Generate a random metal yield
+                const metalType = METAL_TYPES[Math.floor(Math.random() * METAL_TYPES.length)];
+                const metalAmount = Math.floor(Math.random() * 15) + 10; // 10–25 units
                 
-                // Faucet: Send 10 D3X safely on-chain
-                if (authorityKeypair) {
-                    pgPool.query(`SELECT solana_wallet_address FROM commanders WHERE callsign = $1`, [callsign])
-                      .then(res => {
-                          if (res.rows.length > 0 && res.rows[0].solana_wallet_address) {
-                              const toPub = new web3.PublicKey(res.rows[0].solana_wallet_address);
-                              transferD3XOnChain(authorityKeypair, toPub, reward).catch(console.error);
-                          }
-                      }).catch(console.error);
-                }
+                // Also give a small bonus metal of a different type
+                const bonusMetal = METAL_TYPES.filter(m => m !== metalType)[Math.floor(Math.random() * 4)];
+                const bonusAmount = Math.floor(Math.random() * 5) + 3; // 3–7 units
+
+                // Read current mining_inventory
+                const dbRes = await pgPool.query(
+                    `SELECT mining_inventory FROM commanders WHERE callsign = $1`,
+                    [callsign]
+                );
+                if (dbRes.rows.length === 0) continue;
+                
+                const inv = dbRes.rows[0].mining_inventory || {};
+                inv[metalType]  = (inv[metalType]  || 0) + metalAmount;
+                inv[bonusMetal] = (inv[bonusMetal] || 0) + bonusAmount;
+
+                // Write updated inventory
+                await pgPool.query(
+                    `UPDATE commanders SET mining_inventory = $1 WHERE callsign = $2`,
+                    [JSON.stringify(inv), callsign]
+                );
+                
+                await logTokenFlow('mine_metals', metalAmount + bonusAmount, callsign, 'INVENTORY',
+                    `Mined ${metalAmount}x ${metalType} + ${bonusAmount}x ${bonusMetal}`);
+                
+                console.log(`[MINING] ⛏ Commander ${callsign} finished 1-hour extraction: +${metalAmount}x ${metalType}, +${bonusAmount}x ${bonusMetal}`);
 
                 // Alert the specific client
                 if (client.ws.readyState === WebSocket.OPEN) {
                     client.ws.send(JSON.stringify({
                         type: 'mining_complete',
-                        amount: reward
+                        metals: { [metalType]: metalAmount, [bonusMetal]: bonusAmount },
+                        inventory: inv
                     }));
                 }
             } catch (e) {
-                console.error("[MINING] Error awarding D3X:", e.message);
+                console.error("[MINING] Error awarding metals:", e.message);
             }
         }
     }
 }, 5000);
+
 
 // --- Solana On-Chain Logic ---
 async function processDailyTokenDrop(callsign, userWalletAddress, amountToDrop = 5, senderKp = worldBankKeypair) {
@@ -2994,12 +3205,8 @@ async function startServer() {
         console.log('☢ D3X Schema Migration successful');
       } catch(e) { /* Col exists */ }
 
-      try {
-          await pgPool.query(`ALTER TABLE ai_combat_state ADD COLUMN IF NOT EXISTS gemini_portfolio JSONB DEFAULT '{}'::jsonb`);
-          await pgPool.query(`ALTER TABLE ai_combat_state ADD COLUMN IF NOT EXISTS claude_portfolio JSONB DEFAULT '{}'::jsonb`);
-          await pgPool.query(`ALTER TABLE ai_combat_state ADD COLUMN IF NOT EXISTS gemini_weapon_inventory JSONB DEFAULT '{}'::jsonb`);
-          await pgPool.query(`ALTER TABLE ai_combat_state ADD COLUMN IF NOT EXISTS claude_weapon_inventory JSONB DEFAULT '{}'::jsonb`);
-      } catch(e) { console.warn("ai_combat_state migration:", e.message); }
+      // 100% skipped pre-creation alter block to avoid Postgres schema errors
+      // The columns will be correctly guaranteed after the main CREATE TABLE block.
 
       // AI Combat System Table
       await pgPool.query(`
@@ -3041,8 +3248,10 @@ async function startServer() {
           ADD COLUMN IF NOT EXISTS claude_instability INTEGER DEFAULT 0,
           ADD COLUMN IF NOT EXISTS gemini_blockade_turns INTEGER DEFAULT 0,
           ADD COLUMN IF NOT EXISTS claude_blockade_turns INTEGER DEFAULT 0,
-          ADD COLUMN IF NOT EXISTS gemini_portfolio JSONB,
-          ADD COLUMN IF NOT EXISTS claude_portfolio JSONB
+          ADD COLUMN IF NOT EXISTS gemini_portfolio JSONB DEFAULT '{}'::jsonb,
+          ADD COLUMN IF NOT EXISTS claude_portfolio JSONB DEFAULT '{}'::jsonb,
+          ADD COLUMN IF NOT EXISTS gemini_weapon_inventory JSONB DEFAULT '{}'::jsonb,
+          ADD COLUMN IF NOT EXISTS claude_weapon_inventory JSONB DEFAULT '{}'::jsonb
         `);
       } catch(e) {
         // Columns exist or migration not needed
@@ -3063,7 +3272,39 @@ async function startServer() {
       } catch(e) {
           console.error("Failed to inject World Bank into DB:", e.message);
       }
-      
+
+      // Initialize Treasury wallet row
+      try {
+          await pgPool.query(`
+              INSERT INTO commanders (callsign, d3x_balance, portfolio) 
+              VALUES ($1, $2, $3) 
+              ON CONFLICT (callsign) DO NOTHING
+          `, ['TREASURY', 0, JSON.stringify({ name: 'Treasury', faction: 'System', wallet: TREASURY_WALLET })]);
+          console.log('☢ PostgreSQL Initialized TREASURY profile');
+      } catch(e) {
+          console.error("Failed to inject Treasury into DB:", e.message);
+      }
+
+      // Token Ledger — records every economic event
+      try {
+          await pgPool.query(`
+              CREATE TABLE IF NOT EXISTS token_ledger (
+                id BIGSERIAL PRIMARY KEY,
+                flow_type VARCHAR(30) NOT NULL,
+                amount NUMERIC NOT NULL,
+                from_commander VARCHAR(100),
+                to_commander VARCHAR(100),
+                note TEXT,
+                created_at TIMESTAMPTZ DEFAULT NOW()
+              )
+          `);
+          await pgPool.query(`CREATE INDEX IF NOT EXISTS idx_ledger_type ON token_ledger (flow_type)`);
+          await pgPool.query(`CREATE INDEX IF NOT EXISTS idx_ledger_from ON token_ledger (from_commander)`);
+          console.log('☢ token_ledger table ready');
+      } catch(e) {
+          console.error("token_ledger setup failed:", e.message);
+      }
+
       console.log('☢ PostgreSQL connected — game_state and commanders tables ready');
       GameLogger.initialize(pgPool);
       
@@ -3104,7 +3345,199 @@ async function startServer() {
     fetchAndBroadcastAIBalances();
   });
 }
+
+// ============================================================================
+// CRAFTING SYSTEM — Consume metals + D3X burn → create weapon items
+// Triggered by WebSocket message { type: 'craft_item', recipe: 'LaserCannon', callsign }
+// ============================================================================
+const CRAFTING_RECIPES = {
+  'LaserCannon':     { Iron: 20, Copper: 10, d3x_burn: 15, item: 'Laser Cannon',       power: 80  },
+  'RailgunMk1':     { Iron: 35, Titanium: 15, d3x_burn: 25, item: 'Railgun Mk.I',      power: 120 },
+  'EMPDisruptor':   { Copper: 20, Lithium: 25,  d3x_burn: 20, item: 'EMP Disruptor',   power: 90  },
+  'PlasmaShield':   { Titanium: 30, Lithium: 20, d3x_burn: 18, item: 'Plasma Shield',  power: 0, defense: 100 },
+  'UraniumBomb':    { Uranium: 40, Iron: 10, d3x_burn: 50,     item: 'Uranium Bomb',   power: 500 },
+  'CopperDrone':    { Copper: 30, Iron: 5,  d3x_burn: 12,      item: 'Copper Drone',   power: 40  },
+  'LithiumCore':    { Lithium: 50, d3x_burn: 30,               item: 'Lithium Core',   power: 150 },
+};
+
+// Register the crafting handler in the WebSocket message router
+// (called inside wss.on('connection') via handleCraftMessage)
+async function handleCraftMessage(ws, msg, client) {
+  const { recipe, callsign } = msg;
+  if (!recipe || !callsign || !pgPool) return;
+
+  const def = CRAFTING_RECIPES[recipe];
+  if (!def) {
+    ws.send(JSON.stringify({ type: 'error', msg: `Unknown recipe: ${recipe}` }));
+    return;
+  }
+
+  try {
+    const dbRes = await pgPool.query(
+      `SELECT d3x_balance, mining_inventory, weapon_inventory FROM commanders WHERE callsign = $1`,
+      [callsign]
+    );
+    if (!dbRes.rows.length) return;
+
+    const row   = dbRes.rows[0];
+    const bal   = parseInt(row.d3x_balance || 0, 10);
+    const mInv  = row.mining_inventory || {};
+    const wInv  = row.weapon_inventory || {};
+
+    // Validate metals
+    for (const [metal, needed] of Object.entries(def)) {
+      if (metal === 'd3x_burn' || metal === 'item' || metal === 'power' || metal === 'defense') continue;
+      if ((mInv[metal] || 0) < needed) {
+        ws.send(JSON.stringify({ type: 'error', msg: `Not enough ${metal}. Need ${needed}, have ${mInv[metal] || 0}.` }));
+        return;
+      }
+    }
+    // Validate D3X burn amount
+    if (bal < def.d3x_burn) {
+      ws.send(JSON.stringify({ type: 'error', msg: `Need ${def.d3x_burn} D3X to fire the forge. Have ${bal}.` }));
+      return;
+    }
+
+    // Deduct metals
+    for (const [metal, needed] of Object.entries(def)) {
+      if (metal === 'd3x_burn' || metal === 'item' || metal === 'power' || metal === 'defense') continue;
+      mInv[metal] = (mInv[metal] || 0) - needed;
+    }
+
+    // Deduct and burn D3X via economy split
+    await pgPool.query(
+      `UPDATE commanders SET d3x_balance = d3x_balance - $1 WHERE callsign = $2`,
+      [def.d3x_burn, callsign]
+    );
+    await splitEconomyFlow(def.d3x_burn, callsign, `Crafting: ${recipe}`);
+
+    // Add crafted item to weapon_inventory
+    wInv[def.item] = (wInv[def.item] || 0) + 1;
+
+    // Write back to DB
+    await pgPool.query(
+      `UPDATE commanders SET mining_inventory = $1, weapon_inventory = $2 WHERE callsign = $3`,
+      [JSON.stringify(mInv), JSON.stringify(wInv), callsign]
+    );
+
+    await logTokenFlow('craft', def.d3x_burn, callsign, 'BURN', `Crafted ${def.item} via ${recipe}`);
+    console.log(`[CRAFT] ⚙ ${callsign} crafted ${def.item} — burned ${def.d3x_burn} D3X`);
+
+    ws.send(JSON.stringify({
+      type: 'craft_complete',
+      recipe,
+      item: def.item,
+      power: def.power || 0,
+      defense: def.defense || 0,
+      mining_inventory: mInv,
+      weapon_inventory: wInv
+    }));
+
+  } catch (e) {
+    console.error('[CRAFT] Error:', e.message);
+    ws.send(JSON.stringify({ type: 'error', msg: 'Crafting failed. Server error.' }));
+  }
+}
+
+// ============================================================================
+// POOL POSITIONS TABLE — auto-create on boot
+// ============================================================================
+async function ensurePoolTable() {
+  if (!pgPool) return;
+  await pgPool.query(`
+    CREATE TABLE IF NOT EXISTS pool_positions (
+      id BIGSERIAL PRIMARY KEY,
+      wallet VARCHAR(100) NOT NULL,
+      callsign VARCHAR(100),
+      sol_contributed NUMERIC DEFAULT 0,
+      d3x_contributed NUMERIC DEFAULT 0,
+      joined_at TIMESTAMPTZ DEFAULT NOW(),
+      active BOOLEAN DEFAULT TRUE,
+      UNIQUE(wallet)
+    )
+  `);
+}
+ensurePoolTable().catch(e => console.error('[POOL] Table setup error:', e.message));
+
+// ============================================================================
+// TREASURY REINJECTION CRON — every 24h
+
+// ============================================================================
+// TREASURY REINJECTION CRON — every 24h
+// Distributes 25% of treasury balance back into gameplay economy
+// Recipients: top 3 leaderboard commanders, Gemini AI, Rainclaude AI
+// ============================================================================
+
+setInterval(async () => {
+  if (!pgPool) return;
+  console.log('[TREASURY] 🔄 Daily reinjection cycle starting...');
+  try {
+    const tRes = await pgPool.query(
+      `SELECT d3x_balance FROM commanders WHERE callsign = 'TREASURY'`
+    );
+    const treasuryBalance = parseInt(tRes.rows[0]?.d3x_balance || 0, 10);
+    if (treasuryBalance < 100) {
+      console.log(`[TREASURY] Balance too low for reinjection (${treasuryBalance}). Skipping.`);
+      return;
+    }
+
+    // Take 25% of treasury for reinjection
+    const pool = Math.floor(treasuryBalance * 0.25);
+
+    // Top 3 commanders by d3x_balance get 60% of pool
+    const topRes = await pgPool.query(`
+      SELECT callsign FROM commanders
+      WHERE callsign NOT IN ('WORLD BANK', 'TREASURY', 'GEMINI CORE', 'RAINCLAUDE')
+        AND d3x_balance IS NOT NULL
+      ORDER BY d3x_balance DESC LIMIT 3
+    `);
+
+    const leaderboardShare = Math.floor(pool * 0.60 / Math.max(topRes.rows.length, 1));
+    const aiShare          = Math.floor(pool * 0.20); // 20% to each AI
+    const seasonPool       = pool - (leaderboardShare * topRes.rows.length) - (aiShare * 2);
+
+    for (const row of topRes.rows) {
+      await pgPool.query(
+        `UPDATE commanders SET d3x_balance = d3x_balance + $1 WHERE callsign = $2`,
+        [leaderboardShare, row.callsign]
+      );
+      await logTokenFlow('reinjection', leaderboardShare, 'TREASURY', row.callsign, 'Daily leaderboard reward');
+      console.log(`[TREASURY] 💰 Reinjected ${leaderboardShare} D3X → ${row.callsign} (leaderboard reward)`);
+    }
+
+    // AI funding
+    for (const ai of ['GEMINI CORE', 'RAINCLAUDE']) {
+      await pgPool.query(
+        `UPDATE commanders SET d3x_balance = d3x_balance + $1 WHERE callsign = $2`,
+        [aiShare, ai]
+      );
+      await logTokenFlow('reinjection', aiShare, 'TREASURY', ai, 'Daily AI combat funding');
+    }
+
+    // Deduct reinjected amount from treasury
+    await pgPool.query(
+      `UPDATE commanders SET d3x_balance = d3x_balance - $1 WHERE callsign = 'TREASURY'`,
+      [pool]
+    );
+
+    await logTokenFlow('reinjection', pool, 'TREASURY', 'ECONOMY', 'Daily reinjection cycle');
+    console.log(`[TREASURY] ✅ Reinjection complete. Distributed ${pool} D3X (Treasury was ${treasuryBalance}).`);
+
+    broadcastAll({
+      type: 'treasury_reinjection',
+      amount: pool,
+      leaderboard_each: leaderboardShare,
+      ai_each: aiShare,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (e) {
+    console.error('[TREASURY] Reinjection error:', e.message);
+  }
+}, 24 * 60 * 60 * 1000); // Every 24 hours
+
 startServer();
+
 
 // --- KEEP ALIVE PING ---
 // Ping the World Monitor app every 30 seconds to prevent Render from sleeping
