@@ -6891,8 +6891,40 @@ async function playWebcamFeed(slug, title) {
     contentBox.innerHTML = '<span style="color:#f24">CONNECTION ERROR</span>';
   }
 }
+// =====================================================================
+// UNIVERSAL YELLOW GLOWING DOTS
+// =====================================================================
+window.yellowDotsGroup = new THREE.Group();
+window.yellowDotsGroup.visible = true; // Always visible on every skin!
+scene.add(window.yellowDotsGroup);
+
+function initYellowGlowingDots() {
+    const glowTex = new THREE.CanvasTexture(createGlowCanvas('#ffff00'));
+    const material = new THREE.SpriteMaterial({ 
+        map: glowTex, 
+        color: 0xffffaa, 
+        transparent: true, 
+        opacity: 0.9,
+        blending: THREE.AdditiveBlending 
+    });
+
+    for(let i=0; i<50; i++) {
+        const lat = Math.random() * 160 - 80;
+        const lon = Math.random() * 360 - 180;
+        const pos = ll2v(lat, lon, GLOBE_R + 0.03); // Slightly above surface
+        
+        const sprite = new THREE.Sprite(material);
+        sprite.position.copy(pos);
+        // Make them BIG as requested
+        sprite.scale.set(0.15, 0.15, 1); 
+        
+        window.yellowDotsGroup.add(sprite);
+    }
+    console.log("Initialized 50 Universal Glowing Yellow Dots.");
+}
 
 initWebcams();
+initYellowGlowingDots();
 initBoats();
 
 async function initBoats() {
