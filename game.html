@@ -5386,7 +5386,7 @@ function initDatacenters() {
                 
                 const numBridges = 3;
                 const braidsPerBridge = 3;
-                const segments = 60; // Doubled from 30 for 100% more particles!
+                const segments = 120; // Doubled again for maximum light particles!
                 
                 for(let b=0; b<numBridges; b++) {
                     const bridgeGroup = new THREE.Group();
@@ -13460,7 +13460,7 @@ function animate() {
                   const p1 = npTowers[bridge.userData.poleIdx].position;
                   const p2 = bridge.userData.targetNode.position;
                   const dist = p1.distanceTo(p2);
-                  const segments = 30;
+                  const segments = 120; // Match the doubled initialization
                   
                   bridge.children.forEach(braid => {
                       const posArray = braid.geometry.attributes.position.array;
@@ -13502,13 +13502,10 @@ function animate() {
                           posArray[i*3+1] = by + dy;
                           posArray[i*3+2] = bz + dz;
                           
-                          // Track neon aura sprites to lightning positional vectors
-                          if (i % 2 === 0) {
-                              const aIdx = i / 2;
-                              if (aIdx < braid.userData.auras.length) {
-                                  braid.userData.auras[aIdx].position.set(bx + dx, by + dy, bz + dz);
-                                  braid.userData.auras[aIdx].visible = true;
-                              }
+                          // Track neon aura sprites to lightning positional vectors (map every segment)
+                          if (i < braid.userData.auras.length) {
+                              braid.userData.auras[i].position.set(bx + dx, by + dy, bz + dz);
+                              braid.userData.auras[i].visible = true;
                           }
                       }
                       braid.geometry.attributes.position.needsUpdate = true;
