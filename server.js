@@ -823,7 +823,12 @@ function initWebSockets() {
     totalPlayers: connectedClients.size
   }, ws);
 
-  const isMockAllowed = process.env.MOCK_VALUES !== 'n' && process.env.MOCK_VALUES !== 'N';
+  const isReleaseProd = (process.env.RELEASE || '').toUpperCase() === 'PROD';
+  const isMockAllowed = !isReleaseProd && process.env.MOCK_VALUES !== 'n' && process.env.MOCK_VALUES !== 'N';
+  
+  if (isReleaseProd && (process.env.MOCK_VALUES === 'y' || process.env.MOCK_VALUES === 'Y')) {
+      console.warn("🛡️ SECURITY OVERRIDE: RELEASE=PROD is active. MOCK_VALUES bypass is strictly FORBIDDEN.");
+  }
   // Immediately send cached AI balances
   ws.send(JSON.stringify({
     type: 'ai_d3x_balances',
