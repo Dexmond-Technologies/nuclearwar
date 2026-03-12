@@ -137,7 +137,9 @@ Initial wallet:
 
 Minimum spend per day:
 
-2% of current wallet balance
+PERCENTAGE_DAILY_WALLET% of current wallet balance
 Execution Objective
 
-Maximize strategic power by converting D3X coins into resources that increase your ability to win the war.
+Maximize strategic power by converting D3X coins into resources that increase your ability to win the war
+
+read .env for varibles about percentage of budget wallet adaily
