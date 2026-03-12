@@ -619,16 +619,23 @@ const server = http.createServer((req, res) => {
     (async () => {
       try {
         const [treasuryRow, bankRow, ledgerSummary] = await Promise.all([
-          pgPool.query(`SELECT d3x_balance FROM commanders WHERE callsign = 'TREASURY'`),
+          pgPool.query(`SELECT d3x_balance, mining_inventory FROM commanders WHERE callsign = 'TREASURY'`),
           pgPool.query(`SELECT d3x_balance FROM commanders WHERE callsign = 'WORLD BANK'`),
           pgPool.query(`SELECT flow_type, SUM(amount)::numeric AS total FROM token_ledger WHERE created_at > NOW() - INTERVAL '24 hours' GROUP BY flow_type`)
         ]);
         const flows = {};
         ledgerSummary.rows.forEach(r => { flows[r.flow_type] = parseFloat(r.total); });
+        
+        let treasuryMetals = {};
+        if (treasuryRow.rows[0] && treasuryRow.rows[0].mining_inventory) {
+            treasuryMetals = treasuryRow.rows[0].mining_inventory;
+        }
+
         res.end(JSON.stringify({
           treasury_balance: parseInt(treasuryRow.rows[0]?.d3x_balance || 0),
           world_bank_balance: parseInt(bankRow.rows[0]?.d3x_balance || 0),
           treasury_wallet: TREASURY_WALLET,
+          metals_reserves: treasuryMetals,
           last_24h_flows: flows,
           timestamp: new Date().toISOString()
         }));

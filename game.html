@@ -8854,7 +8854,6 @@ window.triggerSolanaDonation = async function() {
       if (typeof _sfxClick !== 'undefined') _sfxClick();
       let tsModal = document.getElementById('treasury-modal');
       if (!tsModal) {
-          // If the user hasn't defined the treasury modal UI yet, alert temporarily.
           alert("TREASURY PROTOCOLS: ONLINE. Interface pending connection...");
           return;
       }
@@ -8866,6 +8865,28 @@ window.triggerSolanaDonation = async function() {
       tsModal.style.left = '0px';
       tsModal.style.top = '0px';
       tsModal.style.display = 'flex';
+      
+      // Fetch Treasury Data
+      fetch('/api/treasury/status')
+          .then(res => res.json())
+          .then(data => {
+              document.getElementById('treasury-bond-address').textContent = data.treasury_wallet || 'NOT_SET';
+              document.getElementById('treasury-d3x-balance').textContent = (data.treasury_balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
+              
+              const tbl = document.getElementById('treasury-metals-table');
+              tbl.innerHTML = '';
+              const metals = data.metals_reserves || {};
+              const keys = Object.keys(metals);
+              if (keys.length === 0) {
+                  tbl.innerHTML = '<tr><td style="color:#f55;">NO RESERVES FOUND</td></tr>';
+              } else {
+                  keys.forEach(k => {
+                      const amount = (metals[k] || 0).toLocaleString();
+                      tbl.innerHTML += `<tr><td style="color:#aaa;">${k.toUpperCase()}</td><td style="text-align:right; font-weight:bold;">${amount} TONNES</td></tr>`;
+                  });
+              }
+          }).catch(e => console.error("Treasury fetch fail:", e));
+
       return; 
     }
   }
@@ -17486,12 +17507,21 @@ window.mineD3XCoin = function() {
           <button onclick="document.getElementById('treasury-modal').style.display='none'" style="position:absolute; top:20px; right:30px; background:transparent; border:none; color:#f55; font-size:40px; cursor:pointer; text-shadow:0 0 10px #f00;">×</button>
           
           <h1 style="color:#00ffaa; text-align:center; font-family:'Share Tech Mono', monospace; letter-spacing:8px; font-size: 3vw; margin-top:0; text-shadow:0 0 20px #00ffaa;">FEDERAL TREASURY</h1>
-          <h3 style="color:#0f8; text-align:center; font-family:'Share Tech Mono', monospace; font-weight:normal; font-size: 1.5vw; text-shadow:0 0 10px #0f8;">BOND ADDRESS: <span style="color:#fff;">[ PENDING CONNECTION ]</span></h3>
+          <h3 style="color:#0f8; text-align:center; font-family:'Share Tech Mono', monospace; font-weight:normal; font-size: 1.5vw; text-shadow:0 0 10px #0f8;">BOND ADDRESS: <span id="treasury-bond-address" style="color:#fff;">[ PENDING CONNECTION ]</span></h3>
           
-          <div style="display:flex; flex:1; justify-content:center; align-items:center; margin-top:20px; gap:40px; height: 100%;">
-              <div style="text-align:center; font-family:'Courier New', monospace; color:#00ffaa; font-size:1.5vw; animation: pulse 2s infinite;">
-                  ESTABLISHING SECURE HANDSHAKE WITH TREASURY MAINNET...<br/><br/>
-                  <span style="font-size:1vw; color:#aaa;">(Treasury issuance and reserve systems coming online shortly)</span>
+          <div style="display:flex; flex:1; justify-content:center; margin-top:20px; gap:40px; height: 100%;">
+              <!-- METALS RESERVES -->
+              <div style="flex:1; background:rgba(0,0,0,0.6); padding:20px; border:1px solid rgba(0,255,136,0.5); box-shadow: inset 0 0 50px rgba(0,255,136,0.1); border-radius:4px; display:flex; flex-direction:column; overflow-y:auto; max-width:800px; width:100%;">
+                  <h2 style="color:#0f8; font-family:'Share Tech Mono', monospace; border-bottom:2px solid #0f8; padding-bottom:15px; margin-top:0; font-size:2vw;">FEDERAL RESERVES</h2>
+                  <table style="width:100%; color:#fff; font-family:'Courier New', monospace; font-size:1.2vw; border-spacing: 0 15px;">
+                      <tr><td style="color:#aaa;">TREASURY FUNDS (D3X)</td><td style="text-align:right; font-weight:bold; color:#0f8; font-size:1.5vw;" id="treasury-d3x-balance">0.00</td></tr>
+                  </table>
+                  <div style="margin-top:20px;">
+                      <h3 style="color:#0f8; font-family:'Share Tech Mono', monospace; font-size:1.5vw; border-bottom: 1px dashed rgba(0,255,136,0.3); padding-bottom:10px;">METALS INVENTORY</h3>
+                      <table id="treasury-metals-table" style="width:100%; color:#aaa; font-family:'Courier New', monospace; font-size:1.1vw; border-spacing: 0 10px;">
+                          <tr><td><i>ESTABLISHING SECURE HANDSHAKE...</i></td></tr>
+                      </table>
+                  </div>
               </div>
           </div>
       </div>
