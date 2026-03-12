@@ -2106,27 +2106,11 @@ async function checkD3XRewards() {
   for (const client of connectedClients) {
     if (client.wallet && client.connectedAt) {
       
-      // Every 1 hour: send 5 D3X directly to wallet
+      // Every 1 hour: send exactly 5 D3X directly to wallet
       if ((now - client.connectedAt) >= 3600000 /* 1 hour */) {
         try {
            client.connectedAt = now; // reset session timer for next 1 hour
-           
-           // Check for active stakes giving the 2x Multiplier (>= 10,000 staked)
-           let multiplier = 1;
-           if (globalGameState && globalGameState.stakes) {
-               const validStake = globalGameState.stakes.find(s => 
-                   s.callsign === client.name && s.amountStaked >= 10000 && now < s.unlockAt
-               );
-               if (validStake) {
-                   multiplier = 2;
-               }
-           }
-           
-           if (client.autoReinvest) {
-               multiplier = 2; // Auto-Reinvest enables 2x multiplier
-           }
-           
-           const amountEarned = 5 * multiplier;
+           const amountEarned = 5; // Strict, un-multiplied 5 D3X ruleset.
 
            if (client.autoReinvest) {
                // Auto-reinvest logic limits immediately into stakes
@@ -2146,7 +2130,7 @@ async function checkD3XRewards() {
                });
                saveGameState(globalGameState);
                
-               console.log(`[REWARD] Commander ${client.name} played 1 hour. +${amountEarned} D3X auto-reinvested (Multiplier: ${multiplier}x).`);
+               console.log(`[REWARD] Commander ${client.name} played 1 hour. +${amountEarned} D3X auto-reinvested.`);
                
                client.ws.send(JSON.stringify({ 
                    type: 'd3x_reward', 
@@ -2156,13 +2140,14 @@ async function checkD3XRewards() {
            } else {
                console.log(`[REWARD] Commander ${client.name} played 1 hour. Airdropping ${amountEarned} D3X directly.`);
                
-               // Deduct from World Bank
+               // Deduct from World Bank locally
                await pgPool.query(`UPDATE commanders SET d3x_balance = d3x_balance - $1 WHERE callsign = 'WORLD BANK'`, [amountEarned]);
                await pgPool.query(`UPDATE commanders SET d3x_balance = d3x_balance + $1 WHERE callsign = $2`, [amountEarned, client.name]);
                
-               // Trigger actual Solana transfer
+               // Trigger actual Solana transfer (Throttled for mass drops)
                if (typeof worldBankKeypair !== 'undefined' && worldBankKeypair) {
                    await processDailyTokenDrop(client.name, client.wallet, amountEarned, worldBankKeypair);
+                   await new Promise(r => setTimeout(r, 500)); // Crucial RPC Rate Limit Throttler!
                } else {
                    console.log(`ℹ [SOLANA OFF] Mock-Dropped ${amountEarned} D3X to ${client.name}. Provide valid WORLD_BANK_PVT_KEY for real token transfer.`);
                }
@@ -2172,10 +2157,6 @@ async function checkD3XRewards() {
                    amount: amountEarned,
                    message: `Hourly Airdrop: ${amountEarned} D3X Sent to Wallet!`
                }));
-           }
-           
-           if (multiplier > 1) {
-               client.ws.send(JSON.stringify({ type: 'd3x_multiplier_active' }));
            }
         } catch(e) {
            console.error('⚠ Error during hourly airdrop:', e.message);
