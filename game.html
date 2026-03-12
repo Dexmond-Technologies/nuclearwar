@@ -1414,9 +1414,6 @@ body {
     <div style="display:flex;gap:15px;pointer-events:auto;align-items:center; margin-left:auto;">
       <div style="display:flex;gap:12px;align-items:center;">
         <div id="d3x-multiplier-badge" style="display:none; color:#fa0; font-family:'Courier New', monospace; font-size:11px; font-weight:bold; letter-spacing:1px; text-shadow:0 0 8px rgba(255,170,0,0.8); border:1px solid rgba(255,170,0,0.5); padding:6px 10px; background:rgba(20,10,0,0.8); border-radius:4px; animation: alertFlash 2s infinite alternate;">🔥 2X MULTIPLIER</div>
-        <div id="connected-wallet-display" style="display:none; color:#0af; font-family:'Courier New', monospace; font-size:11px; font-weight:bold; letter-spacing:1px; text-shadow:0 0 8px rgba(0,170,255,0.6); border:1px solid rgba(0,170,255,0.3); padding:6px 10px; background:rgba(0,10,20,0.6);">
-            <span id="cwd-icon">🛡️</span> <span id="cwd-addr"></span> <span id="cwd-bal" style="color:#0f8; margin-left:8px;"></span>
-        </div>
       </div>
     </div>
   </div>
@@ -1649,6 +1646,10 @@ body {
   </div>
   <div class="faction-dash" id="dash-1">
     <div class="dash-header" style="position:relative;">
+      <!-- USER WALLET DISPLAY -->
+      <div id="connected-wallet-display" style="position:absolute; top:-55px; left:135px; display:none; color:#0af; font-family:'Courier New', monospace; font-size:11px; font-weight:bold; letter-spacing:1px; text-shadow:0 0 8px rgba(0,170,255,0.6); border:1px solid rgba(0,170,255,0.3); padding:7px 12px; background:rgba(0,25,50,0.9); border-radius:4px; backdrop-filter:blur(5px); z-index:100;">
+          <span id="cwd-icon" style="margin-right:5px;">🛡️</span> <span id="cwd-addr"></span> <span id="cwd-bal" style="color:#0f8; margin-left:8px; text-shadow:0 0 5px rgba(0,255,136,0.5);"></span>
+      </div>      
       <button id="btn-reinvest-d3x" onclick="toggleReinvest()" style="position:absolute; top:-60px; left:-15px; display:block; width:130px; pointer-events:auto; padding:8px 0; background:rgba(0,255,136,0.15); border:1px solid #0f8; color:#0f8; font-family:'Courier New', monospace; font-size:10px; font-weight:bold; text-align:center; cursor:pointer; border-radius:4px; transition:all 0.2s; box-shadow:0 0 10px rgba(0,255,136,0.2); box-sizing:border-box; z-index:100;">♻️ REINVEST: OFF<br/>AIRDROP 1X</button>
       <!-- RAINCLAUDE INVENTORY BUTTON -->
       <button id="btn-rainclaude-inventory" onclick="openRainclaudeInventory()" style="position:absolute; left:-280px; top:-70px; background:rgba(60,0,0,0.9); border:2px solid #f33; border-radius:8px; color:#f33; font-family:'Share Tech Mono', monospace; font-size:12px; font-weight:bold; padding:8px 15px; cursor:pointer; pointer-events:auto; z-index:999999; box-shadow:0 -5px 15px rgba(255,50,50,0.4); transition:0.2s; letter-spacing:2px; text-shadow:0 0 10px #f33; backdrop-filter:blur(5px);" onmouseover="this.style.background='rgba(160,0,0,0.9)'; this.style.color='#fff';" onmouseout="this.style.background='rgba(60,0,0,0.9)'; this.style.color='#f33';">
@@ -5032,7 +5033,7 @@ function initDatacenters() {
         const owner = isRainclaude ? 'RAINCLAUDE' : 'GEMINI';
 
         const dcMat = (isMaster || isD3XExchange) 
-            ? new THREE.MeshPhongMaterial({ color: colorHex, shininess: 100, specular: 0xffffff, map: cyberTex }) 
+            ? new THREE.MeshPhongMaterial({ color: colorHex, shininess: 100, specular: 0xffffff }) 
             : new THREE.MeshBasicMaterial({ color: colorHex });
         
         const mesh = new THREE.Mesh(dcGeo, dcMat);
@@ -5187,7 +5188,7 @@ function initDatacenters() {
             // Using MeshBasicMaterial with transparent: false, depthWrite: true, depthTest: true forces it to render as a solid block.
             const solidCoreGeo = new THREE.SphereGeometry(0.0245, 32, 32); 
             // Apply the cyber metal texture to the inner core explicitly requested by the user
-            const solidCoreMat = new THREE.MeshStandardMaterial({ color: colorHex, map: cyberTex, roughness: 0.8, metalness: 0.2, transparent: false, depthWrite: true, depthTest: true });
+            const solidCoreMat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.8, metalness: 0.2, transparent: false, depthWrite: true, depthTest: true });
             const solidCore = new THREE.Mesh(solidCoreGeo, solidCoreMat);
             // Render the solid core BEFORE transparent elements to ensure it blocks background properly
             solidCore.renderOrder = -1;
@@ -5349,7 +5350,7 @@ function initDatacenters() {
                     const towerLonRad = -(npLon + off.lon) * Math.PI / 180;
                     const towerGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.245, 32);
                     towerGeo.translate(0, 0.1225, 0);
-                    const towerMat = new THREE.MeshPhongMaterial({ color: 0x00aaff, shininess: 100, specular: 0xffffff, map: cyberTex });
+                    const towerMat = new THREE.MeshPhongMaterial({ color: 0x00aaff, shininess: 100, specular: 0xffffff });
                     const towerMesh = new THREE.Mesh(towerGeo, towerMat);
                     
                     const lowerAmt = 0.0245;
@@ -5455,8 +5456,8 @@ function initWorldBank() {
   cyberTex.repeat.set(4, 4);
 
   const bankColor = 0xffffff; 
-  const mat = new THREE.MeshStandardMaterial({ color: bankColor, roughness: 0.6, metalness: 0.7, map: cyberTex });
-  const roofMat = new THREE.MeshStandardMaterial({ color: 0x8b0000, roughness: 0.8, metalness: 0.2, map: cyberTex });
+  const mat = new THREE.MeshStandardMaterial({ color: bankColor, roughness: 0.6, metalness: 0.7 });
+  const roofMat = new THREE.MeshStandardMaterial({ color: 0x8b0000, roughness: 0.8, metalness: 0.2 });
 
   const building = new THREE.Group();
 
@@ -5683,7 +5684,7 @@ function initDatacenterNetwork() {
     if (!nodes || nodes.length < 2) return;
     
     // Bright yellow connection lines — AdditiveBlending ensures yellow wins over the blue globe glow
-    const material = new THREE.LineBasicMaterial({ color: 0xffff00, transparent: true, opacity: 0.9, linewidth: 3, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false });
+    const material = new THREE.LineBasicMaterial({ color: 0xffff00, transparent: true, opacity: 0.9, linewidth: 3, blending: THREE.AdditiveBlending, depthWrite: false });
     
     // Create a blurred yellow dot texture for the pulse
     const c = document.createElement('canvas');
@@ -6747,8 +6748,8 @@ async function initWebcams() {
     const tex = new THREE.CanvasTexture(c);
 
     data.result.webcams.forEach(cam => {
-      // Must have location
-      if (cam.latitude === undefined || cam.longitude === undefined) return;
+      // Must have location and be active
+      if (cam.latitude === undefined || cam.longitude === undefined || cam.status !== 'active') return;
       
       const mat = new THREE.SpriteMaterial({ map: tex, color: 0xffffff, transparent: true, depthTest: true });
       const sprite = new THREE.Sprite(mat);
@@ -12694,30 +12695,80 @@ const wtrGlowSphere = new THREE.Mesh(wtrGlowGeo, wtrGlowMat);
 window.wtrEffectsGroup.add(wtrGlowSphere);
 window.wtrGlowSphere = wtrGlowSphere; // Reference for animation pulse
 
-// 150 Floating Particles
-const wtrParticleGeo = new THREE.BufferGeometry();
-const wtrParticlePositions = [];
-for (let i = 0; i < 150; i++) {
-    const r = GLOBE_R * (1.08 + Math.random() * 0.2); // Float just above aura
+// 1. Supernova Core (High Polygon)
+const supernovaGeo = new THREE.IcosahedronGeometry(GLOBE_R * 1.02, 6); // Detail level 6 = very high poly
+const supernovaMat = new THREE.MeshPhongMaterial({
+    color: 0x0055ff,
+    emissive: 0x00aaff,
+    emissiveIntensity: 0.8,
+    wireframe: true,
+    transparent: true,
+    opacity: 0.15,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+});
+const wtrSupernova = new THREE.Mesh(supernovaGeo, supernovaMat);
+window.wtrEffectsGroup.add(wtrSupernova);
+
+// 2. Thick Fog/Steam Particles
+const fogGeo = new THREE.BufferGeometry();
+const fogPos = [];
+const fogSizes = [];
+for (let i = 0; i < 400; i++) {
+    const r = GLOBE_R * (1.05 + Math.random() * 0.15); // Hugging the core
     const theta = Math.random() * Math.PI * 2;
     const phi = Math.acos(2 * Math.random() - 1);
-    const x = r * Math.sin(phi) * Math.cos(theta);
-    const y = r * Math.sin(phi) * Math.sin(theta);
-    const z = r * Math.cos(phi);
-    wtrParticlePositions.push(x, y, z);
+    fogPos.push(r * Math.sin(phi) * Math.cos(theta), r * Math.sin(phi) * Math.sin(theta), r * Math.cos(phi));
+    fogSizes.push(Math.random() * 1.5 + 0.5); // Variable size
 }
-wtrParticleGeo.setAttribute('position', new THREE.Float32BufferAttribute(wtrParticlePositions, 3));
-const wtrParticleMat = new THREE.PointsMaterial({
-    color: 0x00ffff,
-    size: 0.5,
+fogGeo.setAttribute('position', new THREE.Float32BufferAttribute(fogPos, 3));
+fogGeo.setAttribute('size', new THREE.Float32BufferAttribute(fogSizes, 1));
+const fogTex = new THREE.CanvasTexture(createCloudCanvas());
+const fogMat = new THREE.PointsMaterial({
+    color: 0xbbddff,
+    map: fogTex,
+    size: 2.5,
     transparent: true,
-    opacity: 0.6,
+    opacity: 0.2,
     blending: THREE.AdditiveBlending,
+    depthWrite: false,
     sizeAttenuation: true
 });
-const wtrParticleSystem = new THREE.Points(wtrParticleGeo, wtrParticleMat);
-window.wtrEffectsGroup.add(wtrParticleSystem);
-window.wtrParticleSystem = wtrParticleSystem; // Reference for rotation
+const wtrFogSystem = new THREE.Points(fogGeo, fogMat);
+window.wtrEffectsGroup.add(wtrFogSystem);
+
+// 3. Electric Static Lines (Pulsing energy)
+const staticGeo = new THREE.BufferGeometry();
+const staticPos = [];
+for (let i = 0; i < 80; i++) {
+    const r1 = GLOBE_R * 1.02;
+    const r2 = GLOBE_R * (1.1 + Math.random() * 0.2);
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+    
+    // Start point
+    staticPos.push(r1 * Math.sin(phi) * Math.cos(theta), r1 * Math.sin(phi) * Math.sin(theta), r1 * Math.cos(phi));
+    // End point branching out
+    const theta2 = theta + (Math.random() - 0.5) * 0.2;
+    const phi2 = phi + (Math.random() - 0.5) * 0.2;
+    staticPos.push(r2 * Math.sin(phi2) * Math.cos(theta2), r2 * Math.sin(phi2) * Math.sin(theta2), r2 * Math.cos(phi2));
+}
+staticGeo.setAttribute('position', new THREE.Float32BufferAttribute(staticPos, 3));
+const staticMat = new THREE.LineBasicMaterial({
+    color: 0x00ffff,
+    transparent: true,
+    opacity: 0.8,
+    linewidth: 2,
+    blending: THREE.AdditiveBlending
+});
+const wtrStaticLines = new THREE.LineSegments(staticGeo, staticMat);
+window.wtrEffectsGroup.add(wtrStaticLines);
+
+// Reference for animation loop rotations and pulsations
+window.wtrParticleSystem = window.wtrEffectsGroup; // Bind the whole group to the legacy rotation target
+window.wtrSupernovaCore = wtrSupernova;
+window.wtrFogSystem = wtrFogSystem;
+window.wtrStaticLines = wtrStaticLines;
 
 function spawnAmbients() {
   const texJet = new THREE.CanvasTexture(createJetCanvas());
@@ -13210,7 +13261,7 @@ function animate() {
                   const allNodes = window.datacentersGroup.children.filter(n => !n.userData.isNorthPole);
                   if (allNodes.length > 0) {
                       bridge.userData.targetNode = allNodes[Math.floor(Math.random() * allNodes.length)];
-                      bridge.userData.timer = 4.0 + Math.random() * 4.0; // Hold connection for 4-8 seconds
+                      bridge.userData.timer = 2.0 + Math.random() * 2.0; // Wait 2-4 seconds instead of 4-8, doubling the mapping speed
                   }
               }
               
@@ -13249,7 +13300,8 @@ function animate() {
                           // Taper radius at ends and pulse overall radius
                           const envelope = Math.sin(t * Math.PI);
                           const pulse = 1.0 + Math.sin(time3 * 10 + braid.userData.phaseOff) * 0.3;
-                          const r = braid.userData.radius * envelope * pulse;
+                          let r = braid.userData.radius * envelope * pulse;
+                          if (!window.isLowEndDevice) r *= 2.0; // 100% thick strings on GPUs only
                           
                           const dx = Math.cos(phase + t * Math.PI * 4) * r * right.x + Math.sin(phase2 + t * Math.PI * 6) * r * up.x;
                           const dy = Math.cos(phase + t * Math.PI * 4) * r * right.y + Math.sin(phase2 + t * Math.PI * 6) * r * up.y;
@@ -13305,9 +13357,20 @@ function animate() {
   
   // WTR Skin / D3X Pool Animations
   if (window.wtrEffectsGroup && window.wtrEffectsGroup.visible) {
-      if (window.wtrParticleSystem) {
-          window.wtrParticleSystem.rotation.y += 0.001; // Slow spin
-          window.wtrParticleSystem.rotation.z += 0.0005;
+      if (window.wtrSupernovaCore) {
+          const sPulse = 1.0 + Math.sin(time3 * 5) * 0.05;
+          window.wtrSupernovaCore.scale.set(sPulse, sPulse, sPulse);
+          window.wtrSupernovaCore.rotation.y += 0.002;
+          window.wtrSupernovaCore.rotation.z += 0.001;
+      }
+      if (window.wtrFogSystem) {
+          window.wtrFogSystem.rotation.y -= 0.001;
+      }
+      if (window.wtrStaticLines) {
+          window.wtrStaticLines.rotation.y += 0.005;
+          window.wtrStaticLines.rotation.x += 0.003;
+          const ePulse = 1.0 + Math.random() * 0.1;
+          window.wtrStaticLines.scale.set(ePulse, ePulse, ePulse);
       }
       if (window.wtrGlowSphere) {
           // Dynamic pulsing aura
@@ -16198,9 +16261,7 @@ window.buyOrbitalStrike = function() {
           authFlex.style.display = 'none';
         }
         window.pendingSolanaAddress = address;
-        if (window.onSuccessfulWalletAuth) {
-           window.onSuccessfulWalletAuth(address);
-        }
+        joinGlobalWar();
       } catch (err) {
         console.error("Phantom custom connect failed:", err);
       }
@@ -16232,7 +16293,7 @@ window.buyOrbitalStrike = function() {
            if (statusEl) statusEl.innerHTML = '✓ BNB LINK ESTABLISHED: ' + address.substring(0,4) + '...' + address.substring(address.length-4);
            document.getElementById('auth-container-flex').style.display = 'none';
            window.pendingSolanaAddress = address; // Routing EVM address into primary auth state
-           if (window.onSuccessfulWalletAuth) window.onSuccessfulWalletAuth(address);
+           joinGlobalWar();
         }
       } catch (err) {
         console.error("BNB connect failed:", err);
@@ -16257,7 +16318,7 @@ window.buyOrbitalStrike = function() {
            if (statusEl) statusEl.innerHTML = '✓ RONIN LINK ESTABLISHED: ' + address.substring(0,4) + '...' + address.substring(address.length-4);
            document.getElementById('auth-container-flex').style.display = 'none';
            window.pendingSolanaAddress = address; 
-           if (window.onSuccessfulWalletAuth) window.onSuccessfulWalletAuth(address);
+           joinGlobalWar();
         }
       } catch (err) {
         console.error("Ronin connect failed:", err);
@@ -16283,7 +16344,7 @@ window.buyOrbitalStrike = function() {
            if (statusEl) statusEl.innerHTML = '✓ DOT LINK ESTABLISHED: ' + address.substring(0,4) + '...' + address.substring(address.length-4);
            document.getElementById('auth-container-flex').style.display = 'none';
            window.pendingSolanaAddress = address; 
-           if (window.onSuccessfulWalletAuth) window.onSuccessfulWalletAuth(address);
+           joinGlobalWar();
         }
       } catch (err) {
         console.error("Polkadot connect failed:", err);
