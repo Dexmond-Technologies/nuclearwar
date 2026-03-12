@@ -1030,6 +1030,15 @@ function initWebSockets() {
       
       case 'mountain_dig_complete': {
         if (!client.name || !pgPool) break;
+        
+        // Anti-Spam: Server-side cooldown (4.5s minimum to match 5s frontend animation)
+        const now = Date.now();
+        if (client.lastMountainDig && (now - client.lastMountainDig < 4500)) {
+            console.warn(`[SECURITY] Anti-cheat: Commander ${client.name} digging mountains too fast!`);
+            break; 
+        }
+        client.lastMountainDig = now;
+
         try {
             // RNG Rolls
             const rand = Math.random();
