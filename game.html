@@ -1651,7 +1651,6 @@ body {
           <span id="cwd-icon" style="margin-right:5px;">🛡️</span> <span id="cwd-addr"></span> <span id="cwd-bal" style="color:#0f8; margin-left:8px; text-shadow:0 0 5px rgba(0,255,136,0.5);"></span>
       </div>      
       <button id="btn-reinvest-d3x" onclick="toggleReinvest()" style="position:absolute; top:-60px; left:-15px; display:block; width:130px; pointer-events:auto; padding:8px 0; background:rgba(0,255,136,0.15); border:1px solid #0f8; color:#0f8; font-family:'Courier New', monospace; font-size:10px; font-weight:bold; text-align:center; cursor:pointer; border-radius:4px; transition:all 0.2s; box-shadow:0 0 10px rgba(0,255,136,0.2); box-sizing:border-box; z-index:100;">♻️ REINVEST: OFF<br/>AIRDROP 1X</button>
-      <button id="btn-open-pool" onclick="openPoolModal()" style="position:absolute; top:-60px; left:125px; display:block; width:130px; pointer-events:auto; padding:8px 0; background:rgba(0,170,255,0.18); border:1px solid #0af; color:#0af; font-family:'Courier New', monospace; font-size:10px; font-weight:bold; text-align:center; cursor:pointer; border-radius:4px; transition:all 0.2s; box-shadow:0 0 14px rgba(0,170,255,0.35); box-sizing:border-box; z-index:100;" onmouseover="this.style.background='rgba(0,170,255,0.35)';this.style.boxShadow='0 0 25px rgba(0,170,255,0.7)';" onmouseout="this.style.background='rgba(0,170,255,0.18)';this.style.boxShadow='0 0 14px rgba(0,170,255,0.35)';">🏊 SOL/D3X<br/>POOL</button>
       <!-- RAINCLAUDE INVENTORY BUTTON -->
       <button id="btn-rainclaude-inventory" onclick="openRainclaudeInventory()" style="position:absolute; left:-280px; top:-70px; background:rgba(60,0,0,0.9); border:2px solid #f33; border-radius:8px; color:#f33; font-family:'Share Tech Mono', monospace; font-size:12px; font-weight:bold; padding:8px 15px; cursor:pointer; pointer-events:auto; z-index:999999; box-shadow:0 -5px 15px rgba(255,50,50,0.4); transition:0.2s; letter-spacing:2px; text-shadow:0 0 10px #f33; backdrop-filter:blur(5px);" onmouseover="this.style.background='rgba(160,0,0,0.9)'; this.style.color='#fff';" onmouseout="this.style.background='rgba(60,0,0,0.9)'; this.style.color='#f33';">
         RAINCLAUDE INVENTORY ⯆
@@ -5539,10 +5538,10 @@ function initWorldBank() {
   
   window.worldBankGroup.add(building);
   
-  // Clone the bank and place it randomly for Cyber Skin
+  // Clone the bank and place it 40 degrees south of the World Bank
   const buildingClone = building.clone();
-  const rLat = (Math.random() - 0.5) * 140; // Random latitude between -70 and 70
-  const rLon = (Math.random() - 0.5) * 360; // Random longitude between -180 and 180
+  const rLat = lat - 40; 
+  const rLon = lon; 
   const rLatRad = rLat * Math.PI / 180;
   const rLonRad = -rLon * Math.PI / 180;
   
@@ -5568,6 +5567,7 @@ function initWorldBank() {
       tctx.shadowColor = '#00ffaa';
       tctx.shadowBlur = 10;
       tctx.fillText('TREASURY', 256, 64);
+      cloneLabel.material = cloneLabel.material.clone();
       cloneLabel.material.map = new THREE.CanvasTexture(tc);
       cloneLabel.material.needsUpdate = true;
   }
@@ -5628,7 +5628,17 @@ function initDexmondHub() {
 
   // Apply the DEXMOND.png texture wrapper
   const texLoader = new THREE.TextureLoader();
-  const dMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2, metalness: 0.8 });
+  const dMat = new THREE.MeshStandardMaterial({ 
+      color: 0xffffff, 
+      roughness: 0.2, 
+      metalness: 0.8,
+      emissive: 0x00aaff,
+      emissiveIntensity: 0.8,
+      depthTest: false,
+      depthWrite: false,
+      transparent: true,
+      opacity: 0.95
+  });
   
   texLoader.load('DEXMOND.png', function(tex) {
       // Repeat the logo across the geometry organically
@@ -5640,7 +5650,33 @@ function initDexmondHub() {
   });
 
   const dMesh = new THREE.Mesh(dGeometry, dMat);
+  dMesh.renderOrder = 999; // Ensure it renders ON TOP of everything
   building.add(dMesh);
+
+  // Add bold graphic text above the hub
+  const tCanvas = document.createElement('canvas');
+  tCanvas.width = 1024; tCanvas.height = 256;
+  const tCtx = tCanvas.getContext('2d');
+  tCtx.font = 'bold 90px "Orbitron", sans-serif';
+  tCtx.fillStyle = '#00f0ff';
+  tCtx.textAlign = 'center';
+  tCtx.textBaseline = 'middle';
+  tCtx.shadowColor = '#00f0ff';
+  tCtx.shadowBlur = 20;
+  tCtx.fillText('DEXMOND.COM HUB', 512, 128);
+  
+  const textTex = new THREE.CanvasTexture(tCanvas);
+  const textMat = new THREE.SpriteMaterial({ 
+      map: textTex, 
+      transparent: true, 
+      depthTest: false, 
+      depthWrite: false 
+  });
+  const textSprite = new THREE.Sprite(textMat);
+  textSprite.scale.set(0.6, 0.15, 1);
+  textSprite.position.set(0, 0.35, 0); // Float above the object
+  textSprite.renderOrder = 1000; // Text is absolutely highest priority
+  building.add(textSprite);
 
   // Add an interior blue glow core
   const glowLight = new THREE.PointLight(0x00aaff, 5, 1);
@@ -6010,7 +6046,7 @@ window.earthCutawayGroup.add(innerCoreMesh);
 // LIVE WEBCAMS
 // =====================================================================
 window.webcamGroup = new THREE.Group();
-window.webcamGroup.visible = true; // Always true
+window.webcamGroup.visible = false; // Hidden by default; shown per-skin below
 scene.add(window.webcamGroup);
 
 // Create a glowing yellow dot texture for the webcams
@@ -8020,6 +8056,12 @@ function handleGlobeClick(e) {
   if (document.getElementById('troop-inp').classList.contains('show')) return;
   if (document.getElementById('attack-modal').classList.contains('show')) return; // Block clicks if attack modal is open
   if (document.getElementById('onboarding-modal').style.display === 'flex') return;
+
+  // On WTR (Pool) skin, clicking anywhere on the globe opens the pool modal instead of showing country info
+  if (window.currentSkinIndex === 2) {
+      if (typeof openPoolModal === 'function') openPoolModal();
+      return;
+  }
 
   // 1. Check Webcams and Boats first (for all skins where they exist)
   if (webcamSprites.length > 0 || boatMeshes.length > 0) {
@@ -11384,22 +11426,27 @@ function initWS() {
           if (!window.d3xDigState[msg.mineId]) window.d3xDigState[msg.mineId] = { clicks: 0 };
           window.d3xDigState[msg.mineId].clicks = msg.clicks;
           
-          window.localD3XBalance += msg.netChange;
+          // Deduct the fuel cost from local UI mock balance
+          window.localD3XBalance -= msg.fuelCost;
           if (document.getElementById('cwd-bal')) {
               document.getElementById('cwd-bal').innerText = "| " + window.localD3XBalance.toLocaleString() + " D3X";
           }
           
           updateDigUI(msg.clicks);
           
-          if (msg.isJackpot) {
-              appendDigLog(`<span style="color:#fa0; font-weight:bold;">>>> CORE BREACH! +${msg.treasure} D3X FOUND!</span>`);
+          let yieldString = "";
+          for (const [metal, amt] of Object.entries(msg.metals || {})) {
+              yieldString += `+${amt} ${metal} `;
+          }
+          
+          if (msg.isCoreBreach) {
+              appendDigLog(`<span style="color:#fa0; font-weight:bold;">>>> CORE BREACH JACKPOT! Found: ${yieldString}</span>`);
               if (typeof spawnFlyingResourceText === 'function') {
-                  // Approximate coordinates to pop up from center screen
-                  spawnFlyingResourceText(`+${msg.treasure} D3X JACKPOT!`, window.innerWidth/2, window.innerHeight/2, '#fa0');
+                  spawnFlyingResourceText(`CORE BREACH!`, window.innerWidth/2, window.innerHeight/2, '#fa0');
               }
               if (typeof _sfxExplosion !== 'undefined') _sfxExplosion(); // Extra punchy sound effect
           } else {
-              appendDigLog(`<span style="color:#f55">-${msg.cost} D3X</span> Burned. Mined <span style="color:#0f8">+${msg.baseReward} D3X</span>. (Net: ${msg.netChange > 0 ? '+' : ''}${msg.netChange})`);
+              appendDigLog(`<span style="color:#f55">-${msg.fuelCost} D3X</span> Fuel Burned. Extracted: <span style="color:#0f8">${yieldString}</span>`);
           }
           break;
       }
@@ -11637,6 +11684,7 @@ function initWS() {
                     const aiNameUi = buy.aiName === 'gemini' ? '<span style="color:#0af">GEMINI AI</span>' : '<span style="color:#fa0">RAINCLAUDE</span>';
                     
                     // Add public log to Green Market ledger
+                    if (!window.greenMarket.tradeLogs) window.greenMarket.tradeLogs = [];
                     window.greenMarket.tradeLogs.push(`[${tString}] ${aiNameUi} <span style="color:#0f8">BOUGHT</span> ${buy.units} ${buy.item} for ${buy.cost.toLocaleString()} D3X`);
                     if (window.greenMarket.tradeLogs.length > 50) window.greenMarket.tradeLogs.shift();
                 }
@@ -12685,6 +12733,27 @@ function spawnDroneSmoke(pos) {
     window.droneBattleState.explosions.push({ mesh: sprite, life: 1.0, decayMs: 1.0, maxScale: 0.05 });
 }
 
+// --- GREEN SKIN MARKET SYSTEM ---
+window.greenSkinGroup = new THREE.Group();
+window.greenSkinGroup.visible = false;
+scene.add(window.greenSkinGroup);
+
+// Green Aura Glow Sphere (Core Pulse)
+const grnGlowGeo = new THREE.SphereGeometry(GLOBE_R * 1.05, 32, 32);
+const grnGlowMat = new THREE.MeshBasicMaterial({
+    color: 0x00ff44,
+    transparent: true,
+    opacity: 0.25,
+    blending: THREE.AdditiveBlending,
+    side: THREE.BackSide,
+    depthWrite: false
+});
+const grnGlowSphere = new THREE.Mesh(grnGlowGeo, grnGlowMat);
+window.greenSkinGroup.add(grnGlowSphere);
+window.grnGlowSphere = grnGlowSphere; // Reference for animation pulse
+
+// Market data arrays
+
 // --- WTR SKIN / D3X POOL EFFECTS ---
 window.wtrEffectsGroup = new THREE.Group();
 window.wtrEffectsGroup.visible = false;
@@ -13061,7 +13130,6 @@ function animate() {
         }
       }
     }
-    }
     
     // Process Boat flashing sirens and rapid boat rockets
     if (window.isRedSkin && typeof boatMarkers !== 'undefined' && boatMarkers.length > 1) {
@@ -13399,6 +13467,21 @@ function animate() {
           const wtrPulse = 1.05 + Math.sin(Date.now() * 0.002) * 0.015;
           window.wtrGlowSphere.scale.set(wtrPulse, wtrPulse, wtrPulse);
       }
+      
+      if (window.grnGlowSphere && window.currentSkinIndex === 2) { // Changed from 5 to 2 for GREEN skin
+          // Dynamic pulsing aura for Green Skin (matches Cyber skin)
+          const grnPulse = 1.05 + Math.sin(Date.now() * 0.002) * 0.015;
+          window.grnGlowSphere.scale.set(grnPulse, grnPulse, grnPulse);
+      }
+  }
+
+  // Pulsing animation for Dexmond Hub (Black Market)
+  if (window.dexmondHubGroup && window.dexmondHubGroup.visible && window.currentSkinIndex === 4) {
+      const hubScale = 1.5 + Math.sin(Date.now() * 0.005) * 0.15; // Rapid visible pulse
+      window.dexmondHubGroup.scale.set(hubScale, hubScale, hubScale);
+      
+      // Make it slowly rotate
+      window.dexmondHubGroup.rotation.y += 0.01;
   }
 
   // ---------------------------------------------------------------------
@@ -15418,10 +15501,22 @@ window.toggleRedSkin = function() {
   else btn.className = '';
   
   // Toggle visibility of overlays (Webcams, Sats)
-  if (typeof webcamGroup !== 'undefined') webcamGroup.visible = (window.currentSkinIndex !== 0); // Hide on Live skin
+  if (typeof webcamGroup !== 'undefined') webcamGroup.visible = (window.currentSkinIndex !== 0 && window.currentSkinIndex !== 4); 
   if (typeof boatGroup !== 'undefined') boatGroup.visible = skin.showOverlays;
   if (typeof redSatGroup !== 'undefined') redSatGroup.visible = skin.showOverlays;
   
+  // Toggle WTR / D3X Pool effects
+  if (typeof wtrEffectsGroup !== 'undefined') wtrEffectsGroup.visible = (skin.name === 'WTR');
+  
+  // Toggle GREEN SKIN effects
+  if (typeof greenSkinGroup !== 'undefined') {
+      greenSkinGroup.visible = (skin.name === 'GREEN');
+      if (skin.name === 'GREEN') {
+          // Initial draw or update for green market lines if they exist
+          if (typeof updateGreenMarketLines === 'function') updateGreenMarketLines();
+      }
+  }
+
   // Clear red warfare projectiles if turning OFF red skin
   if (!skin.showOverlays) {
       if (typeof redWarfareProjectiles !== 'undefined') {
@@ -15643,7 +15738,7 @@ window.toggleRedSkin = function() {
   }
 
   if (skin.name === 'WTR') {
-      window.spawnWTRBlocks();
+      if (typeof window.spawnWTRBlocks === 'function') window.spawnWTRBlocks();
   } else {
       if (typeof window.clearWTRBlocks === 'function') window.clearWTRBlocks();
   }
@@ -16263,35 +16358,9 @@ window.openSoftwareShop = function() {
         font-family: 'Orbitron', sans-serif;
     `;
 
-    const softwares = [
-        {name: "Zero-Day Exploit Framework", cost: 5000},
-        {name: "Neural Network Scrambler", cost: 3500},
-        {name: "Cryptographic Key Logger", cost: 2000},
-        {name: "Quantum Decryption Algorithm", cost: 8000},
-        {name: "Satellite Uplink Hijacker", cost: 6000},
-        {name: "Deep-Web Data Scraper", cost: 1500},
-        {name: "Logic Bomb Payload", cost: 4500},
-        {name: "Autonomous Botnet Swarm", cost: 7000},
-        {name: "Firewall Breach Protocol", cost: 2500},
-        {name: "Identity Spoofing Toolkit", cost: 3000}
-    ];
-
-    // Randomize the order of the software shop for each visit
-    const shuffled = softwares.sort(() => 0.5 - Math.random());
-
-    let itemsHtml = '';
-    shuffled.forEach(sw => {
-        itemsHtml += `
-            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,170,255,0.05); border:1px solid rgba(0,170,255,0.3); padding:15px; border-radius:4px; margin-bottom:10px;">
-                <span style="color:#fff; font-size:16px;">${sw.name}</span>
-                <button onclick="buyWeaponFromShop('${sw.name}', ${sw.cost})" style="background:rgba(0,170,255,0.2); border:1px solid #0af; color:#0af; padding:8px 15px; cursor:pointer; font-weight:bold; border-radius:4px; transition:0.2s;" onmouseover="this.style.background='rgba(0,170,255,0.4)'" onmouseout="this.style.background='rgba(0,170,255,0.2)'">ACQUIRE - ${sw.cost} D3X</button>
-            </div>
-        `;
-    });
-
     const modal = document.createElement('div');
     modal.style.cssText = `
-        width: 80%; max-width: 800px; height: 80vh; max-height: 800px;
+        width: 90%; max-width: 1200px; height: 90vh; max-height: 900px;
         background: linear-gradient(135deg, rgba(0,40,80,0.8) 0%, rgba(0,10,20,0.9) 100%);
         border: 2px solid #0af; border-radius: 12px;
         box-shadow: 0 0 40px rgba(0,170,255,0.4), inset 0 0 20px rgba(0,170,255,0.2);
@@ -16299,20 +16368,17 @@ window.openSoftwareShop = function() {
     `;
 
     modal.innerHTML = `
-        <button id="close-software-shop" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#0af; font-size:30px; cursor:pointer; font-weight:bold; transition:0.2s;">&times;</button>
+        <button id="close-software-shop" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#0af; font-size:30px; cursor:pointer; font-weight:bold; transition:0.2s; z-index:1000;">&times;</button>
         <h1 style="color:#0af; font-size:32px; text-shadow: 0 0 10px #0af; margin-top:0; border-bottom:1px solid rgba(0,170,255,0.5); padding-bottom:15px; text-align:center; letter-spacing:4px;">
-            CYBER BLACK MARKET SOFTWARE
+            DEXMOND.COM HUB
         </h1>
-        <div id="software-shop-list" style="flex-grow:1; overflow-y:auto; padding-right:10px; margin-top:20px;">
-            <style>
-                #software-shop-list::-webkit-scrollbar { width: 8px; }
-                #software-shop-list::-webkit-scrollbar-track { background: rgba(0, 10, 20, 0.5); border-left: 1px solid rgba(0,170,255,0.2); }
-                #software-shop-list::-webkit-scrollbar-thumb { background: rgba(0,170,255,0.5); border-radius: 4px; border: 1px solid #0af; }
-                #software-shop-list::-webkit-scrollbar-thumb:hover { background: rgba(0,170,255,0.8); }
-            </style>
-            ${itemsHtml}
+        <div id="dexmond-iframe-container" style="flex-grow:1; width:100%; border:1px solid rgba(0,170,255,0.3); border-radius:8px; overflow:hidden; background:#000;">
+            <!-- Iframe injected via JS to avoid parser bugs -->
         </div>
     `;
+
+    const iframeHtml = '<iframe src="https://dexmond.com" style="width:100%; height:100%; border:none;"><' + '/iframe>';
+    modal.querySelector('#dexmond-iframe-container').innerHTML = iframeHtml;
 
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
