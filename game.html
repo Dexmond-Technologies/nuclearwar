@@ -6190,7 +6190,7 @@
       let balanceHtml = '';
       if (window.currentSkinIndex === 3) { // Black Skin only
         if (typeof compData.d3xBalance === 'undefined') {
-          compData.d3xBalance = (compData.name === 'WORLD BANK') ? 12300000 : (200000 + Math.random() * 1800000);
+          compData.d3xBalance = (window.ENV_MOCK_VALUES !== 'n') ? ((compData.name === 'WORLD BANK') ? 12300000 : (200000 + Math.random() * 1800000)) : 0;
         }
         balanceHtml = `<div style="margin-top:15px; background:rgba(0,255,136,0.1); padding:10px; border:1px solid #0f8; border-radius:4px; text-align:center; box-shadow:0 0 10px rgba(0,255,136,0.2);">
           <div style="color:#aaa; font-size:10px; margin-bottom:5px;">CORPORATE LIQUIDITY:</div>
@@ -16185,7 +16185,7 @@ window.simulateGreenMarketAI = function() {
       // ---------------------------------------------------------------------
       // MOCK CRYPTO WAR LOGIC (Gemini vs Rainclaude Feeds)
       // ---------------------------------------------------------------------
-      if (Math.random() < 0.05) { // 5% chance per frame (~3 times a second)
+      if (window.ENV_MOCK_VALUES !== 'n' && Math.random() < 0.05) { // 5% chance per frame (~3 times a second)
         const isGemini = Math.random() > 0.5;
         const coins = ['D3X', 'SOL', 'BTC', 'ETH', 'XRP', 'XLM', 'USDC'];
         const coin = coins[Math.floor(Math.random() * coins.length)];
@@ -18914,7 +18914,7 @@ window.toggleRedSkin = function() {
     // ========================================================
     // D3X STORE LOGIC
     // ========================================================
-    window.d3xBalance = 1000; // Mock starting balance for testing
+    window.d3xBalance = (window.ENV_MOCK_VALUES !== 'n') ? 1000 : 0; // Guarded mock balance
     window.unlockedCyberSkin = false;
     window.hasLaserVFX = false;
 
@@ -19228,6 +19228,7 @@ window.toggleRedSkin = function() {
       }
 
       function runTurn() {
+        if (window.ENV_MOCK_VALUES === 'n') return; // Do not run mock logic in production
         try {
           initCountries();
           if (countries.length === 0) return;
@@ -19544,10 +19545,10 @@ window.toggleRedSkin = function() {
 
         // Ensure they have pseudo-wallets (Distributing ~123 Million D3X Global Economy)
         if (typeof sender.d3xBalance === 'undefined') {
-          sender.d3xBalance = (sender.name === 'WORLD BANK') ? 12300000 : (200000 + Math.random() * 1800000);
+          sender.d3xBalance = (window.ENV_MOCK_VALUES !== 'n') ? ((sender.name === 'WORLD BANK') ? 12300000 : (200000 + Math.random() * 1800000)) : 0;
         }
         if (typeof receiver.d3xBalance === 'undefined') {
-          receiver.d3xBalance = (receiver.name === 'WORLD BANK') ? 12300000 : (200000 + Math.random() * 1800000);
+          receiver.d3xBalance = (window.ENV_MOCK_VALUES !== 'n') ? ((receiver.name === 'WORLD BANK') ? 12300000 : (200000 + Math.random() * 1800000)) : 0;
         }
 
         const txAmount = parseFloat((Math.random() * (sender.d3xBalance * 0.05)).toFixed(2));
