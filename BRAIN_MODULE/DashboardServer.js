@@ -130,8 +130,9 @@ const httpServer = http.createServer((req, res) => {
             res.writeHead(200);
             res.end('OK');
             
-            // Execute Git Pull and PM2 Restart autonomously
-            exec('git pull origin main && pm2 restart all', (error, stdout, stderr) => {
+            // Execute Git Pull and PM2 Restart autonomously from the project root
+            const rootDir = require('path').join(__dirname, '..');
+            exec('git pull origin main && pm2 restart all', { cwd: rootDir }, (error, stdout, stderr) => {
                 if (error) {
                     console.error(`[BRAIN MODULE] Auto-pull execution error: ${error.message}`);
                     return;
