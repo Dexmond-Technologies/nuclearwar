@@ -6039,11 +6039,11 @@ for(let i=0; i<35000; i++) {
 dustGeo.setAttribute('position', new THREE.Float32BufferAttribute(dustPts, 3));
 // Use a fine dirt/greyish color for the atmosphere
 const dustMat = new THREE.PointsMaterial({
-    color: 0xaa9575, 
-    size: 0.005, 
+    color: 0x8b7355, // Stronger brown/dirt color
+    size: 0.012,     // Larger particles
     transparent: true, 
-    opacity: 0.45, 
-    blending: THREE.AdditiveBlending 
+    opacity: 0.7,    // More opaque
+    blending: THREE.NormalBlending // Normal blending so it darkens the sky like real dirt instead of adding light like fire
 });
 window.liveDustPoints = new THREE.Points(dustGeo, dustMat);
 window.liveDustGroup.add(window.liveDustPoints);
