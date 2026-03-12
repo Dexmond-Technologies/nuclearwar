@@ -6068,6 +6068,150 @@ window.liveDustGroup.add(window.liveDustPoints);
 scene.add(window.liveDustGroup);
 
 // =====================================================================
+// LIVE SKIN ATMOSPHERE & WEATHER EFFECTS
+// =====================================================================
+window.atmosphereGroup = new THREE.Group();
+window.atmosphereGroup.visible = true; // Active on LIVE skin
+scene.add(window.atmosphereGroup);
+
+// 1. High-Altitude Cloud Layer
+const cloudGeo = new THREE.SphereGeometry(GLOBE_R + 0.005, 64, 64);
+const textureLoader = new THREE.TextureLoader();
+// Create a procedural noise texture for clouds to avoid external dependencies
+const cloudCanvas = document.createElement('canvas');
+cloudCanvas.width = 1024; cloudCanvas.height = 512;
+const cloudCtx = cloudCanvas.getContext('2d');
+cloudCtx.fillStyle = 'rgba(0,0,0,0)';
+cloudCtx.fillRect(0, 0, 1024, 512);
+// Simple noise generation for clouds
+for(let i=0; i<40000; i++) {
+    const cx = Math.random() * 1024;
+    const cy = Math.random() * 512;
+    const cr = Math.random() * 20 + 5;
+    const alpha = Math.random() * 0.15;
+    cloudCtx.beginPath();
+    cloudCtx.arc(cx, cy, cr, 0, Math.PI * 2);
+    cloudCtx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+    cloudCtx.fill();
+}
+const cloudTex = new THREE.CanvasTexture(cloudCanvas);
+cloudTex.wrapS = THREE.RepeatWrapping;
+cloudTex.wrapT = THREE.RepeatWrapping;
+
+const cloudMat = new THREE.MeshPhongMaterial({
+    map: cloudTex,
+    transparent: true,
+    opacity: 0.8,
+    blending: THREE.NormalBlending,
+    side: THREE.FrontSide,
+    depthWrite: false // Crucial so troops render on top
+});
+window.cloudMesh = new THREE.Mesh(cloudGeo, cloudMat);
+window.atmosphereGroup.add(window.cloudMesh);
+
+// 2. Low-Orbit Atmospheric Glow (Fresnel-like)
+const atmGlowGeo = new THREE.SphereGeometry(GLOBE_R + 0.02, 64, 64);
+// Custom shader for edge glow
+const atmShader = {
+    uniforms: {
+        "c": { type: "f", value: 0.15 },
+        "p": { type: "f", value: 3.5 },
+        glowColor: { type: "c", value: new THREE.Color(0x44aaff) },
+        viewVector: { type: "v3", value: camera.position }
+    },
+    vertexShader: `
+        uniform vec3 viewVector;
+        uniform float c;
+        uniform float p;
+        varying float intensity;
+        void main() {
+            vec3 vNormal = normalize( normalMatrix * normal );
+            vec3 vNormel = normalize( normalMatrix * viewVector );
+            intensity = pow( c - dot(vNormal, vNormel), p );
+            gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+        }
+    `,
+    fragmentShader: `
+        uniform vec3 glowColor;
+        varying float intensity;
+        void main() {
+            vec3 glow = glowColor * intensity;
+            gl_FragColor = vec4( glow, intensity );
+        }
+    `,
+    side: THREE.BackSide,
+    blending: THREE.AdditiveBlending,
+    transparent: true,
+    depthWrite: false
+};
+const atmGlowMat = new THREE.ShaderMaterial(atmShader);
+window.atmGlowMesh = new THREE.Mesh(atmGlowGeo, atmGlowMat);
+window.atmosphereGroup.add(window.atmGlowMesh);
+
+// 3. Regional Storm Flashes (Lightning)
+window.stormFlashes = [];
+for(let i=0; i<3; i++) {
+    const flashLight = new THREE.PointLight(0xaaccff, 0, 0.4);
+    window.atmosphereGroup.add(flashLight);
+    window.stormFlashes.push({
+        light: flashLight,
+        timer: 0,
+        x: 0, y: 0, z: 0,
+        active: false
+    });
+}
+
+// 4. Aurora Borealis Rings
+const auroraGeo1 = new THREE.RingGeometry(GLOBE_R + 0.05, GLOBE_R + 0.1, 128, 8);
+const auroraGeo2 = new THREE.RingGeometry(GLOBE_R + 0.05, GLOBE_R + 0.1, 128, 8);
+
+const auroraShader = {
+    uniforms: {
+        time: { type: "f", value: 0.0 },
+        color1: { type: "c", value: new THREE.Color(0x00ffaa) },
+        color2: { type: "c", value: new THREE.Color(0x0055ff) }
+    },
+    vertexShader: `
+        uniform float time;
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            vec3 pos = position;
+            // Add wave distortion to the aurora
+            pos.z += sin(pos.x * 20.0 + time) * 0.02;
+            pos.z += cos(pos.y * 15.0 + time * 1.5) * 0.015;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+        }
+    `,
+    fragmentShader: `
+        uniform float time;
+        uniform vec3 color1;
+        uniform vec3 color2;
+        varying vec2 vUv;
+        void main() {
+            float alpha = sin(vUv.x * 3.14159) * 0.6; // Fade edges
+            vec3 finalColor = mix(color1, color2, sin(vUv.y * 10.0 + time * 2.0) * 0.5 + 0.5);
+            gl_FragColor = vec4(finalColor, alpha * (sin(time * 0.5) * 0.2 + 0.8));
+        }
+    `,
+    side: THREE.DoubleSide,
+    blending: THREE.AdditiveBlending,
+    transparent: true,
+    depthWrite: false
+};
+const auroraMat = new THREE.ShaderMaterial(auroraShader);
+
+window.auroraNorth = new THREE.Mesh(auroraGeo1, auroraMat);
+window.auroraNorth.rotation.x = -Math.PI / 2;
+window.auroraNorth.position.y = GLOBE_R - 0.1; // North pole
+window.atmosphereGroup.add(window.auroraNorth);
+
+window.auroraSouth = new THREE.Mesh(auroraGeo2, auroraMat);
+window.auroraSouth.rotation.x = Math.PI / 2;
+window.auroraSouth.position.y = -(GLOBE_R - 0.1); // South pole
+window.atmosphereGroup.add(window.auroraSouth);
+
+// =====================================================================
 // LIVE WEBCAMS
 // =====================================================================
 window.webcamGroup = new THREE.Group();
@@ -9149,9 +9293,7 @@ function updateGreenMarket() {
     const priceEl = document.getElementById(`market-price-${safeK}`);
     const sellBtn = document.getElementById(`market-sell-${safeK}`);
     if (priceEl) {
-        priceEl.innerHTML = `${trend} ${shareVal.toFixed(2)} D3X`;
-    }
-      priceEl.innerHTML = `${trend} ${shareVal.toFixed(2)} D3X <span style="font-size:10px; color:#aaa; font-weight:normal;">/ UNIT</span>`;
+        priceEl.innerHTML = `${trend} ${shareVal.toFixed(2)} D3X <span style="font-size:10px; color:#aaa; font-weight:normal;">/ UNIT</span>`;
     }
     if (sellBtn) {
        sellBtn.style.opacity = c.shares > 0 ? '1' : '0.3';
@@ -15501,6 +15643,11 @@ window.toggleRedSkin = function() {
   window.currentSkinIndex = (window.currentSkinIndex + 1) % SKINS.length;
   const skin = SKINS[window.currentSkinIndex];
   
+  // Toggle New Atmospheric Effects (LIVE Skin specific)
+  if (typeof window.atmosphereGroup !== 'undefined') {
+      window.atmosphereGroup.visible = (skin.name === 'LIVE');
+  }
+
   window.isRedSkin = (skin.name === 'RED'); // Keep legacy compatibility
 
   const btn = document.getElementById('btn-toggle-skin');
