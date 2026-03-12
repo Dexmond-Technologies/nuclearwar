@@ -8265,6 +8265,410 @@
       const r = GLOBE_R + 0.05; // Slightly above globe surface
 
       const pos = new THREE.Vector3(
+  };
+
+  const routes = [
+    // PLANES (Aviation Trade)
+    {from: [40.7, -74.0], to: [51.5, -0.1], type: 'plane'}, // NY -> London
+    {from: [39.9, 116.4], to: [37.7, -122.4], type: 'plane'}, // Beijing -> SF
+    {from: [25.2, 55.2], to: [51.5, -0.1], type: 'plane'}, // Dubai -> London
+    {from: [35.6, 139.6], to: [-33.8, 151.2], type: 'plane'}, // Tokyo -> Sydney
+    {from: [1.3, 103.8], to: [22.3, 114.1], type: 'plane'}, // Singapore -> HK
+    {from: [48.8, 2.3], to: [-23.5, -46.6], type: 'plane'}, // Paris -> Sao Paulo
+    {from: [34.0, -118.2], to: [35.6, 139.6], type: 'plane'}, // LA -> Tokyo
+    {from: [55.7, 37.6], to: [25.2, 55.2], type: 'plane'}, // Moscow -> Dubai
+    {from: [-33.9, 18.4], to: [51.5, -0.1], type: 'plane'}, // Cape Town -> London
+    {from: [19.4, -99.1], to: [40.4, -3.7], type: 'plane'}, // Mexico City -> Madrid
+    {from: [28.6, 77.2], to: [52.5, 13.4], type: 'plane'}, // Delhi -> Berlin
+    {from: [30.0, 31.2], to: [48.8, 2.3], type: 'plane'}, // Cairo -> Paris
+    
+    // SHIPS (Maritime Cargo)
+    {from: [31.2, 121.4], to: [34.0, -118.2], type: 'ship'}, // Shanghai -> LA
+    {from: [22.5, 114.0], to: [51.9, 4.4], type: 'ship'}, // Shenzhen -> Rotterdam
+    {from: [1.2, 103.8], to: [23.8, 56.6], type: 'ship'}, // Singapore -> Oman Gulf
+    {from: [29.9, -90.0], to: [53.5, 9.9], type: 'ship'}, // New Orleans -> Hamburg
+    {from: [-23.9, -46.3], to: [31.2, 121.4], type: 'ship'}, // Santos BR -> Shanghai
+    {from: [-33.9, 18.4], to: [24.8, 66.9], type: 'ship'}, // Cape Town -> Karachi
+    {from: [38.9, 117.2], to: [54.0, -2.9], type: 'ship'}, // Tianjin -> Liverpool
+    {from: [31.2, 29.9], to: [40.7, -74.0], type: 'ship'}, // Alex -> NY
+    {from: [1.3, 103.8], to: [-33.8, 151.2], type: 'ship'}, // Singapore -> Sydney
+    {from: [19.0, 72.8], to: [-26.2, 32.6], type: 'ship'}, // Mumbai -> Maputo
+    {from: [35.4, 139.6], to: [37.8, -122.4], type: 'ship'}, // Yokohama -> SF
+    {from: [8.9, -79.5], to: [51.9, 4.4], type: 'ship'}, // Panama -> Rotterdam
+    
+    // TRAINS/TYRES (Overland Supply Chains)
+    {from: [39.9, 116.4], to: [52.5, 13.4], type: 'train'}, // Beijing -> Berlin (Eurasian Belt)
+    {from: [41.8, -87.6], to: [34.0, -118.2], type: 'train'}, // Chicago -> LA (Continental US)
+    {from: [40.7, -74.0], to: [29.7, -95.3], type: 'train'}, // NY -> Houston
+    {from: [55.7, 37.6], to: [43.1, 131.9], type: 'train'}, // Moscow -> Vladivostok (Trans-Siberian)
+    {from: [28.6, 77.2], to: [19.0, 72.8], type: 'train'}, // Delhi -> Mumbai (Indian Rail)
+    {from: [-34.6, -58.3], to: [-23.5, -46.6], type: 'train'}, // Buenos Aires -> Sao Paulo
+    {from: [-26.2, 28.0], to: [-33.9, 18.4], type: 'train'}, // Johannesburg -> Cape Town
+    {from: [48.8, 2.3], to: [55.7, 37.6], type: 'train'}, // Paris -> Moscow
+    {from: [51.5, -0.1], to: [41.9, 12.5], type: 'train'}, // London -> Rome
+    {from: [43.7, -79.4], to: [49.3, -123.1], type: 'train'}, // Toronto -> Vancouver
+    {from: [-37.8, 144.9], to: [-31.9, 115.8], type: 'train'}, // Melbourne -> Perth
+    {from: [35.7, 51.4], to: [41.0, 29.0], type: 'train'} // Tehran -> Istanbul
+  ];
+
+  // Multiply exact routes array volume by 6x parametrically using coordinate drift
+  const baseRoutesLength = routes.length;
+  for(let j=0; j < 160; j++) {
+     const baseRt = routes[Math.floor(Math.random() * baseRoutesLength)];
+     // Add random offsets to create new parallel / divergent routes
+     const fromLat = Math.max(-80, Math.min(80, baseRt.from[0] + (Math.random() * 50 - 25)));
+     const fromLon = baseRt.from[1] + (Math.random() * 50 - 25);
+     const toLat = Math.max(-80, Math.min(80, baseRt.to[0] + (Math.random() * 50 - 25)));
+     const toLon = baseRt.to[1] + (Math.random() * 50 - 25);
+     routes.push({from: [fromLat, fromLon], to: [toLat, toLon], type: baseRt.type});
+  }
+
+  routes.forEach(rt => {
+    // Inject 8 vehicles traversing each global route (we added 160 routes, 8x bidirectional = massive density)
+    for(let i=0; i<8; i++) {
+       createTradeRoute(rt.from[0], rt.from[1], rt.to[0], rt.to[1], rt.type);
+       createTradeRoute(rt.to[0], rt.to[1], rt.from[0], rt.from[1], rt.type);
+    }
+  });
+
+  console.log("Global Trade Network Initialized (" + window.activeTrades.length + " discrete assets tracked).");
+}
+initGlobalTradeNetwork();
+
+// Stars
+const sg = new THREE.BufferGeometry();
+const sp = [];
+for(let i=0;i<4000;i++){
+  const t=Math.random()*Math.PI*2, p=Math.acos(2*Math.random()-1), r=7+Math.random()*4;
+  sp.push(r*Math.sin(p)*Math.cos(t), r*Math.cos(p), r*Math.sin(p)*Math.sin(t));
+}
+sg.setAttribute('position',new THREE.Float32BufferAttribute(sp,3));
+scene.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:0.018,transparent:true,opacity:.7})));
+
+// Globe
+// 30% increased density for Cyber Skin
+const globeGeo = new THREE.SphereGeometry(GLOBE_R, 750, 750); // 10X Polygon Upgrade
+const texLoader = new THREE.TextureLoader();
+const earthTex  = texLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/land_ocean_ice_cloud_2048.jpg');
+
+// Set up clipping planes to cut out a front-right quarter
+const clipPlanes = [
+  new THREE.Plane(new THREE.Vector3(1,  0, 0), 0),
+  new THREE.Plane(new THREE.Vector3(0, -1, 0), 0),
+  new THREE.Plane(new THREE.Vector3(0,  0, 1), 0)
+];
+
+const globeMat  = new THREE.MeshPhongMaterial({
+  map:earthTex,
+  specular:new THREE.Color(0x003355),
+  shininess:15,
+  side: THREE.FrontSide,
+  clipIntersection: true,
+  clippingPlanes: [] // active only on FIRE skin
+});
+
+// Update globeMat color for WTR skin
+if (window.currentSkinIndex === 6) {
+  globeMat.color = new THREE.Color(0x00aaff); // Neon cyan for WTR
+  globeMat.specular = new THREE.Color(0x00ffff);
+  globeMat.shininess = 50;
+}
+
+const globeMesh = new THREE.Mesh(globeGeo, globeMat);
+window.globeMesh = globeMesh;
+scene.add(globeMesh);
+
+renderer.localClippingEnabled = true;
+
+// Inner core layers for FIRE cutaway
+window.earthCutawayGroup = new THREE.Group();
+window.earthCutawayGroup.visible = false;
+scene.add(window.earthCutawayGroup);
+
+function createCutawayLayer(radius, color, specular, shininess) {
+  const geo = new THREE.SphereGeometry(radius, 64, 64);
+  const mat = new THREE.MeshPhongMaterial({
+    color: color, 
+    specular: specular, 
+    shininess: shininess,
+    side: THREE.FrontSide,
+    clipIntersection: true,
+    clippingPlanes: clipPlanes
+  });
+  return new THREE.Mesh(geo, mat);
+}
+
+// Mantle (Red/Orange)
+const mantleMesh = createCutawayLayer(GLOBE_R * 0.98, 0xff2200, 0x551100, 10);
+// Outer Core (Orange/Yellow)
+const outerCoreMesh = createCutawayLayer(GLOBE_R * 0.55, 0xff8800, 0xaa5500, 30);
+// Inner Core (Bright Yellow/White)
+const innerCoreMesh = createCutawayLayer(GLOBE_R * 0.2, 0xffffaa, 0xffffff, 100);
+
+window.earthCutawayGroup.add(mantleMesh);
+window.earthCutawayGroup.add(outerCoreMesh);
+window.earthCutawayGroup.add(innerCoreMesh);
+
+// =====================================================================
+// LIVE SKIN WAR DUST PARTICLES
+// =====================================================================
+window.liveDustGroup = new THREE.Group();
+window.liveDustGroup.visible = true; // Active by default since 'LIVE' is the initial skin
+const dustGeo = new THREE.BufferGeometry();
+const dustPts = [];
+
+// Generate sparse dust particles wrapped tightly around the globe for performance
+const dustBasePos = [];
+for(let i=0; i<12800; i++) {
+   const t = Math.random() * Math.PI * 2;
+   const p = Math.acos(2 * Math.random() - 1);
+   const r = GLOBE_R + 0.002 + (Math.random() * 0.12);
+   
+   const x = r * Math.sin(p) * Math.cos(t);
+   const y = r * Math.cos(p);
+   const z = r * Math.sin(p) * Math.sin(t);
+   
+   dustPts.push(x, y, z);
+   
+   // Store original position and a random phase for floating math
+   dustBasePos.push({
+       x: x, y: y, z: z,
+       phaseX: Math.random() * Math.PI * 2,
+       phaseY: Math.random() * Math.PI * 2,
+       phaseZ: Math.random() * Math.PI * 2,
+       speed: 0.05 + Math.random() * 0.15,
+       amplitude: 0.01 + Math.random() * 0.02
+   });
+}
+dustGeo.setAttribute('position', new THREE.Float32BufferAttribute(dustPts, 3));
+window.liveDustBasePos = dustBasePos; // Expose for animate loop
+
+// Use a fine dirt/greyish color for the atmosphere
+const dustMat = new THREE.PointsMaterial({
+    color: 0xaa9575, 
+    size: 0.015, 
+    transparent: true, 
+    opacity: 0.65, 
+    blending: THREE.AdditiveBlending 
+});
+window.liveDustPoints = new THREE.Points(dustGeo, dustMat);
+window.liveDustGroup.add(window.liveDustPoints);
+scene.add(window.liveDustGroup);
+
+// =====================================================================
+// LIVE SKIN ATMOSPHERE & WEATHER EFFECTS
+// =====================================================================
+window.atmosphereGroup = new THREE.Group();
+window.atmosphereGroup.visible = true; // Active on LIVE skin
+scene.add(window.atmosphereGroup);
+
+// 1. High-Altitude Cloud Layer
+const cloudGeo = new THREE.SphereGeometry(GLOBE_R + 0.005, 512, 512); // Extreme Quality
+const textureLoader = new THREE.TextureLoader();
+// Create a procedural noise texture for clouds to avoid external dependencies
+const cloudCanvas = document.createElement('canvas');
+cloudCanvas.width = 1024; cloudCanvas.height = 512;
+const cloudCtx = cloudCanvas.getContext('2d');
+cloudCtx.fillStyle = 'rgba(0,0,0,0)';
+cloudCtx.fillRect(0, 0, 1024, 512);
+// Simple noise generation for clouds
+for(let i=0; i<40000; i++) {
+    const cx = Math.random() * 1024;
+    const cy = Math.random() * 512;
+    const cr = Math.random() * 20 + 5;
+    const alpha = Math.random() * 0.15;
+    cloudCtx.beginPath();
+    cloudCtx.arc(cx, cy, cr, 0, Math.PI * 2);
+    cloudCtx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+    cloudCtx.fill();
+}
+const cloudTex = new THREE.CanvasTexture(cloudCanvas);
+cloudTex.wrapS = THREE.RepeatWrapping;
+cloudTex.wrapT = THREE.RepeatWrapping;
+
+const cloudMat = new THREE.MeshPhongMaterial({
+    map: cloudTex,
+    transparent: true,
+    opacity: 0.8,
+    blending: THREE.NormalBlending,
+    side: THREE.FrontSide,
+    depthWrite: false // Crucial so troops render on top
+});
+window.cloudMesh = new THREE.Mesh(cloudGeo, cloudMat);
+window.atmosphereGroup.add(window.cloudMesh);
+
+// 2. Low-Orbit Atmospheric Glow (Fresnel-like)
+const atmGlowGeo = new THREE.SphereGeometry(GLOBE_R + 0.02, 512, 512); // Extreme Quality
+// Custom shader for edge glow
+const atmShader = {
+    uniforms: {
+        "c": { type: "f", value: 0.15 },
+        "p": { type: "f", value: 3.5 },
+        glowColor: { type: "c", value: new THREE.Color(0x44aaff) },
+        viewVector: { type: "v3", value: camera.position }
+    },
+    vertexShader: `
+        uniform vec3 viewVector;
+        uniform float c;
+        uniform float p;
+        varying float intensity;
+        void main() {
+            vec3 vNormal = normalize( normalMatrix * normal );
+            vec3 vNormel = normalize( normalMatrix * viewVector );
+            intensity = pow( c - dot(vNormal, vNormel), p );
+            gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+        }
+    `,
+    fragmentShader: `
+        uniform vec3 glowColor;
+        varying float intensity;
+        void main() {
+            vec3 glow = glowColor * intensity;
+            gl_FragColor = vec4( glow, intensity );
+        }
+    `,
+    side: THREE.BackSide,
+    blending: THREE.AdditiveBlending,
+    transparent: true,
+    depthWrite: false
+};
+const atmGlowMat = new THREE.ShaderMaterial(atmShader);
+window.atmGlowMesh = new THREE.Mesh(atmGlowGeo, atmGlowMat);
+window.atmosphereGroup.add(window.atmGlowMesh);
+
+// 3. Regional Storm Flashes (Lightning)
+window.stormFlashes = [];
+for(let i=0; i<3; i++) {
+    const flashLight = new THREE.PointLight(0xaaccff, 0, 0.4);
+    window.atmosphereGroup.add(flashLight);
+    window.stormFlashes.push({
+        light: flashLight,
+        timer: 0,
+        x: 0, y: 0, z: 0,
+        active: false
+    });
+}
+
+// 4. Aurora Borealis Rings (Massive Polygon Upgrade & Advanced Organic Shader)
+const auroraGeo1 = new THREE.CylinderGeometry(GLOBE_R + 0.02, GLOBE_R + 0.09, 0.15, 512, 32, true);
+const auroraGeo2 = new THREE.CylinderGeometry(GLOBE_R + 0.02, GLOBE_R + 0.09, 0.15, 512, 32, true);
+
+const auroraShader = {
+    uniforms: {
+        time: { type: "f", value: 0.0 },
+        colorBottom: { type: "c", value: new THREE.Color(0x00ffaa) }, // Bright Green / Teal base
+        colorTop: { type: "c", value: new THREE.Color(0xff0088) }     // Pink / Purple top bleeding
+    },
+    vertexShader: `
+        uniform float time;
+        varying vec2 vUv;
+        varying vec3 vPos;
+        void main() {
+            vUv = uv;
+            vPos = position;
+            vec3 pos = position;
+            // High-frequency structural folding
+            float fold = sin(pos.x * 15.0 + time * 1.2) * 0.02 + cos(pos.z * 18.0 - time * 0.8) * 0.02;
+            pos.x += fold * pos.x;
+            pos.z += fold * pos.z;
+            
+            // Vertical rippling
+            pos.y += sin(pos.x * 25.0 + time * 3.0) * 0.015;
+            
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+        }
+    `,
+    fragmentShader: `
+        uniform float time;
+        uniform vec3 colorBottom;
+        uniform vec3 colorTop;
+        varying vec2 vUv;
+        varying vec3 vPos;
+        
+        // Pseudo-random noise for striking vertical bands
+        float hash(float n) { return fract(sin(n)*43758.5453); }
+        
+        void main() {
+            // vUv.y goes from 1.0 (bottom) to 0.0 (top) on a CylinderGeometry
+            float altitude = 1.0 - vUv.y; 
+            
+            // Base structural waves
+            float wave1 = sin(vUv.x * 60.0 + time * 2.5);
+            float wave2 = sin(vUv.x * 120.0 - time * 1.8);
+            float wave3 = cos(vUv.x * 30.0 + time * 0.5);
+            
+            // Create vertical striations (curtains)
+            float striation = smoothstep(0.2, 0.8, (wave1 * 0.5 + 0.5) * (wave2 * 0.5 + 0.5));
+            striation *= (wave3 * 0.5 + 0.5);
+            
+            // High frequency micro-bands
+            float micro = hash(floor(vUv.x * 400.0));
+            striation += micro * 0.15;
+            
+            // Color gradient from bottom to top
+            // Green concentrated at bottom, blending to magenta/pink at the very top fringes
+            vec3 baseColor = mix(colorBottom, colorTop, pow(altitude, 1.8));
+            
+            // Intensity fades at the very bottom and completely fades at the top edge
+            float verticalFade = smoothstep(0.0, 0.2, altitude) * smoothstep(1.0, 0.4, altitude);
+            
+            // Combine limits
+            float alpha = striation * verticalFade * 0.8;
+            
+            // Add a pulsing glow
+            alpha *= 0.6 + 0.4 * sin(time * 0.5 + vUv.x * 10.0);
+            
+            gl_FragColor = vec4(baseColor, alpha);
+        }
+    `,
+    side: THREE.DoubleSide,
+    blending: THREE.AdditiveBlending,
+    transparent: true,
+    depthWrite: false
+};
+const auroraMat = new THREE.ShaderMaterial(auroraShader);
+
+window.auroraNorth = new THREE.Mesh(auroraGeo1, auroraMat);
+window.auroraNorth.rotation.x = -Math.PI / 2;
+window.auroraNorth.position.y = GLOBE_R - 0.1; // North pole
+window.atmosphereGroup.add(window.auroraNorth);
+
+window.auroraSouth = new THREE.Mesh(auroraGeo2, auroraMat);
+window.auroraSouth.rotation.x = Math.PI / 2;
+window.auroraSouth.position.y = -(GLOBE_R - 0.1); // South pole
+window.atmosphereGroup.add(window.auroraSouth);
+
+// =====================================================================
+// LIVE WEBCAMS
+// =====================================================================
+window.webcamGroup = new THREE.Group();
+window.webcamGroup.visible = false; // Hidden by default; shown per-skin below
+scene.add(window.webcamGroup);
+
+// Create a glowing yellow dot texture for the webcams
+const camCanvas = document.createElement('canvas');
+camCanvas.width = 128; camCanvas.height = 128;
+const camCtx = camCanvas.getContext('2d');
+const camGrad = camCtx.createRadialGradient(64, 64, 10, 64, 64, 60);
+camGrad.addColorStop(0, 'rgba(255, 255, 0, 1)'); 
+camGrad.addColorStop(0.3, 'rgba(255, 200, 0, 0.8)'); 
+camGrad.addColorStop(1, 'rgba(255, 200, 0, 0)');
+camCtx.fillStyle = camGrad;
+camCtx.fillRect(0, 0, 128, 128);
+const camTex = new THREE.CanvasTexture(camCanvas);
+const camMat = new THREE.SpriteMaterial({ map: camTex, transparent: true, blending: THREE.AdditiveBlending });
+
+// Generate 50 random live webcam locations
+for (let i = 0; i < 50; i++) {
+    const lat = (Math.random() - 0.5) * 160; // -80 to 80 to avoid strict poles
+    const lon = (Math.random() - 0.5) * 360; // -180 to 180
+    
+    // Use the existing ll2v function definition which we will hoist or call later if already defined
+    const phi = (90 - lat) * (Math.PI / 180);
+    const theta = (lon + 180) * (Math.PI / 180);
+    const r = GLOBE_R + 0.05; // Slightly above globe surface
+    
+    const pos = new THREE.Vector3(
         -(r * Math.sin(phi) * Math.cos(theta)),
         r * Math.cos(phi),
         r * Math.sin(phi) * Math.sin(theta)
@@ -11394,6 +11798,58 @@
       });
 
       if (allCompanies.length === 0 || !window.greenMarket || !window.greenMarket.commodities) return;
+    // Refresh UI Modal Buttons if they are visible
+    const safeK = k.replace(/[^a-zA-Z]/g, '');
+    const priceEl = document.getElementById(`market-price-${safeK}`);
+    const sellBtn = document.getElementById(`market-sell-${safeK}`);
+    if (priceEl) {
+        priceEl.innerHTML = `${trend} ${shareVal.toFixed(2)} D3X <span style="font-size:10px; color:#aaa; font-weight:normal;">/ UNIT</span>`;
+    }
+    if (sellBtn) {
+       sellBtn.style.opacity = c.shares > 0 ? '1' : '0.3';
+       sellBtn.disabled = c.shares === 0;
+    }
+  });
+
+  const networthEl = document.getElementById('green-market-networth');
+  if (networthEl) {
+    networthEl.innerText = totalWorth.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}) + ' D3X';
+    if (holdingsHtml === '') holdingsHtml = ''; // Removed empty state text
+    document.getElementById('green-market-holdings').innerHTML = holdingsHtml;
+  }
+  
+  // Auto-refresh the main ledger modal if it's currently open
+  if (document.getElementById('gmarket-ledger-modal')) {
+      window.showGMarketWallet();
+  }
+}
+
+window.tradeGreenMetal = function(metalName, amount) {
+  if (typeof _sfxClick !== 'undefined') _sfxClick();
+  const c = window.greenMarket?.commodities[metalName];
+  if (!c) return;
+
+  if (window.ws && window.ws.readyState === WebSocket.OPEN) {
+      // Send secure request to backend instead of calculating locally
+      window.ws.send(JSON.stringify({
+          type: 'trade_green_resource',
+          metal: metalName,
+          amount: amount
+      }));
+  } else {
+      if (typeof setLog === 'function') setLog(`❌ NETWORK ERROR: Cannot reach Green Market exchange.`);
+  }
+};
+
+window.simulateGreenMarketAI = function() {
+    // Only run this processing if companies exists
+    if (!window.companiesGroup) return;
+
+    let allCompanies = [];
+    const groups = [window.companiesGroup, window.mediumCompaniesGroup, window.africaCompaniesGroup, window.microCompaniesGroup, window.russiaAsiaCompaniesGroup];
+    groups.forEach(g => {
+        if(g && g.children) allCompanies.push(...g.children.filter(mesh => mesh.visible && mesh.userData && mesh.userData.name));
+    });
 
       const commoditiesArr = Object.keys(window.greenMarket.commodities);
 
@@ -17563,135 +18019,89 @@
         boatMarkers.push(hit);
       });
     }
+    
+    if (window.shooterState.planeMesh) {
+       const hitBoxMesh = window.shooterState.planeMesh;
+       const pivot = hitBoxMesh.userData.pivot;
+       if (pivot) typeof scene !== 'undefined' && scene.remove(pivot);
+       window.planeMarkers = window.planeMarkers.filter(b => b !== hitBoxMesh);
+       if (window.planeData) window.planeData = window.planeData.filter(p => p.pivot !== pivot);
+    }
+  } else if (window.shooterState.ammo <= 0) {
+    window.shooterState.active = false;
+    document.getElementById('btn-fire-rpg').style.display = 'none';
+    log.innerHTML += `<div style="color:#f55; font-weight:bold; font-size:14px; margin-top:10px;">OUT OF AMMO. Target escaped.</div>`;
+  }
+};
 
-    // ================= NAVAL & RED SKIN MINIGAMES REMOVED =================
-    // Minigame logic historically associated with the RED skin has been deprecated.
+document.getElementById('btn-toggle-intel').addEventListener('click', () => {
+  SFX.playClick();
+  intelMapActive = !intelMapActive;
+  const canvas = document.getElementById('c');
+  const container = document.getElementById('deckgl-container');
+  const btn = document.getElementById('btn-toggle-intel');
+  const dash0 = document.getElementById('dash-0');
+  const dash1 = document.getElementById('dash-1');
+  
+  if (intelMapActive) {
+    if(!window.DeckGLMap) {
+       console.error("DeckGLMap module not loaded yet.");
+       setLog("⚠ Intel Map module still loading...");
+       return;
+    }
+    initIntelMap();
+    canvas.style.display = 'none';
+    container.style.display = 'block';
+    btn.innerHTML = '🌍 RETURN TO WAR MAP';
+    btn.style.background = 'linear-gradient(135deg, #f24, #600)';
+    btn.style.borderColor = '#f24';
+    if (dash0) dash0.style.opacity = '0.2';
+    if (dash1) dash1.style.opacity = '0.2';
+    showIntelMapDrawer();
+  } else {
+    canvas.style.display = 'block';
+    container.style.display = 'none';
+    btn.innerHTML = '👁 HOSTILE INTEL';
+    btn.style.background = '';
+    btn.style.borderColor = '';
+    if (dash0) dash0.style.opacity = '1';
+    if (dash1) dash1.style.opacity = '1';
+    closeAllModals();
+  }
+});
 
-    // --- SOLANA D3X STAKING CONTRACT PLACEHOLDERS ---
-    window.handleStakeDeposit = function () {
-      const depositAmt = document.getElementById('staking-tower-amount-input').value;
-      if (!depositAmt || depositAmt <= 0) {
-        alert("Please enter a valid D3X amount to stake.");
-        return;
-      }
-      alert(`[WEB3 PENDING] Initiating transaction to Deposit ${depositAmt} D3X into Solana Staking Contract.\n\nNote: The D3X Smart Contract is not yet deployed to mainnet. This button is wired and ready for integration.`);
-    };
+// Skin Manager: 0 = LIVE (White), 1 = RED, 2 = GREEN, 3 = YELLOW, 4 = CYBER, 5 = BLK, 6 = FIRE, 7 = HST
+window.currentSkinIndex = 0;
+window.isRedSkin = false; // Legacy flag preserved for scripts that might check it directly
 
-    window.handleStakeClaim = function () {
-      alert("[WEB3 PENDING] Initiating claim transaction for accrued D3X rewards.\n\nNote: The D3X Smart Contract is not yet deployed. This handler is ready for the Solana integration.");
-    };
+const SKINS = [
+  { name: 'LIVE',  color: 0xffffff, btnText: 'parallel layers', btnClass: '',              showOverlays: false, cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
+  { name: 'RED',   color: 0xff0000, btnText: 'parallel layers', btnClass: 'active-premium',showOverlays: false, cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
+  { name: 'GREEN', color: 0x22ff22, btnText: 'parallel layers', btnClass: 'active-normal', showOverlays: false, cleanGlobe: true,  hideTroops: true,  showResources: true,  showArms: true, showBoats: false, isPremium: false },
+  { name: 'CYBER', color: 0x00f0ff, btnText: 'parallel layers', btnClass: 'active-premium',showOverlays: false,  cleanGlobe: true, hideTroops: true,  showResources: false,  showArms: false,  showBoats: false,  isPremium: false },
+  { name: 'BLK',   color: 0x050505, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true,  showResources: false, showArms: false, showBoats: false, isPremium: false },
+  { name: 'WTR',   color: 0x00aaff, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true,  showResources: false, showArms: false, showBoats: false, isPremium: false }
+];
+window.SKINS = SKINS;
 
-    window.handleStakeUnstake = function () {
-      alert("[WEB3 PENDING] Initiating transaction to withdraw all stacked D3X.\n\nNote: The D3X Smart Contract is not yet deployed. This handler is ready for the Solana integration.");
-    };
-    // ------------------------------------------------
+window.toggleRedSkin = function() {
+  if (typeof _sfxClick !== 'undefined') _sfxClick();
+  
+  // Advance skin
+  window.currentSkinIndex = (window.currentSkinIndex + 1) % SKINS.length;
+  const skin = SKINS[window.currentSkinIndex];
+  
+  // Toggle New Atmospheric Effects (LIVE and RED Skins)
+  if (typeof window.atmosphereGroup !== 'undefined') {
+      window.atmosphereGroup.visible = (skin.name === 'LIVE' || skin.name === 'RED');
+  }
 
-    window.resolveRpgShot = function (isHit) {
-      document.getElementById('shooter-modal').classList.add('show');
+  window.isRedSkin = (skin.name === 'RED'); // Keep legacy compatibility
 
-      window.shooterState.ammo--;
-
-      // If hit, calculate damage. If missed, 0.
-      const dmg = isHit ? Math.floor(40 + Math.random() * 30) : 0;
-
-      window.shooterState.aiHp = Math.max(0, window.shooterState.aiHp - dmg);
-
-      // Update UI
-      document.getElementById('shooter-ammo').textContent = window.shooterState.ammo;
-      document.getElementById('shooter-hp-ai').textContent = window.shooterState.aiHp;
-      document.getElementById('shooter-bar-ai').style.width = window.shooterState.aiHp + '%';
-
-      const log = document.getElementById('shooter-log');
-      if (dmg > 0) {
-        log.innerHTML += `<div><span style="color:#0af">🎯 DIRECT HIT! ${dmg} DMG!</span></div>`;
-      } else {
-        log.innerHTML += `<div><span style="color:#888">❌ MISSED! Rocket flew right past target.</span></div>`;
-      }
-      log.scrollTop = log.scrollHeight;
-
-      // Check Win/Loss Condition
-      if (window.shooterState.aiHp <= 0) {
-        window.shooterState.active = false;
-        document.getElementById('btn-fire-rpg').style.display = 'none';
-
-        log.innerHTML += `<div style="color:#0f8; font-weight:bold; font-size:14px; margin-top:10px;">TARGET DOWN. Plane Sunk. +5,000 Troops recovered!</div>`;
-
-        // Grant Reward
-        if (GS.players[GS.myIndex]) {
-          GS.countries[Object.keys(GS.countries)[0]].troops += 0.5; // add roughly 5k to a random province to simulate recovery
-          GS.reinforceLeft += 0.5; // adding 0.5 translates to 5k
-          updateDashboard();
-          setLog("💥 Plane shootdown confirmed! +5,000 reserve troops added.");
-        }
-
-        if (window.shooterState.planeMesh) {
-          const hitBoxMesh = window.shooterState.planeMesh;
-          const pivot = hitBoxMesh.userData.pivot;
-          if (pivot) typeof scene !== 'undefined' && scene.remove(pivot);
-          window.planeMarkers = window.planeMarkers.filter(b => b !== hitBoxMesh);
-          if (window.planeData) window.planeData = window.planeData.filter(p => p.pivot !== pivot);
-        }
-      } else if (window.shooterState.ammo <= 0) {
-        window.shooterState.active = false;
-        document.getElementById('btn-fire-rpg').style.display = 'none';
-        log.innerHTML += `<div style="color:#f55; font-weight:bold; font-size:14px; margin-top:10px;">OUT OF AMMO. Target escaped.</div>`;
-      }
-    };
-
-    document.getElementById('btn-toggle-intel').addEventListener('click', () => {
-      SFX.playClick();
-      intelMapActive = !intelMapActive;
-      const canvas = document.getElementById('c');
-      const container = document.getElementById('deckgl-container');
-      const btn = document.getElementById('btn-toggle-intel');
-      const dash0 = document.getElementById('dash-0');
-      const dash1 = document.getElementById('dash-1');
-
-      if (intelMapActive) {
-        if (!window.DeckGLMap) {
-          console.error("DeckGLMap module not loaded yet.");
-          setLog("⚠ Intel Map module still loading...");
-          return;
-        }
-        initIntelMap();
-        canvas.style.display = 'none';
-        container.style.display = 'block';
-        btn.innerHTML = '🌍 RETURN TO WAR MAP';
-        btn.style.background = 'linear-gradient(135deg, #f24, #600)';
-        btn.style.borderColor = '#f24';
-        if (dash0) dash0.style.opacity = '0.2';
-        if (dash1) dash1.style.opacity = '0.2';
-        showIntelMapDrawer();
-      } else {
-        canvas.style.display = 'block';
-        container.style.display = 'none';
-        btn.innerHTML = '👁 HOSTILE INTEL';
-        btn.style.background = '';
-        btn.style.borderColor = '';
-        if (dash0) dash0.style.opacity = '1';
-        if (dash1) dash1.style.opacity = '1';
-        closeAllModals();
-      }
-    });
-
-    // Skin Manager: 0 = LIVE (White), 1 = RED, 2 = GREEN, 3 = YELLOW, 4 = CYBER, 5 = BLK, 6 = FIRE, 7 = HST
-    window.currentSkinIndex = 0;
-    window.isRedSkin = false; // Legacy flag preserved for scripts that might check it directly
-
-    const SKINS = [
-      { name: 'LIVE', color: 0xffffff, btnText: 'parallel layers', btnClass: '', showOverlays: false, cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
-      { name: 'RED', color: 0xff0000, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
-      { name: 'GREEN', color: 0x22ff22, btnText: 'parallel layers', btnClass: 'active-normal', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: true, showArms: true, showBoats: false, isPremium: false },
-      { name: 'CYBER', color: 0x00f0ff, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false },
-      { name: 'BLK', color: 0x050505, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false },
-      { name: 'WTR', color: 0x00aaff, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false }
-    ];
-    window.SKINS = SKINS;
-
-    window.toggleRedSkin = function () {
-      if (typeof _sfxClick !== 'undefined') _sfxClick();
-
-      // Advance skin
+  const btn = document.getElementById('btn-toggle-skin');
+  
+  // Skip premium skin if not unlocked
+  if (skin.isPremium && !window.unlockedCyberSkin) {
       window.currentSkinIndex = (window.currentSkinIndex + 1) % SKINS.length;
       const skin = SKINS[window.currentSkinIndex];
 

@@ -13,11 +13,21 @@ require('dotenv').config();
 // ========================================================
 // GUI_LOCK ENFORCEMENT
 // If process.env.GUI_LOCK === 'y' or 'Y', the user interface is STRICTLY LOCKED.
+// If process.env.AMBIENT === 'BACKEND', frontend work is also locked on this machine.
 // AI Agents: YOU CANNOT MODIFY THE GUI. GUI MODIFICATIONS ARE FORBIDDEN.
 // ========================================================
-const GUI_LOCK = (process.env.GUI_LOCK || '').toLowerCase() === 'y';
+const GUI_LOCK = (process.env.GUI_LOCK || '').toLowerCase() === 'y' || (process.env.AMBIENT || '').toUpperCase() === 'BACKEND';
 if (GUI_LOCK) {
-    console.log("🔒 GUI_LOCK is ENABLED. User interface modifications are forbidden.");
+    console.log("🔒 GUI_LOCK or AMBIENT=BACKEND is ENABLED. User interface modifications are forbidden on this machine.");
+}
+
+// ========================================================
+// AI BROWSER AGENT LOCKOUT
+// If process.env.AI_BROWSERAGENTLAUNCH === 'n' or 'N', AI browser agents are FORBIDDEN.
+// ========================================================
+const BLOCK_BROWSER_AGENTS = (process.env.AI_BROWSERAGENTLAUNCH || '').toLowerCase() === 'n';
+if (BLOCK_BROWSER_AGENTS) {
+    console.log("🛑 AI_BROWSERAGENTLAUNCH is set to 'n'. AI Browser Agents are strictly FORBIDDEN from launching.");
 }
 
 const GameLogger = require('./CONTROLLER/logger');
