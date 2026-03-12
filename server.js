@@ -307,7 +307,7 @@ const server = http.createServer((req, res) => {
   } else if (req.url === '/api/radio/random') {
     res.writeHead(200, {
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
+      'Access-Control-Allow-Origin': process.env.ALLOWED_ORIGIN || 'http://localhost:8888'
     });
     // Fetch unlimited free stations using the radio-browser-api!
     // We pick a random country to ensure global diversity, instead of getting stuck on top Spanish ones
@@ -338,7 +338,7 @@ const server = http.createServer((req, res) => {
   } else if (req.url === '/api/wallet') {
     res.writeHead(200, {
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
+      'Access-Control-Allow-Origin': process.env.ALLOWED_ORIGIN || 'http://localhost:8888'
     });
     res.end(JSON.stringify({ 
       btcWallet: process.env.BTC_WALLET || "NOT_SET",
@@ -349,7 +349,7 @@ const server = http.createServer((req, res) => {
   } else if (req.url === '/api/soundtrack') {
     res.writeHead(200, {
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
+      'Access-Control-Allow-Origin': process.env.ALLOWED_ORIGIN || 'http://localhost:8888'
     });
     try {
       const stPath = path.join(__dirname, 'soundtrack');
@@ -386,7 +386,7 @@ const server = http.createServer((req, res) => {
       res.writeHead(200, {
         'Content-Type': contentType,
         'Content-Length': stats.size,
-        'Access-Control-Allow-Origin': '*'
+        'Access-Control-Allow-Origin': process.env.ALLOWED_ORIGIN || 'http://localhost:8888'
       });
       
       const readStream = fs.createReadStream(filePath);
@@ -395,7 +395,7 @@ const server = http.createServer((req, res) => {
   } else if (req.url === '/api/boats') {
     res.writeHead(200, {
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
+      'Access-Control-Allow-Origin': process.env.ALLOWED_ORIGIN || 'http://localhost:8888'
     });
     // Generate 50 random boats for AIS testing
     const boats = [];
@@ -413,7 +413,7 @@ const server = http.createServer((req, res) => {
   } else if (req.url === '/api/webcams') {
     res.writeHead(200, {
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
+      'Access-Control-Allow-Origin': process.env.ALLOWED_ORIGIN || 'http://localhost:8888'
     });
 
     // Check memory cache first
@@ -503,7 +503,7 @@ const server = http.createServer((req, res) => {
     const slug = req.url.split('/').pop();
     res.writeHead(200, {
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
+      'Access-Control-Allow-Origin': process.env.ALLOWED_ORIGIN || 'http://localhost:8888'
     });
 
     global.cachedStreams = global.cachedStreams || {};
@@ -578,13 +578,13 @@ const server = http.createServer((req, res) => {
         let event;
 
         try {
-            // Need a webhook secret to verify signature securely. Falling back to basic event parsing for now if no secret
-            if (process.env.STRIPE_WEBHOOK_SECRET) {
-                event = stripe.webhooks.constructEvent(bodyData, sig, process.env.STRIPE_WEBHOOK_SECRET);
-            } else {
-                console.warn('⚠ No STRIPE_WEBHOOK_SECRET provided, bypassing signature verification.');
-                event = JSON.parse(bodyData);
+            // Must strictly verify signature for production security. No fallbacks.
+            if (!process.env.STRIPE_WEBHOOK_SECRET) {
+                console.error('⚠ STRIPE_WEBHOOK_SECRET missing. Rejecting webhook for security.');
+                res.writeHead(500);
+                return res.end('Server configuration error: missing webhook secret.');
             }
+            event = stripe.webhooks.constructEvent(bodyData, sig, process.env.STRIPE_WEBHOOK_SECRET);
         } catch (err) {
             console.error(`Webhook Error: ${err.message}`);
             res.writeHead(400);
@@ -830,7 +830,22 @@ function initWebSockets() {
     }).catch(console.warn);
   }
 
+  let messageCount = 0;
+  let lastMessageTime = Date.now();
+
   ws.on('message', async raw => {
+    // Basic Rate Limiter (Max 20 messages per second, or it will drop them)
+    const now = Date.now();
+    if (now - lastMessageTime > 1000) {
+        messageCount = 0;
+        lastMessageTime = now;
+    }
+    messageCount++;
+    if (messageCount > 20) {
+        console.warn(`[RATE LIMIT] Dropping messages from ${client.name}. Spam detected.`);
+        return;
+    }
+
     let msg;
     try { msg = JSON.parse(raw); } catch { return; }
 
@@ -905,7 +920,6 @@ function initWebSockets() {
             stats: { attacks, damage, mining_inventory: miningInventory },
             wallet: {
                 publicKey: publicWallet,
-                privateKeyHex: privateWalletHex,
                 isNew: isNewWallet
             }
           }));
@@ -925,10 +939,12 @@ function initWebSockets() {
       }
 
       case 'company_hack': {
-        const success = msg.success;
-        const reward = msg.rewardAmount || 0;
-        const callsign = msg.callsign || 'Unknown';
+        const callsign = client.name; // Enforce authenticated session identity
         const companyName = msg.companyName || 'Unknown Corp';
+
+        // Calculate success and reward entirely server-side (e.g. 40% win rate, 50-150 reward)
+        const success = Math.random() < 0.40;
+        const reward = success ? Math.floor(Math.random() * 101) + 50 : 0;
 
         GameLogger.hack(callsign, companyName, success, { reward });
 
@@ -1530,7 +1546,7 @@ function initWebSockets() {
       }
       
       case 'early_unstake': {
-        const callsign = msg.callsign;
+        const callsign = client.name; // Enforce authenticated session identity
         const stakeId = msg.stakeId;
         if (!callsign || !stakeId || !globalGameState || !globalGameState.stakes) break;
         
@@ -1631,10 +1647,15 @@ function initWebSockets() {
       }
 
       case 'record_attack': {
-        const callsign = msg.callsign;
-        const targetCountry = msg.targetCountry; // Assuming msg now includes targetCountry
-        const damage = msg.damage || 0;
-        const success = msg.success; // Assuming msg now includes success
+        const callsign = client.name; // Enforce authenticated session identity
+        const targetCountry = msg.targetCountry; 
+        
+        // Strict server-side validation/clamping of damage output (e.g. max 5000 per strike)
+        let damage = parseInt(msg.damage) || 0;
+        if (damage < 0) damage = 0;
+        if (damage > 5000) damage = 5000;
+        
+        const success = msg.success === true;
         
         GameLogger.combat(callsign, targetCountry, 'STRIKE', { from: callsign, success, damageDealt: damage });
 
@@ -1661,7 +1682,12 @@ function initWebSockets() {
 
       case 'human_combat_support': {
         const target = msg.target; // 'gemini' or 'claude'
-        const amount = msg.amount || 50;
+        
+        // Sanitize impact amount statically to prevent DB inflation cheating
+        let amount = parseInt(msg.amount) || 50;
+        if (amount < 0) amount = 0;
+        if (amount > 100) amount = 100;
+        
         const COMBAT_ENTRY_FEE = 20; // D3X required to take a combat action
         if (!pgPool) return;
         try {
