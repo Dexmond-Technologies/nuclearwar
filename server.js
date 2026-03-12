@@ -2171,7 +2171,7 @@ async function checkD3XRewards() {
            await pgPool.query(`UPDATE commanders SET last_d3x_claim = NOW() WHERE callsign = $1`, [client.name]);
            
            client.connectedAt = now; // reset session timer for next 1 hour
-           const amountEarned = 5; // Strict, un-multiplied 5 D3X ruleset.
+           const amountEarned = client.autoReinvest ? 10 : 5; // 2x multiplier for reinvesting
 
            if (client.autoReinvest) {
                // Auto-reinvest logic limits immediately into stakes
