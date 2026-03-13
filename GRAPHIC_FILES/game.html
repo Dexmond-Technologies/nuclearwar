@@ -15459,6 +15459,25 @@
           });
         }
 
+        // Animate Blue Buildings Aura Pulse
+        if (window.blueBuildingsGroup && window.blueBuildingsGroup.visible) {
+          window.blueBuildingsGroup.children.forEach(dc => {
+            if (dc.userData && dc.userData.aura) {
+              // Dynamic pulsing effect using a sine wave based on time
+              const pulseVar = Math.sin(time3 * 5 + dc.position.x * 10) * 0.5 + 0.5; // values between 0.0 and 1.0
+
+              // Create a buzzing offset for the aura scale
+              const buzzOffset = Math.random() * 0.15 + (pulseVar * 0.4);
+              dc.userData.aura.scale.set(1 + buzzOffset, 1 + buzzOffset, 1 + buzzOffset);
+
+              // Rotate the aura rapidly
+              const rotSpeed = 0.1 + (pulseVar * 0.2);
+              dc.userData.aura.rotation.x += rotSpeed;
+              dc.userData.aura.rotation.y += rotSpeed * 1.5;
+            }
+          });
+        }
+
         // Animate North Pole Tesla Towers
         const npTowers = [];
         window.datacentersGroup.children.forEach(dc => {
