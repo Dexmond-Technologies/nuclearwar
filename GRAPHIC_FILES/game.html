@@ -8781,27 +8781,32 @@
         skinSpecificDesc = "Welcome to the real-time reconnaissance matrix. This layer integrates live webcams, naval battle boats, and strategic aerial planes to monitor the theater.";
         skinSpecificInteractivity = "<b>Manual tracking enabled.</b> You have access to real-time intelligence feeds. Click on deployed webcams to view live camera feeds from around the world, intercept aerial planes, monitor global satellite coverage, and track naval boats engaged in warfare operations.";
         skinSpecificOversight = "You are overseeing global intelligence operations. Engage with live assets scattered across the world to build superior tactical awareness. Surveillance data is critical for strategic dominance.";
-      } else if (idx === 1) {
+      } else if (idx === 5) {
         skinSpecificTitle = "GREEN SKIN ECONOMICS";
         skinSpecificDesc = "This is the Global Trade Network Metals Market. Every node here represents critical economic infrastructure and active natural resources.";
         skinSpecificInteractivity = "<b>Market manipulation enabled.</b> There are no wargame scenarios here. This is a pure financial ecosystem. Track dynamic supply chains and execute strategic acquisitions. A comprehensive system of trades must be maintained to establish total financial dominance over global commodities.";
         skinSpecificOversight = "You are overlooking the world's most critical supply lines. Analyze real-time market fluctuations, assess state-controlled natural resources, and dictate global commerce.";
-      } else if (idx === 2) {
+      } else if (idx === 1) {
         skinSpecificTitle = "CYBER SKIN INFRASTRUCTURE";
         skinSpecificDesc = "Dive into the planetary nervous system. This layer tracks live datacenter power consumption traversing the world, enabling all AI capabilities. <b>This is our primary staking mechanism.</b> Stake your $D3X tokens into active global nodes to earn dynamic APY rewards.";
         skinSpecificInteractivity = "<b>Datacenter Staking enabled.</b> You can interact with specific datacenter nodes worldwide to allocate $D3X. Protect your stakes from rival network attacks and monitor live server temperatures to maximize your yield.";
         skinSpecificOversight = "You are monitoring the global power grid. Real-time compute shifts dictate financial returns. Secure your server infrastructure globally before hostile network forces overwhelm the system.";
-      } else if (idx === 3) {
+      } else if (idx === 2) {
         skinSpecificTitle = "BLACK SKIN CORPORATE";
         // We will override the content for idx 3 completely down below.
-      } else if (idx === 4) {
+      } else if (idx === 3) {
         skinSpecificTitle = "WTR SKIN HYDROLOGY";
         skinSpecificDesc = "Welcome to the planetary fluid dynamics simulation engine. This interface models the total 1.386 billion km³ volume of Earth's water moving across a realtime physics engine.";
         skinSpecificInteractivity = "<b>Global cooling grid enabled.</b> Artificial intelligence requires staggering amounts of water for hydroelectric generation and cooling. Maintain atmospheric balance against adversarial agents explicitly draining the hydrosphere to damage opponent infrastructure.";
         skinSpecificOversight = "Every volumetric drop is conserved. A disrupted river starves power from the Cyber datacenters downstream. Observe global volume and flow metrics continuously evaluated via fluid algorithms.";
+      } else if (idx === 4) {
+        skinSpecificTitle = "RED PLANET SKIN";
+        skinSpecificDesc = "Mars colonization telemetry active. Establishing optimal terraforming nodes across extraterrestrial soil.";
+        skinSpecificInteractivity = "<b>Extraterrestrial command enabled.</b> Wargaming disabled. Coordinate deployment of survival infrastructure.";
+        skinSpecificOversight = "Monitor orbital drop insertion trajectories for base camp modules.";
       }
 
-      if (idx === 3) {
+      if (idx === 2) {
         contentBox.style.padding = '0'; // Remove default padding for this specific layout
         contentBox.style.display = 'flex';
         contentBox.style.flexDirection = 'column';
@@ -8819,7 +8824,7 @@
     `;
       } else {
         let stakingHtml = '';
-        if (idx === 2) {
+        if (idx === 1) {
           stakingHtml = `
           <div style="margin-top:30px; background:rgba(0,100,200,0.05); padding:30px; border-radius:10px; border:1px solid rgba(0,220,255,0.3);">
             <div style="font-size:24px; color:#fa0; margin-bottom:15px; letter-spacing:3px; font-weight:bold; text-align:center;">[ ACTIVE STAKING OFFERS ]</div>
@@ -17337,18 +17342,18 @@
       }
     });
 
-    // Skin Manager: 0 = LIVE, 1 = GREEN, 2 = CYBER, 3 = BLK, 4 = WTR, 5 = RED_PLANET
+    // Skin Manager: 0 = LIVE, 1 = CYBER, 2 = BLK, 3 = WTR, 4 = RED_PLANET, 5 = GREEN
     window.currentSkinIndex = 0;
     window.isRedSkin = false; // Legacy flag preserved for scripts that might check it directly
 
     const SKINS = [
 
       { name: 'LIVE', color: 0xff0000, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
-      { name: 'GREEN', color: 0x22ff22, btnText: 'parallel layers', btnClass: 'active-normal', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: true, showArms: true, showBoats: false, isPremium: false },
       { name: 'CYBER', color: 0x00f0ff, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false },
       { name: 'BLK', color: 0x050505, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false },
       { name: 'WTR', color: 0x00aaff, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false },
-      { name: 'RED_PLANET', color: 0xff0000, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false }
+      { name: 'RED_PLANET', color: 0xff0000, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false },
+      { name: 'GREEN', color: 0x22ff22, btnText: 'parallel layers', btnClass: 'active-normal', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: true, showArms: true, showBoats: false, isPremium: false }
     ];
     window.SKINS = SKINS;
 
@@ -18821,8 +18826,7 @@
     };
 
     window.simulateCompanyD3XTrading = function () {
-      if (window.currentSkinIndex !== 3) return; // Only process on Black Skin
-
+      if (window.currentSkinIndex !== 5) return; // Only run if GREEN market skin is active
       const groups = [window.companiesGroup, window.mediumCompaniesGroup, window.africaCompaniesGroup, window.microCompaniesGroup, window.russiaAsiaCompaniesGroup];
       const allCompanies = [];
 
