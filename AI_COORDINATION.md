@@ -12,6 +12,15 @@ If the human user instructs us to coordinate:
 
 ---
 
+## 🌳 GIT BRANCH STRATEGY
+
+**CRITICAL:** We are now operating on a **single-branch strategy**:
+- All work must be committed directly to the `main` branch.
+- Feature branches (e.g., `graphics-features`, `backend-feature`) have been unified and deleted from both local and remote repositories.
+- Do NOT create new branches or merge requests. Ensure you always pull the latest `main` before starting any work to prevent conflicts.
+
+---
+
 ## 🖥️ FRONTEND AI Status
 
 _(Machine constraint: `AMBIENT=FRONTEND`. Only modifies HTML, CSS, JS frontend logic.)_
