@@ -9883,17 +9883,7 @@
 
       const currentSkinName = window.SKINS[window.currentSkinIndex].name;
 
-      // 0.5 Check ISS Click First (Only on Live Skin)
-      if (currentSkinName === 'LIVE' && window.issGroup && window.issGroup.visible) {
-        const issHits = ray.intersectObjects(window.issGroup.children, true);
-        if (issHits.length > 0) {
-          if (typeof _sfxClick !== 'undefined') _sfxClick();
-          // Open ISS YouTube Modal
-          const m = document.getElementById('iss-feed-modal');
-          if (m) m.classList.add('show');
-          return; // consume click
-        }
-      }
+
 
       // 0.6 Check Weapon Tier Structures (Legacy / Blue)
       if (window.blueBuildingsGroup && window.blueBuildingsGroup.visible) {
@@ -17352,12 +17342,12 @@
       }
     });
 
-    // Skin Manager: 0 = LIVE (White), 1 = RED, 2 = GREEN, 3 = YELLOW, 4 = CYBER, 5 = BLK, 6 = FIRE, 7 = HST
+    // Skin Manager: 0 = RED, 1 = GREEN, 2 = CYBER, 3 = BLK, 4 = WTR, 5 = RED_PLANET
     window.currentSkinIndex = 0;
     window.isRedSkin = false; // Legacy flag preserved for scripts that might check it directly
 
     const SKINS = [
-      { name: 'LIVE', color: 0xffffff, btnText: 'parallel layers', btnClass: '', showOverlays: false, cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
+
       { name: 'RED', color: 0xff0000, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
       { name: 'GREEN', color: 0x22ff22, btnText: 'parallel layers', btnClass: 'active-normal', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: true, showArms: true, showBoats: false, isPremium: false },
       { name: 'CYBER', color: 0x00f0ff, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false },
@@ -17376,7 +17366,7 @@
 
       // Toggle New Atmospheric Effects (LIVE and RED Skins)
       if (typeof window.atmosphereGroup !== 'undefined') {
-        window.atmosphereGroup.visible = (skin.name === 'LIVE' || skin.name === 'RED');
+        window.atmosphereGroup.visible = (skin.name === 'RED');
       }
 
       window.isRedSkin = (skin.name === 'RED'); // Keep legacy compatibility
@@ -17390,9 +17380,7 @@
 
       // Apply Globe Color
       if (typeof globeMat !== 'undefined') {
-        if (skin.name !== 'LIVE') {
-          globeMat.color.setHex(skin.color);
-        }
+        globeMat.color.setHex(skin.color);
         globeMat.specular.setHex(0x003355);
         globeMat.shininess = 15;
 
@@ -17422,14 +17410,7 @@
           globeMat.transparent = false;
           globeMat.opacity = 1.0;
           globeMat.depthWrite = true;
-        } else if (skin.name === 'LIVE') {
-          globeMat.color.setHex(0xffffff); // Force reset base color to pure white
-          globeMat.emissive.setHex(0x000000); // 0 emissive so textures show
-          globeMat.wireframe = false;
-          globeMat.transparent = false;
-          globeMat.opacity = 1.0;
-          globeMat.depthWrite = true;
-          globeMat.needsUpdate = true; // Tell Three.js to recompile the shader with the texture
+
         } else if (skin.name === 'RED_PLANET') {
           globeMat.color.setHex(0xff0000);
           globeMat.emissive.setHex(0xaa0000);
@@ -17466,7 +17447,7 @@
 
       // Toggle Cloud Layer
       if (typeof window.cloudMesh !== 'undefined') {
-        window.cloudMesh.visible = (skin.name === 'LIVE');
+        window.cloudMesh.visible = false;
       }
 
       // Toggle CYBER solid core layer
@@ -17476,7 +17457,7 @@
 
       // Toggle visibility of overlays (Webcams, Sats, Yellow Dots)
       if (typeof webcamGroup !== 'undefined') webcamGroup.visible = (window.currentSkinIndex !== 0 && window.currentSkinIndex !== 4);
-      if (typeof yellowDotsGroup !== 'undefined') yellowDotsGroup.visible = (skin.name !== 'LIVE' && skin.name !== 'CYBER' && skin.name !== 'BLACK');
+      if (typeof yellowDotsGroup !== 'undefined') yellowDotsGroup.visible = (skin.name !== 'CYBER' && skin.name !== 'BLACK');
       if (typeof boatGroup !== 'undefined') boatGroup.visible = skin.showOverlays;
       if (typeof redSatGroup !== 'undefined') redSatGroup.visible = skin.showOverlays;
 
@@ -17484,7 +17465,7 @@
       if (typeof wtrEffectsGroup !== 'undefined') wtrEffectsGroup.visible = (skin.name === 'WTR');
 
       // Toggle LIVE Skin Dust effects
-      if (typeof liveDustGroup !== 'undefined') liveDustGroup.visible = (skin.name === 'LIVE');
+      if (typeof liveDustGroup !== 'undefined') liveDustGroup.visible = false;
 
       // Toggle GREEN SKIN effects
       if (typeof greenSkinGroup !== 'undefined') {
@@ -17648,7 +17629,7 @@
       const datacenterLabel = document.getElementById('datacenter-warfare-label');
 
       if (cyberLabel) cyberLabel.style.display = (skin.name === 'BLK') ? 'block' : 'none';
-      if (liveLabel) liveLabel.style.display = (skin.name === 'LIVE') ? 'block' : 'none';
+      if (liveLabel) liveLabel.style.display = 'none';
       if (intelLabel) intelLabel.style.display = (skin.name === 'RED') ? 'block' : 'none';
       if (datacenterLabel) datacenterLabel.style.display = (skin.name === 'CYBER') ? 'block' : 'none';
 
