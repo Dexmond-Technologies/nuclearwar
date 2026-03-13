@@ -8388,6 +8388,11 @@
     // Using a simple low-res cloud map for safety
     const cloudTex = texLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_clouds_1024.png');
 
+    // High Realism Texture Maps for REAL Skin
+    const realEarthTex = texLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg');
+    const realEarthSpec = texLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_specular_2048.jpg');
+    const realEarthNorm = texLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_normal_2048.jpg');
+
     // Create a high-density artificial wireframe grid using a CanvasTexture
     const gridCanvas = document.createElement('canvas');
     gridCanvas.width = 1024;
@@ -17394,7 +17399,8 @@
       { name: 'WTR', color: 0x00aaff, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false },
       { name: 'RED_PLANET', color: 0xff0000, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false },
       { name: 'CYBER', color: 0x00f0ff, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false },
-      { name: 'GREEN', color: 0x22ff22, btnText: 'parallel layers', btnClass: 'active-normal', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: true, showArms: true, showBoats: false, isPremium: false }
+      { name: 'GREEN', color: 0x22ff22, btnText: 'parallel layers', btnClass: 'active-normal', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: true, showArms: true, showBoats: false, isPremium: false },
+      { name: 'REAL', color: 0xffffff, btnText: 'parallel layers', btnClass: 'active-normal', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false }
     ];
     window.SKINS = SKINS;
 
@@ -17480,9 +17486,29 @@
           globeMat.transparent = false; // Solid planet!
           globeMat.opacity = 1.0;
           globeMat.depthWrite = true;
+          // Clean up realism maps if exiting REAL skin
+          globeMat.specularMap = null;
+          globeMat.normalMap = null;
+        } else if (skin.name === 'REAL') {
+          // Photorealistic Texture Configuration
+          globeMat.map = realEarthTex;
+          globeMat.specularMap = realEarthSpec;
+          globeMat.normalMap = realEarthNorm;
+          globeMat.emissiveMap = null;
+          globeMat.emissive.setHex(0x000000);
+          globeMat.color.setHex(0xffffff);
+          globeMat.specular.setHex(0x333333); // Reflect sun lightly off oceans
+          globeMat.shininess = 15;
+          globeMat.wireframe = false;
+          globeMat.transparent = false;
+          globeMat.opacity = 1.0;
+          globeMat.depthWrite = true;
         } else {
           globeMat.map = earthTex; // Reset default earth texture
           globeMat.emissiveMap = null;
+          // Clean up realism maps if exiting REAL skin
+          globeMat.specularMap = null;
+          globeMat.normalMap = null;
           globeMat.emissive.setHex(0x000000);
           globeMat.wireframe = false;
           globeMat.transparent = true;
