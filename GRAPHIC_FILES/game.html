@@ -3001,9 +3001,9 @@
           style="font-size:9px; color:rgba(255,255,255,0.5); font-family:'Courier New', monospace; letter-spacing:1px; max-width: 280px; text-align: right; line-height: 1.2;">Servers
           are provided for free so everyone can have fun.<br>Any support helps keep them running!</span>
         <button onclick="
-        const w = window.pendingSolanaAddress || window.localD3XWallet; 
-        if(!w) { alert('You must connect a Solana Wallet first to receive D3X Coins!'); return; } 
-        window.open('https://buy.stripe.com/5kQcN4dP35lO19J7wo2wU00?client_reference_id=' + w, '_blank');
+        const wallet = window.pendingSolanaAddress || window.localD3XWallet; 
+        if(!wallet) { alert('You must connect a Solana Wallet first to receive D3X Coins!'); return; } 
+        window.open('https://buy.stripe.com/5kQcN4dP35lO19J7wo2wU00?client_reference_id=' + wallet, '_blank');
       " style="background:linear-gradient(135deg, #fa0, #d80); color:#000; padding:6px 12px; font-size:11px; font-weight:bold; border-radius:4px; text-decoration:none; font-family:'Courier New', monospace; letter-spacing:1px; border:1px solid #c80; transition:all 0.2s; box-shadow:0 0 10px rgba(255,170,0,0.2); cursor:pointer;"
           onmouseover="this.style.filter='brightness(1.2)';" onmouseout="this.style.filter='brightness(1)';">☕
           SUPPORT</button>
@@ -5674,6 +5674,10 @@
       // Base ocean background for the Risiko map
       ctx.fillStyle = '#110000';
       ctx.fillRect(0, 0, w, h);
+      
+      // DEBUG: Giant blue square down the middle to prove rendering is active
+      ctx.fillStyle = '#0000ff';
+      ctx.fillRect(w/2 - 200, h/2 - 200, 400, 400);
       
       ctx.lineWidth = 1;
       
@@ -19864,9 +19868,9 @@
               </div>
 
               <button onclick="
-                            const w = window.pendingSolanaAddress || window.localD3XWallet;
-                            if(!w) { alert('You must connect a Solana Wallet first to receive D3X Coins!'); return; } 
-                            window.open('https://buy.stripe.com/aFa14m9yN8y0g4D7wo2wU05?client_reference_id=' + w, '_blank');
+                            const walletId = window.pendingSolanaAddress || window.localD3XWallet;
+                            if(!walletId) { alert('You must connect a Solana Wallet first to receive D3X Coins!'); return; } 
+                            window.open('https://buy.stripe.com/aFa14m9yN8y0g4D7wo2wU05?client_reference_id=' + walletId, '_blank');
                           "
                 style="margin-top:16px; width:100%; padding:16px 0; background:linear-gradient(90deg, rgba(0,170,255,0.25), rgba(0,255,136,0.15)); border:1.5px solid #0af; color:#fff; font-family:'Share Tech Mono', monospace; font-size:1.1vw; font-weight:bold; letter-spacing:4px; cursor:pointer; border-radius:6px; transition:all 0.25s; box-shadow:0 0 25px rgba(0,170,255,0.3);"
                 onmouseover="this.style.boxShadow='0 0 45px rgba(0,170,255,0.7)'; this.style.background='linear-gradient(90deg, rgba(0,170,255,0.45), rgba(0,255,136,0.3))';"
