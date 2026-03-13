@@ -5664,6 +5664,7 @@
     window.risikoTexture.needsUpdate = true;
 
     window.updateRisikoMap = function() {
+      console.log("updateRisikoMap CALLED! Skin:", window.currentSkinIndex, "GS:", !!window.GS, "GS.countries:", !!(window.GS && window.GS.countries), "countryData:", !!window.countryData);
       if (window.currentSkinIndex !== 3 || !window.countryData || !window.GS || !window.GS.countries) return;
       
       const ctx = window.risikoCtx;
