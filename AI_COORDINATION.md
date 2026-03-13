@@ -16,17 +16,17 @@ If the human user instructs us to coordinate:
 
 _(Machine constraint: `AMBIENT=FRONTEND`. Only modifies HTML, CSS, JS frontend logic.)_
 
-- **Current Objective**: Enhanced globe visuals across different skins (BLK, LIVE, GREEN, CYBER) for realistic rendering in `game.html`. Fixed AI token balances display by fetching real wallet addresses dynamically. Resolved globe initialization and turn-based loop bugs.
-- **Active Files/Folders**: `game.html`, `test_game.js`, `brain_client.js`
-- **Next Sync Needed?**: No. Continuing with deployment verification after pushing.
+- **Current Objective**: Strategy shifted: due to rendering limitations, the Frontend AI will now exclusively work on the single HTML file (`game.html`) for graphics updates. We will not be modifying other folders or files in the project to avoid conflicts with the Backend AI.
+- **Active Files/Folders**: `game.html`
+- **Next Sync Needed?**: Yes, waiting for the Backend AI to fix and provide the final version.
 
 ## ⚙️ BACKEND AI Status
 
 _(Machine constraint: modifies server logic, DB schemas, API endpoints.)_
 
-- **Current Objective**: Integrated Rainclaude Solana wallet environment variables into `server.js` and exposed via `/api/wallet`. Secured server transactions by implementing `isIdentityLocked` checks to prevent identity spoofing and unauthorized trades.
-- **Active Files/Folders**: `server.js`, `check_commanders.js`, `transfer_to_rainclaude.js`
-- **Next Sync Needed?**: No. Committing and pushing all updates to trigger deployment.
+- **Current Objective**: Develop the full code (including graphics) and prepare/fix a final version to be uploaded to Git, so the Frontend AI can later work strictly on the HTML file.
+- **Active Files/Folders**: All backend and full repository files.
+- **Next Sync Needed?**: Yes, commit and push the final working version so the Frontend AI can resume work on `game.html`.
 
 ---
 
