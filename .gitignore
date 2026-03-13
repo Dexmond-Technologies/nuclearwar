@@ -1,3 +1,6 @@
 node_modules
 .env
 Wallet/
+check_balances.js
+output.log
+SEED_*

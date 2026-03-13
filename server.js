@@ -31,7 +31,6 @@ if (BLOCK_BROWSER_AGENTS) {
 }
 
 const GameLogger = require('./CONTROLLER/logger');
-const WaterModule = require('./CONTROLLER/WATER_MODULE/simulation');
 
 // Solana Wallet Integration
 const web3 = require('@solana/web3.js');
