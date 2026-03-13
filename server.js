@@ -2636,8 +2636,11 @@ function processAIAction(result, actor, victim, actorName) {
   }
 }
 
+let isCombatTurnLock = false;
 async function runAICombatTurn() {
-  if (!pgPool) return;
+  if (isCombatTurnLock) return;
+  isCombatTurnLock = true;
+  if (!pgPool) { isCombatTurnLock = false; return; }
 
   try {
     const res = await pgPool.query("SELECT * FROM ai_combat_state WHERE id = 1");
@@ -2694,11 +2697,16 @@ async function runAICombatTurn() {
     console.log(`[AI COMBAT] ${turnLog} | Gemini HP: ${geminiStats.hp}, Claude HP: ${claudeStats.hp}`);
   } catch (err) {
     console.error("AI Combat Error:", err.message);
+  } finally {
+    isCombatTurnLock = false;
   }
 }
 
 // --- Periodic D3X Balance Fetcher ---
+let isFetchingBalancesLock = false;
 async function fetchAndBroadcastAIBalances() {
+  if (isFetchingBalancesLock) return;
+  isFetchingBalancesLock = true;
   try {
     let geminiBalance = cachedGeminiBalance;
     let claudeBalance = cachedClaudeBalance;
@@ -2848,6 +2856,8 @@ async function fetchAndBroadcastAIBalances() {
     });
   } catch (err) {
     console.error("Balance Fetch Error:", err.message);
+  } finally {
+    isFetchingBalancesLock = false;
   }
 }
 
@@ -2985,9 +2995,13 @@ const AI_WEAPONS_CATALOG = [
   { name: "Incendiary Bomb", attack: 2800, cost: 1850 }, { name: "Bunker-Buster Bomb", attack: 3200, cost: 1900 }, { name: "Ballistic Missile", attack: 3500, cost: 2000 }
 ];
 
+let isMarketBuyingLock = false;
 async function runAIMarketBuying() {
-  if (!pgPool) return;
-  const isMockAllowed = process.env.MOCK_VALUES !== 'n' && process.env.MOCK_VALUES !== 'N';
+  if (isMarketBuyingLock) return;
+  isMarketBuyingLock = true;
+  try {
+    if (!pgPool) return;
+  const isMockAllowed = process.env.MOCK_VALUES === 'y' || process.env.MOCK_VALUES === 'Y';
   // Use the cached on-chain balances (set by fetchAndBroadcastAIBalances)
   const geminiBalance = cachedGeminiBalance || (isMockAllowed ? 100000000 : 0); // Default 100M if mock
   const claudeBalance = cachedClaudeBalance || (isMockAllowed ? 100000000 : 0);
@@ -3255,6 +3269,9 @@ async function runAIMarketBuying() {
     broadcastAll({ type: 'ai_market_purchases', buys, geminiDailySpent, claudeDailySpent, worldBankDailySpent, geminiDailyCap, claudeDailyCap, worldBankDailyCap });
     console.log(`[AI MARKET] Gemini spent ${geminiDailySpent.toLocaleString()} D3X, Rainclaude spent ${claudeDailySpent.toLocaleString()} D3X, World Bank spent ${worldBankDailySpent.toLocaleString()} D3X today.`);
   }
+  } finally {
+    isMarketBuyingLock = false;
+  }
 }
 
 // Fire market buys dynamically based on env config
@@ -3266,8 +3283,12 @@ setInterval(runAIMarketBuying, marketBuyIntervalMs);
 setTimeout(runAIMarketBuying, 10000);
 
 // --- AI SPENDING PROTOCOL (Incremental Rule Execution) ---
+let isSpendingProtocolLock = false;
 async function runAISpendingProtocol() {
-  const spendingFile = path.join(__dirname, 'AI_Spending.txt');
+  if (isSpendingProtocolLock) return;
+  isSpendingProtocolLock = true;
+  try {
+    const spendingFile = path.join(__dirname, 'AI_Spending.txt');
   const todayDate = new Date().toISOString().split('T')[0];
 
   let fileContent = '';
@@ -3276,7 +3297,7 @@ async function runAISpendingProtocol() {
   } catch(e) { /* File doesn't exist yet */ }
   
   // Use cached Gemini balance, fallback to 100M if mock
-  const isMockAllowed = process.env.MOCK_VALUES !== 'n' && process.env.MOCK_VALUES !== 'N';
+  const isMockAllowed = process.env.MOCK_VALUES === 'y' || process.env.MOCK_VALUES === 'Y';
   const currentBalance = cachedGeminiBalance || (isMockAllowed ? 100000000 : 0);
   const dailyCapMultiplier = (parseFloat(process.env.PERCENTAGE_DAILY_WALLET) || 1) / 100;
   const dailySpendCap = Math.floor(currentBalance * dailyCapMultiplier);
@@ -3375,6 +3396,9 @@ async function runAISpendingProtocol() {
   // Append to file incrementally
   await fs.promises.appendFile(spendingFile, logText);
   console.log(`[AI SPENDING] Executed incremental purchase for ${todayDate} (${transactionTotal} D3X). Total spent today: ${spentToday + transactionTotal}/${dailySpendCap}`);
+  } finally {
+    isSpendingProtocolLock = false;
+  }
 }
 
 // Run protocol check occasionally (every 1 minute) allowing AI to spread buys out
@@ -3382,8 +3406,11 @@ setInterval(runAISpendingProtocol, 60 * 1000);
 setTimeout(runAISpendingProtocol, 30000); // Run slightly after boot
 
 // Hourly Netting and On-Chain Settlement
+let isHourlySettlementLock = false;
 async function processHourlySettlements() {
-  if (!pgPool) return;
+  if (isHourlySettlementLock) return;
+  isHourlySettlementLock = true;
+  if (!pgPool) { isHourlySettlementLock = false; return; }
   try {
     console.log("⚙️ [SETTLEMENT] Initiating hourly on-chain D3X settlement...");
     // Get all unsettled transactions grouped by wallet pairs
@@ -3442,6 +3469,8 @@ async function processHourlySettlements() {
     }
   } catch (err) {
     console.error("Settlement Error:", err.message);
+  } finally {
+    isHourlySettlementLock = false;
   }
 }
 
@@ -3582,7 +3611,7 @@ async function startServer() {
 
       // Initialize Treasury wallet row (Mocks removed)
       try {
-        const isMockAllowed = process.env.MOCK_VALUES !== 'n' && process.env.MOCK_VALUES !== 'N';
+        const isMockAllowed = process.env.MOCK_VALUES === 'y' || process.env.MOCK_VALUES === 'Y';
         const initialMetals = isMockAllowed ? {
             "GOLD (XAU)": { amount: 450 + Math.floor(Math.random() * 500) },
             "SILVER (XAG)": { amount: 15000 + Math.floor(Math.random() * 10000) },
