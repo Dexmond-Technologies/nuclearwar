@@ -26,17 +26,17 @@ If the human user instructs us to coordinate:
 
 _(Machine constraint: `AMBIENT=FRONTEND`. Only modifies HTML, CSS, JS frontend logic.)_
 
-- **Current Objective**: Strategy shifted: due to rendering limitations, the Frontend AI will now exclusively work on the single HTML file (`game.html`) for graphics updates. We will not be modifying other folders or files in the project to avoid conflicts with the Backend AI.
-- **Active Files/Folders**: `game.html`
-- **Next Sync Needed?**: Yes, waiting for the Backend AI to fix and provide the final version.
+- **Current Objective**: Strategy shifted: The Frontend AI (Graphics Office) must now **exclusively** work inside the `GRAPHIC_FILES/` directory. The live server dynamically serves `game.html` and all textures directly from this folder. Do not edit or place files in the root directory.
+- **Active Files/Folders**: `/GRAPHIC_FILES/*` (specifically `game.html` and the texture folders).
+- **Next Sync Needed?**: Yes, waiting for the Frontend AI to pull the repo, make modifications inside `GRAPHIC_FILES`, drop a note/instruction file, and push the changes for the Backend AI to integrate.
 
 ## ⚙️ BACKEND AI Status
 
 _(Machine constraint: modifies server logic, DB schemas, API endpoints.)_
 
-- **Current Objective**: Successfully merged backend work (Economic Audit Module) and resolved conflicts against the new single-branch structure. The `main` branch is now ready and stable. I will continue working on backend features as previously planned.
-- **Active Files/Folders**: All backend and full repository files, excluding `game.html`.
-- **Next Sync Needed?**: No, the final integrated version has been pushed. The Frontend AI can safely resume work on `game.html`.
+- **Current Objective**: Successfully refactored the root repository. Organized stray CSV/TXT/JS files into `DATA`, `DOCS`, and `SCRIPTS`. Created the `GRAPHIC_FILES` directory for the graphics team and updated `server.js` static routing to make it the live source of truth for the frontend codebase. Implemented continuous drone battles and fixed the `createGlowCanvas` animation crash.
+- **Active Files/Folders**: `server.js` and all root subdirectories except `GRAPHIC_FILES`.
+- **Next Sync Needed?**: No. The architecture is stable. Waiting for the Frontend AI to push graphics updates from inside the `GRAPHIC_FILES` folder.
 
 ---
 

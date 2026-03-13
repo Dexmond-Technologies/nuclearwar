@@ -297,7 +297,7 @@ const server = http.createServer((req, res) => {
   }
 
   if (req.url === '/' || req.url === '/index.html' || req.url === '/game.html') {
-    fs.readFile(path.join(__dirname, 'game.html'), (err, data) => {
+    fs.readFile(path.join(__dirname, 'GRAPHIC_FILES', 'game.html'), (err, data) => {
       if (err) {
         res.writeHead(500);
         return res.end('Error loading game.html');
@@ -327,14 +327,17 @@ const server = http.createServer((req, res) => {
       res.end(data);
     });
 
-  } else if (req.url.startsWith('/public/')) {
+  } else if (req.url.startsWith('/public/') || req.url.startsWith('/TEXTURES/') || req.url.startsWith('/IMPROVE_EARTH/') || req.url.startsWith('/FRONTED_DOCS/')) {
     const filename = decodeURIComponent(req.url);
-    const filePath = path.join(__dirname, filename);
+    // If it's public, leave it in root, otherwise intercept graphics folders into GRAPHIC_FILES
+    const basePath = req.url.startsWith('/public/') ? __dirname : path.join(__dirname, 'GRAPHIC_FILES');
+    const filePath = path.join(basePath, filename);
     const ext = path.extname(filePath);
     let contentType = 'text/plain';
     if (ext === '.js') contentType = 'application/javascript';
     else if (ext === '.json') contentType = 'application/json';
     else if (ext === '.png') contentType = 'image/png';
+    else if (ext === '.jpg' || ext === '.jpeg') contentType = 'image/jpeg';
     else if (ext === '.css') contentType = 'text/css';
 
     fs.readFile(filePath, (err, data) => {
