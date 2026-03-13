@@ -5407,7 +5407,7 @@
     // =====================================================================
     // GAME STATE
     // =====================================================================
-    let GS = {
+    window.GS = {
       countries: {},     // iso -> {name,lat,lon,owner,troops,nuked,instabilityLevel}
       players: [],       // [{name,color,nukes,alive}]
       turn: 0,           // player index
@@ -5440,7 +5440,7 @@
     let pendingPerk = null;
 
     let countryBorders = {}; // iso -> THREE.Line
-    let countryData = {}; // iso -> {name,lat,lon,polygons:[]}
+    window.countryData = {}; // iso -> {name,lat,lon,polys:[]}
     let ws = null;
 
     // =====================================================================
@@ -5643,10 +5643,104 @@
     }
 
     // Red Skin Webcams
-    let webcamGroup = new THREE.Group();
-    webcamGroup.visible = false;
-    let webcamSprites = [];
-    scene.add(webcamGroup);
+    window.webcamGroup = new THREE.Group();
+    window.webcamGroup.visible = false;
+    window.webcamSprites = [];
+    scene.add(window.webcamGroup);
+
+    // -------------------------------------------------------------
+    // RISIKO RED MAP CANVAS ENGINE
+    // -------------------------------------------------------------
+    window.risikoCanvas = document.createElement('canvas');
+    window.risikoCanvas.width = 4096;
+    window.risikoCanvas.height = 2048;
+    window.risikoCtx = window.risikoCanvas.getContext('2d');
+    window.risikoTexture = new THREE.CanvasTexture(window.risikoCanvas);
+    window.risikoTexture.minFilter = THREE.LinearFilter;
+    
+    // Initial blank fill so it works before first update
+    window.risikoCtx.fillStyle = '#110000';
+    window.risikoCtx.fillRect(0, 0, 4096, 2048);
+    window.risikoTexture.needsUpdate = true;
+
+    window.updateRisikoMap = function() {
+      if (window.currentSkinIndex !== 3 || !window.countryData || !window.GS || !window.GS.countries) return;
+      
+      const ctx = window.risikoCtx;
+      const w = window.risikoCanvas.width;
+      const h = window.risikoCanvas.height;
+      
+      // Base ocean background for the Risiko map
+      ctx.fillStyle = '#110000';
+      ctx.fillRect(0, 0, w, h);
+      
+      ctx.lineWidth = 1;
+      
+      Object.entries(window.countryData).forEach(([iso, cd]) => {
+        if (!cd.polys || cd.polys.length === 0) return;
+        
+        const cState = window.GS.countries[iso];
+        let fillColor = '#330000'; // Default uninhabited color
+        
+        if (cState && cState.owner !== undefined) {
+          const commander = window.GS.players[cState.owner];
+          if (commander && commander.color && commander.color.hex) {
+             fillColor = commander.color.hex;
+          }
+        }
+        
+        ctx.fillStyle = fillColor;
+        ctx.strokeStyle = '#ff0000'; // Hardcoded neon red border for the RISK theme
+        
+        ctx.beginPath();
+        cd.polys.forEach(poly => {
+          let first = true;
+          poly.forEach(pt => {
+            // Equirectangular projection mapping to Canvas coords
+            const x = ((pt.lon + 180) / 360) * w;
+            const y = ((90 - pt.lat) / 180) * h;
+            if (first) { ctx.moveTo(x, y); first = false; }
+            else { ctx.lineTo(x, y); }
+          });
+          ctx.closePath();
+        });
+        ctx.fill();
+        ctx.stroke();
+        
+        // Draw Troops Numeric Overlay
+        if (cState && cState.troops > 0) {
+          const tx = ((cd.lon + 180) / 360) * w;
+          const ty = ((90 - cd.lat) / 180) * h;
+          
+          ctx.fillStyle = 'rgba(0,0,0,0.6)';
+          // Troop background oval pill
+          ctx.beginPath();
+          ctx.ellipse(tx, ty, 30, 18, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 20px monospace';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(cState.troops.toLocaleString(), tx, ty);
+          
+          // Draw Owner Name below it for realism
+          if (cState.owner !== undefined) {
+            const commander = window.GS.players[cState.owner];
+            if (commander && commander.name) {
+              ctx.fillStyle = '#aaaaaa';
+              ctx.font = '12px monospace';
+              ctx.fillText(commander.name.toUpperCase().substring(0,6), tx, ty + 20);
+            }
+          }
+        }
+      });
+      
+      window.risikoTexture.needsUpdate = true;
+    };
 
     let boatGroup = new THREE.Group();
     boatGroup.visible = false;
@@ -8515,12 +8609,17 @@
         const data = await res.json();
         if (!data.result || !data.result.webcams) return;
 
-        // Create a tiny yellow dot texture
-        const c = document.createElement('canvas'); c.width = 64; c.height = 64;
+        // Create a big red-yellow dot texture
+        const c = document.createElement('canvas'); c.width = 128; c.height = 128;
         const ctx = c.getContext('2d');
-        ctx.fillStyle = '#ffff00'; // Yellow dot
-        ctx.beginPath(); ctx.arc(32, 32, 28, 0, Math.PI * 2); ctx.fill();
-        ctx.lineWidth = 4; ctx.strokeStyle = '#ffae00'; ctx.stroke();
+        // Outer Yellow Glow
+        ctx.fillStyle = 'rgba(255, 255, 0, 0.4)'; 
+        ctx.beginPath(); ctx.arc(64, 64, 60, 0, Math.PI * 2); ctx.fill();
+        // Inner Red Core
+        ctx.fillStyle = '#ff0000'; 
+        ctx.beginPath(); ctx.arc(64, 64, 32, 0, Math.PI * 2); ctx.fill();
+        // Thick Yellow Border
+        ctx.lineWidth = 12; ctx.strokeStyle = '#ffff00'; ctx.stroke();
         const tex = new THREE.CanvasTexture(c);
 
         data.result.webcams.forEach(cam => {
@@ -8540,10 +8639,10 @@
             title: cam.title || 'Live Feed',
             streamType: cam.stream_type
           };
-          webcamGroup.add(sprite);
-          webcamSprites.push(sprite);
+          window.webcamGroup.add(sprite);
+          window.webcamSprites.push(sprite);
         });
-        console.log("Loaded " + webcamSprites.length + " Red Skin webcams");
+        console.log("Loaded " + window.webcamSprites.length + " Red Skin webcams");
       } catch (e) { console.error("Webcam load error", e); }
     }
 
@@ -13887,6 +13986,9 @@
 
       if (GS.turn === 0) setLog(`▶ HUMAN FRONT — ${GS.phase}`);
       else setLog(`⟳ RAINCLAUDE PROCESSING...`);
+      
+      // Update the Risiko Red Map if active
+      if (typeof window.updateRisikoMap === 'function') window.updateRisikoMap();
     }
 
     function showRoomPlayers(players) {
@@ -17477,10 +17579,12 @@
           globeMat.depthWrite = true;
 
         } else if (skin.name === 'RED_PLANET') {
-          globeMat.map = earthTex; // Reset default earth texture
+          globeMat.map = window.risikoTexture; // Dynamically generated Risiko state!
+          if (typeof window.updateRisikoMap === 'function') window.updateRisikoMap();
           globeMat.emissiveMap = null;
-          globeMat.color.setHex(0xff0000);
-          globeMat.emissive.setHex(0xaa0000);
+          // Apply neutral white lighting base so the canvas colors shine perfectly accurately
+          globeMat.color.setHex(0xffffff);
+          globeMat.emissive.setHex(0x222222);
           globeMat.wireframe = false;
           globeMat.transparent = false;
           globeMat.opacity = 1.0;
@@ -17557,7 +17661,7 @@
       }
 
       // Toggle visibility of overlays (Webcams, Sats, Yellow Dots)
-      if (typeof webcamGroup !== 'undefined') webcamGroup.visible = (window.currentSkinIndex === 3);
+      if (typeof window.webcamGroup !== 'undefined') window.webcamGroup.visible = (window.currentSkinIndex === 3);
       if (typeof yellowDotsGroup !== 'undefined') yellowDotsGroup.visible = (skin.name !== 'CYBER' && skin.name !== 'BLACK');
       if (typeof boatGroup !== 'undefined') boatGroup.visible = skin.showOverlays;
       if (typeof redSatGroup !== 'undefined') redSatGroup.visible = skin.showOverlays;
