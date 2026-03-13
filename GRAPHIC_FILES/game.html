@@ -8612,14 +8612,26 @@
         // Create a big red-yellow dot texture
         const c = document.createElement('canvas'); c.width = 128; c.height = 128;
         const ctx = c.getContext('2d');
-        // Outer Yellow Glow
+        
+        // 1. Draw Outer Yellow Glow
         ctx.fillStyle = 'rgba(255, 255, 0, 0.4)'; 
-        ctx.beginPath(); ctx.arc(64, 64, 60, 0, Math.PI * 2); ctx.fill();
-        // Inner Red Core
+        ctx.beginPath(); 
+        ctx.arc(64, 64, 60, 0, Math.PI * 2); 
+        ctx.fill();
+        
+        // 2. Draw Thick Yellow Border (Draw this BEFORE the core so the core sits perfectly on top)
+        ctx.lineWidth = 12; 
+        ctx.strokeStyle = '#ffff00'; 
+        ctx.beginPath();
+        ctx.arc(64, 64, 32, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // 3. Draw Inner Red Core
         ctx.fillStyle = '#ff0000'; 
-        ctx.beginPath(); ctx.arc(64, 64, 32, 0, Math.PI * 2); ctx.fill();
-        // Thick Yellow Border
-        ctx.lineWidth = 12; ctx.strokeStyle = '#ffff00'; ctx.stroke();
+        ctx.beginPath(); 
+        ctx.arc(64, 64, 28, 0, Math.PI * 2); 
+        ctx.fill();
+        
         const tex = new THREE.CanvasTexture(c);
 
         data.result.webcams.forEach(cam => {
@@ -17637,6 +17649,11 @@
 
       // Update UI Button
       btn.innerHTML = skin.btnText;
+      
+      // Force Three.js to recompile the shader with the dynamic canvas mappings.
+      if (globeMat) globeMat.needsUpdate = true;
+      if (globeMat.map) globeMat.map.needsUpdate = true;
+
       if (skin.btnClass) {
         btn.className = '';
         btn.classList.add(skin.btnClass);
