@@ -17557,7 +17557,7 @@
       }
 
       // Toggle visibility of overlays (Webcams, Sats, Yellow Dots)
-      if (typeof webcamGroup !== 'undefined') webcamGroup.visible = (window.currentSkinIndex !== 0 && window.currentSkinIndex !== 4);
+      if (typeof webcamGroup !== 'undefined') webcamGroup.visible = (window.currentSkinIndex === 3);
       if (typeof yellowDotsGroup !== 'undefined') yellowDotsGroup.visible = (skin.name !== 'CYBER' && skin.name !== 'BLACK');
       if (typeof boatGroup !== 'undefined') boatGroup.visible = skin.showOverlays;
       if (typeof redSatGroup !== 'undefined') redSatGroup.visible = skin.showOverlays;
