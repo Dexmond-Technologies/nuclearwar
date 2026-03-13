@@ -15350,17 +15350,17 @@
           if (dc.userData && dc.userData.isNorthPole) {
             npTowers.push(dc);
 
-            // Dynamic pulsing effect using a sine wave
+            // Dynamic pulsing effect using a sine wave based on time
             const pulseVar = Math.sin(time3 * 5 + dc.position.x * 10) * 0.5 + 0.5; // values between 0.0 and 1.0
 
-            const buzzOffset = Math.random() * 0.15 + (pulseVar * 0.4); // Reduced by 50%
+            // Create a buzzing offset for the aura scale
+            const buzzOffset = Math.random() * 0.15 + (pulseVar * 0.4);
             dc.userData.aura.scale.set(1 + buzzOffset, 1 + buzzOffset, 1 + buzzOffset);
 
-            const rotSpeed = 0.1 + (pulseVar * 0.2); // Reduced by 50%
+            // Rotate the aura rapidly
+            const rotSpeed = 0.1 + (pulseVar * 0.2);
             dc.userData.aura.rotation.x += rotSpeed;
             dc.userData.aura.rotation.y += rotSpeed * 1.5;
-
-            dc.userData.aura.material.opacity = 0.3 + (pulseVar * 0.3); // Reduced by 50%
 
             if (Math.random() < 0.2) dc.userData.light.intensity = 2 + Math.random() * 5 + (pulseVar * 3); // Flashing light follows pulse, reduced by 50%
           }
