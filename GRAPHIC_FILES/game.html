@@ -14683,23 +14683,35 @@
             prop.rotation.y += dt * 50.0; // Spin fast
           });
         }
+        
+        // UPGRADE: Neon Engine Trails
+        if (Math.random() > 0.3) {
+           const trailColor = d.faction === 'RAINCLAUDE' ? '#ff0044' : '#00aaff';
+           // Emit directly backwards from the drone's current rotation
+           const backPos = pos.clone().sub(fwd.clone().multiplyScalar(0.015));
+           const mat = new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(createGlowCanvas(trailColor)), color: 0xffffff, transparent: true, blending: THREE.AdditiveBlending });
+           const sprite = new THREE.Sprite(mat);
+           sprite.position.copy(backPos);
+           scene.add(sprite);
+           window.droneBattleState.explosions.push({ mesh: sprite, life: 1.0, decayMs: 3.0, maxScale: 0.08 }); // Reuse explosion particle system for trails
+        }
 
         d.cooldown -= dt;
-        if (d.target && minDistSq < 0.01 && d.cooldown <= 0) {
+        if (d.target && minDistSq < 0.05 && d.cooldown <= 0) {
           if (d.role === 'Bomber') {
-            d.cooldown = 4.0;
+            d.cooldown = 1.0; // INCREASED: 4.0 -> 1.0 (400% faster)
             spawnDroneMissile(pos.clone(), d.target.mesh);
-            _droneBattleLogEvent(d.faction, `${d.role} launched MISSILE at ${d.target.faction} ${d.target.role}`);
+            _droneBattleLogEvent(d.faction, `[VEC-LOCK: ${minDistSq.toFixed(3)}] ${d.role} launched MISSILE at ${d.target.faction} ${d.target.role}`);
           } else if (d.role === 'Scout') {
-            d.cooldown = 1.5;
+            d.cooldown = 0.5; // INCREASED: 1.5 -> 0.5 (300% faster)
             spawnDroneLaser(pos.clone(), d.target.mesh.position.clone(), d.faction);
             if (Math.random() < 0.15) d.target.hp -= 1;
-            if (Math.random() < 0.3) _droneBattleLogEvent(d.faction, `Scout DETECTED ${d.target.faction} ${d.target.role}`);
+            if (Math.random() < 0.5) _droneBattleLogEvent(d.faction, `[SCAN-MTX: ${Math.random().toFixed(4)}] Scout DETECTED ${d.target.faction} ${d.target.role}`);
           } else {
-            d.cooldown = 0.5;
+            d.cooldown = 0.15; // INCREASED: 0.5 -> 0.15 (333% faster)
             spawnDroneLaser(pos.clone(), d.target.mesh.position.clone(), d.faction);
             if (Math.random() < 0.3) d.target.hp -= 2;
-            if (Math.random() < 0.2) _droneBattleLogEvent(d.faction, `Fighter ENGAGING ${d.target.faction} ${d.target.role}`);
+            if (Math.random() < 0.3) _droneBattleLogEvent(d.faction, `[ATK-VEC: x:${d.target.mesh.position.x.toFixed(2)} y:${d.target.mesh.position.y.toFixed(2)}] Fighter ENGAGING ${d.target.faction} ${d.target.role}`);
           }
         }
 
@@ -14770,10 +14782,20 @@
     }
 
     function spawnDroneLaser(start, end, faction) {
-      const geo = new THREE.BufferGeometry().setFromPoints([start, end]);
+      // UPGRADE: Thicker neon cylinder instead of flat 1px geometry line
+      const dir = new THREE.Vector3().subVectors(end, start);
+      const dist = dir.length();
+      const geo = new THREE.CylinderGeometry(0.001, 0.001, dist, 4);
+      geo.rotateX(Math.PI / 2); // align along Z
+      geo.translate(0, 0, dist / 2); // pivot at start
+
       const color = faction === 'RAINCLAUDE' ? 0xff0044 : 0x00aaff;
-      const mat = new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 1.0, blending: THREE.AdditiveBlending });
-      const line = new THREE.Line(geo, mat);
+      const mat = new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 1.0, blending: THREE.AdditiveBlending });
+      const line = new THREE.Mesh(geo, mat);
+      
+      line.position.copy(start);
+      line.lookAt(end);
+      
       scene.add(line);
       window.droneBattleState.lasers.push({ mesh: line, life: 1.0 });
     }
@@ -14812,6 +14834,36 @@
           r1.scrollTop = r1.scrollHeight;
         }
       });
+      
+      // UPGRADE: High Frequency Crypto AI Feed Injection
+      const algoTypes = ['ARBITRAGE', 'HFT-SCALPING', 'LIQUIDITY SWEEP', 'SHORT SQUEEZE', 'FLASH LOAN', 'MEV-BLOCK'];
+      const dtStr = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }) + `.${Math.floor(Math.random()*999)}`;
+      
+      if (Math.random() > 0.5) { // Gemini Trade
+         const feed0 = document.getElementById('d0-crypto-lines');
+         if (feed0) {
+            const algo = algoTypes[Math.floor(Math.random()*algoTypes.length)];
+            const vol = Math.floor(Math.random() * 5000000);
+            feed0.innerHTML = `<div><span style="color:#0f8">> [${dtStr}] EXECUTING ${algo} -- VOL: $${vol.toLocaleString()}</span></div>` + feed0.innerHTML;
+            if (feed0.childElementCount > 5) feed0.removeChild(feed0.lastChild);
+            
+            window.geminiCryptoVol = (window.geminiCryptoVol || 0) + vol;
+            const t0 = document.getElementById('d0-crypto-total');
+            if(t0) t0.innerText = 'VOL: $' + window.geminiCryptoVol.toLocaleString();
+         }
+      } else { // Rainclaude Trade
+         const feed1 = document.getElementById('d1-crypto-lines');
+         if (feed1) {
+            const algo = algoTypes[Math.floor(Math.random()*algoTypes.length)];
+            const vol = Math.floor(Math.random() * 5000000);
+            feed1.innerHTML = `<div><span style="color:#f44">> [${dtStr}] DEPLOYING ${algo} -- VOL: $${vol.toLocaleString()}</span></div>` + feed1.innerHTML;
+            if (feed1.childElementCount > 5) feed1.removeChild(feed1.lastChild);
+            
+            window.claudeCryptoVol = (window.claudeCryptoVol || 0) + vol;
+            const t1 = document.getElementById('d1-crypto-total');
+            if(t1) t1.innerText = 'VOL: $' + window.claudeCryptoVol.toLocaleString();
+         }
+      }
     }
 
     function spawnDroneMissile(pos, targetMesh) {
@@ -14843,7 +14895,16 @@
       const sprite = new THREE.Sprite(mat);
       sprite.position.copy(pos);
       scene.add(sprite);
-      window.droneBattleState.explosions.push({ mesh: sprite, life: 1.0, decayMs: 2.0, maxScale: 0.15 });
+      window.droneBattleState.explosions.push({ mesh: sprite, life: 1.0, decayMs: 3.5, maxScale: 0.25 }); // Bigger, slower
+      
+      // UPGRADE: Shockwave Ring
+      const ringGeo = new THREE.RingGeometry(0.01, 0.02, 16);
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0xff4400, side: THREE.DoubleSide, transparent: true, blending: THREE.AdditiveBlending });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.position.copy(pos);
+      ring.lookAt(new THREE.Vector3(0,0,0));
+      scene.add(ring);
+      window.droneBattleState.explosions.push({ mesh: ring, life: 1.0, decayMs: 6.0, maxScale: 0.4 });
     }
 
     function spawnDroneSmoke(pos) {
