@@ -8777,36 +8777,31 @@
       }
 
       if (idx === 0) {
-        skinSpecificTitle = "LIVE SKIN OP CENTER";
-        skinSpecificDesc = "This is the primary theater of operations. Witness the real war and the real battle unfold with live troops, combat planes, and tactical rockets sweeping across the globe.";
-        skinSpecificInteractivity = "<b>Manual override enabled.</b> This is the real war theatre. As a commander, you can execute manual attacks, deploy spy strategies, run espionage operations, and establish ground superiority on the interactive globe.";
-        skinSpecificOversight = "You are currently engaging in live combat operations. Monitor troop deployments, assess casualty reports, and execute strategic commands to dominate the digital battlefield. Every action has permanent geopolitical consequences.";
-      } else if (idx === 1) {
-        skinSpecificTitle = "RED SKIN INTELLIGENCE";
+        skinSpecificTitle = "LIVE SKIN INTELLIGENCE";
         skinSpecificDesc = "Welcome to the real-time reconnaissance matrix. This layer integrates live webcams, naval battle boats, and strategic aerial planes to monitor the theater.";
         skinSpecificInteractivity = "<b>Manual tracking enabled.</b> You have access to real-time intelligence feeds. Click on deployed webcams to view live camera feeds from around the world, intercept aerial planes, monitor global satellite coverage, and track naval boats engaged in warfare operations.";
         skinSpecificOversight = "You are overseeing global intelligence operations. Engage with live assets scattered across the world to build superior tactical awareness. Surveillance data is critical for strategic dominance.";
-      } else if (idx === 2) {
+      } else if (idx === 1) {
         skinSpecificTitle = "GREEN SKIN ECONOMICS";
         skinSpecificDesc = "This is the Global Trade Network Metals Market. Every node here represents critical economic infrastructure and active natural resources.";
         skinSpecificInteractivity = "<b>Market manipulation enabled.</b> There are no wargame scenarios here. This is a pure financial ecosystem. Track dynamic supply chains and execute strategic acquisitions. A comprehensive system of trades must be maintained to establish total financial dominance over global commodities.";
         skinSpecificOversight = "You are overlooking the world's most critical supply lines. Analyze real-time market fluctuations, assess state-controlled natural resources, and dictate global commerce.";
-      } else if (idx === 3) {
+      } else if (idx === 2) {
         skinSpecificTitle = "CYBER SKIN INFRASTRUCTURE";
         skinSpecificDesc = "Dive into the planetary nervous system. This layer tracks live datacenter power consumption traversing the world, enabling all AI capabilities. <b>This is our primary staking mechanism.</b> Stake your $D3X tokens into active global nodes to earn dynamic APY rewards.";
         skinSpecificInteractivity = "<b>Datacenter Staking enabled.</b> You can interact with specific datacenter nodes worldwide to allocate $D3X. Protect your stakes from rival network attacks and monitor live server temperatures to maximize your yield.";
         skinSpecificOversight = "You are monitoring the global power grid. Real-time compute shifts dictate financial returns. Secure your server infrastructure globally before hostile network forces overwhelm the system.";
-      } else if (idx === 4) {
+      } else if (idx === 3) {
         skinSpecificTitle = "BLACK SKIN CORPORATE";
-        // We will override the content for idx 4 completely down below.
-      } else if (idx === 5) {
+        // We will override the content for idx 3 completely down below.
+      } else if (idx === 4) {
         skinSpecificTitle = "WTR SKIN HYDROLOGY";
         skinSpecificDesc = "Welcome to the planetary fluid dynamics simulation engine. This interface models the total 1.386 billion km³ volume of Earth's water moving across a realtime physics engine.";
         skinSpecificInteractivity = "<b>Global cooling grid enabled.</b> Artificial intelligence requires staggering amounts of water for hydroelectric generation and cooling. Maintain atmospheric balance against adversarial agents explicitly draining the hydrosphere to damage opponent infrastructure.";
         skinSpecificOversight = "Every volumetric drop is conserved. A disrupted river starves power from the Cyber datacenters downstream. Observe global volume and flow metrics continuously evaluated via fluid algorithms.";
       }
 
-      if (idx === 4) {
+      if (idx === 3) {
         contentBox.style.padding = '0'; // Remove default padding for this specific layout
         contentBox.style.display = 'flex';
         contentBox.style.flexDirection = 'column';
@@ -8824,7 +8819,7 @@
     `;
       } else {
         let stakingHtml = '';
-        if (idx === 3) {
+        if (idx === 2) {
           stakingHtml = `
           <div style="margin-top:30px; background:rgba(0,100,200,0.05); padding:30px; border-radius:10px; border:1px solid rgba(0,220,255,0.3);">
             <div style="font-size:24px; color:#fa0; margin-bottom:15px; letter-spacing:3px; font-weight:bold; text-align:center;">[ ACTIVE STAKING OFFERS ]</div>
@@ -9557,11 +9552,11 @@
 
     function openSatelliteHackMinigame() {
       if (window.activeSkin === 'green') {
-        setLog(`⚠ SATELLITE HACK IS INCOMPATIBLE WITH GREEN MARKET SKIN. SWITCH TO RED.`);
+        setLog(`⚠ SATELLITE HACK IS INCOMPATIBLE WITH GREEN MARKET SKIN. SWITCH TO LIVE.`);
         return;
       }
       if (window.currentSkinIndex === 3) {
-        setLog(`⚠ SATELLITE HACK IS INCOMPATIBLE WITH GREEN MARKET SKIN. SWITCH TO RED.`);
+        setLog(`⚠ SATELLITE HACK IS INCOMPATIBLE WITH GREEN MARKET SKIN. SWITCH TO LIVE.`);
         return;
       }
       document.getElementById('sat-hack-modal').classList.add('show');
@@ -11611,7 +11606,7 @@
         }
         else if (type === 15) { // Satellite Hack
           if (window.activeSkin === 'green') {
-            setLog(`⚠ SATELLITE HACK IS INCOMPATIBLE WITH GREEN MARKET SKIN. SWITCH TO RED.`);
+            setLog(`⚠ SATELLITE HACK IS INCOMPATIBLE WITH GREEN MARKET SKIN. SWITCH TO LIVE.`);
             GS.players[0].budget += cost; // Refund cost
             return;
           }
@@ -17342,13 +17337,13 @@
       }
     });
 
-    // Skin Manager: 0 = RED, 1 = GREEN, 2 = CYBER, 3 = BLK, 4 = WTR, 5 = RED_PLANET
+    // Skin Manager: 0 = LIVE, 1 = GREEN, 2 = CYBER, 3 = BLK, 4 = WTR, 5 = RED_PLANET
     window.currentSkinIndex = 0;
     window.isRedSkin = false; // Legacy flag preserved for scripts that might check it directly
 
     const SKINS = [
 
-      { name: 'RED', color: 0xff0000, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
+      { name: 'LIVE', color: 0xff0000, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
       { name: 'GREEN', color: 0x22ff22, btnText: 'parallel layers', btnClass: 'active-normal', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: true, showArms: true, showBoats: false, isPremium: false },
       { name: 'CYBER', color: 0x00f0ff, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false },
       { name: 'BLK', color: 0x050505, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false },
@@ -17364,12 +17359,12 @@
       window.currentSkinIndex = (window.currentSkinIndex + 1) % SKINS.length;
       const skin = SKINS[window.currentSkinIndex];
 
-      // Toggle New Atmospheric Effects (LIVE and RED Skins)
+      // Toggle New Atmospheric Effects (LIVE Skins)
       if (typeof window.atmosphereGroup !== 'undefined') {
-        window.atmosphereGroup.visible = (skin.name === 'RED');
+        window.atmosphereGroup.visible = (skin.name === 'LIVE');
       }
 
-      window.isRedSkin = (skin.name === 'RED'); // Keep legacy compatibility
+      window.isRedSkin = (skin.name === 'LIVE'); // Keep legacy compatibility
 
       const btn = document.getElementById('btn-toggle-skin');
 
@@ -17630,7 +17625,7 @@
 
       if (cyberLabel) cyberLabel.style.display = (skin.name === 'BLK') ? 'block' : 'none';
       if (liveLabel) liveLabel.style.display = 'none';
-      if (intelLabel) intelLabel.style.display = (skin.name === 'RED') ? 'block' : 'none';
+      if (intelLabel) intelLabel.style.display = (skin.name === 'LIVE') ? 'block' : 'none';
       if (datacenterLabel) datacenterLabel.style.display = (skin.name === 'CYBER') ? 'block' : 'none';
 
       // Toggle Green Skin Info Label
