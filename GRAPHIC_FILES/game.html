@@ -8380,6 +8380,16 @@
     sg.setAttribute('position', new THREE.Float32BufferAttribute(sp, 3));
     scene.add(new THREE.Points(sg, new THREE.PointsMaterial({ color: 0xffffff, size: 0.018, transparent: true, opacity: .7 })));
 
+    // Global Lighting for Realistic Skin
+    window.sunLight = new THREE.DirectionalLight(0xffffff, 3.0);
+    window.sunLight.position.set(5, 3, 5);
+    window.sunLight.visible = false;
+    scene.add(window.sunLight);
+
+    window.ambientLight = new THREE.AmbientLight(0xffffff, 0.4); // Ambient so dark side isn't pitch black
+    window.ambientLight.visible = false;
+    scene.add(window.ambientLight);
+
     // Globe
     const globeGeo = new THREE.SphereGeometry(GLOBE_R, 250, 250);
     const cyberGlobeGeo = new THREE.SphereGeometry(GLOBE_R, 128, 128); // Density reduced for lag optimization
@@ -17759,8 +17769,14 @@
       }
       if (typeof countryBorders !== 'undefined') {
         Object.values(countryBorders).forEach(group => {
-          group.visible = true;
+          group.visible = (skin.name !== 'REAL');
         });
+      }
+
+      // Toggle Realistic Lighting Setup
+      if (typeof window.sunLight !== 'undefined') {
+        window.sunLight.visible = (skin.name === 'REAL');
+        window.ambientLight.visible = (skin.name === 'REAL');
       }
 
       // Clear ambient visual flights immediately when toggling to clean skin
