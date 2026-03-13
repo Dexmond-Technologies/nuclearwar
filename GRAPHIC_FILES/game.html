@@ -8382,11 +8382,39 @@
 
     // Globe
     const globeGeo = new THREE.SphereGeometry(GLOBE_R, 250, 250);
-    const cyberGlobeGeo = new THREE.SphereGeometry(GLOBE_R, 500, 500); // 100% Higher Density for CYBER skin
+    const cyberGlobeGeo = new THREE.SphereGeometry(GLOBE_R, 128, 128); // Density reduced for lag optimization
     const texLoader = new THREE.TextureLoader();
     const earthTex = texLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/land_ocean_ice_cloud_2048.jpg');
     // Using a simple low-res cloud map for safety
     const cloudTex = texLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_clouds_1024.png');
+
+    // Create a high-density artificial wireframe grid using a CanvasTexture
+    const gridCanvas = document.createElement('canvas');
+    gridCanvas.width = 1024;
+    gridCanvas.height = 1024;
+    const gridCtx = gridCanvas.getContext('2d');
+    gridCtx.fillStyle = '#000000';
+    gridCtx.fillRect(0, 0, 1024, 1024);
+    
+    // Draw neon cyan grid lines
+    gridCtx.strokeStyle = '#00f0ff';
+    gridCtx.lineWidth = 2; // Thinner lines for higher density illusion
+    const divisions = 64; // How many squares per 1024px chunk
+    const step = 1024 / divisions;
+    gridCtx.beginPath();
+    for (let x = 0; x <= 1024; x += step) {
+      gridCtx.moveTo(x, 0); gridCtx.lineTo(x, 1024);
+    }
+    for (let y = 0; y <= 1024; y += step) {
+      gridCtx.moveTo(0, y); gridCtx.lineTo(1024, y);
+    }
+    gridCtx.stroke();
+    
+    window.cyberGridTex = new THREE.CanvasTexture(gridCanvas);
+    window.cyberGridTex.wrapS = THREE.RepeatWrapping;
+    window.cyberGridTex.wrapT = THREE.RepeatWrapping;
+    // Repeat the texture 4x horizontally and 2x vertically to make it incredibly dense
+    window.cyberGridTex.repeat.set(4, 2);
 
     // Set up clipping planes to cut out a front-right quarter
     const clipPlanes = [
@@ -15324,7 +15352,7 @@
         });
 
         // Elaborate Electricity Bridges Animation
-        if (npTowers.length === 3 && window.npLightningGroup && window.currentSkinIndex === 3) { // CYBER skin
+        if (npTowers.length === 3 && window.npLightningGroup && window.currentSkinIndex === 4) { // CYBER skin
           window.npLightningGroup.visible = true;
           window.npLightningGroup.children.forEach(bridge => {
             bridge.userData.timer -= dt;
@@ -15402,7 +15430,7 @@
         } else if (window.npLightningGroup) {
           window.npLightningGroup.visible = false;
         }
-      } else if (window.npLightningGroup && window.currentSkinIndex !== 3) {
+      } else if (window.npLightningGroup && window.currentSkinIndex !== 4) {
         window.npLightningGroup.visible = false;
       } // <-- End of Cyber Skin Block
 
@@ -15452,6 +15480,19 @@
           window.grnGlowSphere.scale.set(grnPulse, grnPulse, grnPulse);
         }
       }
+
+      // ---------------------------------------------------------------------
+      // PERFORMANCE FIX: DO NOT ANIMATE GREEN MOUNTAINS IN RENDER LOOP
+      // The complex vertex geography rotation was causing massive frame drops.
+      // Mining hitboxes and visual structures remain intact, just static.
+      /*
+      if (window.greenMountainsGroup && window.greenMountainsGroup.visible) {
+         window.greenMountainsGroup.children.forEach(mount => {
+            mount.rotation.y += 0.005; 
+         });
+      }
+      */
+      // ---------------------------------------------------------------------
 
       // Pulsing animation for Dexmond Hub (Black Market)
       if (window.dexmondHubGroup && window.dexmondHubGroup.visible && window.currentSkinIndex === 4) {
@@ -17391,17 +17432,24 @@
 
         if (skin.name === 'CYBER') {
           globeMat.emissive.setHex(0x0055ff);
-          globeMat.wireframe = true;
-          globeMat.transparent = false;
+          globeMat.wireframe = false; // Turn OFF physical wireframe to preserve high FPS rotation
+          // Apply the high-density grid texture map
+          globeMat.map = window.cyberGridTex;
+          globeMat.emissiveMap = window.cyberGridTex;
+          globeMat.transparent = true; // Needs transparency so the dark areas are seen
           globeMat.opacity = 1.0; 
           globeMat.depthWrite = true; 
         } else if (skin.name === 'WTR') {
+          globeMat.map = earthTex; // Reset default earth texture
+          globeMat.emissiveMap = null;
           globeMat.emissive.setHex(0x0055aa); // Deep ocean blue emissive base
           globeMat.wireframe = false;
           globeMat.transparent = true;
           globeMat.opacity = 0.5; // WTR default
           globeMat.depthWrite = false;
         } else if (skin.name === 'BLK') {
+          globeMat.map = earthTex; // Reset default earth texture
+          globeMat.emissiveMap = null;
           globeMat.color.setHex(0x111111);
           globeMat.specular.setHex(0x777777);
           globeMat.shininess = 35;
@@ -17412,13 +17460,29 @@
           globeMat.depthWrite = true;
 
         } else if (skin.name === 'RED_PLANET') {
+          globeMat.map = earthTex; // Reset default earth texture
+          globeMat.emissiveMap = null;
           globeMat.color.setHex(0xff0000);
           globeMat.emissive.setHex(0xaa0000);
           globeMat.wireframe = false;
           globeMat.transparent = false;
           globeMat.opacity = 1.0;
           globeMat.depthWrite = true;
+        } else if (skin.name === 'GREEN') {
+          globeMat.map = earthTex; // Reset default earth texture
+          globeMat.emissiveMap = null;
+          // Apply solid dark forest green aesthetic
+          globeMat.color.setHex(0x0a220a); 
+          globeMat.emissive.setHex(0x051a05);
+          globeMat.specular.setHex(0x001100);
+          globeMat.shininess = 5;
+          globeMat.wireframe = false;
+          globeMat.transparent = false; // Solid planet!
+          globeMat.opacity = 1.0;
+          globeMat.depthWrite = true;
         } else {
+          globeMat.map = earthTex; // Reset default earth texture
+          globeMat.emissiveMap = null;
           globeMat.emissive.setHex(0x000000);
           globeMat.wireframe = false;
           globeMat.transparent = true;
