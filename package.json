@@ -4,7 +4,7 @@
   "description": "WebSocket multiplayer server for 3D NUCLEAR WAR",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "npx pm2 start ecosystem.config.js --no-daemon"
   },
   "dependencies": {
     "@solana/spl-token": "^0.4.14",

@@ -1,4 +1,4 @@
-<!-- Vanilla Wallet Integration (Phantom / MetaMask) -->
+// Vanilla Wallet Integration (Phantom / MetaMask)
 
   window.openVanillaWalletModal = function() {
     const overlay = document.createElement('div');
@@ -172,7 +172,7 @@ const MockTradeEconomy = (function() {
     });
   }
 
-  function runTurn() {
+  function runTurn() { return; // STRICT SURVEILLANCE: Mock Disabled. Awaiting true state data from Backend
     try {
       initCountries();
       if (countries.length === 0) return;
@@ -832,4 +832,4 @@ window.mineD3XCoin = function() {
     log.scrollTop = log.scrollHeight;
 };
 
-</script>
+// </script>

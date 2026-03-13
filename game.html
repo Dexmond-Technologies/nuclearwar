@@ -5328,6 +5328,7 @@
     // CONSTANTS & PLAYER SETUP
     // =====================================================================
     // =====================================================================
+
     const GLOBE_R = 1.0, RAD = Math.PI / 180;
 
     // Dynamic WebSocket URL to support both local and production environments
@@ -5360,6 +5361,284 @@
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 1000);
+function ll2v(lat,lon,r){
+  const phi = (90 - lat) * (Math.PI / 180);
+  const theta = (lon + 180) * (Math.PI / 180);
+
+  return new THREE.Vector3(
+      -(r * Math.sin(phi) * Math.cos(theta)),
+      r * Math.cos(phi),
+      r * Math.sin(phi) * Math.sin(theta)
+  );
+}
+
+// =====================================================================
+// ORBIT CONTROLS
+// =====================================================================
+let drag=false, prevM={x:0,y:0};
+let sph={theta:.3, phi:1.1, r:3.5};
+
+function updCam(){
+  camera.position.set(
+    sph.r*Math.sin(sph.phi)*Math.cos(sph.theta),
+    sph.r*Math.cos(sph.phi),
+    sph.r*Math.sin(sph.phi)*Math.sin(sph.theta)
+  );
+  camera.lookAt(0,0,0);
+}
+updCam();
+
+canvas.addEventListener('mousedown',e=>{if(e.button===2){drag=true;prevM={x:e.clientX,y:e.clientY};}});
+canvas.addEventListener('contextmenu',e=>e.preventDefault());
+window.addEventListener('mousemove',e=>{
+  if(!drag)return;
+  sph.theta-=(prevM.x-e.clientX)*.005;
+  sph.phi=Math.max(.1,Math.min(Math.PI-.1,sph.phi+(prevM.y-e.clientY)*.005));
+  prevM={x:e.clientX,y:e.clientY}; updCam();
+});
+window.addEventListener('mouseup',()=>drag=false);
+canvas.addEventListener('wheel',e=>{
+  sph.r=Math.max(1.4,Math.min(8,sph.r+e.deltaY*.003));
+  updCam(); e.preventDefault();
+},{passive:false});
+
+// =====================================================================
+// GAME STATE
+// =====================================================================
+let GS = {
+  countries: {},     // iso -> {name,lat,lon,owner,troops,nuked,instabilityLevel}
+  players: [],       // [{name,color,nukes,alive}]
+  turn: 0,           // player index
+  turnCount: 1,      // overall turn number
+  phase: 'REINFORCE',// REINFORCE|ATTACK|FORTIFY
+  reinforceLeft: 0,
+  selected: null,    // iso of selected country
+  fortifyFrom: null,
+  isOnline: false,
+  myIndex: 0,
+  roomCode: '',
+  AI_STATE: {
+    techLevel: 1,
+    intelligenceLevel: 1,
+    aggressionLevel: 1,
+    adaptabilityScore: 1,
+    energy: 10,
+    threatTier: 1
+  },
+  globalMetrics: {
+    powerGrid: 100,
+    comms: 100,
+    economy: 100,
+    airTrafficDisabledTurns: 0,
+    satelliteDisruptedTurns: 0,
+    commJamTurns: 0
+  }
+};
+
+let pendingPerk = null;
+
+let countryBorders = {}; // iso -> THREE.Line
+let countryData    = {}; // iso -> {name,lat,lon,polygons:[]}
+let ws             = null;
+
+// =====================================================================
+// GEOJSON COUNTRY LOADING
+// =====================================================================
+const GEOJSON_URL = 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_countries.geojson';
+
+async function loadCountries(retries = 3) {
+  setLog('⟳ Loading world map data...');
+  let res;
+  for (let i = 0; i < retries; i++) {
+    try {
+      res = await fetch(GEOJSON_URL);
+      if (res.ok) break;
+    } catch (e) {
+      if (i === retries - 1) {
+        setLog('⚠ failed to load world geometry. Please refresh.');
+        return;
+      }
+      setLog(`⚠ retrying map data (${i+1}/${retries})...`);
+      await new Promise(r => setTimeout(r, 1000));
+    }
+  }
+  
+  if (!res || !res.ok) {
+    setLog('⚠ failed to load world geometry.');
+    return;
+  }
+  
+  const json = await res.json();
+
+  json.features.forEach(f => {
+    const p = f.properties;
+    const iso = p.gu_a3 || p.iso_a3 || p.adm0_a3;
+    if (!iso || iso === '-99') return;
+
+    // Bounding box center as lat/lon
+    let sumLat=0, sumLon=0, cnt=0;
+    const polys = [];
+
+    // Helper to apply prime meridian offset and wrap dateline
+    const oLon = (lon) => {
+      let l = lon;
+      if (l < -180) l += 360;
+      if (l > 180) l -= 360;
+      return l;
+    };
+
+    const extractRing = ring => {
+      const pts = ring.map(([lon,lat]) => ll2v(lat,oLon(lon),GLOBE_R+.003));
+      polys.push(ring.map(([lon,lat])=>({lat,lon:oLon(lon)})));
+      
+      // Calculate ring centroid using offset longitude, handling dateline wrap naively as before
+      let tLon = 0, tLat = 0;
+      ring.forEach(([lo, la]) => {
+        tLon += oLon(lo);
+        tLat += la;
+      });
+      sumLon += tLon / ring.length;
+      sumLat += tLat / ring.length;
+      
+      cnt++;
+      return new THREE.BufferGeometry().setFromPoints(pts);
+    };
+
+    const geos = [];
+    if (f.geometry.type==='Polygon') {
+      f.geometry.coordinates.forEach(r=>geos.push(extractRing(r)));
+    } else if (f.geometry.type==='MultiPolygon') {
+      f.geometry.coordinates.forEach(poly=>poly.forEach(r=>geos.push(extractRing(r))));
+    }
+
+    if (!geos.length) return;
+
+    // Calculate bounding box for the country to sample random points
+    let minLat = 90, maxLat = -90, minLon = 180, maxLon = -180;
+    polys.forEach(poly => {
+      poly.forEach(pt => {
+        if(pt.lat < minLat) minLat = pt.lat;
+        if(pt.lat > maxLat) maxLat = pt.lat;
+        if(pt.lon < minLon) minLon = pt.lon;
+        if(pt.lon > maxLon) maxLon = pt.lon;
+      });
+    });
+
+    let bestLat = sumLat/cnt;
+    let bestLon = sumLon/cnt;
+
+    // 85% chance to force the point onto explicit dry land (inside the polygon)
+    // 15% chance to let it naturally fall near the coast/water as per user request
+    if (Math.random() < 0.85) {
+      for(let iter = 0; iter < 100; iter++) {
+        const testLat = minLat + Math.random() * (maxLat - minLat);
+        const testLon = minLon + Math.random() * (maxLon - minLon);
+        let inside = false;
+        for (const poly of polys) {
+          if (pointInPoly(testLat, testLon, poly)) { inside = true; break; }
+        }
+        if (inside) {
+          bestLat = testLat;
+          bestLon = testLon;
+          break;
+        }
+      }
+    }
+
+    // Generate dense dots for visual representation
+    const denseDots = [];
+    denseDots.push({ lat: bestLat, lon: bestLon });
+    const extraDots = Math.min(80, Math.max(8, Math.floor(cnt / 8))); 
+    for(let dots = 0; dots < extraDots; dots++) {
+      for(let iter = 0; iter < 50; iter++) {
+        const testLat = minLat + Math.random() * (maxLat - minLat);
+        const testLon = minLon + Math.random() * (maxLon - minLon);
+        let inside = false;
+        for (const poly of polys) {
+          if (pointInPoly(testLat, testLon, poly)) { inside = true; break; }
+        }
+        if (inside) {
+          denseDots.push({ lat: testLat, lon: testLon });
+          break;
+        }
+      }
+    }
+    // Add coastal padding dots
+    for(let dots=0; dots < Math.floor(extraDots * 0.2); dots++) {
+      denseDots.push({ 
+         lat: minLat + Math.random() * (maxLat - minLat), 
+         lon: minLon + Math.random() * (maxLon - minLon) 
+      });
+    }
+
+    countryData[iso] = { name: p.name||iso, lat: bestLat, lon: bestLon, polys, denseDots };
+
+    if (iso === 'USA') {
+      for (let i = 1; i <= 10; i++) {
+        countryData[`USA_V${i}`] = {
+          name: `US Sector ${i}`,
+          lat: 30 + Math.random() * 18,
+          lon: -125 + Math.random() * 50,
+          polys: []
+        };
+      }
+    }
+    if (iso === 'CHN') {
+      for (let i = 1; i <= 10; i++) {
+        countryData[`CHN_V${i}`] = {
+          name: `China Sector ${i}`,
+          lat: 22 + Math.random() * 18,
+          lon: 80 + Math.random() * 40,
+          polys: []
+        };
+      }
+    }
+
+    // Draw border lines
+    // Build border lines geometry but do not render them on the globe
+    const mat = new THREE.LineBasicMaterial({color:NEUTRAL.int, transparent:true, opacity:.6});
+    const group = new THREE.Group();
+    geos.forEach(geo => group.add(new THREE.Line(geo, mat.clone())));
+    group.userData = { iso, mat };
+    group.visible = true; // Show borders per user request
+    countryBorders[iso] = group;
+    scene.add(group);
+  });
+
+  setLog(`✓ ${Object.keys(countryData).length} countries loaded`);
+}
+
+// Point-in-polygon test (2D lat/lon)
+function pointInPoly(lat, lon, poly) {
+  let inside = false;
+  for (let i=0,j=poly.length-1; i<poly.length; j=i++) {
+    const xi=poly[i].lon, yi=poly[i].lat, xj=poly[j].lon, yj=poly[j].lat;
+    if(((yi>lat)!==(yj>lat))&&(lon<(xj-xi)*(lat-yi)/(yj-yi)+xi)) inside=!inside;
+  }
+  return inside;
+}
+
+function getCountryAt(lat, lon) {
+  let closest = null;
+  let minDist = Infinity;
+  for (const [iso, cd] of Object.entries(countryData)) {
+    if(!cd.polys) continue;
+    for (const poly of cd.polys) {
+      if (pointInPoly(lat, lon, poly)) return iso;
+    }
+    // Fallback for tiny states/islands (Haversine approx distance)
+    if(cd.lat !== undefined && cd.lon !== undefined) {
+      const dLat=Math.abs(lat-cd.lat)*Math.PI/180;
+      const dLon=Math.abs(lon-cd.lon)*Math.PI/180;
+      const a = Math.sin(dLat/2)**2 + Math.cos(lat*Math.PI/180)*Math.cos(cd.lat*Math.PI/180) * Math.sin(dLon/2)**2;
+      const dist = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      if(dist < minDist) { minDist = dist; closest = iso; }
+    }
+  }
+  // If no polygon hit, return the closest center if it's within ~500 miles (0.15 rads)
+  if(closest && minDist < 0.15) return closest;
+  return null;
+}
 
     // Red Skin Webcams
     let webcamGroup = new THREE.Group();
@@ -8104,253 +8383,6 @@
     const globeGeo = new THREE.SphereGeometry(GLOBE_R, 250, 250);
     const texLoader = new THREE.TextureLoader();
     const earthTex = texLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/land_ocean_ice_cloud_2048.jpg');
-
-    // Set up clipping planes to cut out a front-right quarter
-    const clipPlanes = [
-      new THREE.Plane(new THREE.Vector3(1, 0, 0), 0),
-      new THREE.Plane(new THREE.Vector3(0, -1, 0), 0),
-      new THREE.Plane(new THREE.Vector3(0, 0, 1), 0)
-    ];
-
-    const globeMat = new THREE.MeshPhongMaterial({
-      map: earthTex,
-      specular: new THREE.Color(0x003355),
-      shininess: 15,
-      side: THREE.FrontSide,
-      clipIntersection: true,
-      clippingPlanes: [] // active only on FIRE skin
-    });
-
-    // Update globeMat color for WTR skin
-    if (window.currentSkinIndex === 6) {
-      globeMat.color = new THREE.Color(0x00aaff); // Neon cyan for WTR
-      globeMat.specular = new THREE.Color(0x00ffff);
-      globeMat.shininess = 50;
-    }
-
-    const globeMesh = new THREE.Mesh(globeGeo, globeMat);
-    window.globeMesh = globeMesh;
-    scene.add(globeMesh);
-
-    renderer.localClippingEnabled = true;
-
-    // Inner core layers for FIRE cutaway
-    window.earthCutawayGroup = new THREE.Group();
-    window.earthCutawayGroup.visible = false;
-    scene.add(window.earthCutawayGroup);
-
-    function createCutawayLayer(radius, color, specular, shininess) {
-      const geo = new THREE.SphereGeometry(radius, 64, 64);
-      const mat = new THREE.MeshPhongMaterial({
-        color: color,
-        specular: specular,
-        shininess: shininess,
-        side: THREE.FrontSide,
-        clipIntersection: true,
-        clippingPlanes: clipPlanes
-      });
-      return new THREE.Mesh(geo, mat);
-    }
-
-    // Mantle (Red/Orange)
-    const mantleMesh = createCutawayLayer(GLOBE_R * 0.98, 0xff2200, 0x551100, 10);
-    // Outer Core (Orange/Yellow)
-    const outerCoreMesh = createCutawayLayer(GLOBE_R * 0.55, 0xff8800, 0xaa5500, 30);
-    // Inner Core (Bright Yellow/White)
-    const innerCoreMesh = createCutawayLayer(GLOBE_R * 0.2, 0xffffaa, 0xffffff, 100);
-
-    window.earthCutawayGroup.add(mantleMesh);
-    window.earthCutawayGroup.add(outerCoreMesh);
-    window.earthCutawayGroup.add(innerCoreMesh);
-
-    // =====================================================================
-    // LIVE SKIN WAR DUST PARTICLES
-    // =====================================================================
-    window.liveDustGroup = new THREE.Group();
-    window.liveDustGroup.visible = true; // Active by default since 'LIVE' is the initial skin
-    const dustGeo = new THREE.BufferGeometry();
-    const dustPts = [];
-
-    // Generate sparse dust particles wrapped tightly around the globe for performance
-    const dustBasePos = [];
-    for (let i = 0; i < 512000; i++) { // Increased by 10x per user request
-      const t = Math.random() * Math.PI * 2;
-      const p = Math.acos(2 * Math.random() - 1);
-      const r = GLOBE_R + 0.002 + (Math.random() * 0.12);
-
-      const x = r * Math.sin(p) * Math.cos(t);
-      const y = r * Math.cos(p);
-      const z = r * Math.sin(p) * Math.sin(t);
-
-      dustPts.push(x, y, z);
-
-      // Store original position and a random phase for floating math
-      dustBasePos.push({
-        x: x, y: y, z: z,
-        phaseX: Math.random() * Math.PI * 2,
-        phaseY: Math.random() * Math.PI * 2,
-        phaseZ: Math.random() * Math.PI * 2,
-        speed: 0.05 + Math.random() * 0.15,
-        amplitude: 0.01 + Math.random() * 0.02
-      });
-    }
-    dustGeo.setAttribute('position', new THREE.Float32BufferAttribute(dustPts, 3));
-    window.liveDustBasePos = dustBasePos; // Expose for animate loop
-
-    // Use a fine dirt/greyish color for the atmosphere
-    const dustTextureCanvas = document.createElement('canvas');
-    dustTextureCanvas.width = 16;
-    dustTextureCanvas.height = 16;
-    const dtCtx = dustTextureCanvas.getContext('2d');
-    dtCtx.beginPath();
-    dtCtx.arc(8, 8, 8, 0, Math.PI * 2);
-    dtCtx.fillStyle = '#ffffff';
-    dtCtx.fill();
-    const dustTex = new THREE.CanvasTexture(dustTextureCanvas);
-
-    const dustMat = new THREE.PointsMaterial({
-      color: 0xaa9575,
-      size: 0.00375, // Halved size
-      map: dustTex, // Apply round texture
-      alphaTest: 0.1, // Prevent square black edges
-      transparent: true,
-      opacity: 0.65,
-      blending: THREE.AdditiveBlending
-    });
-    window.liveDustPoints = new THREE.Points(dustGeo, dustMat);
-    window.liveDustGroup.add(window.liveDustPoints);
-    scene.add(window.liveDustGroup);
-
-    // =====================================================================
-    // LIVE WEBCAMS
-    // =====================================================================
-    window.webcamGroup = new THREE.Group();
-    window.webcamGroup.visible = false; // Hidden by default; shown per-skin below
-    scene.add(window.webcamGroup);
-
-    // Create a glowing yellow dot texture for the webcams
-    const camCanvas = document.createElement('canvas');
-    camCanvas.width = 128; camCanvas.height = 128;
-    const camCtx = camCanvas.getContext('2d');
-    const camGrad = camCtx.createRadialGradient(64, 64, 10, 64, 64, 60);
-    camGrad.addColorStop(0, 'rgba(255, 255, 0, 1)');
-    camGrad.addColorStop(0.3, 'rgba(255, 200, 0, 0.8)');
-    camGrad.addColorStop(1, 'rgba(255, 200, 0, 0)');
-    camCtx.fillStyle = camGrad;
-    camCtx.fillRect(0, 0, 128, 128);
-    const camTex = new THREE.CanvasTexture(camCanvas);
-    const camMat = new THREE.SpriteMaterial({ map: camTex, transparent: true, blending: THREE.AdditiveBlending });
-
-    // Create a green variant for the GREEN skin
-    const greenCamCanvas = document.createElement('canvas');
-    greenCamCanvas.width = 128; greenCamCanvas.height = 128;
-    const greenCamCtx = greenCamCanvas.getContext('2d');
-    const greenCamGrad = greenCamCtx.createRadialGradient(64, 64, 10, 64, 64, 60);
-    greenCamGrad.addColorStop(0, 'rgba(0, 255, 0, 1)');
-    greenCamGrad.addColorStop(0.3, 'rgba(0, 200, 0, 0.8)');
-    greenCamGrad.addColorStop(1, 'rgba(0, 200, 0, 0)');
-    greenCamCtx.fillStyle = greenCamGrad;
-    greenCamCtx.fillRect(0, 0, 128, 128);
-    const greenCamTex = new THREE.CanvasTexture(greenCamCanvas);
-    const greenCamMat = new THREE.SpriteMaterial({ map: greenCamTex, transparent: true, blending: THREE.AdditiveBlending });
-
-    // Generate 50 random live webcam locations
-    for (let i = 0; i < 50; i++) {
-      const lat = (Math.random() - 0.5) * 160; // -80 to 80 to avoid strict poles
-      const lon = (Math.random() - 0.5) * 360; // -180 to 180
-
-      // Use the existing ll2v function definition which we will hoist or call later if already defined
-      const phi = (90 - lat) * (Math.PI / 180);
-      const theta = (lon + 180) * (Math.PI / 180);
-      const r = GLOBE_R + 0.05; // Slightly above globe surface
-
-      const pos = new THREE.Vector3(
-  };
-
-  const routes = [
-    // PLANES (Aviation Trade)
-    {from: [40.7, -74.0], to: [51.5, -0.1], type: 'plane'}, // NY -> London
-    {from: [39.9, 116.4], to: [37.7, -122.4], type: 'plane'}, // Beijing -> SF
-    {from: [25.2, 55.2], to: [51.5, -0.1], type: 'plane'}, // Dubai -> London
-    {from: [35.6, 139.6], to: [-33.8, 151.2], type: 'plane'}, // Tokyo -> Sydney
-    {from: [1.3, 103.8], to: [22.3, 114.1], type: 'plane'}, // Singapore -> HK
-    {from: [48.8, 2.3], to: [-23.5, -46.6], type: 'plane'}, // Paris -> Sao Paulo
-    {from: [34.0, -118.2], to: [35.6, 139.6], type: 'plane'}, // LA -> Tokyo
-    {from: [55.7, 37.6], to: [25.2, 55.2], type: 'plane'}, // Moscow -> Dubai
-    {from: [-33.9, 18.4], to: [51.5, -0.1], type: 'plane'}, // Cape Town -> London
-    {from: [19.4, -99.1], to: [40.4, -3.7], type: 'plane'}, // Mexico City -> Madrid
-    {from: [28.6, 77.2], to: [52.5, 13.4], type: 'plane'}, // Delhi -> Berlin
-    {from: [30.0, 31.2], to: [48.8, 2.3], type: 'plane'}, // Cairo -> Paris
-    
-    // SHIPS (Maritime Cargo)
-    {from: [31.2, 121.4], to: [34.0, -118.2], type: 'ship'}, // Shanghai -> LA
-    {from: [22.5, 114.0], to: [51.9, 4.4], type: 'ship'}, // Shenzhen -> Rotterdam
-    {from: [1.2, 103.8], to: [23.8, 56.6], type: 'ship'}, // Singapore -> Oman Gulf
-    {from: [29.9, -90.0], to: [53.5, 9.9], type: 'ship'}, // New Orleans -> Hamburg
-    {from: [-23.9, -46.3], to: [31.2, 121.4], type: 'ship'}, // Santos BR -> Shanghai
-    {from: [-33.9, 18.4], to: [24.8, 66.9], type: 'ship'}, // Cape Town -> Karachi
-    {from: [38.9, 117.2], to: [54.0, -2.9], type: 'ship'}, // Tianjin -> Liverpool
-    {from: [31.2, 29.9], to: [40.7, -74.0], type: 'ship'}, // Alex -> NY
-    {from: [1.3, 103.8], to: [-33.8, 151.2], type: 'ship'}, // Singapore -> Sydney
-    {from: [19.0, 72.8], to: [-26.2, 32.6], type: 'ship'}, // Mumbai -> Maputo
-    {from: [35.4, 139.6], to: [37.8, -122.4], type: 'ship'}, // Yokohama -> SF
-    {from: [8.9, -79.5], to: [51.9, 4.4], type: 'ship'}, // Panama -> Rotterdam
-    
-    // TRAINS/TYRES (Overland Supply Chains)
-    {from: [39.9, 116.4], to: [52.5, 13.4], type: 'train'}, // Beijing -> Berlin (Eurasian Belt)
-    {from: [41.8, -87.6], to: [34.0, -118.2], type: 'train'}, // Chicago -> LA (Continental US)
-    {from: [40.7, -74.0], to: [29.7, -95.3], type: 'train'}, // NY -> Houston
-    {from: [55.7, 37.6], to: [43.1, 131.9], type: 'train'}, // Moscow -> Vladivostok (Trans-Siberian)
-    {from: [28.6, 77.2], to: [19.0, 72.8], type: 'train'}, // Delhi -> Mumbai (Indian Rail)
-    {from: [-34.6, -58.3], to: [-23.5, -46.6], type: 'train'}, // Buenos Aires -> Sao Paulo
-    {from: [-26.2, 28.0], to: [-33.9, 18.4], type: 'train'}, // Johannesburg -> Cape Town
-    {from: [48.8, 2.3], to: [55.7, 37.6], type: 'train'}, // Paris -> Moscow
-    {from: [51.5, -0.1], to: [41.9, 12.5], type: 'train'}, // London -> Rome
-    {from: [43.7, -79.4], to: [49.3, -123.1], type: 'train'}, // Toronto -> Vancouver
-    {from: [-37.8, 144.9], to: [-31.9, 115.8], type: 'train'}, // Melbourne -> Perth
-    {from: [35.7, 51.4], to: [41.0, 29.0], type: 'train'} // Tehran -> Istanbul
-  ];
-
-  // Multiply exact routes array volume by 6x parametrically using coordinate drift
-  const baseRoutesLength = routes.length;
-  for(let j=0; j < 160; j++) {
-     const baseRt = routes[Math.floor(Math.random() * baseRoutesLength)];
-     // Add random offsets to create new parallel / divergent routes
-     const fromLat = Math.max(-80, Math.min(80, baseRt.from[0] + (Math.random() * 50 - 25)));
-     const fromLon = baseRt.from[1] + (Math.random() * 50 - 25);
-     const toLat = Math.max(-80, Math.min(80, baseRt.to[0] + (Math.random() * 50 - 25)));
-     const toLon = baseRt.to[1] + (Math.random() * 50 - 25);
-     routes.push({from: [fromLat, fromLon], to: [toLat, toLon], type: baseRt.type});
-  }
-
-  routes.forEach(rt => {
-    // Inject 8 vehicles traversing each global route (we added 160 routes, 8x bidirectional = massive density)
-    for(let i=0; i<8; i++) {
-       createTradeRoute(rt.from[0], rt.from[1], rt.to[0], rt.to[1], rt.type);
-       createTradeRoute(rt.to[0], rt.to[1], rt.from[0], rt.from[1], rt.type);
-    }
-  });
-
-  console.log("Global Trade Network Initialized (" + window.activeTrades.length + " discrete assets tracked).");
-}
-initGlobalTradeNetwork();
-
-// Stars
-const sg = new THREE.BufferGeometry();
-const sp = [];
-for(let i=0;i<4000;i++){
-  const t=Math.random()*Math.PI*2, p=Math.acos(2*Math.random()-1), r=7+Math.random()*4;
-  sp.push(r*Math.sin(p)*Math.cos(t), r*Math.cos(p), r*Math.sin(p)*Math.sin(t));
-}
-sg.setAttribute('position',new THREE.Float32BufferAttribute(sp,3));
-scene.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:0.018,transparent:true,opacity:.7})));
-
-// Globe
-// 30% increased density for Cyber Skin
-const globeGeo = new THREE.SphereGeometry(GLOBE_R, 750, 750); // 10X Polygon Upgrade
-const texLoader = new THREE.TextureLoader();
-const earthTex  = texLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/land_ocean_ice_cloud_2048.jpg');
-
 // Set up clipping planes to cut out a front-right quarter
 const clipPlanes = [
   new THREE.Plane(new THREE.Vector3(1,  0, 0), 0),
@@ -8366,14 +8398,6 @@ const globeMat  = new THREE.MeshPhongMaterial({
   clipIntersection: true,
   clippingPlanes: [] // active only on FIRE skin
 });
-
-// Update globeMat color for WTR skin
-if (window.currentSkinIndex === 6) {
-  globeMat.color = new THREE.Color(0x00aaff); // Neon cyan for WTR
-  globeMat.specular = new THREE.Color(0x00ffff);
-  globeMat.shininess = 50;
-}
-
 const globeMesh = new THREE.Mesh(globeGeo, globeMat);
 window.globeMesh = globeMesh;
 scene.add(globeMesh);
@@ -8410,991 +8434,8 @@ window.earthCutawayGroup.add(outerCoreMesh);
 window.earthCutawayGroup.add(innerCoreMesh);
 
 // =====================================================================
-// LIVE SKIN WAR DUST PARTICLES
-// =====================================================================
-window.liveDustGroup = new THREE.Group();
-window.liveDustGroup.visible = true; // Active by default since 'LIVE' is the initial skin
-const dustGeo = new THREE.BufferGeometry();
-const dustPts = [];
+// INTERNATIONAL SPACE STATION (ISS)
 
-// Generate sparse dust particles wrapped tightly around the globe for performance
-const dustBasePos = [];
-for(let i=0; i<12800; i++) {
-   const t = Math.random() * Math.PI * 2;
-   const p = Math.acos(2 * Math.random() - 1);
-   const r = GLOBE_R + 0.002 + (Math.random() * 0.12);
-   
-   const x = r * Math.sin(p) * Math.cos(t);
-   const y = r * Math.cos(p);
-   const z = r * Math.sin(p) * Math.sin(t);
-   
-   dustPts.push(x, y, z);
-   
-   // Store original position and a random phase for floating math
-   dustBasePos.push({
-       x: x, y: y, z: z,
-       phaseX: Math.random() * Math.PI * 2,
-       phaseY: Math.random() * Math.PI * 2,
-       phaseZ: Math.random() * Math.PI * 2,
-       speed: 0.05 + Math.random() * 0.15,
-       amplitude: 0.01 + Math.random() * 0.02
-   });
-}
-dustGeo.setAttribute('position', new THREE.Float32BufferAttribute(dustPts, 3));
-window.liveDustBasePos = dustBasePos; // Expose for animate loop
-
-// Use a fine dirt/greyish color for the atmosphere
-const dustMat = new THREE.PointsMaterial({
-    color: 0xaa9575, 
-    size: 0.015, 
-    transparent: true, 
-    opacity: 0.65, 
-    blending: THREE.AdditiveBlending 
-});
-window.liveDustPoints = new THREE.Points(dustGeo, dustMat);
-window.liveDustGroup.add(window.liveDustPoints);
-scene.add(window.liveDustGroup);
-
-// =====================================================================
-// LIVE SKIN ATMOSPHERE & WEATHER EFFECTS
-// =====================================================================
-window.atmosphereGroup = new THREE.Group();
-window.atmosphereGroup.visible = true; // Active on LIVE skin
-scene.add(window.atmosphereGroup);
-
-// 1. High-Altitude Cloud Layer
-const cloudGeo = new THREE.SphereGeometry(GLOBE_R + 0.005, 512, 512); // Extreme Quality
-const textureLoader = new THREE.TextureLoader();
-// Create a procedural noise texture for clouds to avoid external dependencies
-const cloudCanvas = document.createElement('canvas');
-cloudCanvas.width = 1024; cloudCanvas.height = 512;
-const cloudCtx = cloudCanvas.getContext('2d');
-cloudCtx.fillStyle = 'rgba(0,0,0,0)';
-cloudCtx.fillRect(0, 0, 1024, 512);
-// Simple noise generation for clouds
-for(let i=0; i<40000; i++) {
-    const cx = Math.random() * 1024;
-    const cy = Math.random() * 512;
-    const cr = Math.random() * 20 + 5;
-    const alpha = Math.random() * 0.15;
-    cloudCtx.beginPath();
-    cloudCtx.arc(cx, cy, cr, 0, Math.PI * 2);
-    cloudCtx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-    cloudCtx.fill();
-}
-const cloudTex = new THREE.CanvasTexture(cloudCanvas);
-cloudTex.wrapS = THREE.RepeatWrapping;
-cloudTex.wrapT = THREE.RepeatWrapping;
-
-const cloudMat = new THREE.MeshPhongMaterial({
-    map: cloudTex,
-    transparent: true,
-    opacity: 0.8,
-    blending: THREE.NormalBlending,
-    side: THREE.FrontSide,
-    depthWrite: false // Crucial so troops render on top
-});
-window.cloudMesh = new THREE.Mesh(cloudGeo, cloudMat);
-window.atmosphereGroup.add(window.cloudMesh);
-
-// 2. Low-Orbit Atmospheric Glow (Fresnel-like)
-const atmGlowGeo = new THREE.SphereGeometry(GLOBE_R + 0.02, 512, 512); // Extreme Quality
-// Custom shader for edge glow
-const atmShader = {
-    uniforms: {
-        "c": { type: "f", value: 0.15 },
-        "p": { type: "f", value: 3.5 },
-        glowColor: { type: "c", value: new THREE.Color(0x44aaff) },
-        viewVector: { type: "v3", value: camera.position }
-    },
-    vertexShader: `
-        uniform vec3 viewVector;
-        uniform float c;
-        uniform float p;
-        varying float intensity;
-        void main() {
-            vec3 vNormal = normalize( normalMatrix * normal );
-            vec3 vNormel = normalize( normalMatrix * viewVector );
-            intensity = pow( c - dot(vNormal, vNormel), p );
-            gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-        }
-    `,
-    fragmentShader: `
-        uniform vec3 glowColor;
-        varying float intensity;
-        void main() {
-            vec3 glow = glowColor * intensity;
-            gl_FragColor = vec4( glow, intensity );
-        }
-    `,
-    side: THREE.BackSide,
-    blending: THREE.AdditiveBlending,
-    transparent: true,
-    depthWrite: false
-};
-const atmGlowMat = new THREE.ShaderMaterial(atmShader);
-window.atmGlowMesh = new THREE.Mesh(atmGlowGeo, atmGlowMat);
-window.atmosphereGroup.add(window.atmGlowMesh);
-
-// 3. Regional Storm Flashes (Lightning)
-window.stormFlashes = [];
-for(let i=0; i<3; i++) {
-    const flashLight = new THREE.PointLight(0xaaccff, 0, 0.4);
-    window.atmosphereGroup.add(flashLight);
-    window.stormFlashes.push({
-        light: flashLight,
-        timer: 0,
-        x: 0, y: 0, z: 0,
-        active: false
-    });
-}
-
-// 4. Aurora Borealis Rings (Massive Polygon Upgrade & Advanced Organic Shader)
-const auroraGeo1 = new THREE.CylinderGeometry(GLOBE_R + 0.02, GLOBE_R + 0.09, 0.15, 512, 32, true);
-const auroraGeo2 = new THREE.CylinderGeometry(GLOBE_R + 0.02, GLOBE_R + 0.09, 0.15, 512, 32, true);
-
-const auroraShader = {
-    uniforms: {
-        time: { type: "f", value: 0.0 },
-        colorBottom: { type: "c", value: new THREE.Color(0x00ffaa) }, // Bright Green / Teal base
-        colorTop: { type: "c", value: new THREE.Color(0xff0088) }     // Pink / Purple top bleeding
-    },
-    vertexShader: `
-        uniform float time;
-        varying vec2 vUv;
-        varying vec3 vPos;
-        void main() {
-            vUv = uv;
-            vPos = position;
-            vec3 pos = position;
-            // High-frequency structural folding
-            float fold = sin(pos.x * 15.0 + time * 1.2) * 0.02 + cos(pos.z * 18.0 - time * 0.8) * 0.02;
-            pos.x += fold * pos.x;
-            pos.z += fold * pos.z;
-            
-            // Vertical rippling
-            pos.y += sin(pos.x * 25.0 + time * 3.0) * 0.015;
-            
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-        }
-    `,
-    fragmentShader: `
-        uniform float time;
-        uniform vec3 colorBottom;
-        uniform vec3 colorTop;
-        varying vec2 vUv;
-        varying vec3 vPos;
-        
-        // Pseudo-random noise for striking vertical bands
-        float hash(float n) { return fract(sin(n)*43758.5453); }
-        
-        void main() {
-            // vUv.y goes from 1.0 (bottom) to 0.0 (top) on a CylinderGeometry
-            float altitude = 1.0 - vUv.y; 
-            
-            // Base structural waves
-            float wave1 = sin(vUv.x * 60.0 + time * 2.5);
-            float wave2 = sin(vUv.x * 120.0 - time * 1.8);
-            float wave3 = cos(vUv.x * 30.0 + time * 0.5);
-            
-            // Create vertical striations (curtains)
-            float striation = smoothstep(0.2, 0.8, (wave1 * 0.5 + 0.5) * (wave2 * 0.5 + 0.5));
-            striation *= (wave3 * 0.5 + 0.5);
-            
-            // High frequency micro-bands
-            float micro = hash(floor(vUv.x * 400.0));
-            striation += micro * 0.15;
-            
-            // Color gradient from bottom to top
-            // Green concentrated at bottom, blending to magenta/pink at the very top fringes
-            vec3 baseColor = mix(colorBottom, colorTop, pow(altitude, 1.8));
-            
-            // Intensity fades at the very bottom and completely fades at the top edge
-            float verticalFade = smoothstep(0.0, 0.2, altitude) * smoothstep(1.0, 0.4, altitude);
-            
-            // Combine limits
-            float alpha = striation * verticalFade * 0.8;
-            
-            // Add a pulsing glow
-            alpha *= 0.6 + 0.4 * sin(time * 0.5 + vUv.x * 10.0);
-            
-            gl_FragColor = vec4(baseColor, alpha);
-        }
-    `,
-    side: THREE.DoubleSide,
-    blending: THREE.AdditiveBlending,
-    transparent: true,
-    depthWrite: false
-};
-const auroraMat = new THREE.ShaderMaterial(auroraShader);
-
-window.auroraNorth = new THREE.Mesh(auroraGeo1, auroraMat);
-window.auroraNorth.rotation.x = -Math.PI / 2;
-window.auroraNorth.position.y = GLOBE_R - 0.1; // North pole
-window.atmosphereGroup.add(window.auroraNorth);
-
-window.auroraSouth = new THREE.Mesh(auroraGeo2, auroraMat);
-window.auroraSouth.rotation.x = Math.PI / 2;
-window.auroraSouth.position.y = -(GLOBE_R - 0.1); // South pole
-window.atmosphereGroup.add(window.auroraSouth);
-
-// =====================================================================
-// LIVE WEBCAMS
-// =====================================================================
-window.webcamGroup = new THREE.Group();
-window.webcamGroup.visible = false; // Hidden by default; shown per-skin below
-scene.add(window.webcamGroup);
-
-// Create a glowing yellow dot texture for the webcams
-const camCanvas = document.createElement('canvas');
-camCanvas.width = 128; camCanvas.height = 128;
-const camCtx = camCanvas.getContext('2d');
-const camGrad = camCtx.createRadialGradient(64, 64, 10, 64, 64, 60);
-camGrad.addColorStop(0, 'rgba(255, 255, 0, 1)'); 
-camGrad.addColorStop(0.3, 'rgba(255, 200, 0, 0.8)'); 
-camGrad.addColorStop(1, 'rgba(255, 200, 0, 0)');
-camCtx.fillStyle = camGrad;
-camCtx.fillRect(0, 0, 128, 128);
-const camTex = new THREE.CanvasTexture(camCanvas);
-const camMat = new THREE.SpriteMaterial({ map: camTex, transparent: true, blending: THREE.AdditiveBlending });
-
-// Generate 50 random live webcam locations
-for (let i = 0; i < 50; i++) {
-    const lat = (Math.random() - 0.5) * 160; // -80 to 80 to avoid strict poles
-    const lon = (Math.random() - 0.5) * 360; // -180 to 180
-    
-    // Use the existing ll2v function definition which we will hoist or call later if already defined
-    const phi = (90 - lat) * (Math.PI / 180);
-    const theta = (lon + 180) * (Math.PI / 180);
-    const r = GLOBE_R + 0.05; // Slightly above globe surface
-    
-    const pos = new THREE.Vector3(
-        -(r * Math.sin(phi) * Math.cos(theta)),
-        r * Math.cos(phi),
-        r * Math.sin(phi) * Math.sin(theta)
-      );
-
-      const camSprite = new THREE.Sprite(camMat);
-      camSprite.scale.set(0.15, 0.15, 1); // Big yellow dots
-      camSprite.position.copy(pos);
-      window.webcamGroup.add(camSprite);
-    }
-
-    // =====================================================================
-    // PERSISTENT YELLOW DOTS (EXCEPT LIVE/CYBER)
-    // =====================================================================
-    window.yellowDotsGroup = new THREE.Group();
-    window.yellowDotsGroup.visible = false; // Hidden on 'LIVE' which is default skin
-    scene.add(window.yellowDotsGroup);
-
-    // Generate 50 random yellow dots
-    for (let i = 0; i < 50; i++) {
-      const lat = (Math.random() - 0.5) * 160;
-      const lon = (Math.random() - 0.5) * 360;
-
-      const phi = (90 - lat) * (Math.PI / 180);
-      const theta = (lon + 180) * (Math.PI / 180);
-      const r = GLOBE_R + 0.055; // Slightly above globe 
-
-      const pos = new THREE.Vector3(
-        -(r * Math.sin(phi) * Math.cos(theta)),
-        r * Math.cos(phi),
-        r * Math.sin(phi) * Math.sin(theta)
-      );
-
-      const dotSprite = new THREE.Sprite(camMat); // Reusing the yellow glowing texture
-      dotSprite.scale.set(0.12, 0.12, 1);
-      dotSprite.position.copy(pos);
-      window.yellowDotsGroup.add(dotSprite);
-    }
-
-
-    // =====================================================================
-    // INTERNATIONAL SPACE STATION (ISS)
-    // =====================================================================
-    const issOrbitGroup = new THREE.Group(); // Parent group to rotate around Earth center
-    const issGroup = new THREE.Group();      // The actual station mesh group
-
-    // --- REALISTIC ISS COMPOSITE BUILD ---
-    // Materials
-    const trussMat = new THREE.MeshPhongMaterial({ color: 0x999999, wireframe: true }); // Fake structural look
-    const moduleMat = new THREE.MeshPhongMaterial({ color: 0xe0e0e0, specular: 0xffffff, shininess: 30 });
-    const moduleDetailMat = new THREE.MeshPhongMaterial({ color: 0xb0b0b0, specular: 0xffffff, shininess: 10 });
-    const panelMat = new THREE.MeshPhongMaterial({ color: 0x1a4b8c, specular: 0x5599ff, shininess: 100, side: THREE.DoubleSide });
-    const radiatorMat = new THREE.MeshPhongMaterial({ color: 0xffffff, specular: 0xaaaaaa, shininess: 10, side: THREE.DoubleSide });
-    const goldMat = new THREE.MeshPhongMaterial({ color: 0xffaa00, specular: 0xffffff, shininess: 90 });
-
-    // 1. Integrated Truss Structure (The long spine)
-    const mainTruss = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.02, 0.02), trussMat);
-    issGroup.add(mainTruss);
-
-    // 2. Central Modules (Zarya, Zvezda, Unity, Destiny, etc. stacked along Z axis)
-    const habCore = new THREE.Group();
-
-    // Russian Segment (rear)
-    const zvezda = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.02, 0.1, 16), moduleMat);
-    zvezda.rotation.x = Math.PI / 2;
-    zvezda.position.z = -0.15;
-    habCore.add(zvezda);
-
-    const zarya = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.12, 16), moduleMat);
-    zarya.rotation.x = Math.PI / 2;
-    zarya.position.z = -0.04;
-    habCore.add(zarya);
-
-    // US Segment (front)
-    const unityNode = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.06, 16), moduleDetailMat);
-    unityNode.rotation.x = Math.PI / 2;
-    unityNode.position.z = 0.05;
-    habCore.add(unityNode);
-
-    const destinyLab = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.12, 16), moduleMat);
-    destinyLab.rotation.x = Math.PI / 2;
-    destinyLab.position.z = 0.14;
-    habCore.add(destinyLab);
-
-    const harmonyNode = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.08, 16), moduleDetailMat);
-    harmonyNode.rotation.x = Math.PI / 2;
-    harmonyNode.position.z = 0.24;
-    habCore.add(harmonyNode);
-
-    // Columbus (Side attached to Node 2)
-    const columbus = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.08, 16), moduleMat);
-    columbus.rotation.z = Math.PI / 2;
-    columbus.position.set(0.05, 0, 0.24);
-    habCore.add(columbus);
-
-    // Kibo (Side attached to Node 2)
-    const kibo = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.12, 16), moduleMat);
-    kibo.rotation.z = Math.PI / 2;
-    kibo.position.set(-0.07, 0, 0.24);
-    habCore.add(kibo);
-
-    // 3. Docked Vehicles (Soyuz/Dragon capsules)
-    const dragon = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.01, 0.04, 16), moduleMat);
-    dragon.rotation.x = Math.PI / 2;
-    dragon.position.set(0, 0.04, 0.24); // Docked to zenith harmony
-    habCore.add(dragon);
-
-    const soyuz = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.012, 0.05, 16), moduleDetailMat);
-    soyuz.rotation.x = Math.PI / 2;
-    soyuz.position.set(0, -0.04, -0.15); // Docked to nadir zvezda
-    habCore.add(soyuz);
-
-    issGroup.add(habCore);
-
-    // 4. Solar Arrays (8 pairs total, simplified as 4 large dual-plane structures)
-    const createSolarWing = (xPos) => {
-      const wing = new THREE.Group();
-      const panelGeo = new THREE.PlaneGeometry(0.08, 0.25);
-      // Forward panel
-      const p1 = new THREE.Mesh(panelGeo, panelMat);
-      p1.rotation.x = Math.PI / 2;
-      p1.position.set(0, 0, 0.06);
-      wing.add(p1);
-      // Aft panel
-      const p2 = new THREE.Mesh(panelGeo, panelMat);
-      p2.rotation.x = Math.PI / 2;
-      p2.position.set(0, 0, -0.06);
-      wing.add(p2);
-
-      // Gold supporting mast
-      const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.003, 0.3, 4), goldMat);
-      mast.rotation.x = Math.PI / 2;
-      wing.add(mast);
-
-      wing.position.x = xPos;
-      return wing;
-    };
-
-    // Add wings to the truss (far port, inner port, inner stbd, far stbd)
-    issGroup.add(createSolarWing(-0.35));
-    issGroup.add(createSolarWing(-0.22));
-    issGroup.add(createSolarWing(0.22));
-    issGroup.add(createSolarWing(0.35));
-
-    // 5. Radiator Panels (Thermal dissipation)
-    const createRadiator = (xPos, zOrient) => {
-      const rad = new THREE.Mesh(new THREE.PlaneGeometry(0.04, 0.15), radiatorMat);
-      rad.rotation.y = Math.PI / 2;
-      rad.position.set(xPos, -0.08, zOrient);
-      return rad;
-    };
-
-    // Central radiating systems dropping down
-    issGroup.add(createRadiator(-0.05, 0.05));
-    issGroup.add(createRadiator(0.05, 0.05));
-    issGroup.add(createRadiator(-0.05, -0.05));
-    issGroup.add(createRadiator(0.05, -0.05));
-
-    // 6. "LIVE FEED!" UI Label Sprite attached directly to the ISS
-    const issLabelCanvas = document.createElement('canvas');
-    issLabelCanvas.width = 512;
-    issLabelCanvas.height = 128;
-    const issCtx = issLabelCanvas.getContext('2d');
-    issCtx.fillStyle = '#ff2222';
-    issCtx.shadowColor = '#ff0000';
-    issCtx.shadowBlur = 15;
-    issCtx.font = "bold 60px 'Share Tech Mono', monospace";
-    issCtx.textAlign = "center";
-    issCtx.textBaseline = "middle";
-    issCtx.fillText("🔴 LIVE FEED!", 256, 64);
-
-    const issLabelTex = new THREE.CanvasTexture(issLabelCanvas);
-    const issLabelMat = new THREE.SpriteMaterial({ map: issLabelTex, color: 0xffffff, transparent: true });
-    const issLabelSprite = new THREE.Sprite(issLabelMat);
-    // Scale appropriately relative to the ISS group
-    issLabelSprite.scale.set(0.6, 0.15, 1);
-    // Position it hovering slightly above the station
-    issLabelSprite.position.set(0, 0.35, 0);
-    issGroup.add(issLabelSprite);
-
-    // Position the ISS in low earth orbit (shifted further out and scaled smaller)
-    issGroup.scale.setScalar(0.25);
-    issGroup.position.set(GLOBE_R + 0.84, 0, 0);
-    issOrbitGroup.add(issGroup);
-
-    // Initial inclination (tilt the orbit so it's not perfectly on the equator)
-    issOrbitGroup.rotation.z = Math.PI / 6;
-    issOrbitGroup.rotation.x = Math.PI / 8;
-
-    scene.add(issOrbitGroup);
-    window.issGroup = issGroup; // Expose globally to bind click interactions
-    window.issOrbitGroup = issOrbitGroup; // Expose for animation loop
-
-
-    // =====================================================================
-    // Economy Sprite removed
-
-    // Atmosphere
-    scene.add(new THREE.Mesh(
-      new THREE.SphereGeometry(GLOBE_R * 1.06, 32, 32),
-      new THREE.MeshBasicMaterial({ color: 0x1155cc, side: THREE.BackSide, transparent: true, opacity: .35 })
-    ));
-
-    // Grid
-    const gm = new THREE.LineBasicMaterial({ color: 0x004488, transparent: true, opacity: .1 });
-    function addLine(pts) { scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), gm)); }
-    for (let la = -80; la <= 80; la += 20) { const p = []; for (let lo = -180; lo <= 180; lo += 3)p.push(ll2v(la, lo, GLOBE_R + .001)); addLine(p); }
-    for (let lo = -180; lo < 180; lo += 20) { const p = []; for (let la = -90; la <= 90; la += 3)p.push(ll2v(la, lo, GLOBE_R + .001)); addLine(p); }
-
-    // Equator
-    const ep = []; for (let lo = -180; lo <= 180; lo += 2)ep.push(ll2v(0, lo, GLOBE_R + .002));
-    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(ep),
-      new THREE.LineBasicMaterial({ color: 0x00aaff, transparent: true, opacity: .3 })));
-
-    // Lighting
-    scene.add(new THREE.AmbientLight(0x334455, 1.3));
-    const sun = new THREE.DirectionalLight(0xffeedd, 2.0); sun.position.set(5, 2, 4); scene.add(sun);
-    const fill = new THREE.DirectionalLight(0x223366, .4); fill.position.set(-4, -1, -3); scene.add(fill);
-
-    // Helpers
-    function ll2v(lat, lon, r) {
-      const phi = (90 - lat) * (Math.PI / 180);
-      const theta = (lon + 180) * (Math.PI / 180);
-
-      return new THREE.Vector3(
-        -(r * Math.sin(phi) * Math.cos(theta)),
-        r * Math.cos(phi),
-        r * Math.sin(phi) * Math.sin(theta)
-      );
-    }
-
-    // =====================================================================
-    // ORBIT CONTROLS
-    // =====================================================================
-    let drag = false, prevM = { x: 0, y: 0 };
-    let sph = { theta: .3, phi: 1.1, r: 3.5 };
-
-    function updCam() {
-      camera.position.set(
-        sph.r * Math.sin(sph.phi) * Math.cos(sph.theta),
-        sph.r * Math.cos(sph.phi),
-        sph.r * Math.sin(sph.phi) * Math.sin(sph.theta)
-      );
-      camera.lookAt(0, 0, 0);
-    }
-    updCam();
-
-    canvas.addEventListener('mousedown', e => { if (e.button === 2) { drag = true; prevM = { x: e.clientX, y: e.clientY }; } });
-    canvas.addEventListener('contextmenu', e => e.preventDefault());
-    window.addEventListener('mousemove', e => {
-      if (!drag) return;
-      sph.theta -= (prevM.x - e.clientX) * .005;
-      sph.phi = Math.max(.1, Math.min(Math.PI - .1, sph.phi + (prevM.y - e.clientY) * .005));
-      prevM = { x: e.clientX, y: e.clientY }; updCam();
-    });
-    window.addEventListener('mouseup', () => drag = false);
-    canvas.addEventListener('wheel', e => {
-      sph.r = Math.max(1.4, Math.min(8, sph.r + e.deltaY * .003));
-      updCam(); e.preventDefault();
-    }, { passive: false });
-
-    // =====================================================================
-    // GAME STATE
-    // =====================================================================
-    let GS = {
-      countries: {},     // iso -> {name,lat,lon,owner,troops,nuked,instabilityLevel}
-      players: [],       // [{name,color,nukes,alive}]
-      turn: 0,           // player index
-      turnCount: 1,      // overall turn number
-      phase: 'REINFORCE',// REINFORCE|ATTACK|FORTIFY
-      reinforceLeft: 0,
-      selected: null,    // iso of selected country
-      fortifyFrom: null,
-      isOnline: false,
-      myIndex: 0,
-      roomCode: '',
-      AI_STATE: {
-        techLevel: 1,
-        intelligenceLevel: 1,
-        aggressionLevel: 1,
-        adaptabilityScore: 1,
-        energy: 10,
-        threatTier: 1
-      },
-      globalMetrics: {
-        powerGrid: 100,
-        comms: 100,
-        economy: 100,
-        airTrafficDisabledTurns: 0,
-        satelliteDisruptedTurns: 0,
-        commJamTurns: 0,
-        globalEconomyD3X: 123000000000000
-      }
-    };
-
-    let pendingPerk = null;
-
-    let countryBorders = {}; // iso -> THREE.Line
-    let countryData = {}; // iso -> {name,lat,lon,polygons:[]}
-    let ws = null;
-
-    // =====================================================================
-    // GEOJSON COUNTRY LOADING
-    // =====================================================================
-    const GEOJSON_URL = 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_countries.geojson';
-
-    async function loadCountries(retries = 3) {
-      setLog('⟳ Loading world map data...');
-      let res;
-      for (let i = 0; i < retries; i++) {
-        try {
-          res = await fetch(GEOJSON_URL);
-          if (res.ok) break;
-        } catch (e) {
-          if (i === retries - 1) {
-            setLog('⚠ failed to load world geometry. Please refresh.');
-            return;
-          }
-          setLog(`⚠ retrying map data (${i + 1}/${retries})...`);
-          await new Promise(r => setTimeout(r, 1000));
-        }
-      }
-
-      if (!res || !res.ok) {
-        setLog('⚠ failed to load world geometry.');
-        return;
-      }
-
-      const json = await res.json();
-
-      json.features.forEach(f => {
-        const p = f.properties;
-        const iso = p.gu_a3 || p.iso_a3 || p.adm0_a3;
-        if (!iso || iso === '-99') return;
-
-        // Bounding box center as lat/lon
-        let sumLat = 0, sumLon = 0, cnt = 0;
-        const polys = [];
-
-        // Helper to apply prime meridian offset and wrap dateline
-        const oLon = (lon) => {
-          let l = lon;
-          if (l < -180) l += 360;
-          if (l > 180) l -= 360;
-          return l;
-        };
-
-        const extractRing = ring => {
-          const pts = ring.map(([lon, lat]) => ll2v(lat, oLon(lon), GLOBE_R + .003));
-          polys.push(ring.map(([lon, lat]) => ({ lat, lon: oLon(lon) })));
-
-          // Calculate ring centroid using offset longitude, handling dateline wrap naively as before
-          let tLon = 0, tLat = 0;
-          ring.forEach(([lo, la]) => {
-            tLon += oLon(lo);
-            tLat += la;
-          });
-          sumLon += tLon / ring.length;
-          sumLat += tLat / ring.length;
-
-          cnt++;
-          return new THREE.BufferGeometry().setFromPoints(pts);
-        };
-
-        const geos = [];
-        if (f.geometry.type === 'Polygon') {
-          f.geometry.coordinates.forEach(r => geos.push(extractRing(r)));
-        } else if (f.geometry.type === 'MultiPolygon') {
-          f.geometry.coordinates.forEach(poly => poly.forEach(r => geos.push(extractRing(r))));
-        }
-
-        if (!geos.length) return;
-
-        // Calculate bounding box for the country to sample random points
-        let minLat = 90, maxLat = -90, minLon = 180, maxLon = -180;
-        polys.forEach(poly => {
-          poly.forEach(pt => {
-            if (pt.lat < minLat) minLat = pt.lat;
-            if (pt.lat > maxLat) maxLat = pt.lat;
-            if (pt.lon < minLon) minLon = pt.lon;
-            if (pt.lon > maxLon) maxLon = pt.lon;
-          });
-        });
-
-        let bestLat = sumLat / cnt;
-        let bestLon = sumLon / cnt;
-
-        // 85% chance to force the point onto explicit dry land (inside the polygon)
-        // 15% chance to let it naturally fall near the coast/water as per user request
-        if (Math.random() < 0.85) {
-          for (let iter = 0; iter < 100; iter++) {
-            const testLat = minLat + Math.random() * (maxLat - minLat);
-            const testLon = minLon + Math.random() * (maxLon - minLon);
-            let inside = false;
-            for (const poly of polys) {
-              if (pointInPoly(testLat, testLon, poly)) { inside = true; break; }
-            }
-            if (inside) {
-              bestLat = testLat;
-              bestLon = testLon;
-              break;
-            }
-          }
-        }
-
-        // Generate dense dots for visual representation
-        const denseDots = [];
-        denseDots.push({ lat: bestLat, lon: bestLon });
-        const extraDots = Math.min(80, Math.max(8, Math.floor(cnt / 8)));
-        for (let dots = 0; dots < extraDots; dots++) {
-          for (let iter = 0; iter < 50; iter++) {
-            const testLat = minLat + Math.random() * (maxLat - minLat);
-            const testLon = minLon + Math.random() * (maxLon - minLon);
-            let inside = false;
-            for (const poly of polys) {
-              if (pointInPoly(testLat, testLon, poly)) { inside = true; break; }
-            }
-            if (inside) {
-              denseDots.push({ lat: testLat, lon: testLon });
-              break;
-            }
-          }
-        }
-        // Add coastal padding dots
-        for (let dots = 0; dots < Math.floor(extraDots * 0.2); dots++) {
-          denseDots.push({
-            lat: minLat + Math.random() * (maxLat - minLat),
-            lon: minLon + Math.random() * (maxLon - minLon)
-          });
-        }
-
-        countryData[iso] = { name: p.name || iso, lat: bestLat, lon: bestLon, polys, denseDots };
-
-        if (iso === 'USA') {
-          for (let i = 1; i <= 10; i++) {
-            countryData[`USA_V${i}`] = {
-              name: `US Sector ${i}`,
-              lat: 30 + Math.random() * 18,
-              lon: -125 + Math.random() * 50,
-              polys: []
-            };
-          }
-        }
-        if (iso === 'CHN') {
-          for (let i = 1; i <= 10; i++) {
-            countryData[`CHN_V${i}`] = {
-              name: `China Sector ${i}`,
-              lat: 22 + Math.random() * 18,
-              lon: 80 + Math.random() * 40,
-              polys: []
-            };
-          }
-        }
-
-        // Draw border lines
-        // Build border lines geometry but do not render them on the globe
-        const mat = new THREE.LineBasicMaterial({ color: NEUTRAL.int, transparent: true, opacity: .6 });
-        const group = new THREE.Group();
-        geos.forEach(geo => group.add(new THREE.Line(geo, mat.clone())));
-        group.userData = { iso, mat };
-        group.visible = true; // Show borders per user request
-        countryBorders[iso] = group;
-        scene.add(group);
-      });
-
-      setLog(`✓ ${Object.keys(countryData).length} countries loaded`);
-    }
-
-    // Point-in-polygon test (2D lat/lon)
-    function pointInPoly(lat, lon, poly) {
-      let inside = false;
-      for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-        const xi = poly[i].lon, yi = poly[i].lat, xj = poly[j].lon, yj = poly[j].lat;
-        if (((yi > lat) !== (yj > lat)) && (lon < (xj - xi) * (lat - yi) / (yj - yi) + xi)) inside = !inside;
-      }
-      return inside;
-    }
-
-    function getCountryAt(lat, lon) {
-      let closest = null;
-      let minDist = Infinity;
-      for (const [iso, cd] of Object.entries(countryData)) {
-        if (!cd.polys) continue;
-        for (const poly of cd.polys) {
-          if (pointInPoly(lat, lon, poly)) return iso;
-        }
-        // Fallback for tiny states/islands (Haversine approx distance)
-        if (cd.lat !== undefined && cd.lon !== undefined) {
-          const dLat = Math.abs(lat - cd.lat) * Math.PI / 180;
-          const dLon = Math.abs(lon - cd.lon) * Math.PI / 180;
-          const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat * Math.PI / 180) * Math.cos(cd.lat * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
-          const dist = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-          if (dist < minDist) { minDist = dist; closest = iso; }
-        }
-      }
-      // If no polygon hit, return the closest center if it's within ~500 miles (0.15 rads)
-      if (closest && minDist < 0.15) return closest;
-      return null;
-    }
-  </script>
-  <script>
-    // =====================================================================
-    // GAME INITIALIZATION
-    // =====================================================================
-    // =====================================================================
-    // PHASE 1: REAL-WORLD COUNTRY STATS (GDP in $B, mil_rank 1-100, pop in M)
-    // =====================================================================
-    const COUNTRY_STATS = {
-      USA: { gdp: 26000, mil: 100, pop: 334 }, CHN: { gdp: 18000, mil: 95, pop: 1412 }, IND: { gdp: 3700, mil: 80, pop: 1428 },
-      RUS: { gdp: 2240, mil: 90, pop: 144 }, DEU: { gdp: 4400, mil: 60, pop: 84 }, GBR: { gdp: 3100, mil: 65, pop: 67 },
-      FRA: { gdp: 3000, mil: 62, pop: 68 }, JPN: { gdp: 4300, mil: 55, pop: 125 }, BRA: { gdp: 2100, mil: 50, pop: 215 },
-      CAN: { gdp: 2100, mil: 45, pop: 38 }, KOR: { gdp: 1700, mil: 58, pop: 52 }, AUS: { gdp: 1700, mil: 44, pop: 26 },
-      MEX: { gdp: 1490, mil: 35, pop: 129 }, IDN: { gdp: 1390, mil: 42, pop: 277 }, SAU: { gdp: 1100, mil: 48, pop: 36 },
-      TUR: { gdp: 1150, mil: 52, pop: 85 }, NLD: { gdp: 1000, mil: 36, pop: 17 }, ARE: { gdp: 500, mil: 40, pop: 10 },
-      ISR: { gdp: 520, mil: 56, pop: 9 }, PAK: { gdp: 376, mil: 44, pop: 231 }, NGA: { gdp: 477, mil: 30, pop: 223 },
-      ARG: { gdp: 630, mil: 32, pop: 46 }, EGY: { gdp: 476, mil: 38, pop: 105 }, ZAF: { gdp: 419, mil: 28, pop: 60 },
-      UKR: { gdp: 200, mil: 46, pop: 44 }, POL: { gdp: 750, mil: 38, pop: 38 }, SWE: { gdp: 590, mil: 34, pop: 10 },
-      NOR: { gdp: 480, mil: 32, pop: 5 }, PHL: { gdp: 404, mil: 28, pop: 115 }, MYS: { gdp: 430, mil: 26, pop: 33 },
-      VNM: { gdp: 406, mil: 30, pop: 98 }, BGD: { gdp: 460, mil: 22, pop: 170 }, COL: { gdp: 363, mil: 26, pop: 52 },
-      CHL: { gdp: 360, mil: 24, pop: 19 }, IRQ: { gdp: 268, mil: 30, pop: 42 }, IRN: { gdp: 367, mil: 42, pop: 87 },
-      PRK: { gdp: 30, mil: 50, pop: 26 }, SYR: { gdp: 22, mil: 18, pop: 21 }, LBY: { gdp: 52, mil: 12, pop: 7 },
-      SDN: { gdp: 35, mil: 14, pop: 46 }, ETH: { gdp: 156, mil: 14, pop: 126 }, TZA: { gdp: 77, mil: 8, pop: 64 },
-      KEN: { gdp: 110, mil: 8, pop: 56 }, GHA: { gdp: 76, mil: 6, pop: 33 }, ANG: { gdp: 95, mil: 12, pop: 35 },
-      MOZ: { gdp: 18, mil: 4, pop: 33 }, ZMB: { gdp: 22, mil: 3, pop: 19 }, ZIM: { gdp: 25, mil: 5, pop: 16 },
-      ALG: { gdp: 191, mil: 20, pop: 45 }, MAR: { gdp: 142, mil: 16, pop: 37 }, TUN: { gdp: 47, mil: 10, pop: 12 },
-      PRT: { gdp: 262, mil: 18, pop: 10 }, ESP: { gdp: 1500, mil: 40, pop: 47 }, ITA: { gdp: 2190, mil: 45, pop: 60 },
-      GRC: { gdp: 240, mil: 20, pop: 11 }, ROU: { gdp: 300, mil: 24, pop: 19 }, HUN: { gdp: 188, mil: 16, pop: 10 },
-      CZE: { gdp: 330, mil: 18, pop: 11 }, AUT: { gdp: 515, mil: 16, pop: 9 }, CHE: { gdp: 800, mil: 18, pop: 9 },
-      BEL: { gdp: 580, mil: 22, pop: 12 }, DNK: { gdp: 390, mil: 18, pop: 6 }, FIN: { gdp: 300, mil: 20, pop: 6 },
-      SGP: { gdp: 470, mil: 30, pop: 6 }, HKG: { gdp: 360, mil: 5, pop: 7 }, TWN: { gdp: 760, mil: 44, pop: 24 },
-      THA: { gdp: 500, mil: 22, pop: 72 }, MMR: { gdp: 65, mil: 18, pop: 54 }, KHM: { gdp: 26, mil: 6, pop: 17 },
-      LAO: { gdp: 14, mil: 4, pop: 7 }, NPL: { gdp: 40, mil: 6, pop: 30 }, LKA: { gdp: 84, mil: 10, pop: 22 },
-      AFG: { gdp: 14, mil: 12, pop: 40 }, UZB: { gdp: 80, mil: 14, pop: 36 }, KAZ: { gdp: 220, mil: 18, pop: 19 },
-      GEO: { gdp: 24, mil: 8, pop: 4 }, AZE: { gdp: 95, mil: 16, pop: 10 }, ARM: { gdp: 20, mil: 12, pop: 3 },
-      BLR: { gdp: 73, mil: 22, pop: 10 }, MDA: { gdp: 15, mil: 4, pop: 3 }, LTU: { gdp: 74, mil: 12, pop: 3 },
-      LVA: { gdp: 43, mil: 10, pop: 2 }, EST: { gdp: 38, mil: 10, pop: 1 }, SVK: { gdp: 120, mil: 12, pop: 5 },
-      SVN: { gdp: 66, mil: 8, pop: 2 }, HRV: { gdp: 80, mil: 10, pop: 4 }, SRB: { gdp: 66, mil: 12, pop: 7 },
-      BIH: { gdp: 24, mil: 6, pop: 3 }, ALB: { gdp: 18, mil: 5, pop: 3 }, MKD: { gdp: 14, mil: 4, pop: 2 },
-      MNE: { gdp: 6, mil: 3, pop: 1 }, BLZ: { gdp: 2, mil: 1, pop: 0.4 }, GTM: { gdp: 85, mil: 6, pop: 18 },
-      HND: { gdp: 28, mil: 4, pop: 10 }, SLV: { gdp: 34, mil: 4, pop: 6 }, NIC: { gdp: 16, mil: 3, pop: 7 },
-      CRI: { gdp: 65, mil: 0, pop: 5 }, PAN: { gdp: 68, mil: 5, pop: 4 }, CUB: { gdp: 100, mil: 14, pop: 11 },
-      VEN: { gdp: 105, mil: 14, pop: 29 }, BOL: { gdp: 44, mil: 6, pop: 12 }, PRY: { gdp: 42, mil: 4, pop: 7 },
-      URY: { gdp: 70, mil: 6, pop: 4 }, PER: { gdp: 240, mil: 18, pop: 33 }, ECU: { gdp: 113, mil: 10, pop: 18 },
-      GUY: { gdp: 20, mil: 2, pop: 0.8 }, JAM: { gdp: 16, mil: 2, pop: 3 }, TTO: { gdp: 22, mil: 4, pop: 1.4 },
-      NZL: { gdp: 250, mil: 10, pop: 5 }, PNG: { gdp: 28, mil: 3, pop: 10 }, FJI: { gdp: 4, mil: 1, pop: 0.9 },
-      SOM: { gdp: 7, mil: 5, pop: 18 }, DJI: { gdp: 4, mil: 4, pop: 1 }, ERI: { gdp: 2, mil: 8, pop: 3 },
-      UGA: { gdp: 48, mil: 6, pop: 48 }, RWA: { gdp: 13, mil: 4, pop: 14 }, BDI: { gdp: 3, mil: 2, pop: 12 },
-      COD: { gdp: 60, mil: 10, pop: 100 }, CMR: { gdp: 46, mil: 5, pop: 28 }, CIV: { gdp: 68, mil: 5, pop: 27 },
-      SEN: { gdp: 28, mil: 4, pop: 17 }, MLI: { gdp: 20, mil: 5, pop: 22 }, BFA: { gdp: 19, mil: 4, pop: 22 },
-      NER: { gdp: 17, mil: 3, pop: 26 }, TCD: { gdp: 12, mil: 5, pop: 17 }, CAF: { gdp: 2, mil: 2, pop: 5 },
-      GAB: { gdp: 19, mil: 3, pop: 2 }, GNQ: { gdp: 12, mil: 2, pop: 1.5 }, COG: { gdp: 14, mil: 2, pop: 6 },
-      MWI: { gdp: 12, mil: 2, pop: 20 }, LSO: { gdp: 3, mil: 1, pop: 2 }, SWZ: { gdp: 4, mil: 1, pop: 1.2 },
-      NAM: { gdp: 13, mil: 2, pop: 3 }, BWA: { gdp: 20, mil: 2, pop: 3 }, MDG: { gdp: 14, mil: 2, pop: 28 },
-      MUS: { gdp: 13, mil: 1, pop: 1.3 }, SYC: { gdp: 2, mil: 0, pop: 0.1 }, CPV: { gdp: 2, mil: 0, pop: 0.6 },
-      GMB: { gdp: 2, mil: 1, pop: 2.6 }, GNB: { gdp: 2, mil: 1, pop: 2 }, SLE: { gdp: 4, mil: 1, pop: 8 },
-      LBR: { gdp: 4, mil: 1, pop: 5 }, TGO: { gdp: 8, mil: 2, pop: 8 }, BEN: { gdp: 18, mil: 2, pop: 13 },
-      GIN: { gdp: 20, mil: 4, pop: 13 }, QAT: { gdp: 220, mil: 24, pop: 3 }, KWT: { gdp: 145, mil: 20, pop: 4 },
-      BHR: { gdp: 44, mil: 12, pop: 1.5 }, OMN: { gdp: 88, mil: 18, pop: 5 }, YEM: { gdp: 20, mil: 8, pop: 34 },
-      JOR: { gdp: 47, mil: 16, pop: 10 }, LBN: { gdp: 22, mil: 8, pop: 5 }, PSE: { gdp: 20, mil: 4, pop: 5 },
-      MDV: { gdp: 7, mil: 0, pop: 0.5 }, BTN: { gdp: 3, mil: 1, pop: 0.8 }, TLS: { gdp: 3, mil: 1, pop: 1.3 },
-      BRN: { gdp: 14, mil: 5, pop: 0.5 }, MNG: { gdp: 17, mil: 4, pop: 3 }, TKM: { gdp: 40, mil: 6, pop: 6 },
-      TJK: { gdp: 11, mil: 4, pop: 10 }, KGZ: { gdp: 12, mil: 4, pop: 7 }, WSM: { gdp: 1, mil: 0, pop: 0.2 },
-      TON: { gdp: 0.5, mil: 0, pop: 0.1 }, VUT: { gdp: 1, mil: 0, pop: 0.3 }, SLB: { gdp: 1.5, mil: 0, pop: 0.7 },
-    };
-    // Helper: get stat for a country (fallback if unknown)
-    function getCountryStat(iso) {
-      return COUNTRY_STATS[iso] || { gdp: 5, mil: 2, pop: 1 };
-    }
-
-    // =====================================================================
-    // PHASE 2: FOG OF WAR
-    // =====================================================================
-    let fogEnabled = true;
-
-    function computeVisibility() {
-      if (!fogEnabled) return null;
-      const myTerritories = new Set(
-        Object.entries(GS.countries || {})
-          .filter(([, c]) => c.owner === GS.myIndex)
-          .map(([iso]) => iso)
-      );
-      const visible = new Set(myTerritories);
-
-      // Add all countries geographically adjacent (within ~20 degrees lat/lon)
-      const myArr = Array.from(myTerritories);
-      Object.keys(countryData || {}).forEach(iso => {
-        if (visible.has(iso)) return;
-        const cd = countryData[iso];
-        if (!cd) return;
-        for (const myIso of myArr) {
-          const mcd = countryData[myIso];
-          if (!mcd) continue;
-          const dlat = Math.abs(cd.lat - mcd.lat);
-          const dlon = Math.abs(cd.lon - mcd.lon);
-          const dist = Math.sqrt(dlat * dlat + dlon * dlon);
-          if (dist < 22) { visible.add(iso); break; }
-        }
-      });
-      return visible;
-    }
-
-    function applyFogOfWar() {
-      if (!GS.countries) return;
-      const visible = computeVisibility();
-      Object.entries(troopSprites).forEach(([iso, sprite]) => {
-        if (!sprite) return;
-        if (visible && !visible.has(iso)) {
-          sprite.material.opacity = 0.15;
-          sprite.material.transparent = true;
-        } else {
-          sprite.material.opacity = 1.0;
-          sprite.material.transparent = true;
-        }
-      });
-    }
-
-    function initGame(playerNames, myIndex) {
-      GS.players = playerNames.map((name, i) => ({
-        name, index: i, color: PLAYER_COLORS[i], nukes: 2, alive: true, troops: 0, budget: 500
-      }));
-      GS.myIndex = myIndex;
-
-      // Assign countries — seed from real-world stats
-      const isos = Object.keys(countryData);
-
-      // REALISTIC GEOPOLITICS
-      const HUMAN_BLOC = ['USA', 'GBR', 'FRA', 'DEU', 'JPN', 'KOR', 'AUS', 'CAN', 'POL', 'ITA', 'ESP', 'UKR', 'ISR', 'TWN', 'NLD', 'BEL', 'SWE', 'NOR', 'FIN', 'DNK', 'GRC', 'PRT', 'CZE', 'ROU', 'CHE', 'AUT', 'NZL', 'PHL', 'CHL', 'ARG', 'COL'];
-      const RAINCLAUDE_BLOC = ['RUS', 'CHN', 'IRN', 'PRK', 'SYR', 'BLR', 'VEN', 'CUB', 'MMR', 'NIC', 'ERI', 'MLI', 'BFA', 'NER', 'CAF', 'ZIM', 'SDN'];
-
-      const EXACT_BASE_TROOPS_PER_FACTION = 50000; // Multiplied by 10k in UI: 50,000 * 10,000 = 500,000,000 troops per side
-
-      // Collect all isos
-      let allIsos = [...isos];
-      // Calculate how many countries each faction should roughly get (Half of the world)
-      const targetTerritoriesPerFaction = Math.floor(allIsos.length / 2); // Should be 101 each
-      const troopsPerCountry = Math.floor(EXACT_BASE_TROOPS_PER_FACTION / targetTerritoriesPerFaction); // ~495 base troops
-
-      // We assign sequentially to ensure EXACT 50/50 split
-      let humanTerritoriesLeft = targetTerritoriesPerFaction;
-      let rainclaudeTerritoriesLeft = targetTerritoriesPerFaction;
-
-      // First allocate the hardcoded blocs
-      allIsos.forEach(iso => {
-        const stats = getCountryStat(iso);
-        const income = Math.max(1, Math.round(Math.log10(stats.gdp + 1) * 3));
-
-        let owner = -1;
-        if (HUMAN_BLOC.includes(iso) && humanTerritoriesLeft > 0) {
-          owner = 0;
-          humanTerritoriesLeft--;
-        } else if (RAINCLAUDE_BLOC.includes(iso) && rainclaudeTerritoriesLeft > 0) {
-          owner = 1;
-          rainclaudeTerritoriesLeft--;
-        }
-
-        GS.countries[iso] = {
-          owner, troops: troopsPerCountry, nuked: 0,
-          name: countryData[iso].name, lat: countryData[iso].lat, lon: countryData[iso].lon,
-          gdp: stats.gdp, mil: stats.mil, pop: stats.pop, income,
-          infrastructure: 3, airwings: 0, ships: 0,
-        };
-      });
-
-      // Now allocate the remaining neutral countries alternately between Human (0) and Rainclaude (1)
-      let nextAssignee = 0;
-      Object.keys(GS.countries).forEach(iso => {
-        if (GS.countries[iso].owner === -1) {
-          if (nextAssignee === 0 && humanTerritoriesLeft > 0) {
-            GS.countries[iso].owner = 0;
-            humanTerritoriesLeft--;
-            nextAssignee = 1;
-          } else if (nextAssignee === 1 && rainclaudeTerritoriesLeft > 0) {
-            GS.countries[iso].owner = 1;
-            rainclaudeTerritoriesLeft--;
-            nextAssignee = 0;
-          } else if (humanTerritoriesLeft > 0) {
-            GS.countries[iso].owner = 0;
-            humanTerritoriesLeft--;
-          } else if (rainclaudeTerritoriesLeft > 0) {
-            GS.countries[iso].owner = 1;
-            rainclaudeTerritoriesLeft--;
-          } else {
-            // Any leftovers go to 2 (Illuminati neutral, if odd numbering)
-            GS.countries[iso].owner = 2;
-          }
-        }
-      });
-
-      // In this highly competitive balanced restart, we omit the 'Illuminati' completely out of the core list
-      // so that Humanity and Rainclaude truly fight a pure 1v1 battle of 500 million vs 500 million.
-
-      // Count troops for reinforcement baseline
-      GS.players.forEach((_, pi) => {
-        GS.players[pi].troops = Object.values(GS.countries).filter(c => c.owner === pi).length;
-      });
-
-      refreshAllBorders();
-      buildTroopSprites();
-      startTurn(0);
-
-      // Build player badges
-      const badges = document.getElementById('player-badges');
-      badges.innerHTML = GS.players.map((p, i) => `
-    <div class="pb" id="badge-${i}"
-      style="border-color:${p.color.hex};color:${p.color.hex}">
-      ${p.color.name}: ${p.name}
-    </div>`).join('');
-
-      document.getElementById('hud').style.display = 'block';
-
-      // Show dashboards and start live update — only 2 panels in 2-faction mode
-      document.getElementById('dash-0').classList.add('visible');
-      document.getElementById('dash-1').classList.add('visible');
-      document.getElementById('user-stats-box').classList.add('visible');
-      const chatToggle = document.getElementById('btn-chat-toggle');
-      if (chatToggle) chatToggle.style.display = 'flex';
-      updateDashboard();
-      if (window._dashInterval) clearInterval(window._dashInterval);
-      window._dashInterval = setInterval(updateDashboard, 1000);
-    }
-
-    // =====================================================================
-    // LIVE FACTION DASHBOARD — 2 factions: Humanity (0) vs Rainclaude (1)
-    // =====================================================================
-    // WEBCAM RENDERING (RED SKIN)
-    // =====================================================================
     async function initWebcams() {
       try {
         const res = await fetch('/api/webcams');
@@ -11798,25 +10839,7 @@ for (let i = 0; i < 50; i++) {
       });
 
       if (allCompanies.length === 0 || !window.greenMarket || !window.greenMarket.commodities) return;
-    // Refresh UI Modal Buttons if they are visible
-    const safeK = k.replace(/[^a-zA-Z]/g, '');
-    const priceEl = document.getElementById(`market-price-${safeK}`);
-    const sellBtn = document.getElementById(`market-sell-${safeK}`);
-    if (priceEl) {
-        priceEl.innerHTML = `${trend} ${shareVal.toFixed(2)} D3X <span style="font-size:10px; color:#aaa; font-weight:normal;">/ UNIT</span>`;
-    }
-    if (sellBtn) {
-       sellBtn.style.opacity = c.shares > 0 ? '1' : '0.3';
-       sellBtn.disabled = c.shares === 0;
-    }
-  });
 
-  const networthEl = document.getElementById('green-market-networth');
-  if (networthEl) {
-    networthEl.innerText = totalWorth.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}) + ' D3X';
-    if (holdingsHtml === '') holdingsHtml = ''; // Removed empty state text
-    document.getElementById('green-market-holdings').innerHTML = holdingsHtml;
-  }
   
   // Auto-refresh the main ledger modal if it's currently open
   if (document.getElementById('gmarket-ledger-modal')) {
@@ -11888,7 +10911,7 @@ window.simulateGreenMarketAI = function() {
           }
         }
       }
-    };
+    }
 
     updateGreenMarket(); // Initial render to prevent 2-3s delay on script load
     // NOTE: setInterval(updateGreenMarket, 3000) was removed. UI is now entirely updated via server's 'green_market_sync' WebSockets.
@@ -12958,7 +11981,7 @@ window.simulateGreenMarketAI = function() {
     }
 
     function spawnFakeTroops() {
-      if (window.currentSkinIndex === 6) return; // Completely disabled on WTR Skin
+      if (typeof countryData === 'undefined' || window.currentSkinIndex === 6) return; // Completely disabled on WTR Skin
       const count = Math.floor(Math.random() * 4) + 4; // 4 to 7
       const isos = Object.keys(countryData);
       if (isos.length < 2) return;
@@ -12994,7 +12017,7 @@ window.simulateGreenMarketAI = function() {
     }
 
     function spawnFakeJets() {
-      if (window.currentSkinIndex === 5 || window.currentSkinIndex === 4 || window.currentSkinIndex === 6) return; // Completely disabled on BLK, CYBER, and WTR Skins
+      if (typeof countryData === 'undefined' || window.currentSkinIndex === 5 || window.currentSkinIndex === 4 || window.currentSkinIndex === 6) return; // Completely disabled on BLK, CYBER, and WTR Skins
       const count = Math.floor(Math.random() * 3) + 4; // 4 to 6 jets
       const isos = Object.keys(countryData);
       if (isos.length < 2) return;
@@ -13034,7 +12057,7 @@ window.simulateGreenMarketAI = function() {
     }
 
     function spawnSquadron() {
-      if (window.currentSkinIndex === 5 || window.currentSkinIndex === 4 || window.currentSkinIndex === 6) return; // No squadrons on BLK, CYBER or WTR skin
+      if (typeof countryData === 'undefined' || window.currentSkinIndex === 5 || window.currentSkinIndex === 4 || window.currentSkinIndex === 6) return; // No squadrons on BLK, CYBER or WTR skin
 
       const isos = Object.keys(countryData);
       if (isos.length < 2) return;
@@ -14688,6 +13711,73 @@ window.simulateGreenMarketAI = function() {
       ws.send(JSON.stringify({ type: 'state_update', gameState: serializeState() }));
     }
 
+// =====================================================================
+// GAME INITIALIZATION
+// =====================================================================
+// =====================================================================
+// PHASE 1: REAL-WORLD COUNTRY STATS (GDP in $B, mil_rank 1-100, pop in M)
+// =====================================================================
+const COUNTRY_STATS = {
+  USA:{gdp:26000,mil:100,pop:334},CHN:{gdp:18000,mil:95,pop:1412},IND:{gdp:3700,mil:80,pop:1428},
+  RUS:{gdp:2240,mil:90,pop:144},DEU:{gdp:4400,mil:60,pop:84},GBR:{gdp:3100,mil:65,pop:67},
+  FRA:{gdp:3000,mil:62,pop:68},JPN:{gdp:4300,mil:55,pop:125},BRA:{gdp:2100,mil:50,pop:215},
+  CAN:{gdp:2100,mil:45,pop:38},KOR:{gdp:1700,mil:58,pop:52},AUS:{gdp:1700,mil:44,pop:26},
+  MEX:{gdp:1490,mil:35,pop:129},IDN:{gdp:1390,mil:42,pop:277},SAU:{gdp:1100,mil:48,pop:36},
+  TUR:{gdp:1150,mil:52,pop:85},NLD:{gdp:1000,mil:36,pop:17},ARE:{gdp:500,mil:40,pop:10},
+  ISR:{gdp:520,mil:56,pop:9},PAK:{gdp:376,mil:44,pop:231},NGA:{gdp:477,mil:30,pop:223},
+  ARG:{gdp:630,mil:32,pop:46},EGY:{gdp:476,mil:38,pop:105},ZAF:{gdp:419,mil:28,pop:60},
+  UKR:{gdp:200,mil:46,pop:44},POL:{gdp:750,mil:38,pop:38},SWE:{gdp:590,mil:34,pop:10},
+  NOR:{gdp:480,mil:32,pop:5},PHL:{gdp:404,mil:28,pop:115},MYS:{gdp:430,mil:26,pop:33},
+  VNM:{gdp:406,mil:30,pop:98},BGD:{gdp:460,mil:22,pop:170},COL:{gdp:363,mil:26,pop:52},
+  CHL:{gdp:360,mil:24,pop:19},IRQ:{gdp:268,mil:30,pop:42},IRN:{gdp:367,mil:42,pop:87},
+  PRK:{gdp:30,mil:50,pop:26},SYR:{gdp:22,mil:18,pop:21},LBY:{gdp:52,mil:12,pop:7},
+  SDN:{gdp:35,mil:14,pop:46},ETH:{gdp:156,mil:14,pop:126},TZA:{gdp:77,mil:8,pop:64},
+  KEN:{gdp:110,mil:8,pop:56},GHA:{gdp:76,mil:6,pop:33},ANG:{gdp:95,mil:12,pop:35},
+  MOZ:{gdp:18,mil:4,pop:33},ZMB:{gdp:22,mil:3,pop:19},ZIM:{gdp:25,mil:5,pop:16},
+  ALG:{gdp:191,mil:20,pop:45},MAR:{gdp:142,mil:16,pop:37},TUN:{gdp:47,mil:10,pop:12},
+  PRT:{gdp:262,mil:18,pop:10},ESP:{gdp:1500,mil:40,pop:47},ITA:{gdp:2190,mil:45,pop:60},
+  GRC:{gdp:240,mil:20,pop:11},ROU:{gdp:300,mil:24,pop:19},HUN:{gdp:188,mil:16,pop:10},
+  CZE:{gdp:330,mil:18,pop:11},AUT:{gdp:515,mil:16,pop:9},CHE:{gdp:800,mil:18,pop:9},
+  BEL:{gdp:580,mil:22,pop:12},DNK:{gdp:390,mil:18,pop:6},FIN:{gdp:300,mil:20,pop:6},
+  SGP:{gdp:470,mil:30,pop:6},HKG:{gdp:360,mil:5,pop:7},TWN:{gdp:760,mil:44,pop:24},
+  THA:{gdp:500,mil:22,pop:72},MMR:{gdp:65,mil:18,pop:54},KHM:{gdp:26,mil:6,pop:17},
+  LAO:{gdp:14,mil:4,pop:7},NPL:{gdp:40,mil:6,pop:30},LKA:{gdp:84,mil:10,pop:22},
+  AFG:{gdp:14,mil:12,pop:40},UZB:{gdp:80,mil:14,pop:36},KAZ:{gdp:220,mil:18,pop:19},
+  GEO:{gdp:24,mil:8,pop:4},AZE:{gdp:95,mil:16,pop:10},ARM:{gdp:20,mil:12,pop:3},
+  BLR:{gdp:73,mil:22,pop:10},MDA:{gdp:15,mil:4,pop:3},LTU:{gdp:74,mil:12,pop:3},
+  LVA:{gdp:43,mil:10,pop:2},EST:{gdp:38,mil:10,pop:1},SVK:{gdp:120,mil:12,pop:5},
+  SVN:{gdp:66,mil:8,pop:2},HRV:{gdp:80,mil:10,pop:4},SRB:{gdp:66,mil:12,pop:7},
+  BIH:{gdp:24,mil:6,pop:3},ALB:{gdp:18,mil:5,pop:3},MKD:{gdp:14,mil:4,pop:2},
+  MNE:{gdp:6,mil:3,pop:1},BLZ:{gdp:2,mil:1,pop:0.4},GTM:{gdp:85,mil:6,pop:18},
+  HND:{gdp:28,mil:4,pop:10},SLV:{gdp:34,mil:4,pop:6},NIC:{gdp:16,mil:3,pop:7},
+  CRI:{gdp:65,mil:0,pop:5},PAN:{gdp:68,mil:5,pop:4},CUB:{gdp:100,mil:14,pop:11},
+  VEN:{gdp:105,mil:14,pop:29},BOL:{gdp:44,mil:6,pop:12},PRY:{gdp:42,mil:4,pop:7},
+  URY:{gdp:70,mil:6,pop:4},PER:{gdp:240,mil:18,pop:33},ECU:{gdp:113,mil:10,pop:18},
+  GUY:{gdp:20,mil:2,pop:0.8},JAM:{gdp:16,mil:2,pop:3},TTO:{gdp:22,mil:4,pop:1.4},
+  NZL:{gdp:250,mil:10,pop:5},PNG:{gdp:28,mil:3,pop:10},FJI:{gdp:4,mil:1,pop:0.9},
+  SOM:{gdp:7,mil:5,pop:18},DJI:{gdp:4,mil:4,pop:1},ERI:{gdp:2,mil:8,pop:3},
+  UGA:{gdp:48,mil:6,pop:48},RWA:{gdp:13,mil:4,pop:14},BDI:{gdp:3,mil:2,pop:12},
+  COD:{gdp:60,mil:10,pop:100},CMR:{gdp:46,mil:5,pop:28},CIV:{gdp:68,mil:5,pop:27},
+  SEN:{gdp:28,mil:4,pop:17},MLI:{gdp:20,mil:5,pop:22},BFA:{gdp:19,mil:4,pop:22},
+  NER:{gdp:17,mil:3,pop:26},TCD:{gdp:12,mil:5,pop:17},CAF:{gdp:2,mil:2,pop:5},
+  GAB:{gdp:19,mil:3,pop:2},GNQ:{gdp:12,mil:2,pop:1.5},COG:{gdp:14,mil:2,pop:6},
+  MWI:{gdp:12,mil:2,pop:20},LSO:{gdp:3,mil:1,pop:2},SWZ:{gdp:4,mil:1,pop:1.2},
+  NAM:{gdp:13,mil:2,pop:3},BWA:{gdp:20,mil:2,pop:3},MDG:{gdp:14,mil:2,pop:28},
+  MUS:{gdp:13,mil:1,pop:1.3},SYC:{gdp:2,mil:0,pop:0.1},CPV:{gdp:2,mil:0,pop:0.6},
+  GMB:{gdp:2,mil:1,pop:2.6},GNB:{gdp:2,mil:1,pop:2},SLE:{gdp:4,mil:1,pop:8},
+  LBR:{gdp:4,mil:1,pop:5},TGO:{gdp:8,mil:2,pop:8},BEN:{gdp:18,mil:2,pop:13},
+  GIN:{gdp:20,mil:4,pop:13},QAT:{gdp:220,mil:24,pop:3},KWT:{gdp:145,mil:20,pop:4},
+  BHR:{gdp:44,mil:12,pop:1.5},OMN:{gdp:88,mil:18,pop:5},YEM:{gdp:20,mil:8,pop:34},
+  JOR:{gdp:47,mil:16,pop:10},LBN:{gdp:22,mil:8,pop:5},PSE:{gdp:20,mil:4,pop:5},
+  MDV:{gdp:7,mil:0,pop:0.5},BTN:{gdp:3,mil:1,pop:0.8},TLS:{gdp:3,mil:1,pop:1.3},
+  BRN:{gdp:14,mil:5,pop:0.5},MNG:{gdp:17,mil:4,pop:3},TKM:{gdp:40,mil:6,pop:6},
+  TJK:{gdp:11,mil:4,pop:10},KGZ:{gdp:12,mil:4,pop:7},WSM:{gdp:1,mil:0,pop:0.2},
+  TON:{gdp:0.5,mil:0,pop:0.1},VUT:{gdp:1,mil:0,pop:0.3},SLB:{gdp:1.5,mil:0,pop:0.7},
+};
+// Helper: get stat for a country (fallback if unknown)
+function getCountryStat(iso) {
+  return COUNTRY_STATS[iso] || { gdp: 5, mil: 2, pop: 1 };
+}
     function serializeState() {
       return {
         countries: GS.countries,
@@ -14795,6 +13885,158 @@ window.simulateGreenMarketAI = function() {
         ws.send(JSON.stringify({ type: 'get_leaderboard' }));
       }
     };
+
+// =====================================================================
+// PHASE 2: FOG OF WAR
+// =====================================================================
+let fogEnabled = true;
+
+function computeVisibility() {
+  if (!fogEnabled) return null;
+  const myTerritories = new Set(
+    Object.entries(GS.countries || {})
+      .filter(([,c]) => c.owner === GS.myIndex)
+      .map(([iso]) => iso)
+  );
+  const visible = new Set(myTerritories);
+
+  // Add all countries geographically adjacent (within ~20 degrees lat/lon)
+  const myArr = Array.from(myTerritories);
+  Object.keys(countryData || {}).forEach(iso => {
+    if (visible.has(iso)) return;
+    const cd = countryData[iso];
+    if (!cd) return;
+    for (const myIso of myArr) {
+      const mcd = countryData[myIso];
+      if (!mcd) continue;
+      const dlat = Math.abs(cd.lat - mcd.lat);
+      const dlon = Math.abs(cd.lon - mcd.lon);
+      const dist = Math.sqrt(dlat*dlat + dlon*dlon);
+      if (dist < 22) { visible.add(iso); break; }
+    }
+  });
+  return visible;
+}
+
+function applyFogOfWar() {
+  if (!GS.countries) return;
+  const visible = computeVisibility();
+  Object.entries(troopSprites).forEach(([iso, sprite]) => {
+    if (!sprite) return;
+    if (visible && !visible.has(iso)) {
+      sprite.material.opacity = 0.15;
+      sprite.material.transparent = true;
+    } else {
+      sprite.material.opacity = 1.0;
+      sprite.material.transparent = true;
+    }
+  });
+}
+
+function initGame(playerNames, myIndex) {
+  GS.players = playerNames.map((name,i)=>({
+    name, index:i, color:PLAYER_COLORS[i], nukes:2, alive:true, troops:0, budget: 500
+  }));
+  GS.myIndex = myIndex;
+
+  // Assign countries — seed from real-world stats
+  const isos = Object.keys(countryData);
+
+  // REALISTIC GEOPOLITICS
+  const HUMAN_BLOC = ['USA', 'GBR', 'FRA', 'DEU', 'JPN', 'KOR', 'AUS', 'CAN', 'POL', 'ITA', 'ESP', 'UKR', 'ISR', 'TWN', 'NLD', 'BEL', 'SWE', 'NOR', 'FIN', 'DNK', 'GRC', 'PRT', 'CZE', 'ROU', 'CHE', 'AUT', 'NZL', 'PHL', 'CHL', 'ARG', 'COL'];
+  const RAINCLAUDE_BLOC = ['RUS', 'CHN', 'IRN', 'PRK', 'SYR', 'BLR', 'VEN', 'CUB', 'MMR', 'NIC', 'ERI', 'MLI', 'BFA', 'NER', 'CAF', 'ZIM', 'SDN'];
+
+  const EXACT_BASE_TROOPS_PER_FACTION = 50000; // Multiplied by 10k in UI: 50,000 * 10,000 = 500,000,000 troops per side
+
+  // Collect all isos
+  let allIsos = [...isos];
+  // Calculate how many countries each faction should roughly get (Half of the world)
+  const targetTerritoriesPerFaction = Math.floor(allIsos.length / 2); // Should be 101 each
+  const troopsPerCountry = Math.floor(EXACT_BASE_TROOPS_PER_FACTION / targetTerritoriesPerFaction); // ~495 base troops
+
+  // We assign sequentially to ensure EXACT 50/50 split
+  let humanTerritoriesLeft = targetTerritoriesPerFaction;
+  let rainclaudeTerritoriesLeft = targetTerritoriesPerFaction;
+
+  // First allocate the hardcoded blocs
+  allIsos.forEach(iso => {
+    const stats = getCountryStat(iso);
+    const income = Math.max(1, Math.round(Math.log10(stats.gdp + 1) * 3));
+    
+    let owner = -1;
+    if (HUMAN_BLOC.includes(iso) && humanTerritoriesLeft > 0) {
+      owner = 0;
+      humanTerritoriesLeft--;
+    } else if (RAINCLAUDE_BLOC.includes(iso) && rainclaudeTerritoriesLeft > 0) {
+      owner = 1;
+      rainclaudeTerritoriesLeft--;
+    }
+
+    GS.countries[iso] = {
+      owner, troops: troopsPerCountry, nuked: 0,
+      name: countryData[iso].name, lat: countryData[iso].lat, lon: countryData[iso].lon,
+      gdp: stats.gdp, mil: stats.mil, pop: stats.pop, income,
+      infrastructure: 3, airwings: 0, ships: 0,
+    };
+  });
+
+  // Now allocate the remaining neutral countries alternately between Human (0) and Rainclaude (1)
+  let nextAssignee = 0;
+  Object.keys(GS.countries).forEach(iso => {
+    if (GS.countries[iso].owner === -1) {
+      if (nextAssignee === 0 && humanTerritoriesLeft > 0) {
+        GS.countries[iso].owner = 0;
+        humanTerritoriesLeft--;
+        nextAssignee = 1;
+      } else if (nextAssignee === 1 && rainclaudeTerritoriesLeft > 0) {
+        GS.countries[iso].owner = 1;
+        rainclaudeTerritoriesLeft--;
+        nextAssignee = 0;
+      } else if (humanTerritoriesLeft > 0) {
+        GS.countries[iso].owner = 0;
+        humanTerritoriesLeft--;
+      } else if (rainclaudeTerritoriesLeft > 0) {
+        GS.countries[iso].owner = 1;
+        rainclaudeTerritoriesLeft--;
+      } else {
+        // Any leftovers go to 2 (Illuminati neutral, if odd numbering)
+        GS.countries[iso].owner = 2;
+      }
+    }
+  });
+
+  // In this highly competitive balanced restart, we omit the 'Illuminati' completely out of the core list
+  // so that Humanity and Rainclaude truly fight a pure 1v1 battle of 500 million vs 500 million.
+
+  // Count troops for reinforcement baseline
+  GS.players.forEach((_,pi) => {
+    GS.players[pi].troops = Object.values(GS.countries).filter(c=>c.owner===pi).length;
+  });
+
+  refreshAllBorders();
+  buildTroopSprites();
+  startTurn(0);
+
+  // Build player badges
+  const badges = document.getElementById('player-badges');
+  badges.innerHTML = GS.players.map((p,i)=>`
+    <div class="pb" id="badge-${i}"
+      style="border-color:${p.color.hex};color:${p.color.hex}">
+      ${p.color.name}: ${p.name}
+    </div>`).join('');
+
+  document.getElementById('hud').style.display='block';
+
+  // Show dashboards and start live update — only 2 panels in 2-faction mode
+  document.getElementById('dash-0').classList.add('visible');
+  document.getElementById('dash-1').classList.add('visible');
+  document.getElementById('user-stats-box').classList.add('visible');
+  const chatToggle = document.getElementById('btn-chat-toggle');
+  if (chatToggle) chatToggle.style.display = 'flex';
+  updateDashboard();
+  if(window._dashInterval) clearInterval(window._dashInterval);
+  window._dashInterval = setInterval(updateDashboard, 1000);
+}
 
     function joinGlobalWar() {
       document.getElementById('lobby-msg').innerHTML = "Establishing secure uplink...";
@@ -15412,7 +14654,7 @@ window.simulateGreenMarketAI = function() {
     // --- GREEN SKIN MARKET SYSTEM ---
     window.greenSkinGroup = new THREE.Group();
     window.greenSkinGroup.visible = false;
-    scene.add(window.greenSkinGroup);
+    if (typeof scene !== 'undefined') scene.add(window.greenSkinGroup);
 
     // Green Aura Glow Sphere (Core Pulse)
     const grnGlowGeo = new THREE.SphereGeometry(GLOBE_R * 1.05, 32, 32);
@@ -15433,7 +14675,7 @@ window.simulateGreenMarketAI = function() {
     // --- WTR SKIN / D3X POOL EFFECTS ---
     window.wtrEffectsGroup = new THREE.Group();
     window.wtrEffectsGroup.visible = false;
-    scene.add(window.wtrEffectsGroup);
+    if (typeof scene !== 'undefined') scene.add(window.wtrEffectsGroup);
 
     // Aura Glow Sphere
     const wtrGlowGeo = new THREE.SphereGeometry(GLOBE_R * 1.05, 32, 32);
@@ -15956,7 +15198,8 @@ window.simulateGreenMarketAI = function() {
       // WTR 3D Blocks are now static on the globe surface, no animation needed here.
 
       // Auto-rotate when idle (even during missile flight)
-      if (!drag) {
+      const isCurrentlyDragging = typeof window.isDragging !== 'undefined' ? window.isDragging : false;
+      if (!isCurrentlyDragging) {
         // Slow down to almost 0 when a country is selected for easier interaction
         const rotSpeed = GS.selected ? 0.0002 : 0.003;
         sph.theta -= rotSpeed * dt * 60;
@@ -18019,20 +17262,7 @@ window.simulateGreenMarketAI = function() {
         boatMarkers.push(hit);
       });
     }
-    
-    if (window.shooterState.planeMesh) {
-       const hitBoxMesh = window.shooterState.planeMesh;
-       const pivot = hitBoxMesh.userData.pivot;
-       if (pivot) typeof scene !== 'undefined' && scene.remove(pivot);
-       window.planeMarkers = window.planeMarkers.filter(b => b !== hitBoxMesh);
-       if (window.planeData) window.planeData = window.planeData.filter(p => p.pivot !== pivot);
-    }
-  } else if (window.shooterState.ammo <= 0) {
-    window.shooterState.active = false;
-    document.getElementById('btn-fire-rpg').style.display = 'none';
-    log.innerHTML += `<div style="color:#f55; font-weight:bold; font-size:14px; margin-top:10px;">OUT OF AMMO. Target escaped.</div>`;
-  }
-};
+
 
 document.getElementById('btn-toggle-intel').addEventListener('click', () => {
   SFX.playClick();
@@ -18102,20 +17332,10 @@ window.toggleRedSkin = function() {
   
   // Skip premium skin if not unlocked
   if (skin.isPremium && !window.unlockedCyberSkin) {
-      window.currentSkinIndex = (window.currentSkinIndex + 1) % SKINS.length;
-      const skin = SKINS[window.currentSkinIndex];
+      return toggleRedSkin(); // Recursively call to move to next
+  }
 
-      window.isRedSkin = (skin.name === 'RED'); // Keep legacy compatibility
-
-      const btn = document.getElementById('btn-toggle-skin');
-
-      // Skip premium skin if not unlocked
-      if (skin.isPremium && !window.unlockedCyberSkin) {
-        window.currentSkinIndex = (window.currentSkinIndex + 1) % SKINS.length;
-        return toggleRedSkin(); // Recursively call to move to next
-      }
-
-      // Apply Globe Color
+  // Apply Globe Color
       if (typeof globeMat !== 'undefined') {
         globeMat.color.setHex(skin.color);
         if (skin.name === 'CYBER') {
@@ -18914,7 +18134,7 @@ window.toggleRedSkin = function() {
     // ========================================================
     // D3X STORE LOGIC
     // ========================================================
-    window.d3xBalance = (window.ENV_MOCK_VALUES !== 'n') ? 1000 : 0; // Guarded mock balance
+    window.d3xBalance = 0; // Strictly enforced: Awaiting real DB data
     window.unlockedCyberSkin = false;
     window.hasLaserVFX = false;
 
@@ -19227,8 +18447,7 @@ window.toggleRedSkin = function() {
         });
       }
 
-      function runTurn() {
-        if (window.ENV_MOCK_VALUES === 'n') return; // Do not run mock logic in production
+      function runTurn() { return; // STRICT SURVEILLANCE: Mock Disabled. Awaiting true state data from Backend
         try {
           initCountries();
           if (countries.length === 0) return;
