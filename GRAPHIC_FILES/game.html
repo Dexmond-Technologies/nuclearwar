@@ -14430,6 +14430,12 @@
         window.droneBattleState.explosions.forEach(e => scene.remove(e.mesh));
         window.droneBattleState.lasers.forEach(l => scene.remove(l.mesh));
 
+        // Reset the arrays so they don't infinitely leak memory tracking dead meshes
+        window.droneBattleState.drones = [];
+        window.droneBattleState.missiles = [];
+        window.droneBattleState.explosions = [];
+        window.droneBattleState.lasers = [];
+
         window.droneBattleState.active = false;
         window.droneMatchTimer = undefined;
 
