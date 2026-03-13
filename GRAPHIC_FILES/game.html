@@ -14604,9 +14604,20 @@
 
       window.droneBattleState.buildingsGroup.visible = isWTR;
 
+      if (!isWTR) {
+        // If we switched away from WTR skin, hide drones AND purge active particles
+        window.droneBattleState.drones.forEach(d => d.mesh.visible = false);
+        window.droneBattleState.missiles.forEach(m => scene.remove(m.mesh));
+        window.droneBattleState.explosions.forEach(e => scene.remove(e.mesh));
+        window.droneBattleState.lasers.forEach(l => scene.remove(l.mesh));
+        window.droneBattleState.missiles = [];
+        window.droneBattleState.explosions = [];
+        window.droneBattleState.lasers = [];
+        return; // Halt all further drone math
+      }
+
       window.droneBattleState.drones.forEach(d => {
-        d.mesh.visible = isWTR;
-        if (!isWTR) return;
+        d.mesh.visible = true;
 
         let closestEnemy = null;
         let minDistSq = Infinity;
@@ -14732,8 +14743,6 @@
           d.target = null;
         }
       });
-
-      if (!isWTR) return;
 
       // Flush queued drone reasoning logs to faction dashboard panels
       _flushDroneBattleLogs(dt);
