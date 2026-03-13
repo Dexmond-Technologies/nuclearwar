@@ -398,7 +398,8 @@ const server = http.createServer((req, res) => {
       btcWallet: process.env.BTC_WALLET || "NOT_SET",
       ethWallet: process.env.ETH_WALLET || "NOT_SET",
       xlmWallet: process.env.XLM_WALLET || "NOT_SET",
-      solWallet: process.env.gemini_wallet || (typeof geminiKeypair !== 'undefined' && geminiKeypair ? geminiKeypair.publicKey.toBase58() : "NOT_SET")
+      solWallet: process.env.gemini_wallet || (typeof geminiKeypair !== 'undefined' && geminiKeypair ? geminiKeypair.publicKey.toBase58() : "NOT_SET"),
+      solWalletRainclaude: process.env.RAINCLAUDE_SOLANA_WALLET || (typeof rainclaudeKeypair !== 'undefined' && rainclaudeKeypair ? rainclaudeKeypair.publicKey.toBase58() : "NOT_SET")
     }));
   } else if (req.url === '/api/soundtrack') {
     res.writeHead(200, {
@@ -2123,8 +2124,8 @@ function initWebSockets() {
               console.log("SENDING AI WALLETS DATA TO CLIENT:", client.name || "unknown");
               ws.send(JSON.stringify({
                 type: 'ai_wallets_data',
-                geminiWallet: process.env.GEMINI_WALLET || null,
-                claudeWallet: process.env.CLAUDE_WALLET || null,
+                geminiWallet: cachedGeminiWallet || process.env.GEMINI_WALLET || null,
+                claudeWallet: cachedClaudeWallet || process.env.RAINCLAUDE_SOLANA_WALLET || null,
                 gemini: {
                   balance: cachedGeminiBalance || 0,
                   hp: row.gemini_hp || 0,
@@ -2704,7 +2705,8 @@ async function fetchAndBroadcastAIBalances() {
     let claudeBalance = cachedClaudeBalance;
     const geminiPubkeyStr = process.env.gemini_wallet;
     const targetGeminiPubkey = geminiPubkeyStr ? new web3.PublicKey(geminiPubkeyStr) : (geminiKeypair ? geminiKeypair.publicKey : (authorityKeypair ? authorityKeypair.publicKey : null));
-    const rainclaudePubkey = rainclaudeKeypair ? rainclaudeKeypair.publicKey : new web3.PublicKey("5rdrJ46YJbtVHEx7xRgURGm49Cwf1WikLhU71VnS8zk3");
+    const rainclaudePubkeyStr = process.env.RAINCLAUDE_SOLANA_WALLET;
+    const rainclaudePubkey = rainclaudeKeypair ? rainclaudeKeypair.publicKey : (rainclaudePubkeyStr ? new web3.PublicKey(rainclaudePubkeyStr) : new web3.PublicKey("2UaZ91pubQS9VJAXASTJs2d2ebTSzFmXMYQKh2Sn2i19pyhv538u9Mcytvtdo9okFwuNQBzSYJ5uiLcw18xVr2sS")); // fallback to random pubkey placeholder if truly nothing exists, but it should
 
     try {
       if (targetGeminiPubkey) {
@@ -2836,7 +2838,7 @@ async function fetchAndBroadcastAIBalances() {
     cachedGeminiBalance = geminiBalance;
     cachedClaudeBalance = claudeBalance;
     cachedGeminiWallet = targetGeminiPubkey ? (typeof targetGeminiPubkey === 'string' ? targetGeminiPubkey : targetGeminiPubkey.toBase58()) : process.env.gemini_wallet || "NOT_SET";
-    cachedClaudeWallet = rainclaudePubkey.toBase58();
+    cachedClaudeWallet = rainclaudePubkeyStr ? rainclaudePubkeyStr : (rainclaudeKeypair ? rainclaudeKeypair.publicKey.toBase58() : "NOT_SET");
 
     broadcastAll({
       type: 'ai_d3x_balances',
@@ -3148,7 +3150,7 @@ async function runAIMarketBuying() {
       if (claudeAccount.portfolio.tradeLogs.length > 50) claudeAccount.portfolio.tradeLogs.shift();
     }
 
-    const claudeFromWallet = rainclaudeKeypair ? rainclaudeKeypair.publicKey.toBase58() : 'CLAUDE_NOT_SET';
+    const claudeFromWallet = rainclaudeKeypair ? rainclaudeKeypair.publicKey.toBase58() : (process.env.RAINCLAUDE_SOLANA_WALLET || 'CLAUDE_NOT_SET');
     await pgPool.query(`INSERT INTO pending_settlements (from_wallet, to_wallet, amount, reason) VALUES ($1, $2, $3, $4)`,
       [claudeFromWallet, BURN_ADDRESS.toBase58(), cost, `market_buy_${item.name.replace(/ /g, '_')}`]).catch(console.error);
 
@@ -3409,6 +3411,10 @@ async function processHourlySettlements() {
       if (geminiKeypair && geminiKeypair.publicKey.toBase58() === from_wallet) fromKeypair = geminiKeypair;
       else if (process.env.gemini_wallet === from_wallet) {
         // We only have the public key env for gemini fallback, cannot sign transaction.
+        console.warn(`[SETTLEMENT] Cannot sign for ${from_wallet}. Need private key.`);
+        continue;
+      } else if (process.env.RAINCLAUDE_SOLANA_WALLET === from_wallet) {
+        // We only have the public key env for claude fallback, cannot sign transaction.
         console.warn(`[SETTLEMENT] Cannot sign for ${from_wallet}. Need private key.`);
         continue;
       } else if (rainclaudeKeypair && rainclaudeKeypair.publicKey.toBase58() === from_wallet) {

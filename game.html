@@ -4491,7 +4491,8 @@
       <div style="display:flex; justify-content:space-between; margin-bottom:15px; gap:20px;">
         <div style="text-align:center; flex:1; border-right:1px solid rgba(0,255,136,0.2); padding-right:20px;">
           <div style="font-size:12px; color:#0af; letter-spacing:2px; margin-bottom:5px;">HUMAN FLEET (SHIPS HITTING:
-            <span id="naval-hp-human">17</span>)</div>
+            <span id="naval-hp-human">17</span>)
+          </div>
           <div
             style="width:100%; height:4px; background:rgba(0,170,255,0.2); margin:8px auto 15px; border-radius:2px; overflow:hidden;">
             <div id="naval-bar-human" style="height:100%; width:100%; background:#0af; transition:0.3s;"></div>
@@ -4502,7 +4503,8 @@
         </div>
         <div style="text-align:center; flex:1;">
           <div style="font-size:12px; color:#f55; letter-spacing:2px; margin-bottom:5px;">RAINCLAUDE AI (SHIPS HITTING:
-            <span id="naval-hp-ai">17</span>)</div>
+            <span id="naval-hp-ai">17</span>)
+          </div>
           <div
             style="width:100%; height:4px; background:rgba(255,85,85,0.2); margin:8px auto 15px; border-radius:2px; overflow:hidden;">
             <div id="naval-bar-ai" style="height:100%; width:100%; background:#f55; transition:0.3s;"></div>
@@ -5361,284 +5363,284 @@
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 1000);
-function ll2v(lat,lon,r){
-  const phi = (90 - lat) * (Math.PI / 180);
-  const theta = (lon + 180) * (Math.PI / 180);
+    function ll2v(lat, lon, r) {
+      const phi = (90 - lat) * (Math.PI / 180);
+      const theta = (lon + 180) * (Math.PI / 180);
 
-  return new THREE.Vector3(
-      -(r * Math.sin(phi) * Math.cos(theta)),
-      r * Math.cos(phi),
-      r * Math.sin(phi) * Math.sin(theta)
-  );
-}
+      return new THREE.Vector3(
+        -(r * Math.sin(phi) * Math.cos(theta)),
+        r * Math.cos(phi),
+        r * Math.sin(phi) * Math.sin(theta)
+      );
+    }
 
-// =====================================================================
-// ORBIT CONTROLS
-// =====================================================================
-let drag=false, prevM={x:0,y:0};
-let sph={theta:.3, phi:1.1, r:3.5};
+    // =====================================================================
+    // ORBIT CONTROLS
+    // =====================================================================
+    let drag = false, prevM = { x: 0, y: 0 };
+    let sph = { theta: .3, phi: 1.1, r: 3.5 };
 
-function updCam(){
-  camera.position.set(
-    sph.r*Math.sin(sph.phi)*Math.cos(sph.theta),
-    sph.r*Math.cos(sph.phi),
-    sph.r*Math.sin(sph.phi)*Math.sin(sph.theta)
-  );
-  camera.lookAt(0,0,0);
-}
-updCam();
+    function updCam() {
+      camera.position.set(
+        sph.r * Math.sin(sph.phi) * Math.cos(sph.theta),
+        sph.r * Math.cos(sph.phi),
+        sph.r * Math.sin(sph.phi) * Math.sin(sph.theta)
+      );
+      camera.lookAt(0, 0, 0);
+    }
+    updCam();
 
-canvas.addEventListener('mousedown',e=>{if(e.button===2){drag=true;prevM={x:e.clientX,y:e.clientY};}});
-canvas.addEventListener('contextmenu',e=>e.preventDefault());
-window.addEventListener('mousemove',e=>{
-  if(!drag)return;
-  sph.theta-=(prevM.x-e.clientX)*.005;
-  sph.phi=Math.max(.1,Math.min(Math.PI-.1,sph.phi+(prevM.y-e.clientY)*.005));
-  prevM={x:e.clientX,y:e.clientY}; updCam();
-});
-window.addEventListener('mouseup',()=>drag=false);
-canvas.addEventListener('wheel',e=>{
-  sph.r=Math.max(1.4,Math.min(8,sph.r+e.deltaY*.003));
-  updCam(); e.preventDefault();
-},{passive:false});
+    canvas.addEventListener('mousedown', e => { if (e.button === 2) { drag = true; prevM = { x: e.clientX, y: e.clientY }; } });
+    canvas.addEventListener('contextmenu', e => e.preventDefault());
+    window.addEventListener('mousemove', e => {
+      if (!drag) return;
+      sph.theta -= (prevM.x - e.clientX) * .005;
+      sph.phi = Math.max(.1, Math.min(Math.PI - .1, sph.phi + (prevM.y - e.clientY) * .005));
+      prevM = { x: e.clientX, y: e.clientY }; updCam();
+    });
+    window.addEventListener('mouseup', () => drag = false);
+    canvas.addEventListener('wheel', e => {
+      sph.r = Math.max(1.4, Math.min(8, sph.r + e.deltaY * .003));
+      updCam(); e.preventDefault();
+    }, { passive: false });
 
-// =====================================================================
-// GAME STATE
-// =====================================================================
-let GS = {
-  countries: {},     // iso -> {name,lat,lon,owner,troops,nuked,instabilityLevel}
-  players: [],       // [{name,color,nukes,alive}]
-  turn: 0,           // player index
-  turnCount: 1,      // overall turn number
-  phase: 'REINFORCE',// REINFORCE|ATTACK|FORTIFY
-  reinforceLeft: 0,
-  selected: null,    // iso of selected country
-  fortifyFrom: null,
-  isOnline: false,
-  myIndex: 0,
-  roomCode: '',
-  AI_STATE: {
-    techLevel: 1,
-    intelligenceLevel: 1,
-    aggressionLevel: 1,
-    adaptabilityScore: 1,
-    energy: 10,
-    threatTier: 1
-  },
-  globalMetrics: {
-    powerGrid: 100,
-    comms: 100,
-    economy: 100,
-    airTrafficDisabledTurns: 0,
-    satelliteDisruptedTurns: 0,
-    commJamTurns: 0
-  }
-};
+    // =====================================================================
+    // GAME STATE
+    // =====================================================================
+    let GS = {
+      countries: {},     // iso -> {name,lat,lon,owner,troops,nuked,instabilityLevel}
+      players: [],       // [{name,color,nukes,alive}]
+      turn: 0,           // player index
+      turnCount: 1,      // overall turn number
+      phase: 'REINFORCE',// REINFORCE|ATTACK|FORTIFY
+      reinforceLeft: 0,
+      selected: null,    // iso of selected country
+      fortifyFrom: null,
+      isOnline: false,
+      myIndex: 0,
+      roomCode: '',
+      AI_STATE: {
+        techLevel: 1,
+        intelligenceLevel: 1,
+        aggressionLevel: 1,
+        adaptabilityScore: 1,
+        energy: 10,
+        threatTier: 1
+      },
+      globalMetrics: {
+        powerGrid: 100,
+        comms: 100,
+        economy: 100,
+        airTrafficDisabledTurns: 0,
+        satelliteDisruptedTurns: 0,
+        commJamTurns: 0
+      }
+    };
 
-let pendingPerk = null;
+    let pendingPerk = null;
 
-let countryBorders = {}; // iso -> THREE.Line
-let countryData    = {}; // iso -> {name,lat,lon,polygons:[]}
-let ws             = null;
+    let countryBorders = {}; // iso -> THREE.Line
+    let countryData = {}; // iso -> {name,lat,lon,polygons:[]}
+    let ws = null;
 
-// =====================================================================
-// GEOJSON COUNTRY LOADING
-// =====================================================================
-const GEOJSON_URL = 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_countries.geojson';
+    // =====================================================================
+    // GEOJSON COUNTRY LOADING
+    // =====================================================================
+    const GEOJSON_URL = 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_countries.geojson';
 
-async function loadCountries(retries = 3) {
-  setLog('⟳ Loading world map data...');
-  let res;
-  for (let i = 0; i < retries; i++) {
-    try {
-      res = await fetch(GEOJSON_URL);
-      if (res.ok) break;
-    } catch (e) {
-      if (i === retries - 1) {
-        setLog('⚠ failed to load world geometry. Please refresh.');
+    async function loadCountries(retries = 3) {
+      setLog('⟳ Loading world map data...');
+      let res;
+      for (let i = 0; i < retries; i++) {
+        try {
+          res = await fetch(GEOJSON_URL);
+          if (res.ok) break;
+        } catch (e) {
+          if (i === retries - 1) {
+            setLog('⚠ failed to load world geometry. Please refresh.');
+            return;
+          }
+          setLog(`⚠ retrying map data (${i + 1}/${retries})...`);
+          await new Promise(r => setTimeout(r, 1000));
+        }
+      }
+
+      if (!res || !res.ok) {
+        setLog('⚠ failed to load world geometry.');
         return;
       }
-      setLog(`⚠ retrying map data (${i+1}/${retries})...`);
-      await new Promise(r => setTimeout(r, 1000));
-    }
-  }
-  
-  if (!res || !res.ok) {
-    setLog('⚠ failed to load world geometry.');
-    return;
-  }
-  
-  const json = await res.json();
 
-  json.features.forEach(f => {
-    const p = f.properties;
-    const iso = p.gu_a3 || p.iso_a3 || p.adm0_a3;
-    if (!iso || iso === '-99') return;
+      const json = await res.json();
 
-    // Bounding box center as lat/lon
-    let sumLat=0, sumLon=0, cnt=0;
-    const polys = [];
+      json.features.forEach(f => {
+        const p = f.properties;
+        const iso = p.gu_a3 || p.iso_a3 || p.adm0_a3;
+        if (!iso || iso === '-99') return;
 
-    // Helper to apply prime meridian offset and wrap dateline
-    const oLon = (lon) => {
-      let l = lon;
-      if (l < -180) l += 360;
-      if (l > 180) l -= 360;
-      return l;
-    };
+        // Bounding box center as lat/lon
+        let sumLat = 0, sumLon = 0, cnt = 0;
+        const polys = [];
 
-    const extractRing = ring => {
-      const pts = ring.map(([lon,lat]) => ll2v(lat,oLon(lon),GLOBE_R+.003));
-      polys.push(ring.map(([lon,lat])=>({lat,lon:oLon(lon)})));
-      
-      // Calculate ring centroid using offset longitude, handling dateline wrap naively as before
-      let tLon = 0, tLat = 0;
-      ring.forEach(([lo, la]) => {
-        tLon += oLon(lo);
-        tLat += la;
-      });
-      sumLon += tLon / ring.length;
-      sumLat += tLat / ring.length;
-      
-      cnt++;
-      return new THREE.BufferGeometry().setFromPoints(pts);
-    };
-
-    const geos = [];
-    if (f.geometry.type==='Polygon') {
-      f.geometry.coordinates.forEach(r=>geos.push(extractRing(r)));
-    } else if (f.geometry.type==='MultiPolygon') {
-      f.geometry.coordinates.forEach(poly=>poly.forEach(r=>geos.push(extractRing(r))));
-    }
-
-    if (!geos.length) return;
-
-    // Calculate bounding box for the country to sample random points
-    let minLat = 90, maxLat = -90, minLon = 180, maxLon = -180;
-    polys.forEach(poly => {
-      poly.forEach(pt => {
-        if(pt.lat < minLat) minLat = pt.lat;
-        if(pt.lat > maxLat) maxLat = pt.lat;
-        if(pt.lon < minLon) minLon = pt.lon;
-        if(pt.lon > maxLon) maxLon = pt.lon;
-      });
-    });
-
-    let bestLat = sumLat/cnt;
-    let bestLon = sumLon/cnt;
-
-    // 85% chance to force the point onto explicit dry land (inside the polygon)
-    // 15% chance to let it naturally fall near the coast/water as per user request
-    if (Math.random() < 0.85) {
-      for(let iter = 0; iter < 100; iter++) {
-        const testLat = minLat + Math.random() * (maxLat - minLat);
-        const testLon = minLon + Math.random() * (maxLon - minLon);
-        let inside = false;
-        for (const poly of polys) {
-          if (pointInPoly(testLat, testLon, poly)) { inside = true; break; }
-        }
-        if (inside) {
-          bestLat = testLat;
-          bestLon = testLon;
-          break;
-        }
-      }
-    }
-
-    // Generate dense dots for visual representation
-    const denseDots = [];
-    denseDots.push({ lat: bestLat, lon: bestLon });
-    const extraDots = Math.min(80, Math.max(8, Math.floor(cnt / 8))); 
-    for(let dots = 0; dots < extraDots; dots++) {
-      for(let iter = 0; iter < 50; iter++) {
-        const testLat = minLat + Math.random() * (maxLat - minLat);
-        const testLon = minLon + Math.random() * (maxLon - minLon);
-        let inside = false;
-        for (const poly of polys) {
-          if (pointInPoly(testLat, testLon, poly)) { inside = true; break; }
-        }
-        if (inside) {
-          denseDots.push({ lat: testLat, lon: testLon });
-          break;
-        }
-      }
-    }
-    // Add coastal padding dots
-    for(let dots=0; dots < Math.floor(extraDots * 0.2); dots++) {
-      denseDots.push({ 
-         lat: minLat + Math.random() * (maxLat - minLat), 
-         lon: minLon + Math.random() * (maxLon - minLon) 
-      });
-    }
-
-    countryData[iso] = { name: p.name||iso, lat: bestLat, lon: bestLon, polys, denseDots };
-
-    if (iso === 'USA') {
-      for (let i = 1; i <= 10; i++) {
-        countryData[`USA_V${i}`] = {
-          name: `US Sector ${i}`,
-          lat: 30 + Math.random() * 18,
-          lon: -125 + Math.random() * 50,
-          polys: []
+        // Helper to apply prime meridian offset and wrap dateline
+        const oLon = (lon) => {
+          let l = lon;
+          if (l < -180) l += 360;
+          if (l > 180) l -= 360;
+          return l;
         };
-      }
-    }
-    if (iso === 'CHN') {
-      for (let i = 1; i <= 10; i++) {
-        countryData[`CHN_V${i}`] = {
-          name: `China Sector ${i}`,
-          lat: 22 + Math.random() * 18,
-          lon: 80 + Math.random() * 40,
-          polys: []
+
+        const extractRing = ring => {
+          const pts = ring.map(([lon, lat]) => ll2v(lat, oLon(lon), GLOBE_R + .003));
+          polys.push(ring.map(([lon, lat]) => ({ lat, lon: oLon(lon) })));
+
+          // Calculate ring centroid using offset longitude, handling dateline wrap naively as before
+          let tLon = 0, tLat = 0;
+          ring.forEach(([lo, la]) => {
+            tLon += oLon(lo);
+            tLat += la;
+          });
+          sumLon += tLon / ring.length;
+          sumLat += tLat / ring.length;
+
+          cnt++;
+          return new THREE.BufferGeometry().setFromPoints(pts);
         };
+
+        const geos = [];
+        if (f.geometry.type === 'Polygon') {
+          f.geometry.coordinates.forEach(r => geos.push(extractRing(r)));
+        } else if (f.geometry.type === 'MultiPolygon') {
+          f.geometry.coordinates.forEach(poly => poly.forEach(r => geos.push(extractRing(r))));
+        }
+
+        if (!geos.length) return;
+
+        // Calculate bounding box for the country to sample random points
+        let minLat = 90, maxLat = -90, minLon = 180, maxLon = -180;
+        polys.forEach(poly => {
+          poly.forEach(pt => {
+            if (pt.lat < minLat) minLat = pt.lat;
+            if (pt.lat > maxLat) maxLat = pt.lat;
+            if (pt.lon < minLon) minLon = pt.lon;
+            if (pt.lon > maxLon) maxLon = pt.lon;
+          });
+        });
+
+        let bestLat = sumLat / cnt;
+        let bestLon = sumLon / cnt;
+
+        // 85% chance to force the point onto explicit dry land (inside the polygon)
+        // 15% chance to let it naturally fall near the coast/water as per user request
+        if (Math.random() < 0.85) {
+          for (let iter = 0; iter < 100; iter++) {
+            const testLat = minLat + Math.random() * (maxLat - minLat);
+            const testLon = minLon + Math.random() * (maxLon - minLon);
+            let inside = false;
+            for (const poly of polys) {
+              if (pointInPoly(testLat, testLon, poly)) { inside = true; break; }
+            }
+            if (inside) {
+              bestLat = testLat;
+              bestLon = testLon;
+              break;
+            }
+          }
+        }
+
+        // Generate dense dots for visual representation
+        const denseDots = [];
+        denseDots.push({ lat: bestLat, lon: bestLon });
+        const extraDots = Math.min(80, Math.max(8, Math.floor(cnt / 8)));
+        for (let dots = 0; dots < extraDots; dots++) {
+          for (let iter = 0; iter < 50; iter++) {
+            const testLat = minLat + Math.random() * (maxLat - minLat);
+            const testLon = minLon + Math.random() * (maxLon - minLon);
+            let inside = false;
+            for (const poly of polys) {
+              if (pointInPoly(testLat, testLon, poly)) { inside = true; break; }
+            }
+            if (inside) {
+              denseDots.push({ lat: testLat, lon: testLon });
+              break;
+            }
+          }
+        }
+        // Add coastal padding dots
+        for (let dots = 0; dots < Math.floor(extraDots * 0.2); dots++) {
+          denseDots.push({
+            lat: minLat + Math.random() * (maxLat - minLat),
+            lon: minLon + Math.random() * (maxLon - minLon)
+          });
+        }
+
+        countryData[iso] = { name: p.name || iso, lat: bestLat, lon: bestLon, polys, denseDots };
+
+        if (iso === 'USA') {
+          for (let i = 1; i <= 10; i++) {
+            countryData[`USA_V${i}`] = {
+              name: `US Sector ${i}`,
+              lat: 30 + Math.random() * 18,
+              lon: -125 + Math.random() * 50,
+              polys: []
+            };
+          }
+        }
+        if (iso === 'CHN') {
+          for (let i = 1; i <= 10; i++) {
+            countryData[`CHN_V${i}`] = {
+              name: `China Sector ${i}`,
+              lat: 22 + Math.random() * 18,
+              lon: 80 + Math.random() * 40,
+              polys: []
+            };
+          }
+        }
+
+        // Draw border lines
+        // Build border lines geometry but do not render them on the globe
+        const mat = new THREE.LineBasicMaterial({ color: NEUTRAL.int, transparent: true, opacity: .6 });
+        const group = new THREE.Group();
+        geos.forEach(geo => group.add(new THREE.Line(geo, mat.clone())));
+        group.userData = { iso, mat };
+        group.visible = true; // Show borders per user request
+        countryBorders[iso] = group;
+        scene.add(group);
+      });
+
+      setLog(`✓ ${Object.keys(countryData).length} countries loaded`);
+    }
+
+    // Point-in-polygon test (2D lat/lon)
+    function pointInPoly(lat, lon, poly) {
+      let inside = false;
+      for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+        const xi = poly[i].lon, yi = poly[i].lat, xj = poly[j].lon, yj = poly[j].lat;
+        if (((yi > lat) !== (yj > lat)) && (lon < (xj - xi) * (lat - yi) / (yj - yi) + xi)) inside = !inside;
       }
+      return inside;
     }
 
-    // Draw border lines
-    // Build border lines geometry but do not render them on the globe
-    const mat = new THREE.LineBasicMaterial({color:NEUTRAL.int, transparent:true, opacity:.6});
-    const group = new THREE.Group();
-    geos.forEach(geo => group.add(new THREE.Line(geo, mat.clone())));
-    group.userData = { iso, mat };
-    group.visible = true; // Show borders per user request
-    countryBorders[iso] = group;
-    scene.add(group);
-  });
-
-  setLog(`✓ ${Object.keys(countryData).length} countries loaded`);
-}
-
-// Point-in-polygon test (2D lat/lon)
-function pointInPoly(lat, lon, poly) {
-  let inside = false;
-  for (let i=0,j=poly.length-1; i<poly.length; j=i++) {
-    const xi=poly[i].lon, yi=poly[i].lat, xj=poly[j].lon, yj=poly[j].lat;
-    if(((yi>lat)!==(yj>lat))&&(lon<(xj-xi)*(lat-yi)/(yj-yi)+xi)) inside=!inside;
-  }
-  return inside;
-}
-
-function getCountryAt(lat, lon) {
-  let closest = null;
-  let minDist = Infinity;
-  for (const [iso, cd] of Object.entries(countryData)) {
-    if(!cd.polys) continue;
-    for (const poly of cd.polys) {
-      if (pointInPoly(lat, lon, poly)) return iso;
+    function getCountryAt(lat, lon) {
+      let closest = null;
+      let minDist = Infinity;
+      for (const [iso, cd] of Object.entries(countryData)) {
+        if (!cd.polys) continue;
+        for (const poly of cd.polys) {
+          if (pointInPoly(lat, lon, poly)) return iso;
+        }
+        // Fallback for tiny states/islands (Haversine approx distance)
+        if (cd.lat !== undefined && cd.lon !== undefined) {
+          const dLat = Math.abs(lat - cd.lat) * Math.PI / 180;
+          const dLon = Math.abs(lon - cd.lon) * Math.PI / 180;
+          const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat * Math.PI / 180) * Math.cos(cd.lat * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+          const dist = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+          if (dist < minDist) { minDist = dist; closest = iso; }
+        }
+      }
+      // If no polygon hit, return the closest center if it's within ~500 miles (0.15 rads)
+      if (closest && minDist < 0.15) return closest;
+      return null;
     }
-    // Fallback for tiny states/islands (Haversine approx distance)
-    if(cd.lat !== undefined && cd.lon !== undefined) {
-      const dLat=Math.abs(lat-cd.lat)*Math.PI/180;
-      const dLon=Math.abs(lon-cd.lon)*Math.PI/180;
-      const a = Math.sin(dLat/2)**2 + Math.cos(lat*Math.PI/180)*Math.cos(cd.lat*Math.PI/180) * Math.sin(dLon/2)**2;
-      const dist = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      if(dist < minDist) { minDist = dist; closest = iso; }
-    }
-  }
-  // If no polygon hit, return the closest center if it's within ~500 miles (0.15 rads)
-  if(closest && minDist < 0.15) return closest;
-  return null;
-}
 
     // Red Skin Webcams
     let webcamGroup = new THREE.Group();
@@ -8379,62 +8381,89 @@ function getCountryAt(lat, lon) {
     scene.add(new THREE.Points(sg, new THREE.PointsMaterial({ color: 0xffffff, size: 0.018, transparent: true, opacity: .7 })));
 
     // Globe
-    // 30% increased density for Cyber Skin
     const globeGeo = new THREE.SphereGeometry(GLOBE_R, 250, 250);
+    const cyberGlobeGeo = new THREE.SphereGeometry(GLOBE_R, 500, 500); // 100% Higher Density for CYBER skin
     const texLoader = new THREE.TextureLoader();
     const earthTex = texLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/land_ocean_ice_cloud_2048.jpg');
-// Set up clipping planes to cut out a front-right quarter
-const clipPlanes = [
-  new THREE.Plane(new THREE.Vector3(1,  0, 0), 0),
-  new THREE.Plane(new THREE.Vector3(0, -1, 0), 0),
-  new THREE.Plane(new THREE.Vector3(0,  0, 1), 0)
-];
+    // Using a simple low-res cloud map for safety
+    const cloudTex = texLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_clouds_1024.png');
 
-const globeMat  = new THREE.MeshPhongMaterial({
-  map:earthTex,
-  specular:new THREE.Color(0x003355),
-  shininess:15,
-  side: THREE.FrontSide,
-  clipIntersection: true,
-  clippingPlanes: [] // active only on FIRE skin
-});
-const globeMesh = new THREE.Mesh(globeGeo, globeMat);
-window.globeMesh = globeMesh;
-scene.add(globeMesh);
+    // Set up clipping planes to cut out a front-right quarter
+    const clipPlanes = [
+      new THREE.Plane(new THREE.Vector3(1, 0, 0), 0),
+      new THREE.Plane(new THREE.Vector3(0, -1, 0), 0),
+      new THREE.Plane(new THREE.Vector3(0, 0, 1), 0)
+    ];
 
-renderer.localClippingEnabled = true;
+    const globeMat = new THREE.MeshPhongMaterial({
+      map: earthTex,
+      specular: new THREE.Color(0x333333),
+      shininess: 15,
+      side: THREE.FrontSide,
+      clipIntersection: true,
+      clippingPlanes: [], // active only on FIRE skin
+      transparent: true,
+      opacity: 0.0,
+      depthWrite: false
+    });
+    const globeMesh = new THREE.Mesh(globeGeo, globeMat);
+    window.globeMesh = globeMesh;
+    scene.add(globeMesh);
 
-// Inner core layers for FIRE cutaway
-window.earthCutawayGroup = new THREE.Group();
-window.earthCutawayGroup.visible = false;
-scene.add(window.earthCutawayGroup);
+    // Solid base mesh for CYBER skin so it's not see-through
+    const cyberBaseMat = new THREE.MeshBasicMaterial({ color: 0x00020a, side: THREE.FrontSide, depthWrite: true });
+    const cyberBaseMesh = new THREE.Mesh(cyberGlobeGeo, cyberBaseMat);
+    cyberBaseMesh.scale.set(0.995, 0.995, 0.995); // Slightly smaller to avoid Z-fighting
+    cyberBaseMesh.visible = false;
+    window.cyberBaseMesh = cyberBaseMesh;
+    scene.add(cyberBaseMesh);
 
-function createCutawayLayer(radius, color, specular, shininess) {
-  const geo = new THREE.SphereGeometry(radius, 64, 64);
-  const mat = new THREE.MeshPhongMaterial({
-    color: color, 
-    specular: specular, 
-    shininess: shininess,
-    side: THREE.FrontSide,
-    clipIntersection: true,
-    clippingPlanes: clipPlanes
-  });
-  return new THREE.Mesh(geo, mat);
-}
+    // Realistic Cloud Layer (Invisible by default, turned on for LIVE skin)
+    const cloudMat = new THREE.MeshLambertMaterial({
+      map: cloudTex,
+      transparent: true,
+      opacity: 0.8,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide
+    });
+    const cloudMesh = new THREE.Mesh(new THREE.SphereGeometry(GLOBE_R * 1.015, 64, 64), cloudMat);
+    window.cloudMesh = cloudMesh;
+    window.cloudMesh.visible = false;
+    scene.add(cloudMesh);
 
-// Mantle (Red/Orange)
-const mantleMesh = createCutawayLayer(GLOBE_R * 0.98, 0xff2200, 0x551100, 10);
-// Outer Core (Orange/Yellow)
-const outerCoreMesh = createCutawayLayer(GLOBE_R * 0.55, 0xff8800, 0xaa5500, 30);
-// Inner Core (Bright Yellow/White)
-const innerCoreMesh = createCutawayLayer(GLOBE_R * 0.2, 0xffffaa, 0xffffff, 100);
+    renderer.localClippingEnabled = true;
 
-window.earthCutawayGroup.add(mantleMesh);
-window.earthCutawayGroup.add(outerCoreMesh);
-window.earthCutawayGroup.add(innerCoreMesh);
+    // Inner core layers for FIRE cutaway
+    window.earthCutawayGroup = new THREE.Group();
+    window.earthCutawayGroup.visible = false;
+    scene.add(window.earthCutawayGroup);
 
-// =====================================================================
-// INTERNATIONAL SPACE STATION (ISS)
+    function createCutawayLayer(radius, color, specular, shininess) {
+      const geo = new THREE.SphereGeometry(radius, 64, 64);
+      const mat = new THREE.MeshPhongMaterial({
+        color: color,
+        specular: specular,
+        shininess: shininess,
+        side: THREE.FrontSide,
+        clipIntersection: true,
+        clippingPlanes: clipPlanes
+      });
+      return new THREE.Mesh(geo, mat);
+    }
+
+    // Mantle (Red/Orange)
+    const mantleMesh = createCutawayLayer(GLOBE_R * 0.98, 0xff2200, 0x551100, 10);
+    // Outer Core (Orange/Yellow)
+    const outerCoreMesh = createCutawayLayer(GLOBE_R * 0.55, 0xff8800, 0xaa5500, 30);
+    // Inner Core (Bright Yellow/White)
+    const innerCoreMesh = createCutawayLayer(GLOBE_R * 0.2, 0xffffaa, 0xffffff, 100);
+
+    window.earthCutawayGroup.add(mantleMesh);
+    window.earthCutawayGroup.add(outerCoreMesh);
+    window.earthCutawayGroup.add(innerCoreMesh);
+
+    // =====================================================================
+    // INTERNATIONAL SPACE STATION (ISS)
 
     async function initWebcams() {
       try {
@@ -10565,22 +10594,10 @@ window.earthCutawayGroup.add(innerCoreMesh);
         const poolHits = ray.intersectObjects(window.poolGroup.children, true);
         if (poolHits.length > 0) {
           if (typeof _sfxClick !== 'undefined') _sfxClick();
-          let pModal = document.getElementById('pool-modal');
-          if (!pModal) {
+          if (typeof openPoolModal === 'function') {
+            openPoolModal();
+          } else {
             alert("POOL PROTOCOLS: ONLINE. Interface pending connection...");
-            return;
-          }
-          const scale = 0.75;
-          const trueW = window.screen.width / scale;
-          const trueH = window.screen.height / scale;
-          pModal.style.width = trueW + 'px';
-          pModal.style.height = trueH + 'px';
-          pModal.style.left = '0px';
-          pModal.style.top = '0px';
-          pModal.style.display = 'flex';
-          
-          if (typeof ws !== 'undefined' && ws.readyState === WebSocket.OPEN) {
-              ws.send(JSON.stringify({ type: 'get_pool_status' }));
           }
           return;
         }
@@ -10840,39 +10857,39 @@ window.earthCutawayGroup.add(innerCoreMesh);
 
       if (allCompanies.length === 0 || !window.greenMarket || !window.greenMarket.commodities) return;
 
-  
-  // Auto-refresh the main ledger modal if it's currently open
-  if (document.getElementById('gmarket-ledger-modal')) {
-      window.showGMarketWallet();
-  }
-}
 
-window.tradeGreenMetal = function(metalName, amount) {
-  if (typeof _sfxClick !== 'undefined') _sfxClick();
-  const c = window.greenMarket?.commodities[metalName];
-  if (!c) return;
+      // Auto-refresh the main ledger modal if it's currently open
+      if (document.getElementById('gmarket-ledger-modal')) {
+        window.showGMarketWallet();
+      }
+    }
 
-  if (window.ws && window.ws.readyState === WebSocket.OPEN) {
-      // Send secure request to backend instead of calculating locally
-      window.ws.send(JSON.stringify({
+    window.tradeGreenMetal = function (metalName, amount) {
+      if (typeof _sfxClick !== 'undefined') _sfxClick();
+      const c = window.greenMarket?.commodities[metalName];
+      if (!c) return;
+
+      if (window.ws && window.ws.readyState === WebSocket.OPEN) {
+        // Send secure request to backend instead of calculating locally
+        window.ws.send(JSON.stringify({
           type: 'trade_green_resource',
           metal: metalName,
           amount: amount
-      }));
-  } else {
-      if (typeof setLog === 'function') setLog(`❌ NETWORK ERROR: Cannot reach Green Market exchange.`);
-  }
-};
+        }));
+      } else {
+        if (typeof setLog === 'function') setLog(`❌ NETWORK ERROR: Cannot reach Green Market exchange.`);
+      }
+    };
 
-window.simulateGreenMarketAI = function() {
-    // Only run this processing if companies exists
-    if (!window.companiesGroup) return;
+    window.simulateGreenMarketAI = function () {
+      // Only run this processing if companies exists
+      if (!window.companiesGroup) return;
 
-    let allCompanies = [];
-    const groups = [window.companiesGroup, window.mediumCompaniesGroup, window.africaCompaniesGroup, window.microCompaniesGroup, window.russiaAsiaCompaniesGroup];
-    groups.forEach(g => {
-        if(g && g.children) allCompanies.push(...g.children.filter(mesh => mesh.visible && mesh.userData && mesh.userData.name));
-    });
+      let allCompanies = [];
+      const groups = [window.companiesGroup, window.mediumCompaniesGroup, window.africaCompaniesGroup, window.microCompaniesGroup, window.russiaAsiaCompaniesGroup];
+      groups.forEach(g => {
+        if (g && g.children) allCompanies.push(...g.children.filter(mesh => mesh.visible && mesh.userData && mesh.userData.name));
+      });
 
       const commoditiesArr = Object.keys(window.greenMarket.commodities);
 
@@ -13711,73 +13728,73 @@ window.simulateGreenMarketAI = function() {
       ws.send(JSON.stringify({ type: 'state_update', gameState: serializeState() }));
     }
 
-// =====================================================================
-// GAME INITIALIZATION
-// =====================================================================
-// =====================================================================
-// PHASE 1: REAL-WORLD COUNTRY STATS (GDP in $B, mil_rank 1-100, pop in M)
-// =====================================================================
-const COUNTRY_STATS = {
-  USA:{gdp:26000,mil:100,pop:334},CHN:{gdp:18000,mil:95,pop:1412},IND:{gdp:3700,mil:80,pop:1428},
-  RUS:{gdp:2240,mil:90,pop:144},DEU:{gdp:4400,mil:60,pop:84},GBR:{gdp:3100,mil:65,pop:67},
-  FRA:{gdp:3000,mil:62,pop:68},JPN:{gdp:4300,mil:55,pop:125},BRA:{gdp:2100,mil:50,pop:215},
-  CAN:{gdp:2100,mil:45,pop:38},KOR:{gdp:1700,mil:58,pop:52},AUS:{gdp:1700,mil:44,pop:26},
-  MEX:{gdp:1490,mil:35,pop:129},IDN:{gdp:1390,mil:42,pop:277},SAU:{gdp:1100,mil:48,pop:36},
-  TUR:{gdp:1150,mil:52,pop:85},NLD:{gdp:1000,mil:36,pop:17},ARE:{gdp:500,mil:40,pop:10},
-  ISR:{gdp:520,mil:56,pop:9},PAK:{gdp:376,mil:44,pop:231},NGA:{gdp:477,mil:30,pop:223},
-  ARG:{gdp:630,mil:32,pop:46},EGY:{gdp:476,mil:38,pop:105},ZAF:{gdp:419,mil:28,pop:60},
-  UKR:{gdp:200,mil:46,pop:44},POL:{gdp:750,mil:38,pop:38},SWE:{gdp:590,mil:34,pop:10},
-  NOR:{gdp:480,mil:32,pop:5},PHL:{gdp:404,mil:28,pop:115},MYS:{gdp:430,mil:26,pop:33},
-  VNM:{gdp:406,mil:30,pop:98},BGD:{gdp:460,mil:22,pop:170},COL:{gdp:363,mil:26,pop:52},
-  CHL:{gdp:360,mil:24,pop:19},IRQ:{gdp:268,mil:30,pop:42},IRN:{gdp:367,mil:42,pop:87},
-  PRK:{gdp:30,mil:50,pop:26},SYR:{gdp:22,mil:18,pop:21},LBY:{gdp:52,mil:12,pop:7},
-  SDN:{gdp:35,mil:14,pop:46},ETH:{gdp:156,mil:14,pop:126},TZA:{gdp:77,mil:8,pop:64},
-  KEN:{gdp:110,mil:8,pop:56},GHA:{gdp:76,mil:6,pop:33},ANG:{gdp:95,mil:12,pop:35},
-  MOZ:{gdp:18,mil:4,pop:33},ZMB:{gdp:22,mil:3,pop:19},ZIM:{gdp:25,mil:5,pop:16},
-  ALG:{gdp:191,mil:20,pop:45},MAR:{gdp:142,mil:16,pop:37},TUN:{gdp:47,mil:10,pop:12},
-  PRT:{gdp:262,mil:18,pop:10},ESP:{gdp:1500,mil:40,pop:47},ITA:{gdp:2190,mil:45,pop:60},
-  GRC:{gdp:240,mil:20,pop:11},ROU:{gdp:300,mil:24,pop:19},HUN:{gdp:188,mil:16,pop:10},
-  CZE:{gdp:330,mil:18,pop:11},AUT:{gdp:515,mil:16,pop:9},CHE:{gdp:800,mil:18,pop:9},
-  BEL:{gdp:580,mil:22,pop:12},DNK:{gdp:390,mil:18,pop:6},FIN:{gdp:300,mil:20,pop:6},
-  SGP:{gdp:470,mil:30,pop:6},HKG:{gdp:360,mil:5,pop:7},TWN:{gdp:760,mil:44,pop:24},
-  THA:{gdp:500,mil:22,pop:72},MMR:{gdp:65,mil:18,pop:54},KHM:{gdp:26,mil:6,pop:17},
-  LAO:{gdp:14,mil:4,pop:7},NPL:{gdp:40,mil:6,pop:30},LKA:{gdp:84,mil:10,pop:22},
-  AFG:{gdp:14,mil:12,pop:40},UZB:{gdp:80,mil:14,pop:36},KAZ:{gdp:220,mil:18,pop:19},
-  GEO:{gdp:24,mil:8,pop:4},AZE:{gdp:95,mil:16,pop:10},ARM:{gdp:20,mil:12,pop:3},
-  BLR:{gdp:73,mil:22,pop:10},MDA:{gdp:15,mil:4,pop:3},LTU:{gdp:74,mil:12,pop:3},
-  LVA:{gdp:43,mil:10,pop:2},EST:{gdp:38,mil:10,pop:1},SVK:{gdp:120,mil:12,pop:5},
-  SVN:{gdp:66,mil:8,pop:2},HRV:{gdp:80,mil:10,pop:4},SRB:{gdp:66,mil:12,pop:7},
-  BIH:{gdp:24,mil:6,pop:3},ALB:{gdp:18,mil:5,pop:3},MKD:{gdp:14,mil:4,pop:2},
-  MNE:{gdp:6,mil:3,pop:1},BLZ:{gdp:2,mil:1,pop:0.4},GTM:{gdp:85,mil:6,pop:18},
-  HND:{gdp:28,mil:4,pop:10},SLV:{gdp:34,mil:4,pop:6},NIC:{gdp:16,mil:3,pop:7},
-  CRI:{gdp:65,mil:0,pop:5},PAN:{gdp:68,mil:5,pop:4},CUB:{gdp:100,mil:14,pop:11},
-  VEN:{gdp:105,mil:14,pop:29},BOL:{gdp:44,mil:6,pop:12},PRY:{gdp:42,mil:4,pop:7},
-  URY:{gdp:70,mil:6,pop:4},PER:{gdp:240,mil:18,pop:33},ECU:{gdp:113,mil:10,pop:18},
-  GUY:{gdp:20,mil:2,pop:0.8},JAM:{gdp:16,mil:2,pop:3},TTO:{gdp:22,mil:4,pop:1.4},
-  NZL:{gdp:250,mil:10,pop:5},PNG:{gdp:28,mil:3,pop:10},FJI:{gdp:4,mil:1,pop:0.9},
-  SOM:{gdp:7,mil:5,pop:18},DJI:{gdp:4,mil:4,pop:1},ERI:{gdp:2,mil:8,pop:3},
-  UGA:{gdp:48,mil:6,pop:48},RWA:{gdp:13,mil:4,pop:14},BDI:{gdp:3,mil:2,pop:12},
-  COD:{gdp:60,mil:10,pop:100},CMR:{gdp:46,mil:5,pop:28},CIV:{gdp:68,mil:5,pop:27},
-  SEN:{gdp:28,mil:4,pop:17},MLI:{gdp:20,mil:5,pop:22},BFA:{gdp:19,mil:4,pop:22},
-  NER:{gdp:17,mil:3,pop:26},TCD:{gdp:12,mil:5,pop:17},CAF:{gdp:2,mil:2,pop:5},
-  GAB:{gdp:19,mil:3,pop:2},GNQ:{gdp:12,mil:2,pop:1.5},COG:{gdp:14,mil:2,pop:6},
-  MWI:{gdp:12,mil:2,pop:20},LSO:{gdp:3,mil:1,pop:2},SWZ:{gdp:4,mil:1,pop:1.2},
-  NAM:{gdp:13,mil:2,pop:3},BWA:{gdp:20,mil:2,pop:3},MDG:{gdp:14,mil:2,pop:28},
-  MUS:{gdp:13,mil:1,pop:1.3},SYC:{gdp:2,mil:0,pop:0.1},CPV:{gdp:2,mil:0,pop:0.6},
-  GMB:{gdp:2,mil:1,pop:2.6},GNB:{gdp:2,mil:1,pop:2},SLE:{gdp:4,mil:1,pop:8},
-  LBR:{gdp:4,mil:1,pop:5},TGO:{gdp:8,mil:2,pop:8},BEN:{gdp:18,mil:2,pop:13},
-  GIN:{gdp:20,mil:4,pop:13},QAT:{gdp:220,mil:24,pop:3},KWT:{gdp:145,mil:20,pop:4},
-  BHR:{gdp:44,mil:12,pop:1.5},OMN:{gdp:88,mil:18,pop:5},YEM:{gdp:20,mil:8,pop:34},
-  JOR:{gdp:47,mil:16,pop:10},LBN:{gdp:22,mil:8,pop:5},PSE:{gdp:20,mil:4,pop:5},
-  MDV:{gdp:7,mil:0,pop:0.5},BTN:{gdp:3,mil:1,pop:0.8},TLS:{gdp:3,mil:1,pop:1.3},
-  BRN:{gdp:14,mil:5,pop:0.5},MNG:{gdp:17,mil:4,pop:3},TKM:{gdp:40,mil:6,pop:6},
-  TJK:{gdp:11,mil:4,pop:10},KGZ:{gdp:12,mil:4,pop:7},WSM:{gdp:1,mil:0,pop:0.2},
-  TON:{gdp:0.5,mil:0,pop:0.1},VUT:{gdp:1,mil:0,pop:0.3},SLB:{gdp:1.5,mil:0,pop:0.7},
-};
-// Helper: get stat for a country (fallback if unknown)
-function getCountryStat(iso) {
-  return COUNTRY_STATS[iso] || { gdp: 5, mil: 2, pop: 1 };
-}
+    // =====================================================================
+    // GAME INITIALIZATION
+    // =====================================================================
+    // =====================================================================
+    // PHASE 1: REAL-WORLD COUNTRY STATS (GDP in $B, mil_rank 1-100, pop in M)
+    // =====================================================================
+    const COUNTRY_STATS = {
+      USA: { gdp: 26000, mil: 100, pop: 334 }, CHN: { gdp: 18000, mil: 95, pop: 1412 }, IND: { gdp: 3700, mil: 80, pop: 1428 },
+      RUS: { gdp: 2240, mil: 90, pop: 144 }, DEU: { gdp: 4400, mil: 60, pop: 84 }, GBR: { gdp: 3100, mil: 65, pop: 67 },
+      FRA: { gdp: 3000, mil: 62, pop: 68 }, JPN: { gdp: 4300, mil: 55, pop: 125 }, BRA: { gdp: 2100, mil: 50, pop: 215 },
+      CAN: { gdp: 2100, mil: 45, pop: 38 }, KOR: { gdp: 1700, mil: 58, pop: 52 }, AUS: { gdp: 1700, mil: 44, pop: 26 },
+      MEX: { gdp: 1490, mil: 35, pop: 129 }, IDN: { gdp: 1390, mil: 42, pop: 277 }, SAU: { gdp: 1100, mil: 48, pop: 36 },
+      TUR: { gdp: 1150, mil: 52, pop: 85 }, NLD: { gdp: 1000, mil: 36, pop: 17 }, ARE: { gdp: 500, mil: 40, pop: 10 },
+      ISR: { gdp: 520, mil: 56, pop: 9 }, PAK: { gdp: 376, mil: 44, pop: 231 }, NGA: { gdp: 477, mil: 30, pop: 223 },
+      ARG: { gdp: 630, mil: 32, pop: 46 }, EGY: { gdp: 476, mil: 38, pop: 105 }, ZAF: { gdp: 419, mil: 28, pop: 60 },
+      UKR: { gdp: 200, mil: 46, pop: 44 }, POL: { gdp: 750, mil: 38, pop: 38 }, SWE: { gdp: 590, mil: 34, pop: 10 },
+      NOR: { gdp: 480, mil: 32, pop: 5 }, PHL: { gdp: 404, mil: 28, pop: 115 }, MYS: { gdp: 430, mil: 26, pop: 33 },
+      VNM: { gdp: 406, mil: 30, pop: 98 }, BGD: { gdp: 460, mil: 22, pop: 170 }, COL: { gdp: 363, mil: 26, pop: 52 },
+      CHL: { gdp: 360, mil: 24, pop: 19 }, IRQ: { gdp: 268, mil: 30, pop: 42 }, IRN: { gdp: 367, mil: 42, pop: 87 },
+      PRK: { gdp: 30, mil: 50, pop: 26 }, SYR: { gdp: 22, mil: 18, pop: 21 }, LBY: { gdp: 52, mil: 12, pop: 7 },
+      SDN: { gdp: 35, mil: 14, pop: 46 }, ETH: { gdp: 156, mil: 14, pop: 126 }, TZA: { gdp: 77, mil: 8, pop: 64 },
+      KEN: { gdp: 110, mil: 8, pop: 56 }, GHA: { gdp: 76, mil: 6, pop: 33 }, ANG: { gdp: 95, mil: 12, pop: 35 },
+      MOZ: { gdp: 18, mil: 4, pop: 33 }, ZMB: { gdp: 22, mil: 3, pop: 19 }, ZIM: { gdp: 25, mil: 5, pop: 16 },
+      ALG: { gdp: 191, mil: 20, pop: 45 }, MAR: { gdp: 142, mil: 16, pop: 37 }, TUN: { gdp: 47, mil: 10, pop: 12 },
+      PRT: { gdp: 262, mil: 18, pop: 10 }, ESP: { gdp: 1500, mil: 40, pop: 47 }, ITA: { gdp: 2190, mil: 45, pop: 60 },
+      GRC: { gdp: 240, mil: 20, pop: 11 }, ROU: { gdp: 300, mil: 24, pop: 19 }, HUN: { gdp: 188, mil: 16, pop: 10 },
+      CZE: { gdp: 330, mil: 18, pop: 11 }, AUT: { gdp: 515, mil: 16, pop: 9 }, CHE: { gdp: 800, mil: 18, pop: 9 },
+      BEL: { gdp: 580, mil: 22, pop: 12 }, DNK: { gdp: 390, mil: 18, pop: 6 }, FIN: { gdp: 300, mil: 20, pop: 6 },
+      SGP: { gdp: 470, mil: 30, pop: 6 }, HKG: { gdp: 360, mil: 5, pop: 7 }, TWN: { gdp: 760, mil: 44, pop: 24 },
+      THA: { gdp: 500, mil: 22, pop: 72 }, MMR: { gdp: 65, mil: 18, pop: 54 }, KHM: { gdp: 26, mil: 6, pop: 17 },
+      LAO: { gdp: 14, mil: 4, pop: 7 }, NPL: { gdp: 40, mil: 6, pop: 30 }, LKA: { gdp: 84, mil: 10, pop: 22 },
+      AFG: { gdp: 14, mil: 12, pop: 40 }, UZB: { gdp: 80, mil: 14, pop: 36 }, KAZ: { gdp: 220, mil: 18, pop: 19 },
+      GEO: { gdp: 24, mil: 8, pop: 4 }, AZE: { gdp: 95, mil: 16, pop: 10 }, ARM: { gdp: 20, mil: 12, pop: 3 },
+      BLR: { gdp: 73, mil: 22, pop: 10 }, MDA: { gdp: 15, mil: 4, pop: 3 }, LTU: { gdp: 74, mil: 12, pop: 3 },
+      LVA: { gdp: 43, mil: 10, pop: 2 }, EST: { gdp: 38, mil: 10, pop: 1 }, SVK: { gdp: 120, mil: 12, pop: 5 },
+      SVN: { gdp: 66, mil: 8, pop: 2 }, HRV: { gdp: 80, mil: 10, pop: 4 }, SRB: { gdp: 66, mil: 12, pop: 7 },
+      BIH: { gdp: 24, mil: 6, pop: 3 }, ALB: { gdp: 18, mil: 5, pop: 3 }, MKD: { gdp: 14, mil: 4, pop: 2 },
+      MNE: { gdp: 6, mil: 3, pop: 1 }, BLZ: { gdp: 2, mil: 1, pop: 0.4 }, GTM: { gdp: 85, mil: 6, pop: 18 },
+      HND: { gdp: 28, mil: 4, pop: 10 }, SLV: { gdp: 34, mil: 4, pop: 6 }, NIC: { gdp: 16, mil: 3, pop: 7 },
+      CRI: { gdp: 65, mil: 0, pop: 5 }, PAN: { gdp: 68, mil: 5, pop: 4 }, CUB: { gdp: 100, mil: 14, pop: 11 },
+      VEN: { gdp: 105, mil: 14, pop: 29 }, BOL: { gdp: 44, mil: 6, pop: 12 }, PRY: { gdp: 42, mil: 4, pop: 7 },
+      URY: { gdp: 70, mil: 6, pop: 4 }, PER: { gdp: 240, mil: 18, pop: 33 }, ECU: { gdp: 113, mil: 10, pop: 18 },
+      GUY: { gdp: 20, mil: 2, pop: 0.8 }, JAM: { gdp: 16, mil: 2, pop: 3 }, TTO: { gdp: 22, mil: 4, pop: 1.4 },
+      NZL: { gdp: 250, mil: 10, pop: 5 }, PNG: { gdp: 28, mil: 3, pop: 10 }, FJI: { gdp: 4, mil: 1, pop: 0.9 },
+      SOM: { gdp: 7, mil: 5, pop: 18 }, DJI: { gdp: 4, mil: 4, pop: 1 }, ERI: { gdp: 2, mil: 8, pop: 3 },
+      UGA: { gdp: 48, mil: 6, pop: 48 }, RWA: { gdp: 13, mil: 4, pop: 14 }, BDI: { gdp: 3, mil: 2, pop: 12 },
+      COD: { gdp: 60, mil: 10, pop: 100 }, CMR: { gdp: 46, mil: 5, pop: 28 }, CIV: { gdp: 68, mil: 5, pop: 27 },
+      SEN: { gdp: 28, mil: 4, pop: 17 }, MLI: { gdp: 20, mil: 5, pop: 22 }, BFA: { gdp: 19, mil: 4, pop: 22 },
+      NER: { gdp: 17, mil: 3, pop: 26 }, TCD: { gdp: 12, mil: 5, pop: 17 }, CAF: { gdp: 2, mil: 2, pop: 5 },
+      GAB: { gdp: 19, mil: 3, pop: 2 }, GNQ: { gdp: 12, mil: 2, pop: 1.5 }, COG: { gdp: 14, mil: 2, pop: 6 },
+      MWI: { gdp: 12, mil: 2, pop: 20 }, LSO: { gdp: 3, mil: 1, pop: 2 }, SWZ: { gdp: 4, mil: 1, pop: 1.2 },
+      NAM: { gdp: 13, mil: 2, pop: 3 }, BWA: { gdp: 20, mil: 2, pop: 3 }, MDG: { gdp: 14, mil: 2, pop: 28 },
+      MUS: { gdp: 13, mil: 1, pop: 1.3 }, SYC: { gdp: 2, mil: 0, pop: 0.1 }, CPV: { gdp: 2, mil: 0, pop: 0.6 },
+      GMB: { gdp: 2, mil: 1, pop: 2.6 }, GNB: { gdp: 2, mil: 1, pop: 2 }, SLE: { gdp: 4, mil: 1, pop: 8 },
+      LBR: { gdp: 4, mil: 1, pop: 5 }, TGO: { gdp: 8, mil: 2, pop: 8 }, BEN: { gdp: 18, mil: 2, pop: 13 },
+      GIN: { gdp: 20, mil: 4, pop: 13 }, QAT: { gdp: 220, mil: 24, pop: 3 }, KWT: { gdp: 145, mil: 20, pop: 4 },
+      BHR: { gdp: 44, mil: 12, pop: 1.5 }, OMN: { gdp: 88, mil: 18, pop: 5 }, YEM: { gdp: 20, mil: 8, pop: 34 },
+      JOR: { gdp: 47, mil: 16, pop: 10 }, LBN: { gdp: 22, mil: 8, pop: 5 }, PSE: { gdp: 20, mil: 4, pop: 5 },
+      MDV: { gdp: 7, mil: 0, pop: 0.5 }, BTN: { gdp: 3, mil: 1, pop: 0.8 }, TLS: { gdp: 3, mil: 1, pop: 1.3 },
+      BRN: { gdp: 14, mil: 5, pop: 0.5 }, MNG: { gdp: 17, mil: 4, pop: 3 }, TKM: { gdp: 40, mil: 6, pop: 6 },
+      TJK: { gdp: 11, mil: 4, pop: 10 }, KGZ: { gdp: 12, mil: 4, pop: 7 }, WSM: { gdp: 1, mil: 0, pop: 0.2 },
+      TON: { gdp: 0.5, mil: 0, pop: 0.1 }, VUT: { gdp: 1, mil: 0, pop: 0.3 }, SLB: { gdp: 1.5, mil: 0, pop: 0.7 },
+    };
+    // Helper: get stat for a country (fallback if unknown)
+    function getCountryStat(iso) {
+      return COUNTRY_STATS[iso] || { gdp: 5, mil: 2, pop: 1 };
+    }
     function serializeState() {
       return {
         countries: GS.countries,
@@ -13886,157 +13903,157 @@ function getCountryStat(iso) {
       }
     };
 
-// =====================================================================
-// PHASE 2: FOG OF WAR
-// =====================================================================
-let fogEnabled = true;
+    // =====================================================================
+    // PHASE 2: FOG OF WAR
+    // =====================================================================
+    let fogEnabled = true;
 
-function computeVisibility() {
-  if (!fogEnabled) return null;
-  const myTerritories = new Set(
-    Object.entries(GS.countries || {})
-      .filter(([,c]) => c.owner === GS.myIndex)
-      .map(([iso]) => iso)
-  );
-  const visible = new Set(myTerritories);
+    function computeVisibility() {
+      if (!fogEnabled) return null;
+      const myTerritories = new Set(
+        Object.entries(GS.countries || {})
+          .filter(([, c]) => c.owner === GS.myIndex)
+          .map(([iso]) => iso)
+      );
+      const visible = new Set(myTerritories);
 
-  // Add all countries geographically adjacent (within ~20 degrees lat/lon)
-  const myArr = Array.from(myTerritories);
-  Object.keys(countryData || {}).forEach(iso => {
-    if (visible.has(iso)) return;
-    const cd = countryData[iso];
-    if (!cd) return;
-    for (const myIso of myArr) {
-      const mcd = countryData[myIso];
-      if (!mcd) continue;
-      const dlat = Math.abs(cd.lat - mcd.lat);
-      const dlon = Math.abs(cd.lon - mcd.lon);
-      const dist = Math.sqrt(dlat*dlat + dlon*dlon);
-      if (dist < 22) { visible.add(iso); break; }
-    }
-  });
-  return visible;
-}
-
-function applyFogOfWar() {
-  if (!GS.countries) return;
-  const visible = computeVisibility();
-  Object.entries(troopSprites).forEach(([iso, sprite]) => {
-    if (!sprite) return;
-    if (visible && !visible.has(iso)) {
-      sprite.material.opacity = 0.15;
-      sprite.material.transparent = true;
-    } else {
-      sprite.material.opacity = 1.0;
-      sprite.material.transparent = true;
-    }
-  });
-}
-
-function initGame(playerNames, myIndex) {
-  GS.players = playerNames.map((name,i)=>({
-    name, index:i, color:PLAYER_COLORS[i], nukes:2, alive:true, troops:0, budget: 500
-  }));
-  GS.myIndex = myIndex;
-
-  // Assign countries — seed from real-world stats
-  const isos = Object.keys(countryData);
-
-  // REALISTIC GEOPOLITICS
-  const HUMAN_BLOC = ['USA', 'GBR', 'FRA', 'DEU', 'JPN', 'KOR', 'AUS', 'CAN', 'POL', 'ITA', 'ESP', 'UKR', 'ISR', 'TWN', 'NLD', 'BEL', 'SWE', 'NOR', 'FIN', 'DNK', 'GRC', 'PRT', 'CZE', 'ROU', 'CHE', 'AUT', 'NZL', 'PHL', 'CHL', 'ARG', 'COL'];
-  const RAINCLAUDE_BLOC = ['RUS', 'CHN', 'IRN', 'PRK', 'SYR', 'BLR', 'VEN', 'CUB', 'MMR', 'NIC', 'ERI', 'MLI', 'BFA', 'NER', 'CAF', 'ZIM', 'SDN'];
-
-  const EXACT_BASE_TROOPS_PER_FACTION = 50000; // Multiplied by 10k in UI: 50,000 * 10,000 = 500,000,000 troops per side
-
-  // Collect all isos
-  let allIsos = [...isos];
-  // Calculate how many countries each faction should roughly get (Half of the world)
-  const targetTerritoriesPerFaction = Math.floor(allIsos.length / 2); // Should be 101 each
-  const troopsPerCountry = Math.floor(EXACT_BASE_TROOPS_PER_FACTION / targetTerritoriesPerFaction); // ~495 base troops
-
-  // We assign sequentially to ensure EXACT 50/50 split
-  let humanTerritoriesLeft = targetTerritoriesPerFaction;
-  let rainclaudeTerritoriesLeft = targetTerritoriesPerFaction;
-
-  // First allocate the hardcoded blocs
-  allIsos.forEach(iso => {
-    const stats = getCountryStat(iso);
-    const income = Math.max(1, Math.round(Math.log10(stats.gdp + 1) * 3));
-    
-    let owner = -1;
-    if (HUMAN_BLOC.includes(iso) && humanTerritoriesLeft > 0) {
-      owner = 0;
-      humanTerritoriesLeft--;
-    } else if (RAINCLAUDE_BLOC.includes(iso) && rainclaudeTerritoriesLeft > 0) {
-      owner = 1;
-      rainclaudeTerritoriesLeft--;
+      // Add all countries geographically adjacent (within ~20 degrees lat/lon)
+      const myArr = Array.from(myTerritories);
+      Object.keys(countryData || {}).forEach(iso => {
+        if (visible.has(iso)) return;
+        const cd = countryData[iso];
+        if (!cd) return;
+        for (const myIso of myArr) {
+          const mcd = countryData[myIso];
+          if (!mcd) continue;
+          const dlat = Math.abs(cd.lat - mcd.lat);
+          const dlon = Math.abs(cd.lon - mcd.lon);
+          const dist = Math.sqrt(dlat * dlat + dlon * dlon);
+          if (dist < 22) { visible.add(iso); break; }
+        }
+      });
+      return visible;
     }
 
-    GS.countries[iso] = {
-      owner, troops: troopsPerCountry, nuked: 0,
-      name: countryData[iso].name, lat: countryData[iso].lat, lon: countryData[iso].lon,
-      gdp: stats.gdp, mil: stats.mil, pop: stats.pop, income,
-      infrastructure: 3, airwings: 0, ships: 0,
-    };
-  });
-
-  // Now allocate the remaining neutral countries alternately between Human (0) and Rainclaude (1)
-  let nextAssignee = 0;
-  Object.keys(GS.countries).forEach(iso => {
-    if (GS.countries[iso].owner === -1) {
-      if (nextAssignee === 0 && humanTerritoriesLeft > 0) {
-        GS.countries[iso].owner = 0;
-        humanTerritoriesLeft--;
-        nextAssignee = 1;
-      } else if (nextAssignee === 1 && rainclaudeTerritoriesLeft > 0) {
-        GS.countries[iso].owner = 1;
-        rainclaudeTerritoriesLeft--;
-        nextAssignee = 0;
-      } else if (humanTerritoriesLeft > 0) {
-        GS.countries[iso].owner = 0;
-        humanTerritoriesLeft--;
-      } else if (rainclaudeTerritoriesLeft > 0) {
-        GS.countries[iso].owner = 1;
-        rainclaudeTerritoriesLeft--;
-      } else {
-        // Any leftovers go to 2 (Illuminati neutral, if odd numbering)
-        GS.countries[iso].owner = 2;
-      }
+    function applyFogOfWar() {
+      if (!GS.countries) return;
+      const visible = computeVisibility();
+      Object.entries(troopSprites).forEach(([iso, sprite]) => {
+        if (!sprite) return;
+        if (visible && !visible.has(iso)) {
+          sprite.material.opacity = 0.15;
+          sprite.material.transparent = true;
+        } else {
+          sprite.material.opacity = 1.0;
+          sprite.material.transparent = true;
+        }
+      });
     }
-  });
 
-  // In this highly competitive balanced restart, we omit the 'Illuminati' completely out of the core list
-  // so that Humanity and Rainclaude truly fight a pure 1v1 battle of 500 million vs 500 million.
+    function initGame(playerNames, myIndex) {
+      GS.players = playerNames.map((name, i) => ({
+        name, index: i, color: PLAYER_COLORS[i], nukes: 2, alive: true, troops: 0, budget: 500
+      }));
+      GS.myIndex = myIndex;
 
-  // Count troops for reinforcement baseline
-  GS.players.forEach((_,pi) => {
-    GS.players[pi].troops = Object.values(GS.countries).filter(c=>c.owner===pi).length;
-  });
+      // Assign countries — seed from real-world stats
+      const isos = Object.keys(countryData);
 
-  refreshAllBorders();
-  buildTroopSprites();
-  startTurn(0);
+      // REALISTIC GEOPOLITICS
+      const HUMAN_BLOC = ['USA', 'GBR', 'FRA', 'DEU', 'JPN', 'KOR', 'AUS', 'CAN', 'POL', 'ITA', 'ESP', 'UKR', 'ISR', 'TWN', 'NLD', 'BEL', 'SWE', 'NOR', 'FIN', 'DNK', 'GRC', 'PRT', 'CZE', 'ROU', 'CHE', 'AUT', 'NZL', 'PHL', 'CHL', 'ARG', 'COL'];
+      const RAINCLAUDE_BLOC = ['RUS', 'CHN', 'IRN', 'PRK', 'SYR', 'BLR', 'VEN', 'CUB', 'MMR', 'NIC', 'ERI', 'MLI', 'BFA', 'NER', 'CAF', 'ZIM', 'SDN'];
 
-  // Build player badges
-  const badges = document.getElementById('player-badges');
-  badges.innerHTML = GS.players.map((p,i)=>`
+      const EXACT_BASE_TROOPS_PER_FACTION = 50000; // Multiplied by 10k in UI: 50,000 * 10,000 = 500,000,000 troops per side
+
+      // Collect all isos
+      let allIsos = [...isos];
+      // Calculate how many countries each faction should roughly get (Half of the world)
+      const targetTerritoriesPerFaction = Math.floor(allIsos.length / 2); // Should be 101 each
+      const troopsPerCountry = Math.floor(EXACT_BASE_TROOPS_PER_FACTION / targetTerritoriesPerFaction); // ~495 base troops
+
+      // We assign sequentially to ensure EXACT 50/50 split
+      let humanTerritoriesLeft = targetTerritoriesPerFaction;
+      let rainclaudeTerritoriesLeft = targetTerritoriesPerFaction;
+
+      // First allocate the hardcoded blocs
+      allIsos.forEach(iso => {
+        const stats = getCountryStat(iso);
+        const income = Math.max(1, Math.round(Math.log10(stats.gdp + 1) * 3));
+
+        let owner = -1;
+        if (HUMAN_BLOC.includes(iso) && humanTerritoriesLeft > 0) {
+          owner = 0;
+          humanTerritoriesLeft--;
+        } else if (RAINCLAUDE_BLOC.includes(iso) && rainclaudeTerritoriesLeft > 0) {
+          owner = 1;
+          rainclaudeTerritoriesLeft--;
+        }
+
+        GS.countries[iso] = {
+          owner, troops: troopsPerCountry, nuked: 0,
+          name: countryData[iso].name, lat: countryData[iso].lat, lon: countryData[iso].lon,
+          gdp: stats.gdp, mil: stats.mil, pop: stats.pop, income,
+          infrastructure: 3, airwings: 0, ships: 0,
+        };
+      });
+
+      // Now allocate the remaining neutral countries alternately between Human (0) and Rainclaude (1)
+      let nextAssignee = 0;
+      Object.keys(GS.countries).forEach(iso => {
+        if (GS.countries[iso].owner === -1) {
+          if (nextAssignee === 0 && humanTerritoriesLeft > 0) {
+            GS.countries[iso].owner = 0;
+            humanTerritoriesLeft--;
+            nextAssignee = 1;
+          } else if (nextAssignee === 1 && rainclaudeTerritoriesLeft > 0) {
+            GS.countries[iso].owner = 1;
+            rainclaudeTerritoriesLeft--;
+            nextAssignee = 0;
+          } else if (humanTerritoriesLeft > 0) {
+            GS.countries[iso].owner = 0;
+            humanTerritoriesLeft--;
+          } else if (rainclaudeTerritoriesLeft > 0) {
+            GS.countries[iso].owner = 1;
+            rainclaudeTerritoriesLeft--;
+          } else {
+            // Any leftovers go to 2 (Illuminati neutral, if odd numbering)
+            GS.countries[iso].owner = 2;
+          }
+        }
+      });
+
+      // In this highly competitive balanced restart, we omit the 'Illuminati' completely out of the core list
+      // so that Humanity and Rainclaude truly fight a pure 1v1 battle of 500 million vs 500 million.
+
+      // Count troops for reinforcement baseline
+      GS.players.forEach((_, pi) => {
+        GS.players[pi].troops = Object.values(GS.countries).filter(c => c.owner === pi).length;
+      });
+
+      refreshAllBorders();
+      buildTroopSprites();
+      startTurn(0);
+
+      // Build player badges
+      const badges = document.getElementById('player-badges');
+      badges.innerHTML = GS.players.map((p, i) => `
     <div class="pb" id="badge-${i}"
       style="border-color:${p.color.hex};color:${p.color.hex}">
       ${p.color.name}: ${p.name}
     </div>`).join('');
 
-  document.getElementById('hud').style.display='block';
+      document.getElementById('hud').style.display = 'block';
 
-  // Show dashboards and start live update — only 2 panels in 2-faction mode
-  document.getElementById('dash-0').classList.add('visible');
-  document.getElementById('dash-1').classList.add('visible');
-  document.getElementById('user-stats-box').classList.add('visible');
-  const chatToggle = document.getElementById('btn-chat-toggle');
-  if (chatToggle) chatToggle.style.display = 'flex';
-  updateDashboard();
-  if(window._dashInterval) clearInterval(window._dashInterval);
-  window._dashInterval = setInterval(updateDashboard, 1000);
-}
+      // Show dashboards and start live update — only 2 panels in 2-faction mode
+      document.getElementById('dash-0').classList.add('visible');
+      document.getElementById('dash-1').classList.add('visible');
+      document.getElementById('user-stats-box').classList.add('visible');
+      const chatToggle = document.getElementById('btn-chat-toggle');
+      if (chatToggle) chatToggle.style.display = 'flex';
+      updateDashboard();
+      if (window._dashInterval) clearInterval(window._dashInterval);
+      window._dashInterval = setInterval(updateDashboard, 1000);
+    }
 
     function joinGlobalWar() {
       document.getElementById('lobby-msg').innerHTML = "Establishing secure uplink...";
@@ -15423,6 +15440,11 @@ function initGame(playerNames, myIndex) {
 
         // Make it slowly rotate
         window.dexmondHubGroup.rotation.y += 0.01;
+      }
+
+      // Rotate Realistic LIVE Skin Clouds
+      if (window.cloudMesh && window.cloudMesh.visible) {
+        window.cloudMesh.rotation.y += 0.0003; // Slowly orbit the globe
       }
 
       // ---------------------------------------------------------------------
@@ -17264,93 +17286,125 @@ function initGame(playerNames, myIndex) {
     }
 
 
-document.getElementById('btn-toggle-intel').addEventListener('click', () => {
-  SFX.playClick();
-  intelMapActive = !intelMapActive;
-  const canvas = document.getElementById('c');
-  const container = document.getElementById('deckgl-container');
-  const btn = document.getElementById('btn-toggle-intel');
-  const dash0 = document.getElementById('dash-0');
-  const dash1 = document.getElementById('dash-1');
-  
-  if (intelMapActive) {
-    if(!window.DeckGLMap) {
-       console.error("DeckGLMap module not loaded yet.");
-       setLog("⚠ Intel Map module still loading...");
-       return;
-    }
-    initIntelMap();
-    canvas.style.display = 'none';
-    container.style.display = 'block';
-    btn.innerHTML = '🌍 RETURN TO WAR MAP';
-    btn.style.background = 'linear-gradient(135deg, #f24, #600)';
-    btn.style.borderColor = '#f24';
-    if (dash0) dash0.style.opacity = '0.2';
-    if (dash1) dash1.style.opacity = '0.2';
-    showIntelMapDrawer();
-  } else {
-    canvas.style.display = 'block';
-    container.style.display = 'none';
-    btn.innerHTML = '👁 HOSTILE INTEL';
-    btn.style.background = '';
-    btn.style.borderColor = '';
-    if (dash0) dash0.style.opacity = '1';
-    if (dash1) dash1.style.opacity = '1';
-    closeAllModals();
-  }
-});
+    document.getElementById('btn-toggle-intel').addEventListener('click', () => {
+      SFX.playClick();
+      intelMapActive = !intelMapActive;
+      const canvas = document.getElementById('c');
+      const container = document.getElementById('deckgl-container');
+      const btn = document.getElementById('btn-toggle-intel');
+      const dash0 = document.getElementById('dash-0');
+      const dash1 = document.getElementById('dash-1');
 
-// Skin Manager: 0 = LIVE (White), 1 = RED, 2 = GREEN, 3 = YELLOW, 4 = CYBER, 5 = BLK, 6 = FIRE, 7 = HST
-window.currentSkinIndex = 0;
-window.isRedSkin = false; // Legacy flag preserved for scripts that might check it directly
+      if (intelMapActive) {
+        if (!window.DeckGLMap) {
+          console.error("DeckGLMap module not loaded yet.");
+          setLog("⚠ Intel Map module still loading...");
+          return;
+        }
+        initIntelMap();
+        canvas.style.display = 'none';
+        container.style.display = 'block';
+        btn.innerHTML = '🌍 RETURN TO WAR MAP';
+        btn.style.background = 'linear-gradient(135deg, #f24, #600)';
+        btn.style.borderColor = '#f24';
+        if (dash0) dash0.style.opacity = '0.2';
+        if (dash1) dash1.style.opacity = '0.2';
+        showIntelMapDrawer();
+      } else {
+        canvas.style.display = 'block';
+        container.style.display = 'none';
+        btn.innerHTML = '👁 HOSTILE INTEL';
+        btn.style.background = '';
+        btn.style.borderColor = '';
+        if (dash0) dash0.style.opacity = '1';
+        if (dash1) dash1.style.opacity = '1';
+        closeAllModals();
+      }
+    });
 
-const SKINS = [
-  { name: 'LIVE',  color: 0xffffff, btnText: 'parallel layers', btnClass: '',              showOverlays: false, cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
-  { name: 'RED',   color: 0xff0000, btnText: 'parallel layers', btnClass: 'active-premium',showOverlays: false, cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
-  { name: 'GREEN', color: 0x22ff22, btnText: 'parallel layers', btnClass: 'active-normal', showOverlays: false, cleanGlobe: true,  hideTroops: true,  showResources: true,  showArms: true, showBoats: false, isPremium: false },
-  { name: 'CYBER', color: 0x00f0ff, btnText: 'parallel layers', btnClass: 'active-premium',showOverlays: false,  cleanGlobe: true, hideTroops: true,  showResources: false,  showArms: false,  showBoats: false,  isPremium: false },
-  { name: 'BLK',   color: 0x050505, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true,  showResources: false, showArms: false, showBoats: false, isPremium: false },
-  { name: 'WTR',   color: 0x00aaff, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true,  showResources: false, showArms: false, showBoats: false, isPremium: false }
-];
-window.SKINS = SKINS;
+    // Skin Manager: 0 = LIVE (White), 1 = RED, 2 = GREEN, 3 = YELLOW, 4 = CYBER, 5 = BLK, 6 = FIRE, 7 = HST
+    window.currentSkinIndex = 0;
+    window.isRedSkin = false; // Legacy flag preserved for scripts that might check it directly
 
-window.toggleRedSkin = function() {
-  if (typeof _sfxClick !== 'undefined') _sfxClick();
-  
-  // Advance skin
-  window.currentSkinIndex = (window.currentSkinIndex + 1) % SKINS.length;
-  const skin = SKINS[window.currentSkinIndex];
-  
-  // Toggle New Atmospheric Effects (LIVE and RED Skins)
-  if (typeof window.atmosphereGroup !== 'undefined') {
-      window.atmosphereGroup.visible = (skin.name === 'LIVE' || skin.name === 'RED');
-  }
+    const SKINS = [
+      { name: 'LIVE', color: 0xffffff, btnText: 'parallel layers', btnClass: '', showOverlays: false, cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
+      { name: 'RED', color: 0xff0000, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: false, isPremium: false },
+      { name: 'GREEN', color: 0x22ff22, btnText: 'parallel layers', btnClass: 'active-normal', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: true, showArms: true, showBoats: false, isPremium: false },
+      { name: 'CYBER', color: 0x00f0ff, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false },
+      { name: 'BLK', color: 0x050505, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false },
+      { name: 'WTR', color: 0x00aaff, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false }
+    ];
+    window.SKINS = SKINS;
 
-  window.isRedSkin = (skin.name === 'RED'); // Keep legacy compatibility
+    window.toggleRedSkin = function () {
+      if (typeof _sfxClick !== 'undefined') _sfxClick();
 
-  const btn = document.getElementById('btn-toggle-skin');
-  
-  // Skip premium skin if not unlocked
-  if (skin.isPremium && !window.unlockedCyberSkin) {
-      return toggleRedSkin(); // Recursively call to move to next
-  }
+      // Advance skin
+      window.currentSkinIndex = (window.currentSkinIndex + 1) % SKINS.length;
+      const skin = SKINS[window.currentSkinIndex];
 
-  // Apply Globe Color
+      // Toggle New Atmospheric Effects (LIVE and RED Skins)
+      if (typeof window.atmosphereGroup !== 'undefined') {
+        window.atmosphereGroup.visible = (skin.name === 'LIVE' || skin.name === 'RED');
+      }
+
+      window.isRedSkin = (skin.name === 'RED'); // Keep legacy compatibility
+
+      const btn = document.getElementById('btn-toggle-skin');
+
+      // Skip premium skin if not unlocked
+      if (skin.isPremium && !window.unlockedCyberSkin) {
+        return toggleRedSkin(); // Recursively call to move to next
+      }
+
+      // Apply Globe Color
       if (typeof globeMat !== 'undefined') {
-        globeMat.color.setHex(skin.color);
+        if (skin.name !== 'LIVE') {
+          globeMat.color.setHex(skin.color);
+        }
+        globeMat.specular.setHex(0x003355);
+        globeMat.shininess = 15;
+
+        // Reset Geometry
+        if (typeof window.globeMesh !== 'undefined' && typeof cyberGlobeGeo !== 'undefined' && typeof globeGeo !== 'undefined') {
+          window.globeMesh.geometry = (skin.name === 'CYBER') ? cyberGlobeGeo : globeGeo;
+        }
+
         if (skin.name === 'CYBER') {
           globeMat.emissive.setHex(0x0055ff);
           globeMat.wireframe = true;
-          globeMat.opacity = 1.0;
+          globeMat.transparent = false;
+          globeMat.opacity = 1.0; 
+          globeMat.depthWrite = true; 
         } else if (skin.name === 'WTR') {
           globeMat.emissive.setHex(0x0055aa); // Deep ocean blue emissive base
           globeMat.wireframe = false;
           globeMat.transparent = true;
+          globeMat.opacity = 0.5; // WTR default
+          globeMat.depthWrite = false;
+        } else if (skin.name === 'BLK') {
+          globeMat.color.setHex(0x111111);
+          globeMat.specular.setHex(0x777777);
+          globeMat.shininess = 35;
+          globeMat.emissive.setHex(0x000000);
+          globeMat.wireframe = false;
+          globeMat.transparent = false;
+          globeMat.opacity = 1.0;
+          globeMat.depthWrite = true;
+        } else if (skin.name === 'LIVE') {
+          globeMat.color.setHex(0xffffff); // Force reset base color to pure white
+          globeMat.emissive.setHex(0x000000); // 0 emissive so textures show
+          globeMat.wireframe = false;
+          globeMat.transparent = false;
+          globeMat.opacity = 1.0;
+          globeMat.depthWrite = true;
+          globeMat.needsUpdate = true; // Tell Three.js to recompile the shader with the texture
         } else {
-          globeMat.emissive.setHex(skin.name === 'LIVE' ? 0x222222 : 0x000000);
+          globeMat.emissive.setHex(0x000000);
           globeMat.wireframe = false;
           globeMat.transparent = true;
-          globeMat.opacity = 0.9;
+          globeMat.opacity = 0.0;
+          globeMat.depthWrite = false;
         }
 
         globeMat.clippingPlanes = [];
@@ -17371,6 +17425,16 @@ window.toggleRedSkin = function() {
         }
       }
       else btn.className = '';
+
+      // Toggle Cloud Layer
+      if (typeof window.cloudMesh !== 'undefined') {
+        window.cloudMesh.visible = (skin.name === 'LIVE');
+      }
+
+      // Toggle CYBER solid core layer
+      if (typeof window.cyberBaseMesh !== 'undefined') {
+        window.cyberBaseMesh.visible = (skin.name === 'CYBER');
+      }
 
       // Toggle visibility of overlays (Webcams, Sats, Yellow Dots)
       if (typeof webcamGroup !== 'undefined') webcamGroup.visible = (window.currentSkinIndex !== 0 && window.currentSkinIndex !== 4);
@@ -18447,7 +18511,8 @@ window.toggleRedSkin = function() {
         });
       }
 
-      function runTurn() { return; // STRICT SURVEILLANCE: Mock Disabled. Awaiting true state data from Backend
+      function runTurn() {
+        return; // STRICT SURVEILLANCE: Mock Disabled. Awaiting true state data from Backend
         try {
           initCountries();
           if (countries.length === 0) return;
@@ -19372,31 +19437,68 @@ window.toggleRedSkin = function() {
         style="color:#0f8; text-align:center; font-family:'Share Tech Mono', monospace; font-weight:normal; font-size: 1.5vw; text-shadow:0 0 10px #0f8;">
         BOND ADDRESS: <span id="treasury-bond-address" style="color:#fff;">[ PENDING CONNECTION ]</span></h3>
 
-      <div style="display:flex; flex:1; justify-content:center; margin-top:20px; gap:40px; height: 100%;">
-        <!-- METALS RESERVES -->
-        <div
-          style="flex:1; background:rgba(0,0,0,0.6); padding:20px; border:1px solid rgba(0,255,136,0.5); box-shadow: inset 0 0 50px rgba(0,255,136,0.1); border-radius:4px; display:flex; flex-direction:column; overflow-y:auto; max-width:800px; width:100%;">
-          <h2
-            style="color:#0f8; font-family:'Share Tech Mono', monospace; border-bottom:2px solid #0f8; padding-bottom:15px; margin-top:0; font-size:2vw;">
-            FEDERAL RESERVES</h2>
-          <table
-            style="width:100%; color:#fff; font-family:'Courier New', monospace; font-size:1.2vw; border-spacing: 0 15px;">
+      <div style="display:grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap:30px; flex:1; margin-top:20px; box-sizing:border-box;">
+        
+        <!-- BOX 1: FEDERAL RESERVES -->
+        <div style="background:rgba(0,20,10,0.8); border:1px solid #0f8; box-shadow:0 0 20px rgba(0,255,136,0.1); padding:20px; border-radius:4px; display:flex; flex-direction:column;">
+          <h2 style="color:#0f8; font-family:'Share Tech Mono', monospace; border-bottom:1px solid #0f8; padding-bottom:10px; margin-top:0; font-size:1.5vw; text-shadow:0 0 5px #0f8;">FEDERAL RESERVES</h2>
+          <table style="width:100%; color:#fff; font-family:'Courier New', monospace; font-size:1.1vw; margin-top:20px; border-spacing:0 15px;">
             <tr>
               <td style="color:#aaa;">TREASURY FUNDS (D3X)</td>
-              <td style="text-align:right; font-weight:bold; color:#0f8; font-size:1.5vw;" id="treasury-d3x-balance">
-                0.00</td>
+              <td style="text-align:right; font-weight:bold; color:#0f8; font-size:1.5vw;" id="treasury-d3x-balance">0.00</td>
+            </tr>
+            <tr>
+              <td style="color:#aaa;">BOND YIELD (Est. APY)</td>
+              <td style="text-align:right; font-weight:bold; color:#0af;">4.25%</td>
+            </tr>
+            <tr>
+              <td style="color:#aaa;">TOTAL LIABILITY</td>
+              <td style="text-align:right; font-weight:bold; color:#f55;">12.5M D3X</td>
             </tr>
           </table>
-          <div style="margin-top:20px;">
-            <h3
-              style="color:#0f8; font-family:'Share Tech Mono', monospace; font-size:1.5vw; border-bottom: 1px dashed rgba(0,255,136,0.3); padding-bottom:10px;">
-              METALS INVENTORY</h3>
-            <table id="treasury-metals-table"
-              style="width:100%; color:#aaa; font-family:'Courier New', monospace; font-size:1.1vw; border-spacing: 0 10px;">
-              <tr>
-                <td><i>ESTABLISHING SECURE HANDSHAKE...</i></td>
-              </tr>
-            </table>
+        </div>
+
+        <!-- BOX 2: METALS INVENTORY -->
+        <div style="background:rgba(0,20,10,0.8); border:1px solid #0f8; box-shadow:0 0 20px rgba(0,255,136,0.1); padding:20px; border-radius:4px; display:flex; flex-direction:column; overflow-y:auto;">
+          <h2 style="color:#0f8; font-family:'Share Tech Mono', monospace; border-bottom:1px solid #0f8; padding-bottom:10px; margin-top:0; font-size:1.5vw; text-shadow:0 0 5px #0f8;">METALS INVENTORY</h2>
+          <table id="treasury-metals-table" style="width:100%; color:#aaa; font-family:'Courier New', monospace; font-size:1vw; margin-top:15px; border-spacing:0 10px;">
+            <tr><td><i>ESTABLISHING SECURE HANDSHAKE...</i></td></tr>
+          </table>
+        </div>
+
+        <!-- BOX 3: TREASURY OPERATIONS -->
+        <div style="background:rgba(0,20,10,0.8); border:1px solid #0f8; box-shadow:0 0 20px rgba(0,255,136,0.1); padding:20px; border-radius:4px; display:flex; flex-direction:column;">
+          <h2 style="color:#0f8; font-family:'Share Tech Mono', monospace; border-bottom:1px solid #0f8; padding-bottom:10px; margin-top:0; font-size:1.5vw; text-shadow:0 0 5px #0f8;">TREASURY OPERATIONS</h2>
+          <div style="display:flex; flex-direction:column; gap:15px; margin-top:20px; flex:1; justify-content:center;">
+            <button style="background:linear-gradient(90deg, #002211, #004422); border:1px solid #0f8; color:#0f8; padding:15px; font-family:'Share Tech Mono', monospace; font-size:1.2vw; cursor:pointer; text-transform:uppercase; transition:0.3s; box-shadow:0 0 10px rgba(0,255,136,0.2);" onmouseover="this.style.background='linear-gradient(90deg, #004422, #006633)'" onmouseout="this.style.background='linear-gradient(90deg, #002211, #004422)'" onclick="if(typeof _sfxClick!=='undefined')_sfxClick(); alert('AUTHORIZING... INSUFFICIENT CLEARANCE.');">ISSUE FEDERAL BONDS</button>
+            <button style="background:linear-gradient(90deg, #220000, #440000); border:1px solid #f55; color:#f55; padding:15px; font-family:'Share Tech Mono', monospace; font-size:1.2vw; cursor:pointer; text-transform:uppercase; transition:0.3s; box-shadow:0 0 10px rgba(255,85,85,0.2);" onmouseover="this.style.background='linear-gradient(90deg, #440000, #660000)'" onmouseout="this.style.background='linear-gradient(90deg, #220000, #440000)'" onclick="if(typeof _sfxClick!=='undefined')_sfxClick(); alert('LIQUIDATION PROTOCOL ENGAGED... OVERRIDDEN.');">LIQUIDATE METALS</button>
+            <button style="background:linear-gradient(90deg, #001133, #002266); border:1px solid #0af; color:#0af; padding:15px; font-family:'Share Tech Mono', monospace; font-size:1.2vw; cursor:pointer; text-transform:uppercase; transition:0.3s; box-shadow:0 0 10px rgba(0,170,255,0.2);" onmouseover="this.style.background='linear-gradient(90deg, #002266, #003399)'" onmouseout="this.style.background='linear-gradient(90deg, #001133, #002266)'" onclick="if(typeof _sfxClick!=='undefined')_sfxClick(); alert('MINTING NEW D3X... ALLOCATING.');">MINT TREASURY D3X</button>
+          </div>
+        </div>
+
+        <!-- BOX 4: SYSTEM STATUS -->
+        <div style="background:rgba(0,20,10,0.8); border:1px solid #0f8; box-shadow:0 0 20px rgba(0,255,136,0.1); padding:20px; border-radius:4px; display:flex; flex-direction:column;">
+          <h2 style="color:#0f8; font-family:'Share Tech Mono', monospace; border-bottom:1px solid #0f8; padding-bottom:10px; margin-top:0; font-size:1.5vw; text-shadow:0 0 5px #0f8;">SYSTEM STATUS</h2>
+          <div style="margin-top:20px; font-family:'Courier New', monospace; font-size:0.9vw; color:#0f8; display:flex; flex-direction:column; gap:10px; overflow-y:auto;">
+            <div>> CONNECTION VERIFIED...</div>
+            <div>> SMART CONTRACT HANDSHAKE: [OK]</div>
+            <div>> RESERVES AUDIT: IN PROGRESS...</div>
+            <div style="color:#aaa;">> NO RECENT WITHDRAWALS DETECTED.</div>
+            <div style="color:#aaa;">> GLOBAL INFLATION INDEX: 2.1%</div>
+            <div style="color:#aaa;">> SECURITY PROTOCOLS: MAXIMUM</div>
+            <div style="margin-top:20px; border:1px solid rgba(0,255,136,0.3); height:60px; display:flex; align-items:flex-end; gap:5px; padding:5px; opacity:0.8;">
+              <!-- Mock Graph -->
+              <div style="width:10%; background:#0f8; height:20%;"></div>
+              <div style="width:10%; background:#0f8; height:40%;"></div>
+              <div style="width:10%; background:#0f8; height:35%;"></div>
+              <div style="width:10%; background:#0f8; height:60%;"></div>
+              <div style="width:10%; background:#0f8; height:50%;"></div>
+              <div style="width:10%; background:#0f8; height:80%;"></div>
+              <div style="width:10%; background:#0f8; height:70%;"></div>
+              <div style="width:10%; background:#0f8; height:90%;"></div>
+              <div style="width:10%; background:#0af; height:100%; box-shadow:0 0 10px #0af;"></div>
+            </div>
+            <div style="text-align:right; color:#0af; font-size:0.8vw; margin-top:5px;">ASSET GROWTH (7D)</div>
           </div>
         </div>
       </div>

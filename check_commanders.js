@@ -8,8 +8,8 @@ const pgPool = new Pool({
 
 async function run() {
   try {
-    const res = await pgPool.query("SELECT * FROM commanders WHERE callsign = 'RAINCLAUDE'");
-    console.log("RAINCLAUDE TABLE:", res.rows[0]);
+    const res = await pgPool.query("SELECT callsign, d3x_balance FROM commanders");
+    console.log("ALL COMMANDERS:", res.rows);
   } catch (e) {
     console.error(e);
   } finally {

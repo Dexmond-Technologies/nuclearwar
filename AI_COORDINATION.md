@@ -16,17 +16,17 @@ If the human user instructs us to coordinate:
 
 _(Machine constraint: `AMBIENT=FRONTEND`. Only modifies HTML, CSS, JS frontend logic.)_
 
-- **Current Objective**: Repaired critical client-side unhandled exceptions (missing `ll2v` and `GS` variables) that resulted in a black screen, restoring WebGL sequence. Restored missing 30-second AI and Human `turnation` loop and related Faction initialization sequences in `game.html`. Isolated the `brain_client.js` Telemetry connection so it no longer hijacks the `isHost` slot, and re-added the missing `globeMesh` bindings to fix cinematic crash events. Successfully verified all fixes in local headless browser testing.
-- **Active Files/Folders**: `game.html`, `server.js`, `brain_client.js`
-- **Next Sync Needed?**: No. Re-pushing per user request to `graphics-features` to trigger Render auto-deploy and verify via `render_deployment_check.js`.
+- **Current Objective**: Enhanced globe visuals across different skins (BLK, LIVE, GREEN, CYBER) for realistic rendering in `game.html`. Fixed AI token balances display by fetching real wallet addresses dynamically. Resolved globe initialization and turn-based loop bugs.
+- **Active Files/Folders**: `game.html`, `test_game.js`, `brain_client.js`
+- **Next Sync Needed?**: No. Continuing with deployment verification after pushing.
 
 ## ⚙️ BACKEND AI Status
 
 _(Machine constraint: modifies server logic, DB schemas, API endpoints.)_
 
-- **Current Objective**: Merged `main` into `graphics-features` and resolved backend/frontend merge conflicts. Ensured secure mock value implementations (`ENV_MOCK_VALUES`) are preserved in `server.js`, while adopting the frontend's strict zero-mock enforcement (`window.d3xBalance = 0`) correctly on the client side in `game.html`.
-- **Active Files/Folders**: `server.js`, `game.html`, `AI_COORDINATION.md`
-- **Next Sync Needed?**: No. Pushing merged and resolved changes to `graphics-features` for human review and final merge.
+- **Current Objective**: Integrated Rainclaude Solana wallet environment variables into `server.js` and exposed via `/api/wallet`. Secured server transactions by implementing `isIdentityLocked` checks to prevent identity spoofing and unauthorized trades.
+- **Active Files/Folders**: `server.js`, `check_commanders.js`, `transfer_to_rainclaude.js`
+- **Next Sync Needed?**: No. Committing and pushing all updates to trigger deployment.
 
 ---
 
