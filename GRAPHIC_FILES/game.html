@@ -7763,13 +7763,14 @@
           const neonAuraTex = new THREE.CanvasTexture(cAura);
           const neonAuraMat = new THREE.SpriteMaterial({ map: neonAuraTex, color: 0xffffff, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending });
 
-          const numBridges = 3;
+          const allNodes = window.datacentersGroup.children.filter(n => !n.userData.isNorthPole);
+          const numBridges = allNodes.length; // One bridge for every single datacenter on earth!
           const braidsPerBridge = 3;
           const segments = 120; // Doubled again for maximum light particles!
 
           for (let b = 0; b < numBridges; b++) {
             const bridgeGroup = new THREE.Group();
-            bridgeGroup.userData = { targetNode: null, timer: 0, poleIdx: b % 3 };
+            bridgeGroup.userData = { targetNode: allNodes[b], timer: 0, poleIdx: b % 3 };
             for (let i = 0; i < braidsPerBridge; i++) {
               const geo = new THREE.BufferGeometry();
               geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array((segments + 1) * 3), 3));
@@ -15370,13 +15371,13 @@
         if (npTowers.length === 3 && window.npLightningGroup && window.currentSkinIndex === 4) { // CYBER skin
           window.npLightningGroup.visible = true;
           window.npLightningGroup.children.forEach(bridge => {
-            bridge.userData.timer -= dt;
-            if (bridge.userData.timer <= 0) {
-              const allNodes = window.datacentersGroup.children.filter(n => !n.userData.isNorthPole);
-              if (allNodes.length > 0) {
-                bridge.userData.targetNode = allNodes[Math.floor(Math.random() * allNodes.length)];
-                bridge.userData.timer = 2.0 + Math.random() * 2.0; // Wait 2-4 seconds instead of 4-8, doubling the mapping speed
-              }
+            // Removed timed rotation; bridges are now statically locked to their target nodes
+            if (!bridge.userData.targetNode) {
+               // Fallback just in case
+               const allNodes = window.datacentersGroup.children.filter(n => !n.userData.isNorthPole);
+               if (allNodes.length > 0) {
+                 bridge.userData.targetNode = allNodes[Math.floor(Math.random() * allNodes.length)];
+               }
             }
 
             if (bridge.userData.targetNode) {
