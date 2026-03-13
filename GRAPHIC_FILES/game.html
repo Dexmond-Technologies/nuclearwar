@@ -8503,6 +8503,9 @@
     const realEarthSpec = texLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_specular_2048.jpg');
     const realEarthNorm = texLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_normal_2048.jpg');
 
+    // Custom Green Skin Texture
+    const greenForestTex = texLoader.load('/green_forest.jpg');
+
     // Create a high-density artificial wireframe grid using a CanvasTexture
     const gridCanvas = document.createElement('canvas');
     gridCanvas.width = 1024;
@@ -17626,10 +17629,10 @@
           globeMat.opacity = 1.0;
           globeMat.depthWrite = true;
         } else if (skin.name === 'GREEN') {
-          globeMat.map = earthTex; // Reset default earth texture
+          globeMat.map = greenForestTex; // Apply user requested forest texture
           globeMat.emissiveMap = null;
-          // Apply solid dark forest green aesthetic
-          globeMat.color.setHex(0x0a220a); 
+          // Apply solid dark forest green aesthetic fallback
+          globeMat.color.setHex(0xffffff); // Use white so the texture colors show purely 
           globeMat.emissive.setHex(0x051a05);
           globeMat.specular.setHex(0x001100);
           globeMat.shininess = 5;
