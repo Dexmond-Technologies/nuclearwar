@@ -10,7 +10,7 @@ window.applySkin_2 = function(skin) {
   }
 
   if (typeof globeMat !== 'undefined') {
-    globeMat.map = window.earthTex; // Default mapped earth texture
+    globeMat.map = null; // Removed real earth texture map as requested
     globeMat.emissiveMap = null;
     globeMat.emissive.setHex(0x0055aa); // Deep ocean blue emissive base
     globeMat.wireframe = false;

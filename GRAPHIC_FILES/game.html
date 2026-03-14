@@ -2824,7 +2824,7 @@
     <div id="botbar">
       <!-- RADIO CONTROLS -->
       <div id="sound-control-container"
-        style="position:absolute; bottom:30px; left:50%; transform:translateX(-50%); display:flex; gap:6px; z-index:200; align-items:flex-end;">
+        style="position:absolute; bottom:100px; left:50%; transform:translateX(-50%); display:flex; gap:6px; z-index:200; align-items:flex-end;">
         <div style="display:flex; gap:6px;">
           <button id="btn-toggle-soundtrack" onclick="toggleSoundtrack()">🎵 SOUNDTRACKS</button>
           <button id="btn-toggle-soundtrack-next" onclick="playNextCustomSoundtrack()">➔</button>
@@ -18481,6 +18481,9 @@
       }
       if (typeof window.solidEarthMesh !== 'undefined') {
         window.solidEarthMesh.visible = false;
+      }
+      if (typeof window.solidLiveMesh !== 'undefined') {
+        window.solidLiveMesh.visible = false;
       }
 
       // Advance skin
