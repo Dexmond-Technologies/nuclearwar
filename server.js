@@ -2547,10 +2547,23 @@ async function runAICombatTurn() {
       claudeStats.hp, claudeStats.budget, claudeStats.tech, claudeStats.intel, claudeStats.fuzzed_turns, claudeStats.instability, claudeStats.blockade_turns
     ]);
 
+    const greenLogs = [
+      "INITIATING DEEP-CRUST MINERAL EXTRACTION",
+      "DEPLOYING SEISMIC CHARGES FOR VEIN PROSPECTING",
+      "EXTRACTING TRACE ELEMENTS FROM MANTLE FRACTURE",
+      "OPTIMIZING DRILL TRAJECTORY FOR MAXIMUM YIELD",
+      "SUBTERRANEAN PROBE RETURNED HIGH-DENSITY ORE",
+      "ESTABLISHING NEW EXCAVATION FORWARD CAMP",
+      "REFINING HARVESTED D3X ISOTOPES",
+      "SIPHONING RARE GEOTHERMAL BYPRODUCTS"
+    ];
+    let greenTurnLog = `[${state.current_turn === 'claude' ? 'GEMINI' : 'RAINCLAUDE'}: MINING_OP] ${greenLogs[Math.floor(Math.random() * greenLogs.length)]}`;
+
     // Broadcast silently for potential future UI hooks
     broadcastAll({
       type: 'ai_combat_log',
       log: turnLog,
+      greenLog: greenTurnLog,
       gemini_hp: geminiStats.hp,
       claude_hp: claudeStats.hp,
       turn: state.current_turn

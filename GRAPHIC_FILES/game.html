@@ -8511,9 +8511,7 @@
     const realEarthSpec = texLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_specular_2048.jpg');
     const realEarthNorm = texLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_normal_2048.jpg');
 
-    // Custom Green Skin Texture
-    const greenForestTex = texLoader.load('/green_forest.jpg');
-
+    // Custom Green Skin Texture Removed (Unused Asset)
     // Create a high-density artificial wireframe grid using a CanvasTexture
     const gridCanvas = document.createElement('canvas');
     gridCanvas.width = 1024;
@@ -8567,6 +8565,37 @@
     const globeMesh = new THREE.Mesh(globeGeo, globeMat);
     window.globeMesh = globeMesh;
     scene.add(globeMesh);
+
+    // ==========================================
+    // SECONDARY MESH: INDESTRUCTIBLE LIVE SKIN 
+    // ==========================================
+    const liveMat = new THREE.MeshBasicMaterial({
+      color: 0xffffff, // Pure white base to perfectly project the image pixels
+      map: earthTex,   // Built-in high-res Google Earth composite (land, green, desert, clouds)
+      transparent: false,
+      depthWrite: true,
+      depthTest: true,
+      side: THREE.FrontSide
+    });
+    window.solidLiveMesh = new THREE.Mesh(globeGeo, liveMat);
+    // Marginally shrink to prevent z-fighting with borders, but keep it huge
+    window.solidLiveMesh.scale.set(0.995, 0.995, 0.995);
+    window.solidLiveMesh.visible = false; // Hidden on initialize
+    scene.add(window.solidLiveMesh);
+
+    // ==========================================
+    // ==========================================
+    const solidEarthMat = new THREE.MeshBasicMaterial({
+      map: texLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg'),
+      color: 0xffffff,
+      transparent: false,
+      depthWrite: true,
+      side: THREE.FrontSide
+    });
+    const solidEarthMesh = new THREE.Mesh(globeGeo, solidEarthMat);
+    window.solidEarthMesh = solidEarthMesh;
+    window.solidEarthMesh.visible = false; // Hidden by default (activated by Skin 0)
+    scene.add(solidEarthMesh);
 
     // GREEN SKIN PROCEDURAL SHADER MATERIAL
     const greenGlobeMat = new THREE.MeshPhongMaterial({
@@ -12461,8 +12490,13 @@
           const cd = countryData[targetIso];
           if (cd && cd.lat !== undefined && cd.lon !== undefined) {
             spawnEMP3D(cd.lat, cd.lon);
-            triggerRedAlert(`EMP DETECTED [ LAT: ${cd.lat.toFixed(2)}, LON: ${cd.lon.toFixed(2)} ]`);
-            setLog(`⚡ EMP DETECTED at ${cd.name} [LAT: ${cd.lat.toFixed(2)}, LON: ${cd.lon.toFixed(2)}]`);
+            if (window.currentSkinIndex === 4) {
+              triggerRedAlert(`ANOMALOUS SEISMIC TREMOR [ LAT: ${cd.lat.toFixed(2)}, LON: ${cd.lon.toFixed(2)} ]`);
+              setLog(`⚡ MANTLE FRACTURE DETECTED at ${cd.name} [LAT: ${cd.lat.toFixed(2)}, LON: ${cd.lon.toFixed(2)}]`);
+            } else {
+              triggerRedAlert(`EMP DETECTED [ LAT: ${cd.lat.toFixed(2)}, LON: ${cd.lon.toFixed(2)} ]`);
+              setLog(`⚡ EMP DETECTED at ${cd.name} [LAT: ${cd.lat.toFixed(2)}, LON: ${cd.lon.toFixed(2)}]`);
+            }
           }
         }
         // Schedule the next one automatically
@@ -12670,7 +12704,11 @@
         }
 
         if (spawnedCount > 0 && Math.random() > 0.5) {
-          setLog(`🌊 ${spawnedCount} UNIDENTIFIED SUBMERGED CONTACTS IN DEEP WATERS`);
+          if (window.currentSkinIndex === 4) {
+            setLog(`🌊 ${spawnedCount} DEEP-SEA THERMAL VENTS TAPPED FOR EXTRACTION`);
+          } else {
+            setLog(`🌊 ${spawnedCount} UNIDENTIFIED SUBMERGED CONTACTS IN DEEP WATERS`);
+          }
         }
 
         scheduleRandomNavalPing();
@@ -12945,7 +12983,7 @@
       if (!myCountries.length) { nextTurn(); return; }
 
       // --- EVOLUTION & ENERGY ---
-      aiLog(window.currentSkin === 4 ? 'UPDATING MINING ALGORITHMS...' : 'UPDATING KNOWLEDGE BASE...');
+      aiLog(window.currentSkinIndex === 4 ? 'UPDATING MINING ALGORITHMS...' : 'UPDATING KNOWLEDGE BASE...');
       let ai = GS.AI_STATE;
 
       if (GS.turnCount % 3 === 0) ai.adaptabilityScore += 0.5;
@@ -12996,12 +13034,22 @@
         ai.energy -= 25;
         if (Math.random() < 0.5) {
           GS.globalMetrics.powerGrid = Math.max(0, GS.globalMetrics.powerGrid - 30);
-          triggerRedAlert("GLOBAL POWER GRID INTEGRITY COMPROMISED");
-          aiLog("<span style='color:#ffaa00'>CYBER: POWER GRID ATTACK SUCCESSFUL</span>");
+          if (window.currentSkinIndex === 4) {
+            triggerRedAlert("SUBTERRANEAN FAULT LINE DESTABILIZED");
+            aiLog("<span style='color:#ffaa00'>DRILL: GEOTHERMAL VENT RUPTURE SUCCESSFUL</span>");
+          } else {
+            triggerRedAlert("GLOBAL POWER GRID INTEGRITY COMPROMISED");
+            aiLog("<span style='color:#ffaa00'>CYBER: POWER GRID ATTACK SUCCESSFUL</span>");
+          }
         } else {
           GS.globalMetrics.economy = Math.max(0, GS.globalMetrics.economy - 30);
-          triggerRedAlert("FINANCIAL SECTOR HACKED");
-          aiLog("<span style='color:#ffaa00'>CYBER: MARKETS CRASHED</span>");
+          if (window.currentSkinIndex === 4) {
+            triggerRedAlert("RARE EARTH MINERAL RESERVES SIPHONED");
+            aiLog("<span style='color:#ffaa00'>DRILL: RESOURCE MARKETS DRAINED</span>");
+          } else {
+            triggerRedAlert("FINANCIAL SECTOR HACKED");
+            aiLog("<span style='color:#ffaa00'>CYBER: MARKETS CRASHED</span>");
+          }
         }
         globeFlickerEffect();
         await wait(1200);
@@ -13014,7 +13062,7 @@
         const damage = Math.min(GS.countries[tIso].troops - 1, Math.floor(1 + (ai.intelligenceLevel / 2)));
         GS.countries[tIso].troops -= damage;
         GS.countries[tIso].instabilityLevel = Math.min(100, (GS.countries[tIso].instabilityLevel || 0) + 25);
-        const sabMsg = window.currentSkin === 4 ? `SEISMIC COLLAPSE IN` : `SABOTAGE IN`;
+        const sabMsg = window.currentSkinIndex === 4 ? `SEISMIC COLLAPSE IN` : `SABOTAGE IN`;
         aiLog(`<span style='color:#ff8888'>${sabMsg} ${countryData[tIso]?.name.toUpperCase()} (-${damage} units)</span>`);
         pulseRedCountry(tIso);
         updateTroopSprite(tIso);
@@ -13029,9 +13077,9 @@
           GS.countries[tIso].troops = Math.max(0, GS.countries[tIso].troops - Math.floor(6 + Math.random() * 5));
           GS.countries[tIso].nuked = 6; // Fix 10
           spawnExplosion3D(countryData[tIso]?.lat, countryData[tIso]?.lon, PLAYER_COLORS[1].int);
-          triggerRedAlert(window.currentSkin === 4 ? "DEEP CORE FRACTURE DETECTED" : "NUCLEAR LAUNCH DETECTED");
-          aiLog(`<span style="color:#ffaa00">${window.currentSkin === 4 ? 'DEEP CRUSH' : 'NUCLEAR LAUNCH'}: ${countryData[tIso]?.name.toUpperCase()}</span>`);
-          setLog(`☢ RAINCLAUDE ${window.currentSkin === 4 ? 'FRACKING OPERATION' : 'NUCLEAR WAR'} on ${countryData[tIso]?.name}!`);
+          triggerRedAlert(window.currentSkinIndex === 4 ? "DEEP CORE FRACTURE DETECTED" : "NUCLEAR LAUNCH DETECTED");
+          aiLog(`<span style="color:#ffaa00">${window.currentSkinIndex === 4 ? 'DEEP CRUSH' : 'NUCLEAR LAUNCH'}: ${countryData[tIso]?.name.toUpperCase()}</span>`);
+          setLog(`☢ RAINCLAUDE ${window.currentSkinIndex === 4 ? 'FRACKING OPERATION' : 'NUCLEAR WAR'} on ${countryData[tIso]?.name}!`);
           if (GS.countries[tIso].troops === 0) { GS.countries[tIso].owner = 1; GS.countries[tIso].troops = 1; refreshBorder(tIso); }
           updateTroopSprite(tIso);
           await wait(1500);
@@ -13076,8 +13124,20 @@
           if (rAmount > 0) {
             GS.countries[tIso].troops += rAmount;
             updateTroopSprite(tIso);
-            aiLog(`${window.currentSkin === 4 ? 'EXCAVATING' : 'REINFORCE'}: <b>${countryData[tIso]?.name.toUpperCase()}</b> (+${rAmount})`);
-            setLog(`⚙ RAINCLAUDE ${window.currentSkin === 4 ? 'mines' : 'reinforce'} +${rAmount} → ${countryData[tIso]?.name}`);
+            let actionStr = 'REINFORCE';
+            if (window.currentSkinIndex === 4) {
+              const greenSkinReinforceLogs = [
+                "DEPLOYING HEAVY EXCAVATORS TO",
+                "ESTABLISHING DRILL SITE AT",
+                "ROUTING MINING DRONES TO",
+                "CONSTRUCTING EXTRACTION PLATFORM IN",
+                "REINFORCING SEISMIC BRACING IN"
+              ];
+              actionStr = greenSkinReinforceLogs[Math.floor(Math.random() * greenSkinReinforceLogs.length)];
+            }
+            
+            aiLog(`${actionStr}: <b>${countryData[tIso]?.name.toUpperCase()}</b> (+${rAmount})`);
+            setLog(`⚙ RAINCLAUDE ${window.currentSkinIndex === 4 ? 'mines' : 'reinforce'} +${rAmount} → ${countryData[tIso]?.name}`);
           }
         }
       }
@@ -13088,9 +13148,9 @@
       let maxAttacks = Math.floor(2 + (ai.aggressionLevel || 0));
       if (GS.globalMetrics.commJamTurns > 0) {
         maxAttacks = Math.max(1, Math.floor(maxAttacks / 2));
-        aiLog(`<span style="color:#ff0000">${window.currentSkin === 4 ? 'DRILL JAM ACTIVE' : 'COMMUNICATION JAM ACTIVE'}. OPERATIONS LIMITED.</span>`);
+        aiLog(`<span style="color:#ff0000">${window.currentSkinIndex === 4 ? 'DRILL JAM ACTIVE' : 'COMMUNICATION JAM ACTIVE'}. OPERATIONS LIMITED.</span>`);
       }
-      aiLog(window.currentSkin === 4 ? `ESTABLISHING MINING OPS (Max: ${maxAttacks})...` : `EXECUTING TACTICAL OPS (Max: ${maxAttacks})...`);
+      aiLog(window.currentSkinIndex === 4 ? `ESTABLISHING MINING OPS (Max: ${maxAttacks})...` : `EXECUTING TACTICAL OPS (Max: ${maxAttacks})...`);
       await wait(500);
 
       let potentialMoves = [];
@@ -13118,7 +13178,19 @@
         if (activeFrom.has(move.fromIso)) continue;
         if (move.fromC.troops < 2) continue;
 
-        aiLog(`${window.currentSkin === 4 ? 'MINING' : 'ENGAGING'}: <b>${countryData[move.toIso]?.name.toUpperCase()}</b> (Score: ${move.score.toFixed(0)})`);
+        let attackStr = 'ENGAGING';
+        if (window.currentSkinIndex === 4) {
+          const greenSkinAttackLogs = [
+            "EXTRACTING D3X VEIN FROM",
+            "INITIATING CORE BREACH AT",
+            "DEPLETING MINERAL YIELD IN",
+            "EXCAVATING RARE EARTH ELEMENTS AT",
+            "PROSPECTOR BOTS HARVESTING IN"
+          ];
+          attackStr = greenSkinAttackLogs[Math.floor(Math.random() * greenSkinAttackLogs.length)];
+        }
+
+        aiLog(`${attackStr}: <b>${countryData[move.toIso]?.name.toUpperCase()}</b> (Score: ${move.score.toFixed(0)})`);
         const atkD = Math.min(3, move.fromC.troops - 1), defD = Math.min(2, move.toC.troops) + (move.toC.infrastructure >= 5 ? 1 : 0); // Fix 11
         const aR = Array.from({ length: atkD }, () => 1 + Math.floor(Math.random() * 6)).sort((a, b) => b - a);
         const dR = Array.from({ length: defD }, () => 1 + Math.floor(Math.random() * 6)).sort((a, b) => b - a);
@@ -13128,8 +13200,19 @@
         move.fromC.troops -= al; move.toC.troops -= dl;
 
         if (move.toC.troops <= 0) {
-          aiLog(`<span style="color:#fff">${window.currentSkin === 4 ? 'CLAIMED' : 'SECURED'}: <b>${countryData[move.toIso]?.name.toUpperCase()}</b></span>`);
-          setLog(`⚙ RAINCLAUDE ${window.currentSkin === 4 ? 'extracts' : 'seizes'} ${countryData[move.toIso]?.name}!`);
+          let victoryStr = 'SECURED';
+          if (window.currentSkinIndex === 4) {
+            const greenSkinCaptureLogs = [
+              "MINING OPERATIONS CLAIMED",
+              "REFINERY SECURED AT",
+              "100% DEPLETION ACHIEVED IN",
+              "DRILLING RIG ESTABLISHED IN"
+            ];
+            victoryStr = greenSkinCaptureLogs[Math.floor(Math.random() * greenSkinCaptureLogs.length)];
+          }
+          
+          aiLog(`<span style="color:#fff">${victoryStr}: <b>${countryData[move.toIso]?.name.toUpperCase()}</b></span>`);
+          setLog(`⚙ RAINCLAUDE ${window.currentSkinIndex === 4 ? 'extracts' : 'seizes'} ${countryData[move.toIso]?.name}!`);
           // Fix 9: Move all troops on conquest for faster AI blitzing
           move.toC.owner = 1; move.toC.troops = move.fromC.troops - 1;
           move.fromC.troops -= move.toC.troops; if (move.fromC.troops < 1) move.fromC.troops = 1;
@@ -13144,7 +13227,7 @@
         await wait(1200);
       }
 
-      aiLog(window.currentSkin === 4 ? 'YIELDING TO LOCAL REGULATIONS.' : 'YIELDING TO HUMAN RESISTANCE.');
+      aiLog(window.currentSkinIndex === 4 ? 'YIELDING TO LOCAL REGULATIONS.' : 'YIELDING TO HUMAN RESISTANCE.');
 
       checkPlayerAlive();
       updateDashboard();
@@ -13727,10 +13810,13 @@
               setTimeout(() => { document.getElementById('dash-1').style.borderColor = 'rgba(255,50,50,0.55)'; }, 1000);
             }
 
+            const activeLog = (window.currentSkinIndex === 4 && msg.greenLog) ? msg.greenLog : msg.log;
+            const logPrefix = window.currentSkinIndex === 4 ? '[DRILL CORE]' : '[DB STRIKE]';
+
             const r0 = document.getElementById('d0-reasoning');
             const r1 = document.getElementById('d1-reasoning');
-            if (r0) { r0.innerHTML += `<div><span style="color:#0f8">> [DB STRIKE]</span> ${msg.log}</div>`; r0.scrollTop = r0.scrollHeight; }
-            if (r1) { r1.innerHTML += `<div><span style="color:#0f8">> [DB STRIKE]</span> ${msg.log}</div>`; r1.scrollTop = r1.scrollHeight; }
+            if (r0) { r0.innerHTML += `<div><span style="color:#0f8">> ${logPrefix}</span> ${activeLog}</div>`; r0.scrollTop = r0.scrollHeight; }
+            if (r1) { r1.innerHTML += `<div><span style="color:#0f8">> ${logPrefix}</span> ${activeLog}</div>`; r1.scrollTop = r1.scrollHeight; }
             break;
           }
 
@@ -15016,7 +15102,7 @@
     // White Aura Glow Sphere (Ported from WTR skin, reduced 80% intensity)
     const grnWhiteAuraGeo = new THREE.SphereGeometry(GLOBE_R * 1.05, 32, 32);
     const grnWhiteAuraMat = new THREE.MeshBasicMaterial({
-      color: 0xffffff, // White aura
+      color: 0xccffcc, // White aura with a 20% green tint
       transparent: true,
       opacity: 0.2 * 0.2, // 80% reduced intensity from the original 0.2
       blending: THREE.AdditiveBlending,
@@ -15053,7 +15139,7 @@
     grnWhiteFogGeo.setAttribute('size', new THREE.Float32BufferAttribute(grnWhiteFogSizes, 1));
     const grnWhiteFogTex = new THREE.CanvasTexture(createGreenWhiteAuraCanvas());
     const grnWhiteFogMat = new THREE.PointsMaterial({
-      color: 0xffffff, // Bright white aura
+      color: 0xccffcc, // Bright white aura with a 20% green tint
       map: grnWhiteFogTex,
       size: 2.5,
       transparent: true,
@@ -15064,6 +15150,26 @@
     });
     const grnWhiteFogSystem = new THREE.Points(grnWhiteFogGeo, grnWhiteFogMat);
     window.greenSkinGroup.add(grnWhiteFogSystem);
+    // Formalize the \"Building Block\" Glitch as a Green Skin Feature (per user request)
+    const greenBlockGeo = new THREE.IcosahedronGeometry(GLOBE_R * 1.035, 2);
+    const greenBlockMat = new THREE.MeshPhongMaterial({
+      color: 0x031808, // Deep dark \"poison\" green/black
+      emissive: 0x010502,
+      transparent: true,
+      opacity: 0.75,
+      flatShading: true,
+      side: THREE.FrontSide,
+      depthWrite: false
+    });
+    const greenBlockMesh = new THREE.Mesh(greenBlockGeo, greenBlockMat);
+    // Add very faint glowing edges to define the blocks perfectly around the globe
+    const greenBlockEdges = new THREE.LineSegments(
+      new THREE.EdgesGeometry(greenBlockGeo),
+      new THREE.LineBasicMaterial({ color: 0x00ff44, transparent: true, opacity: 0.25 })
+    );
+    greenBlockMesh.add(greenBlockEdges);
+    window.greenScaffoldMesh = greenBlockMesh; // Reference for animation loop
+    window.greenSkinGroup.add(greenBlockMesh);
 
     // Green Atmospheric Fog (Volumetric GLSL ShaderMaterial)
     window.greenFogGroup = new THREE.Group();
@@ -16423,6 +16529,13 @@
         window.dexmondHubGroup.rotateX(Math.PI / 2); // Stand it upright
         window.dexmondHubGroup.rotateY(Math.PI / 2); // Face it outward, traveling forward
       }
+
+      // Rotate the formalized "building blocks" (Icosahedron Scaffold) around the Green Skin
+      if (window.greenScaffoldMesh && window.greenScaffoldMesh.visible) {
+        window.greenScaffoldMesh.rotation.y += 0.0004;
+        window.greenScaffoldMesh.rotation.x += 0.0002;
+      }
+
 
       // Rotate Realistic LIVE Skin Clouds
       if (window.cloudMesh && window.cloudMesh.visible) {
@@ -18354,14 +18467,21 @@
       { name: 'BLK', color: 0x050505, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false },
       { name: 'WTR', color: 0x00aaff, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false },
       { name: 'CYBER', color: 0xffffff, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false },
-      { name: 'GREEN', color: 0x22ff22, btnText: 'parallel layers', btnClass: 'active-normal', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: true, showArms: true, showBoats: false, isPremium: false },
-      { name: 'REAL_EARTH', color: 0xffffff, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: true, isPremium: false }
+      { name: 'GREEN', color: 0x22ff22, btnText: 'parallel layers', btnClass: 'active-normal', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: true, showArms: true, showBoats: false, isPremium: false }
     ];
     Object.freeze(SKINS);
     window.SKINS = SKINS;
 
     window.toggleRedSkin = function () {
       if (typeof _sfxClick !== 'undefined') _sfxClick();
+
+      // Ensure base globe is visible by default for all non-solid skins
+      if (typeof window.globeMesh !== 'undefined') {
+        window.globeMesh.visible = true;
+      }
+      if (typeof window.solidEarthMesh !== 'undefined') {
+        window.solidEarthMesh.visible = false;
+      }
 
       // Advance skin
       window.currentSkinIndex = (window.currentSkinIndex + 1) % SKINS.length;
@@ -18410,6 +18530,54 @@
         // Dynamically invoke the plugin
         if (typeof window['applySkin_' + window.currentSkinIndex] === 'function') {
           window['applySkin_' + window.currentSkinIndex](skin);
+        }
+
+        // HARDCODED OVERRIDES: Protect Core Skins from Plugin Degradation
+        if (skin.name === 'LIVE') {
+          // Discard the cursed transparent global mesh entirely
+          if (typeof window.globeMesh !== 'undefined') window.globeMesh.visible = false;
+          // Spawn the indestructible secondary mesh
+          if (typeof window.solidLiveMesh !== 'undefined') window.solidLiveMesh.visible = true;
+          if (typeof window.atmosphereGroup !== 'undefined') window.atmosphereGroup.visible = true;
+        } else if (skin.name === 'BLK') {
+          if (typeof window.blackGlobeMat === 'undefined') {
+            window.blackGlobeMat = new THREE.MeshStandardMaterial({
+              color: 0x010101, // Deep black base
+              emissive: 0x050505, // Emissive glow to retain silhouette
+              roughness: 0.1, // Shiny
+              metalness: 0.9, // Glossy environmental catch
+              transparent: false,
+              opacity: 1.0, // Solid opaque ball
+              depthWrite: true, // Write depth buffer
+              depthTest: true,
+              side: THREE.FrontSide
+            });
+            
+            // Generate Rim Lights (Soft 3-point lighting setup, dimmed per user request)
+            window.blackSkinRimLight = new THREE.DirectionalLight(0xffffff, 2.8); // 30% dimmer than 4.0
+            window.blackSkinRimLight.position.set(20, 0, 0); // Purely from the X-Right axis (Key Light)
+
+            window.blackSkinRimLight2 = new THREE.DirectionalLight(0xffffff, 2.0); // Softer Fill Light
+            window.blackSkinRimLight2.position.set(-20, 15, 10); // Top-Left
+
+            window.blackSkinRimLight3 = new THREE.DirectionalLight(0xffffff, 1.5); // Subtle Back Rim Light
+            window.blackSkinRimLight3.position.set(0, -20, -15); // Bottom-Back
+
+            if (typeof scene !== 'undefined') {
+              scene.add(window.blackSkinRimLight);
+              scene.add(window.blackSkinRimLight2);
+              scene.add(window.blackSkinRimLight3);
+            }
+          }
+          window.globeMesh.material = window.blackGlobeMat;
+          if (window.blackSkinRimLight) window.blackSkinRimLight.visible = true;
+          if (window.blackSkinRimLight2) window.blackSkinRimLight2.visible = true;
+          if (window.blackSkinRimLight3) window.blackSkinRimLight3.visible = true;
+          window.globeMesh.renderOrder = 0; // Return to default opaque queuing
+        } else {
+          if (window.blackSkinRimLight) window.blackSkinRimLight.visible = false;
+          if (window.blackSkinRimLight2) window.blackSkinRimLight2.visible = false;
+          if (window.blackSkinRimLight3) window.blackSkinRimLight3.visible = false;
         }
 
         // Specifically for REAL_EARTH, enforce material update
@@ -18678,8 +18846,8 @@
 
       // Toggle Realistic Lighting Setup
       if (typeof window.sunLight !== 'undefined') {
-        window.sunLight.visible = (skin.name === 'REAL' || skin.name === 'MARS');
-        window.ambientLight.visible = (skin.name === 'REAL' || skin.name === 'MARS');
+        window.sunLight.visible = (skin.name === 'REAL' || skin.name === 'MARS' || skin.name === 'LIVE');
+        window.ambientLight.visible = (skin.name === 'REAL' || skin.name === 'MARS' || skin.name === 'LIVE');
       }
 
       // Clear ambient visual flights immediately when toggling to clean skin
@@ -21173,12 +21341,11 @@
       </div>
     </div>
   </div>
-  <script src="GLOBE_SKINS/0/skin.js"></script>
-  <script src="GLOBE_SKINS/1/skin.js"></script>
-  <script src="GLOBE_SKINS/2/skin.js"></script>
-  <script src="GLOBE_SKINS/3/skin.js"></script>
-  <script src="GLOBE_SKINS/4/skin.js"></script>
-  <script src="GLOBE_SKINS/5/skin.js"></script>
+  <script src="GLOBE_SKINS/0/skin.js?v=26"></script>
+  <script src="GLOBE_SKINS/1/skin.js?v=26"></script>
+  <script src="GLOBE_SKINS/2/skin.js?v=26"></script>
+  <script src="GLOBE_SKINS/3/skin.js?v=26"></script>
+  <script src="GLOBE_SKINS/4/skin.js?v=26"></script>
 
 </body>
 
