@@ -21403,8 +21403,53 @@
   <script src="GLOBE_SKINS/1/skin.js?v=26"></script>
   <script src="GLOBE_SKINS/2/skin.js?v=26"></script>
   <script src="GLOBE_SKINS/3/skin.js?v=26"></script>
-  <script src="GLOBE_SKINS/4/skin.js?v=26"></script>
+  <script src="GLOBE_SKINS/4/skin.js?v=26"></script>  <!-- GLOBAL HUD SCALER (1920x1080 VIRTUAL RESOLUTION) -->
+  <script>
+    (function initGlobalHUDScaler() {
+      // Establish the master virtual containment grid
+      const uiLayer = document.createElement('div');
+      uiLayer.id = 'global-ui-layer';
+      uiLayer.style.position = 'absolute';
+      uiLayer.style.top = '0';
+      uiLayer.style.left = '0';
+      uiLayer.style.width = '1920px';
+      uiLayer.style.height = '1080px';
+      uiLayer.style.pointerEvents = 'none'; // Critical gap bypass layer 
+      uiLayer.style.transformOrigin = 'top left';
+      uiLayer.style.zIndex = '10';
 
+      const exclusions = ['c', 'deckgl-container'];
+      const excludeTags = ['SCRIPT', 'STYLE', 'LINK'];
+      
+      const children = Array.from(document.body.children);
+      
+      // Sweep and trap all UI elements off the DOM body into the scaler box
+      for (let el of children) {
+        if (excludeTags.includes(el.tagName)) continue;
+        if (exclusions.includes(el.id)) continue;
+        uiLayer.appendChild(el);
+      }
+      
+      document.body.appendChild(uiLayer);
+
+      // Restore internal click collision detection inside the UI boundary 
+      // (Bypassed natively by elements with inline pointer-events:none via 1,0,0,0 HTML specificity)
+      const style = document.createElement('style');
+      style.textContent = '#global-ui-layer > * { pointer-events: auto; }';
+      document.head.appendChild(style);
+
+      // Live algorithmic translation module 
+      function resizeHUD() {
+        const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+        const xOffset = (window.innerWidth - (1920 * scale)) / 2;
+        const yOffset = (window.innerHeight - (1080 * scale)) / 2;
+        uiLayer.style.transform = `translate(${xOffset}px, ${yOffset}px) scale(${scale})`;
+      }
+
+      window.addEventListener('resize', resizeHUD);
+      resizeHUD();
+    })();
+  </script>
 </body>
 
 </html>
