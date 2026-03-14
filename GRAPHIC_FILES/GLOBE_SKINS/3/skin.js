@@ -1,8 +1,7 @@
 // GRAPHIC_FILES/GLOBE_SKINS/3/skin.js
-
-window.applySkin_3 = function(skin) {
+window['applySkin_3'] = function(skin) {
   // ----------------------------------------------------------------
-  // RED PLANET SKIN (Index 3)
+  // CYBER SKIN (Index 3)
   // ----------------------------------------------------------------
   
   if (typeof window.atmosphereGroup !== 'undefined') {
@@ -10,18 +9,23 @@ window.applySkin_3 = function(skin) {
   }
 
   if (typeof globeMat !== 'undefined') {
-    globeMat.map = window.risikoTexture; // Dynamically generated Risiko state!
-    if (typeof window.updateRisikoMap === 'function') window.updateRisikoMap();
-    globeMat.emissiveMap = null;
+    globeMat.transmission = 0.0; // Turn off glass for cyber
+    globeMat.emissive.setHex(0x001144); // Further darkened emissive blue
     
-    // Apply neutral white lighting base so the canvas colors shine perfectly accurately
-    globeMat.color.setHex(0xffffff);
-    globeMat.emissive.setHex(0x222222);
+    // Apply the high-density grid texture map
+    globeMat.map = window.cyberGridTex;
+    globeMat.emissiveMap = null; // Let the solid planet explicitly emit light so it doesn't match space
+    
+    // Solid layer
+    globeMat.transparent = false; 
+    globeMat.opacity = 1.0; 
+    globeMat.depthWrite = true; 
+    
     globeMat.wireframe = false;
-    
-    // Transparent layer
-    globeMat.transparent = true;
-    globeMat.opacity = 0.2;
-    globeMat.depthWrite = false;
+  }
+
+  // Toggle CYBER solid core layer
+  if (typeof window.cyberBaseMesh !== 'undefined') {
+    window.cyberBaseMesh.visible = true;
   }
 };

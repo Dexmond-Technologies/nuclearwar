@@ -306,7 +306,7 @@
       text-align: center;
     }
 
-    #cybercrime-map-label {
+    #blackwarfare-map-label {
       position: absolute;
       bottom: 50px;
       left: 50%;
@@ -317,7 +317,7 @@
       color: #0f8;
       letter-spacing: 6px;
       text-shadow: 0 0 10px #0f8, 0 0 20px #0f8;
-      animation: cyberPulse 1s infinite alternate;
+      animation: blackPulse 1s infinite alternate;
       pointer-events: none;
       z-index: 100;
       display: none;
@@ -334,7 +334,7 @@
       color: #0af;
       letter-spacing: 6px;
       text-shadow: 0 0 10px #0af, 0 0 20px #0af;
-      animation: cyberPulse 1s infinite alternate;
+      animation: blackPulse 1s infinite alternate;
       pointer-events: none;
       z-index: 100;
       display: block;
@@ -352,7 +352,7 @@
       color: #f55;
       letter-spacing: 6px;
       text-shadow: 0 0 10px #f55, 0 0 20px #f55;
-      animation: cyberPulse 1s infinite alternate;
+      animation: blackPulse 1s infinite alternate;
       pointer-events: none;
       z-index: 100;
       display: none;
@@ -369,7 +369,7 @@
       color: #00f0ff;
       letter-spacing: 6px;
       text-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff;
-      animation: cyberPulse 1s infinite alternate;
+      animation: blackPulse 1s infinite alternate;
       pointer-events: none;
       z-index: 100;
       display: none;
@@ -398,7 +398,7 @@
       transition: opacity 0.3s;
     }
 
-    @keyframes cyberPulse {
+    @keyframes blackPulse {
       0% {
         opacity: 0.3;
         text-shadow: 0 0 5px #0f8;
@@ -2824,7 +2824,7 @@
     <div id="botbar">
       <!-- RADIO CONTROLS -->
       <div id="sound-control-container"
-        style="position:absolute; bottom:990px; left:calc(20px + 30vw - 390px); display:flex; gap:6px; z-index:20; align-items:flex-end;">
+        style="position:absolute; bottom:30px; left:50%; transform:translateX(-50%); display:flex; gap:6px; z-index:200; align-items:flex-end;">
         <div style="display:flex; gap:6px;">
           <button id="btn-toggle-soundtrack" onclick="toggleSoundtrack()">🎵 SOUNDTRACKS</button>
           <button id="btn-toggle-soundtrack-next" onclick="playNextCustomSoundtrack()">➔</button>
@@ -2841,7 +2841,7 @@
         </div>
       </div>
 
-      <div id="cybercrime-map-label">CYBER-WARFARE</div>
+      <div id="blackwarfare-map-label">BLACK-WARFARE</div>
       <div id="global-player-count"
         style="position: absolute; bottom: 75px; left: 50%; transform: translateX(-50%); font-family:'Courier New', monospace; font-size:11px; font-weight:bold; letter-spacing:2px; color:#0af; text-shadow:0 0 8px rgba(0,170,255,0.6); z-index: 100; pointer-events: none;">
         🟢 <span id="gpc-val">0</span> ACTIVE COMMANDERS
@@ -3618,7 +3618,8 @@
     </div>
   </div>
 
-  <div id="skin-index-display" style="position:absolute; bottom:25px; left:50%; transform:translateX(-50%); color:#0af; font-family:'Orbitron', sans-serif; font-size:10px; font-weight:bold; letter-spacing:2px; text-shadow:0 0 5px rgba(0,170,255,0.8); pointer-events:none; z-index:9000;">
+  <div id="skin-index-display"
+    style="position:absolute; bottom:25px; left:50%; transform:translateX(-50%); color:#0af; font-family:'Orbitron', sans-serif; font-size:10px; font-weight:bold; letter-spacing:2px; text-shadow:0 0 5px rgba(0,170,255,0.8); pointer-events:none; z-index:9000;">
     SKIN INDEX: 0
   </div>
 
@@ -5547,46 +5548,46 @@
     window.risikoCtx = window.risikoCanvas.getContext('2d');
     window.risikoTexture = new THREE.CanvasTexture(window.risikoCanvas);
     window.risikoTexture.minFilter = THREE.LinearFilter;
-    
+
     // Initial blank fill so it works before first update
     window.risikoCtx.fillStyle = '#110000';
     window.risikoCtx.fillRect(0, 0, 4096, 2048);
     window.risikoTexture.needsUpdate = true;
 
-    window.updateRisikoMap = function() {
+    window.updateRisikoMap = function () {
       console.log("updateRisikoMap CALLED! Skin:", window.currentSkinIndex, "GS:", !!window.GS, "GS.countries:", !!(window.GS && window.GS.countries), "countryData:", !!window.countryData);
       if (window.currentSkinIndex !== 3 || !window.countryData || !window.GS || !window.GS.countries) return;
-      
+
       const ctx = window.risikoCtx;
       const w = window.risikoCanvas.width;
       const h = window.risikoCanvas.height;
-      
+
       // Base ocean background for the Risiko map
       ctx.fillStyle = '#110000';
       ctx.fillRect(0, 0, w, h);
-      
+
       // DEBUG: Giant blue square down the middle to prove rendering is active
       ctx.fillStyle = '#0000ff';
-      ctx.fillRect(w/2 - 200, h/2 - 200, 400, 400);
-      
+      ctx.fillRect(w / 2 - 200, h / 2 - 200, 400, 400);
+
       ctx.lineWidth = 1;
-      
+
       Object.entries(window.countryData).forEach(([iso, cd]) => {
         if (!cd.polys || cd.polys.length === 0) return;
-        
+
         const cState = window.GS.countries[iso];
         let fillColor = '#330000'; // Default uninhabited color
-        
+
         if (cState && cState.owner !== undefined) {
           const commander = window.GS.players[cState.owner];
           if (commander && commander.color && commander.color.hex) {
-             fillColor = commander.color.hex;
+            fillColor = commander.color.hex;
           }
         }
-        
+
         ctx.fillStyle = fillColor;
         ctx.strokeStyle = '#ff0000'; // Hardcoded neon red border for the RISK theme
-        
+
         ctx.beginPath();
         cd.polys.forEach(poly => {
           let first = true;
@@ -5601,12 +5602,12 @@
         });
         ctx.fill();
         ctx.stroke();
-        
+
         // Draw Troops Numeric Overlay
         if (cState && cState.troops > 0) {
           const tx = ((cd.lon + 180) / 360) * w;
           const ty = ((90 - cd.lat) / 180) * h;
-          
+
           ctx.fillStyle = 'rgba(0,0,0,0.6)';
           // Troop background oval pill
           ctx.beginPath();
@@ -5615,25 +5616,25 @@
           ctx.strokeStyle = '#ffffff';
           ctx.lineWidth = 2;
           ctx.stroke();
-          
+
           ctx.fillStyle = '#ffffff';
           ctx.font = 'bold 20px monospace';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           ctx.fillText(cState.troops.toLocaleString(), tx, ty);
-          
+
           // Draw Owner Name below it for realism
           if (cState.owner !== undefined) {
             const commander = window.GS.players[cState.owner];
             if (commander && commander.name) {
               ctx.fillStyle = '#aaaaaa';
               ctx.font = '12px monospace';
-              ctx.fillText(commander.name.toUpperCase().substring(0,6), tx, ty + 20);
+              ctx.fillText(commander.name.toUpperCase().substring(0, 6), tx, ty + 20);
             }
           }
         }
       });
-      
+
       window.risikoTexture.needsUpdate = true;
     };
 
@@ -5718,11 +5719,11 @@
       // Generate a shiny, detailed green material rendering OVER other visual layers 
       const mat = new THREE.MeshStandardMaterial({
         color: 0x00ff33,
-        roughness: 0.1,
-        metalness: 0.7,
+        emissive: 0x220033, // Purple shiny reflection baseline
+        roughness: 0.15,
+        metalness: 0.85,    // High metalness for sharp shiny facets
         flatShading: true,
-        transparent: true,
-        opacity: 0.99,
+        transparent: false, // Fully opaque per user request
         depthTest: true,
         depthWrite: true
       });
@@ -5737,36 +5738,59 @@
           const v = new THREE.Vector3();
           for (let i = 0; i < pos.count; i++) {
             v.fromBufferAttribute(pos, i);
-            // Don't displace the absolute base or the exact peak to maintain structure
-            if (v.y > -height / 2 + 0.001 && v.y < height / 2 - 0.001) {
+
+            // Distance from local center (for curving the base)
+            const distFromCenter = Math.sqrt(v.x * v.x + v.z * v.z);
+            const isBase = (v.y < -height / 2 + 0.05);
+
+            // Curve the base downward to hug the sphere's curvature (R=1.0)
+            if (isBase) {
+               // Approximate spherical drop: y_drop = -(x^2 + z^2) / (2*R)
+               const drop = -(distFromCenter * distFromCenter) / (2.0 * GLOBE_R);
+               v.y += drop;
+            }
+
+            // Apply displacement to BOTH the sides AND the base footprint, only skipping the absolute highest peak
+            if (v.y < height / 2 - 0.001) {
               const angle = Math.atan2(v.z, v.x);
+
+              // Base distortion logic to warp perfectly round cone footprints
+              let baseWarp = 0;
+              if (isBase) {
+                // Apply a very large, slow wave to completely break the circular base shape
+                baseWarp = (Math.sin(angle * 2.5 + Math.random()) * 0.45 + Math.cos(angle * 4) * 0.3) * radius;
+              }
+
               // Organic sine waves for mountain ridges
               let wave = Math.sin(angle * 4) * 0.4 + Math.cos(angle * 7) * 0.2 + Math.sin(v.y * 30 / scaleMulti) * 0.3;
-              // Taper the displacement near the peak and base
               let factor = 1.0 - Math.abs(v.y) / (height / 2);
               let displacement = wave * factor * radius * 0.6;
 
               const dir = new THREE.Vector2(v.x, v.z).normalize();
-              // Apply structural ridge displacement + micro-jitter for craggy rocks
-              v.x += dir.x * displacement + (Math.random() - 0.5) * radius * 0.15;
-              v.z += dir.y * displacement + (Math.random() - 0.5) * radius * 0.15;
-              v.y += (Math.random() - 0.5) * height * 0.05;
+              // Apply structural ridge displacement + macro-base-warp + micro-jitter
+              v.x += dir.x * (displacement + baseWarp) + (Math.random() - 0.5) * radius * 0.15;
+              v.z += dir.y * (displacement + baseWarp) + (Math.random() - 0.5) * radius * 0.15;
+              
+              // Only add random Y jitter if it's NOT the base, keeping the base flush with the curve
+              if (!isBase) {
+                v.y += (Math.random() - 0.5) * height * 0.05;
+              }
             }
             pos.setXYZ(i, v.x, v.y, v.z);
           }
           geo.computeVertexNormals();
         }
 
-        // Base center peak (Doubled base width)
-        const centerGeo = new THREE.ConeGeometry(0.24 * scaleMulti, 0.4 * scaleMulti, 32, 16);
+        // Base center peak (Doubled base width, doubled polygon density for realism)
+        const centerGeo = new THREE.ConeGeometry(0.24 * scaleMulti, 0.4 * scaleMulti, 64, 32);
         displace(centerGeo, 0.24 * scaleMulti, 0.4 * scaleMulti);
         const center = new THREE.Mesh(centerGeo, mat);
         center.position.y = 0.2 * scaleMulti;
         center.renderOrder = 9999;
         group.add(center);
 
-        // Secondary side peak A
-        const side1Geo = new THREE.ConeGeometry(0.08 * scaleMulti, 0.25 * scaleMulti, 24, 12);
+        // Secondary side peak A (Doubled polygon density)
+        const side1Geo = new THREE.ConeGeometry(0.08 * scaleMulti, 0.25 * scaleMulti, 48, 24);
         displace(side1Geo, 0.08 * scaleMulti, 0.25 * scaleMulti);
         const side1 = new THREE.Mesh(side1Geo, mat);
         side1.position.set(0.06 * scaleMulti, 0.125 * scaleMulti, 0.05 * scaleMulti);
@@ -5774,8 +5798,8 @@
         side1.renderOrder = 9999;
         group.add(side1);
 
-        // Secondary side peak B
-        const side2Geo = new THREE.ConeGeometry(0.07 * scaleMulti, 0.2 * scaleMulti, 24, 12);
+        // Secondary side peak B (Doubled polygon density)
+        const side2Geo = new THREE.ConeGeometry(0.07 * scaleMulti, 0.2 * scaleMulti, 48, 24);
         displace(side2Geo, 0.07 * scaleMulti, 0.2 * scaleMulti);
         const side2 = new THREE.Mesh(side2Geo, mat);
         side2.position.set(-0.07 * scaleMulti, 0.1 * scaleMulti, -0.05 * scaleMulti);
@@ -5821,6 +5845,20 @@
         mLight.position.set(0, 0.15 * scaleMulti, 0);
         group.add(mLight);
 
+        // Add procedural glowing Mist/Fog at the base of the mountains
+        const mistGeo = new THREE.SphereGeometry(0.3 * scaleMulti, 16, 12);
+        const mistMat = new THREE.MeshBasicMaterial({
+            color: 0x55ff88,
+            transparent: true,
+            opacity: 0.15,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+        const mistMesh = new THREE.Mesh(mistGeo, mistMat);
+        mistMesh.position.set(0, 0.05 * scaleMulti, 0);
+        mistMesh.scale.set(1.5, 0.4, 1.5); // Flatten it into a ground-hugging cloud
+        group.add(mistMesh);
+
         // Add volumetric glowing mist (steam particle system) around the mountain
         const steamGroup = new THREE.Group();
         const steamCanvas = document.createElement('canvas');
@@ -5851,16 +5889,16 @@
         return group;
       }
 
-      // 1. First Mountain (Alps)
+      // 1. First Mountain (Alps) - Shifted South
       const mount1 = createJaggedMountain(1.2);
-      const pos1 = ll2v(46.8, 8.2, GLOBE_R);
+      const pos1 = ll2v(-46.8, 8.2, GLOBE_R);
       mount1.position.copy(pos1);
       mount1.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pos1.clone().normalize());
       greenMountainsGroup.add(mount1);
 
-      // 2. Second Mountain (Himalayas)
+      // 2. Second Mountain (Himalayas) - Shifted South
       const mount2 = createJaggedMountain(1.6);
-      const pos2 = ll2v(27.9, 86.9, GLOBE_R);
+      const pos2 = ll2v(-27.9, 86.9, GLOBE_R);
       mount2.position.copy(pos2);
       mount2.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pos2.clone().normalize());
       greenMountainsGroup.add(mount2);
@@ -5872,9 +5910,9 @@
       mount3.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pos3.clone().normalize());
       greenMountainsGroup.add(mount3);
 
-      // 4. Fourth Mountain (Rockies)
+      // 4. Fourth Mountain (Rockies) - Shifted South
       const mount4 = createJaggedMountain(1.1);
-      const pos4 = ll2v(43.0, -109.0, GLOBE_R);
+      const pos4 = ll2v(-43.0, -109.0, GLOBE_R);
       mount4.position.copy(pos4);
       mount4.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pos4.clone().normalize());
       greenMountainsGroup.add(mount4);
@@ -6521,7 +6559,7 @@
         conflictStr = `<div style="margin-top:10px; padding:5px; background:rgba(255,0,0,0.1); border:1px solid #f24; color:#f24; font-size:11px; text-align:center;">⚠️ RAINCLAUDE UPLOADING MALWARE TO HEIST ASSET</div>`;
       } else {
         // Active combat
-        conflictStr = `<div style="margin-top:10px; padding:5px; background:rgba(255,150,0,0.1); border:1px solid #f80; color:#f80; font-size:11px; text-align:center;">⚔️ ACTIVE AI CYBER-WARFARE DETECTED ⚔️</div>`;
+        conflictStr = `<div style="margin-top:10px; padding:5px; background:rgba(255,150,0,0.1); border:1px solid #f80; color:#f80; font-size:11px; text-align:center;">⚔️ ACTIVE AI BLACK-WARFARE DETECTED ⚔️</div>`;
       }
 
       let balanceHtml = '';
@@ -7815,7 +7853,7 @@
           // Elaborate Electricity Bridges for North Pole
           window.npLightningGroup = new THREE.Group();
           scene.add(window.npLightningGroup);
-          const bridgeMat = new THREE.LineBasicMaterial({ color: 0x00eaff, transparent: true, opacity: 0.11, blending: THREE.AdditiveBlending });
+          const bridgeMat = new THREE.LineBasicMaterial({ color: 0x00eaff, transparent: true, opacity: 0.0, blending: THREE.AdditiveBlending });
 
           // Neon Light Blue glow texture for the strings
           const cAura = document.createElement('canvas');
@@ -7833,7 +7871,7 @@
 
           const allNodes = window.datacentersGroup.children.filter(n => !n.userData.isNorthPole);
           // Cut bridge instances by 50% per user request (down to 20% total)
-          const numBridges = Math.floor(allNodes.length * 0.2); 
+          const numBridges = Math.floor(allNodes.length * 0.2);
           const braidsPerBridge = 2; // Also cut the number of inner lines per bridge
           const segments = 120; // Doubled again for maximum light particles!
 
@@ -8193,7 +8231,7 @@
       if (!nodes || nodes.length < 2) return;
 
       // Bright yellow connection lines — AdditiveBlending ensures yellow wins over the blue globe glow
-      const material = new THREE.LineBasicMaterial({ color: 0xffff00, transparent: true, opacity: 0.9, linewidth: 3, blending: THREE.AdditiveBlending, depthWrite: false });
+      const material = new THREE.LineBasicMaterial({ color: 0xffff00, transparent: true, opacity: 0.9, linewidth: 3, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: true });
 
       // Create a blurred yellow dot texture for the pulse
       const c = document.createElement('canvas');
@@ -8208,7 +8246,7 @@
 
       const pulseTex = new THREE.CanvasTexture(c);
       // Use NormalBlending to ensure the exact yellow gradient renders even on bright backgrounds
-      const pulseMat = new THREE.SpriteMaterial({ map: pulseTex, color: 0xffff00, transparent: true, opacity: 1.0, blending: THREE.NormalBlending, depthWrite: false });
+      const pulseMat = new THREE.SpriteMaterial({ map: pulseTex, color: 0xffff00, transparent: true, opacity: 1.0, blending: THREE.NormalBlending, depthWrite: false, depthTest: true });
 
       nodes.forEach((node, i) => {
         const numConnections = Math.floor(Math.random() * 3) + 1; // 1 to 3 connections
@@ -8250,11 +8288,11 @@
 
 
 
-    // --- CYBER WARFARE STATE ---
-    window.cyberWarfareInterval = null;
+    // --- BLACK WARFARE STATE ---
+    window.blackWarfareInterval = null;
     window.activeAttacks = {}; // Track which meshes are under attack { uuid: { mesh, startTime, type } }
 
-    // --- CYBER WARFARE CO-OP STATE ---
+    // --- BLACK WARFARE CO-OP STATE ---
     window.coopPwrBudget = 100;
     window.coopPUE = 1.15;
     window.coopCoolAlloc = 50;
@@ -8481,9 +8519,9 @@
     gridCanvas.width = 1024;
     gridCanvas.height = 1024;
     const gridCtx = gridCanvas.getContext('2d');
-    gridCtx.fillStyle = '#000000';
+    gridCtx.fillStyle = '#000a1a'; // Dark solid navy for visual distinction over black space
     gridCtx.fillRect(0, 0, 1024, 1024);
-    
+
     // Draw neon cyan grid lines
     gridCtx.strokeStyle = '#00f0ff';
     gridCtx.lineWidth = 2; // Thinner lines for higher density illusion
@@ -8497,7 +8535,7 @@
       gridCtx.moveTo(0, y); gridCtx.lineTo(1024, y);
     }
     gridCtx.stroke();
-    
+
     window.cyberGridTex = new THREE.CanvasTexture(gridCanvas);
     window.cyberGridTex.wrapS = THREE.RepeatWrapping;
     window.cyberGridTex.wrapT = THREE.RepeatWrapping;
@@ -8540,7 +8578,7 @@
       transparent: false,
       depthWrite: true
     });
-    
+
     greenGlobeMat.onBeforeCompile = function (shader) {
       shader.uniforms.uTime = { value: 0 };
       shader.vertexShader = `
@@ -8651,7 +8689,11 @@
     window.greenGlobeMat = greenGlobeMat;
 
     // Solid base mesh for CYBER skin so it's not see-through
-    const cyberBaseMat = new THREE.MeshBasicMaterial({ color: 0x00020a, side: THREE.FrontSide, depthWrite: true });
+    const cyberBaseMat = new THREE.MeshBasicMaterial({
+      color: 0x00020a,
+      depthWrite: true,
+      depthTest: true
+    });
     const cyberBaseMesh = new THREE.Mesh(cyberGlobeGeo, cyberBaseMat);
     cyberBaseMesh.scale.set(0.995, 0.995, 0.995); // Slightly smaller to avoid Z-fighting
     cyberBaseMesh.visible = false;
@@ -10659,7 +10701,7 @@
             .then(res => res.json())
             .then(data => {
               document.getElementById('treasury-bond-address').textContent = data.treasury_wallet || 'NOT_SET';
-              
+
               // Correctly map the numeric balance to the UI without forcing string undefined errors
               const tBal = data.treasury_balance ? Number(data.treasury_balance) : 0;
               document.getElementById('treasury-d3x-balance').textContent = tBal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -12903,7 +12945,7 @@
       if (!myCountries.length) { nextTurn(); return; }
 
       // --- EVOLUTION & ENERGY ---
-      aiLog('UPDATING KNOWLEDGE BASE...');
+      aiLog(window.currentSkin === 4 ? 'UPDATING MINING ALGORITHMS...' : 'UPDATING KNOWLEDGE BASE...');
       let ai = GS.AI_STATE;
 
       if (GS.turnCount % 3 === 0) ai.adaptabilityScore += 0.5;
@@ -12972,7 +13014,8 @@
         const damage = Math.min(GS.countries[tIso].troops - 1, Math.floor(1 + (ai.intelligenceLevel / 2)));
         GS.countries[tIso].troops -= damage;
         GS.countries[tIso].instabilityLevel = Math.min(100, (GS.countries[tIso].instabilityLevel || 0) + 25);
-        aiLog(`<span style='color:#ff8888'>SABOTAGE IN ${countryData[tIso]?.name.toUpperCase()} (-${damage} units)</span>`);
+        const sabMsg = window.currentSkin === 4 ? `SEISMIC COLLAPSE IN` : `SABOTAGE IN`;
+        aiLog(`<span style='color:#ff8888'>${sabMsg} ${countryData[tIso]?.name.toUpperCase()} (-${damage} units)</span>`);
         pulseRedCountry(tIso);
         updateTroopSprite(tIso);
         await wait(800);
@@ -12986,9 +13029,9 @@
           GS.countries[tIso].troops = Math.max(0, GS.countries[tIso].troops - Math.floor(6 + Math.random() * 5));
           GS.countries[tIso].nuked = 6; // Fix 10
           spawnExplosion3D(countryData[tIso]?.lat, countryData[tIso]?.lon, PLAYER_COLORS[1].int);
-          triggerRedAlert("NUCLEAR LAUNCH DETECTED");
-          aiLog(`<span style="color:#ffaa00">NUCLEAR LAUNCH: ${countryData[tIso]?.name.toUpperCase()}</span>`);
-          setLog(`☢ RAINCLAUDE NUCLEAR WAR on ${countryData[tIso]?.name}!`);
+          triggerRedAlert(window.currentSkin === 4 ? "DEEP CORE FRACTURE DETECTED" : "NUCLEAR LAUNCH DETECTED");
+          aiLog(`<span style="color:#ffaa00">${window.currentSkin === 4 ? 'DEEP CRUSH' : 'NUCLEAR LAUNCH'}: ${countryData[tIso]?.name.toUpperCase()}</span>`);
+          setLog(`☢ RAINCLAUDE ${window.currentSkin === 4 ? 'FRACKING OPERATION' : 'NUCLEAR WAR'} on ${countryData[tIso]?.name}!`);
           if (GS.countries[tIso].troops === 0) { GS.countries[tIso].owner = 1; GS.countries[tIso].troops = 1; refreshBorder(tIso); }
           updateTroopSprite(tIso);
           await wait(1500);
@@ -13033,8 +13076,8 @@
           if (rAmount > 0) {
             GS.countries[tIso].troops += rAmount;
             updateTroopSprite(tIso);
-            aiLog(`REINFORCE: <b>${countryData[tIso]?.name.toUpperCase()}</b> (+${rAmount})`);
-            setLog(`⚙ RAINCLAUDE reinforce +${rAmount} → ${countryData[tIso]?.name}`);
+            aiLog(`${window.currentSkin === 4 ? 'EXCAVATING' : 'REINFORCE'}: <b>${countryData[tIso]?.name.toUpperCase()}</b> (+${rAmount})`);
+            setLog(`⚙ RAINCLAUDE ${window.currentSkin === 4 ? 'mines' : 'reinforce'} +${rAmount} → ${countryData[tIso]?.name}`);
           }
         }
       }
@@ -13045,9 +13088,9 @@
       let maxAttacks = Math.floor(2 + (ai.aggressionLevel || 0));
       if (GS.globalMetrics.commJamTurns > 0) {
         maxAttacks = Math.max(1, Math.floor(maxAttacks / 2));
-        aiLog(`<span style="color:#ff0000">COMMUNICATION JAM ACTIVE. OPERATIONS LIMITED.</span>`);
+        aiLog(`<span style="color:#ff0000">${window.currentSkin === 4 ? 'DRILL JAM ACTIVE' : 'COMMUNICATION JAM ACTIVE'}. OPERATIONS LIMITED.</span>`);
       }
-      aiLog(`EXECUTING TACTICAL OPS (Max: ${maxAttacks})...`);
+      aiLog(window.currentSkin === 4 ? `ESTABLISHING MINING OPS (Max: ${maxAttacks})...` : `EXECUTING TACTICAL OPS (Max: ${maxAttacks})...`);
       await wait(500);
 
       let potentialMoves = [];
@@ -13075,7 +13118,7 @@
         if (activeFrom.has(move.fromIso)) continue;
         if (move.fromC.troops < 2) continue;
 
-        aiLog(`ENGAGING: <b>${countryData[move.toIso]?.name.toUpperCase()}</b> (Score: ${move.score.toFixed(0)})`);
+        aiLog(`${window.currentSkin === 4 ? 'MINING' : 'ENGAGING'}: <b>${countryData[move.toIso]?.name.toUpperCase()}</b> (Score: ${move.score.toFixed(0)})`);
         const atkD = Math.min(3, move.fromC.troops - 1), defD = Math.min(2, move.toC.troops) + (move.toC.infrastructure >= 5 ? 1 : 0); // Fix 11
         const aR = Array.from({ length: atkD }, () => 1 + Math.floor(Math.random() * 6)).sort((a, b) => b - a);
         const dR = Array.from({ length: defD }, () => 1 + Math.floor(Math.random() * 6)).sort((a, b) => b - a);
@@ -13085,8 +13128,8 @@
         move.fromC.troops -= al; move.toC.troops -= dl;
 
         if (move.toC.troops <= 0) {
-          aiLog(`<span style="color:#fff">SECURED: <b>${countryData[move.toIso]?.name.toUpperCase()}</b></span>`);
-          setLog(`⚙ RAINCLAUDE seizes ${countryData[move.toIso]?.name}!`);
+          aiLog(`<span style="color:#fff">${window.currentSkin === 4 ? 'CLAIMED' : 'SECURED'}: <b>${countryData[move.toIso]?.name.toUpperCase()}</b></span>`);
+          setLog(`⚙ RAINCLAUDE ${window.currentSkin === 4 ? 'extracts' : 'seizes'} ${countryData[move.toIso]?.name}!`);
           // Fix 9: Move all troops on conquest for faster AI blitzing
           move.toC.owner = 1; move.toC.troops = move.fromC.troops - 1;
           move.fromC.troops -= move.toC.troops; if (move.fromC.troops < 1) move.fromC.troops = 1;
@@ -13101,7 +13144,7 @@
         await wait(1200);
       }
 
-      aiLog('YIELDING TO HUMAN RESISTANCE.');
+      aiLog(window.currentSkin === 4 ? 'YIELDING TO LOCAL REGULATIONS.' : 'YIELDING TO HUMAN RESISTANCE.');
 
       checkPlayerAlive();
       updateDashboard();
@@ -13834,7 +13877,7 @@
           case 'error':
             const lbyMsg = document.getElementById('lobby-msg');
             if (lbyMsg) lbyMsg.textContent = msg.msg;
-            
+
             // Route error to D3X Mine Log if actively open
             const stakeModal = document.getElementById('d3x-resource-staking-modal');
             if (window.activeMineModalId && stakeModal && stakeModal.style.display === 'flex') {
@@ -13976,7 +14019,7 @@
 
       if (GS.turn === 0) setLog(`▶ HUMAN FRONT — ${GS.phase}`);
       else setLog(`⟳ RAINCLAUDE PROCESSING...`);
-      
+
       // Update the Risiko Red Map if active
       if (typeof window.updateRisikoMap === 'function') window.updateRisikoMap();
     }
@@ -14664,17 +14707,17 @@
             prop.rotation.y += dt * 50.0; // Spin fast
           });
         }
-        
+
         // UPGRADE: Neon Engine Trails
         if (Math.random() > 0.3) {
-           const trailColor = d.faction === 'RAINCLAUDE' ? '#ff0044' : '#00aaff';
-           // Emit directly backwards from the drone's current rotation
-           const backPos = pos.clone().sub(fwd.clone().multiplyScalar(0.015));
-           const mat = new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(createGlowCanvas(trailColor)), color: 0xffffff, transparent: true, blending: THREE.AdditiveBlending });
-           const sprite = new THREE.Sprite(mat);
-           sprite.position.copy(backPos);
-           scene.add(sprite);
-           window.droneBattleState.explosions.push({ mesh: sprite, life: 1.0, decayMs: 3.0, maxScale: 0.08 }); // Reuse explosion particle system for trails
+          const trailColor = d.faction === 'RAINCLAUDE' ? '#ff0044' : '#00aaff';
+          // Emit directly backwards from the drone's current rotation
+          const backPos = pos.clone().sub(fwd.clone().multiplyScalar(0.015));
+          const mat = new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(createGlowCanvas(trailColor)), color: 0xffffff, transparent: true, blending: THREE.AdditiveBlending });
+          const sprite = new THREE.Sprite(mat);
+          sprite.position.copy(backPos);
+          scene.add(sprite);
+          window.droneBattleState.explosions.push({ mesh: sprite, life: 1.0, decayMs: 3.0, maxScale: 0.08 }); // Reuse explosion particle system for trails
         }
 
         d.cooldown -= dt;
@@ -14771,10 +14814,10 @@
       const color = faction === 'RAINCLAUDE' ? 0xff0044 : 0x00aaff;
       const mat = new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 1.0, blending: THREE.AdditiveBlending });
       const line = new THREE.Mesh(geo, mat);
-      
+
       line.position.copy(start);
       line.lookAt(end);
-      
+
       scene.add(line);
       window.droneBattleState.lasers.push({ mesh: line, life: 1.0 });
     }
@@ -14813,35 +14856,35 @@
           r1.scrollTop = r1.scrollHeight;
         }
       });
-      
+
       // UPGRADE: High Frequency Crypto AI Feed Injection
       const algoTypes = ['ARBITRAGE', 'HFT-SCALPING', 'LIQUIDITY SWEEP', 'SHORT SQUEEZE', 'FLASH LOAN', 'MEV-BLOCK'];
-      const dtStr = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }) + `.${Math.floor(Math.random()*999)}`;
-      
+      const dtStr = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }) + `.${Math.floor(Math.random() * 999)}`;
+
       if (Math.random() > 0.5) { // Gemini Trade
-         const feed0 = document.getElementById('d0-crypto-lines');
-         if (feed0) {
-            const algo = algoTypes[Math.floor(Math.random()*algoTypes.length)];
-            const vol = Math.floor(Math.random() * 5000000);
-            feed0.innerHTML = `<div><span style="color:#0f8">> [${dtStr}] EXECUTING ${algo} -- VOL: $${vol.toLocaleString()}</span></div>` + feed0.innerHTML;
-            if (feed0.childElementCount > 5) feed0.removeChild(feed0.lastChild);
-            
-            window.geminiCryptoVol = (window.geminiCryptoVol || 0) + vol;
-            const t0 = document.getElementById('d0-crypto-total');
-            if(t0) t0.innerText = 'VOL: $' + window.geminiCryptoVol.toLocaleString();
-         }
+        const feed0 = document.getElementById('d0-crypto-lines');
+        if (feed0) {
+          const algo = algoTypes[Math.floor(Math.random() * algoTypes.length)];
+          const vol = Math.floor(Math.random() * 5000000);
+          feed0.innerHTML = `<div><span style="color:#0f8">> [${dtStr}] EXECUTING ${algo} -- VOL: $${vol.toLocaleString()}</span></div>` + feed0.innerHTML;
+          if (feed0.childElementCount > 5) feed0.removeChild(feed0.lastChild);
+
+          window.geminiCryptoVol = (window.geminiCryptoVol || 0) + vol;
+          const t0 = document.getElementById('d0-crypto-total');
+          if (t0) t0.innerText = 'VOL: $' + window.geminiCryptoVol.toLocaleString();
+        }
       } else { // Rainclaude Trade
-         const feed1 = document.getElementById('d1-crypto-lines');
-         if (feed1) {
-            const algo = algoTypes[Math.floor(Math.random()*algoTypes.length)];
-            const vol = Math.floor(Math.random() * 5000000);
-            feed1.innerHTML = `<div><span style="color:#f44">> [${dtStr}] DEPLOYING ${algo} -- VOL: $${vol.toLocaleString()}</span></div>` + feed1.innerHTML;
-            if (feed1.childElementCount > 5) feed1.removeChild(feed1.lastChild);
-            
-            window.claudeCryptoVol = (window.claudeCryptoVol || 0) + vol;
-            const t1 = document.getElementById('d1-crypto-total');
-            if(t1) t1.innerText = 'VOL: $' + window.claudeCryptoVol.toLocaleString();
-         }
+        const feed1 = document.getElementById('d1-crypto-lines');
+        if (feed1) {
+          const algo = algoTypes[Math.floor(Math.random() * algoTypes.length)];
+          const vol = Math.floor(Math.random() * 5000000);
+          feed1.innerHTML = `<div><span style="color:#f44">> [${dtStr}] DEPLOYING ${algo} -- VOL: $${vol.toLocaleString()}</span></div>` + feed1.innerHTML;
+          if (feed1.childElementCount > 5) feed1.removeChild(feed1.lastChild);
+
+          window.claudeCryptoVol = (window.claudeCryptoVol || 0) + vol;
+          const t1 = document.getElementById('d1-crypto-total');
+          if (t1) t1.innerText = 'VOL: $' + window.claudeCryptoVol.toLocaleString();
+        }
       }
     }
 
@@ -14875,13 +14918,13 @@
       sprite.position.copy(pos);
       scene.add(sprite);
       window.droneBattleState.explosions.push({ mesh: sprite, life: 1.0, decayMs: 3.5, maxScale: 0.25 }); // Bigger, slower
-      
+
       // UPGRADE: Shockwave Ring
       const ringGeo = new THREE.RingGeometry(0.01, 0.02, 16);
       const ringMat = new THREE.MeshBasicMaterial({ color: 0xff4400, side: THREE.DoubleSide, transparent: true, blending: THREE.AdditiveBlending });
       const ring = new THREE.Mesh(ringGeo, ringMat);
       ring.position.copy(pos);
-      ring.lookAt(new THREE.Vector3(0,0,0));
+      ring.lookAt(new THREE.Vector3(0, 0, 0));
       scene.add(ring);
       window.droneBattleState.explosions.push({ mesh: ring, life: 1.0, decayMs: 6.0, maxScale: 0.4 });
     }
@@ -14893,6 +14936,63 @@
       scene.add(sprite);
       window.droneBattleState.explosions.push({ mesh: sprite, life: 1.0, decayMs: 1.0, maxScale: 0.05 });
     }
+
+    // --- CYBER SKIN AURA ---
+    window.cyberSkinGroup = new THREE.Group();
+    window.cyberSkinGroup.visible = false;
+    if (typeof scene !== 'undefined') scene.add(window.cyberSkinGroup);
+
+    const cyberGlowGeo = new THREE.SphereGeometry(GLOBE_R * 1.05, 32, 32);
+    const cyberGlowMat = new THREE.MeshBasicMaterial({
+      color: 0xff00ff, // Pink/Purple
+      transparent: true,
+      opacity: 0.04, // 80% reduced from 0.2
+      blending: THREE.AdditiveBlending,
+      side: THREE.BackSide,
+      depthWrite: false
+    });
+    const cyberGlowSphere = new THREE.Mesh(cyberGlowGeo, cyberGlowMat);
+    window.cyberSkinGroup.add(cyberGlowSphere);
+    window.cyberGlowSphere = cyberGlowSphere; // Reference for animation pulse
+
+    function createCyberAuraCanvas() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 128;
+      canvas.height = 128;
+      const context = canvas.getContext('2d');
+      const gradient = context.createRadialGradient(64, 64, 0, 64, 64, 64);
+      gradient.addColorStop(0, 'rgba(255, 0, 255, 1)');
+      gradient.addColorStop(1, 'rgba(255, 0, 255, 0)');
+      context.fillStyle = gradient;
+      context.fillRect(0, 0, 128, 128);
+      return canvas;
+    }
+    const cyberFogGeo = new THREE.BufferGeometry();
+    const cyberFogPos = [];
+    const cyberFogSizes = [];
+    for (let i = 0; i < 400; i++) {
+      const r = GLOBE_R * (1.05 + Math.random() * 0.15); // Hugging the core
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      cyberFogPos.push(r * Math.sin(phi) * Math.cos(theta), r * Math.sin(phi) * Math.sin(theta), r * Math.cos(phi));
+      cyberFogSizes.push(Math.random() * 1.5 + 0.5); // Variable size
+    }
+    cyberFogGeo.setAttribute('position', new THREE.Float32BufferAttribute(cyberFogPos, 3));
+    cyberFogGeo.setAttribute('size', new THREE.Float32BufferAttribute(cyberFogSizes, 1));
+    const cyberFogTex = new THREE.CanvasTexture(createCyberAuraCanvas());
+    const cyberFogMat = new THREE.PointsMaterial({
+      color: 0xff00ff,
+      map: cyberFogTex,
+      size: 2.5,
+      transparent: true,
+      opacity: 0.04, // 80% reduced intensity
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      sizeAttenuation: true
+    });
+    const cyberFogSystem = new THREE.Points(cyberFogGeo, cyberFogMat);
+    window.cyberSkinGroup.add(cyberFogSystem);
+    window.cyberFogSystem = cyberFogSystem;
 
     // --- GREEN SKIN MARKET SYSTEM ---
     window.greenSkinGroup = new THREE.Group();
@@ -14913,74 +15013,408 @@
     window.greenSkinGroup.add(grnGlowSphere);
     window.grnGlowSphere = grnGlowSphere; // Reference for animation pulse
 
-    // Green Orbital Fog
-    window.greenFogGroup = new THREE.Group();
-    const greenFogGeo = new THREE.SphereGeometry(GLOBE_R * 1.08, 64, 64);
-    const fogCnv = document.createElement('canvas'); fogCnv.width = 512; fogCnv.height = 512;
-    const fogCtx = fogCnv.getContext('2d');
-    fogCtx.fillStyle = '#000000'; fogCtx.fillRect(0,0,512,512);
-    for(let i=0; i<200; i++) {
-        fogCtx.beginPath();
-        fogCtx.arc(Math.random()*512, Math.random()*512, Math.random()*40+10, 0, Math.PI*2);
-        fogCtx.fillStyle = `rgba(0, 255, 68, ${Math.random()*0.15})`;
-        fogCtx.fill();
+    // White Aura Glow Sphere (Ported from WTR skin, reduced 80% intensity)
+    const grnWhiteAuraGeo = new THREE.SphereGeometry(GLOBE_R * 1.05, 32, 32);
+    const grnWhiteAuraMat = new THREE.MeshBasicMaterial({
+      color: 0xffffff, // White aura
+      transparent: true,
+      opacity: 0.2 * 0.2, // 80% reduced intensity from the original 0.2
+      blending: THREE.AdditiveBlending,
+      side: THREE.BackSide,
+      depthWrite: false
+    });
+    const grnWhiteAuraSphere = new THREE.Mesh(grnWhiteAuraGeo, grnWhiteAuraMat);
+    window.greenSkinGroup.add(grnWhiteAuraSphere);
+
+    // Thick White Fog/Steam Particles for Aura (Ported from WTR skin, reduced 80% intensity)
+    function createGreenWhiteAuraCanvas() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 128;
+      canvas.height = 128;
+      const context = canvas.getContext('2d');
+      const gradient = context.createRadialGradient(64, 64, 0, 64, 64, 64);
+      gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+      gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      context.fillStyle = gradient;
+      context.fillRect(0, 0, 128, 128);
+      return canvas;
     }
-    const fogTex = new THREE.CanvasTexture(fogCnv);
-    fogTex.wrapS = THREE.RepeatWrapping; fogTex.wrapT = THREE.RepeatWrapping;
-    const greenFogMat = new THREE.MeshBasicMaterial({ map: fogTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+    const grnWhiteFogGeo = new THREE.BufferGeometry();
+    const grnWhiteFogPos = [];
+    const grnWhiteFogSizes = [];
+    for (let i = 0; i < 400; i++) {
+      const r = GLOBE_R * (1.05 + Math.random() * 0.15); // Hugging the core
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      grnWhiteFogPos.push(r * Math.sin(phi) * Math.cos(theta), r * Math.sin(phi) * Math.sin(theta), r * Math.cos(phi));
+      grnWhiteFogSizes.push(Math.random() * 1.5 + 0.5); // Variable size
+    }
+    grnWhiteFogGeo.setAttribute('position', new THREE.Float32BufferAttribute(grnWhiteFogPos, 3));
+    grnWhiteFogGeo.setAttribute('size', new THREE.Float32BufferAttribute(grnWhiteFogSizes, 1));
+    const grnWhiteFogTex = new THREE.CanvasTexture(createGreenWhiteAuraCanvas());
+    const grnWhiteFogMat = new THREE.PointsMaterial({
+      color: 0xffffff, // Bright white aura
+      map: grnWhiteFogTex,
+      size: 2.5,
+      transparent: true,
+      opacity: 0.2 * 0.2, // 80% reduced intensity
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      sizeAttenuation: true
+    });
+    const grnWhiteFogSystem = new THREE.Points(grnWhiteFogGeo, grnWhiteFogMat);
+    window.greenSkinGroup.add(grnWhiteFogSystem);
+
+    // Green Atmospheric Fog (Volumetric GLSL ShaderMaterial)
+    window.greenFogGroup = new THREE.Group();
+    const greenFogGeo = new THREE.SphereGeometry(GLOBE_R * 1.025, 64, 64); // Reduced from 128x128 for performance
+    
+    const greenFogMat = new THREE.ShaderMaterial({
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.NormalBlending,
+      side: THREE.FrontSide, 
+      uniforms: {
+        uTime: { value: 0 },
+        uColor: { value: new THREE.Color(0x0a6432) }, // Deep green shadows
+        uHighlight: { value: new THREE.Color(0x00ff44) } // Bright green cloud tops
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        varying vec3 vPosition;
+        void main() {
+          vUv = uv;
+          vPosition = position;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float uTime;
+        uniform vec3 uColor;
+        uniform vec3 uHighlight;
+        varying vec2 vUv;
+        varying vec3 vPosition;
+
+        // 3D Simplex noise generator
+        vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+        vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+        vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+        vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+
+        float snoise(vec3 v) {
+          const vec2  C = vec2(1.0/6.0, 1.0/3.0);
+          const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
+          vec3 i  = floor(v + dot(v, C.yyy));
+          vec3 x0 = v - i + dot(i, C.xxx);
+          vec3 g = step(x0.yzx, x0.xyz);
+          vec3 l = 1.0 - g;
+          vec3 i1 = min( g.xyz, l.zxy );
+          vec3 i2 = max( g.xyz, l.zxy );
+          vec3 x1 = x0 - i1 + C.xxx;
+          vec3 x2 = x0 - i2 + C.yyy;
+          vec3 x3 = x0 - D.yyy;
+          i = mod289(i);
+          vec4 p = permute( permute( permute(
+                     i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
+                   + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))
+                   + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
+          float n_ = 0.142857142857;
+          vec3  ns = n_ * D.wyz - D.xzx;
+          vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+          vec4 x_ = floor(j * ns.z);
+          vec4 y_ = floor(j - 7.0 * x_ );
+          vec4 x = x_ *ns.x + ns.yyyy;
+          vec4 y = y_ *ns.x + ns.yyyy;
+          vec4 h = 1.0 - abs(x) - abs(y);
+          vec4 b0 = vec4( x.xy, y.xy );
+          vec4 b1 = vec4( x.zw, y.zw );
+          vec4 s0 = floor(b0)*2.0 + 1.0;
+          vec4 s1 = floor(b1)*2.0 + 1.0;
+          vec4 sh = -step(h, vec4(0.0));
+          vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
+          vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
+          vec3 p0 = vec3(a0.xy,h.x);
+          vec3 p1 = vec3(a0.zw,h.y);
+          vec3 p2 = vec3(a1.xy,h.z);
+          vec3 p3 = vec3(a1.zw,h.w);
+          vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+          p0 *= norm.x;
+          p1 *= norm.y;
+          p2 *= norm.z;
+          p3 *= norm.w;
+          vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+          m = m * m;
+          return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3) ) );
+        }
+
+        void main() {
+          vec3 pos = normalize(vPosition) * 2.5;
+          
+          // Fractal Brownian Motion (fBm) for hyper-realistic fluffy clouds
+          float noise = 0.0;
+          float amplitude = 0.5;
+          float frequency = 1.0;
+          float maxAmplitude = 0.0;
+          
+          // 5 Octaves of noise for extreme detail
+          for(int i = 0; i < 5; i++) {
+              noise += snoise(pos * frequency + uTime * 0.03 * float(i+1)) * amplitude;
+              maxAmplitude += amplitude;
+              amplitude *= 0.5;
+              frequency *= 2.0;    
+          }
+          noise /= maxAmplitude; // Normalize back to -1.0 to 1.0
+          
+          // Map to 0.0 - 1.0
+          noise = noise * 0.5 + 0.5;
+          
+          // Tweak alpha cutoffs for wispy, separated cloud clumps instead of a solid shell
+          float alpha = smoothstep(0.35, 0.75, noise);
+          
+          // Mix colors: deep green core gas, bright neon green wisps
+          vec3 finalColor = mix(uColor, uHighlight, smoothstep(0.4, 0.8, noise));
+          
+          gl_FragColor = vec4(finalColor, alpha * 0.90); // Allow 90% opacity for thick storms
+        }
+      `
+    });
+    window.greenFogMatShader = greenFogMat; // Exposed to update loop
     const fogSphere = new THREE.Mesh(greenFogGeo, greenFogMat);
     window.greenFogGroup.add(fogSphere);
+
+    // Generate Physical Floating Dust Particles to swirl around the mountains
+    const dustCount = 500000; // Lowered from 5.3M per user request to improve performance
+    const dustGeo = new THREE.BufferGeometry();
+    const dustPos = new Float32Array(dustCount * 3);
+    for (let i = 0; i < dustCount; i++) {
+      // Keep dust closely hugging the planet surface (1.0 to 1.15 GLOBE_R)
+      const r = GLOBE_R * (1.01 + Math.random() * 0.14);
+      const theta = 2 * Math.PI * Math.random();
+      const phi = Math.acos(2 * Math.random() - 1);
+      dustPos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+      dustPos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+      dustPos[i * 3 + 2] = r * Math.cos(phi);
+    }
+    dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+
+    // Create perfectly round smooth particle texture instead of squares
+    const roundCanvas = document.createElement('canvas'); roundCanvas.width = 32; roundCanvas.height = 32;
+    const roundCtx = roundCanvas.getContext('2d');
+    roundCtx.beginPath();
+    roundCtx.arc(16, 16, 16, 0, Math.PI * 2);
+    roundCtx.fillStyle = '#ffffff';
+    roundCtx.fill();
+    const roundTex = new THREE.CanvasTexture(roundCanvas);
+
+    const dustMat = new THREE.PointsMaterial({
+      color: 0xaaffbb,
+      size: 0.00015625, // Halved size again per user request for micro-fog
+      map: roundTex, // Makes them round seamlessly
+      transparent: true,
+      opacity: 0.5, // Lowered opacity to 50% as requested
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const floatingDust = new THREE.Points(dustGeo, dustMat);
+    window.greenFogGroup.add(floatingDust);
+
     window.greenSkinGroup.add(window.greenFogGroup);
 
     // Green Orbiter Moons
     window.greenMoonsGroup = new THREE.Group();
     for (let i = 0; i < 5; i++) {
       const radius = Math.random() * 0.15 + 0.1;
-      const moonGeo = new THREE.SphereGeometry(radius, 32, 32); 
+      const moonGeo = new THREE.SphereGeometry(radius, 32, 32);
       const moonMat = new THREE.MeshStandardMaterial({ color: 0x55ff77, emissive: 0x002211, flatShading: false, roughness: 0.8, metalness: 0.2 });
       const moon = new THREE.Mesh(moonGeo, moonMat);
-      
-      const distance = GLOBE_R * (1.5 + Math.random() * 2);
+
+      const distance = GLOBE_R * (3.0 + Math.random() * 4);
       const angleP = Math.random() * Math.PI * 2;
-      
+
       const pivot = new THREE.Group();
       pivot.rotation.x = Math.random() * Math.PI;
       pivot.rotation.y = Math.random() * Math.PI;
-      
+
       moon.position.set(Math.cos(angleP) * distance, 0, Math.sin(angleP) * distance);
-      
+
       pivot.add(moon);
       pivot.userData = { speed: (Math.random() * 0.5 + 0.2) * (Math.random() > 0.5 ? 1 : -1) };
       window.greenMoonsGroup.add(pivot);
-      
+
       const mLight = new THREE.PointLight(0x00ff44, 1, distance * 1.5);
       moon.add(mLight);
     }
-    
-    // Massive Purple Lake at the North Pole
-    const lakeRadius = 0.25 * 3; // Approx 3x the size of a typical moon
-    const lakeGeo = new THREE.SphereGeometry(lakeRadius, 64, 64);
-    const lakeMat = new THREE.MeshPhysicalMaterial({
-      color: 0x8800ff,      // Vibrant purple
-      transmission: 0.8,    // Glassy water look
-      transparent: true,
-      roughness: 0.1,       // Slightly rippled
-      metalness: 0.1,
-      clearcoat: 1.0, 
-      ior: 1.33             // Index of refraction for water
+
+    // Flat Purple Lake Patch at the North Pole
+    const lakeRadius = 0.5; // Radius of the patch
+    // Use a slightly larger sphere segment to tightly hug the globe surface like a decal
+    const lakeGeo = new THREE.SphereGeometry(GLOBE_R + 0.002, 128, 64, 0, Math.PI * 2, 0, lakeRadius);
+    const lakePos = lakeGeo.attributes.position;
+    const lV = new THREE.Vector3();
+    for (let i = 0; i < lakePos.count; i++) {
+        lV.fromBufferAttribute(lakePos, i);
+        const distFromY = Math.sqrt(lV.x * lV.x + lV.z * lV.z);
+        const maxDist = Math.sin(lakeRadius) * (GLOBE_R + 0.002);
+        const angle = Math.atan2(lV.z, lV.x);
+
+        // Craggy organic shoreline math
+        let noise = Math.sin(angle * 7) * 0.2 + Math.cos(angle * 13) * 0.15 + Math.sin(angle * 3) * 0.3;
+
+        // Taper displacement so center of lake remains solid
+        let edgeFactor = distFromY / maxDist;
+        if (edgeFactor > 0.2) {
+            let pushAmt = noise * Math.pow(edgeFactor, 2) * 0.3;
+            lV.x += (lV.x / distFromY) * pushAmt;
+            lV.z += (lV.z / distFromY) * pushAmt;
+            // Snap back onto the globe surface
+            lV.normalize().multiplyScalar(GLOBE_R + 0.002);
+        }
+        lakePos.setXYZ(i, lV.x, lV.y, lV.z);
+    }
+    lakeGeo.computeVertexNormals();
+
+    const lakeMat = new THREE.MeshBasicMaterial({
+        color: 0x8800ff, // Vibrant purple
+        transparent: true,
+        opacity: 0.9,
+        side: THREE.FrontSide,
+        depthWrite: false
     });
     const purpleLake = new THREE.Mesh(lakeGeo, lakeMat);
-    // Flatten it so it looks like a surface lake, not a sphere
-    purpleLake.scale.set(1.0, 0.1, 1.0); 
-    // Position it flush near the top pole
-    purpleLake.position.set(0, GLOBE_R * 0.99, 0); 
-    
-    // Add a soft purple glow to the lake
-    const lLight = new THREE.PointLight(0xaa00ff, 2, lakeRadius * 4);
-    lLight.position.set(0, 0.5, 0);
+    purpleLake.position.set(0, 0, 0); // Align to North Pole
+
+    // Add a soft purple glow to the lake patch
+    const lLight = new THREE.PointLight(0xaa00ff, 2, 1.5);
+    lLight.position.set(0, GLOBE_R + 0.1, 0);
     purpleLake.add(lLight);
 
     window.greenSkinGroup.add(purpleLake);
+
+    // --- SATELLITE LAKE (Half the area/radius) ---
+    const satLakeRadius = 0.25; 
+    const satLakeGeo = new THREE.SphereGeometry(GLOBE_R + 0.002, 64, 32, 0, Math.PI * 2, 0, satLakeRadius);
+    const satLakePos = satLakeGeo.attributes.position;
+    const slV = new THREE.Vector3();
+    for (let i = 0; i < satLakePos.count; i++) {
+        slV.fromBufferAttribute(satLakePos, i);
+        const distFromY = Math.sqrt(slV.x * slV.x + slV.z * slV.z);
+        const maxDist = Math.sin(satLakeRadius) * (GLOBE_R + 0.002);
+        const angle = Math.atan2(slV.z, slV.x);
+
+        let noise = Math.sin(angle * 5) * 0.25 + Math.cos(angle * 11) * 0.2 + Math.sin(angle * 2) * 0.35;
+        let edgeFactor = distFromY / maxDist;
+        if (edgeFactor > 0.2) {
+            let pushAmt = noise * Math.pow(edgeFactor, 2) * 0.3;
+            slV.x += (slV.x / distFromY) * pushAmt;
+            slV.z += (slV.z / distFromY) * pushAmt;
+            slV.normalize().multiplyScalar(GLOBE_R + 0.002);
+        }
+        satLakePos.setXYZ(i, slV.x, slV.y, slV.z);
+    }
+    satLakeGeo.computeVertexNormals();
+    const satelliteLake = new THREE.Mesh(satLakeGeo, lakeMat); // Reuse purple material
+
+    // Position it south of the main lake
+    // North Pole is (0, R, 0). To shift it "beneath" we rotate it along the X or Z axis
+    // 0.8 radians is roughly 45 degrees down the curvature of the sphere
+    satelliteLake.rotation.x = 0.8;
+    satelliteLake.rotation.z = 0.2; // Slight diagonal offset
+
+    const satLight = new THREE.PointLight(0xaa00ff, 1.5, 1.0);
+    satLight.position.set(0, GLOBE_R + 0.1, 0);
+    satelliteLake.add(satLight);
+
+    // --- FIRST METEOR CRATER (Over light green patch) ---
+    const craterRadius = 0.25; 
+    const craterGeo = new THREE.SphereGeometry(GLOBE_R, 64, 32, 0, Math.PI * 2, 0, craterRadius * 1.3);
+    const cratPos = craterGeo.attributes.position;
+    const cV = new THREE.Vector3();
+    
+    for (let i = 0; i < cratPos.count; i++) {
+        cV.fromBufferAttribute(cratPos, i);
+        const distFromY = Math.sqrt(cV.x * cV.x + cV.z * cV.z);
+        const maxDist = Math.sin(craterRadius * 1.3) * GLOBE_R;
+        const angle = Math.atan2(cV.z, cV.x);
+        
+        let edgeFactor = distFromY / maxDist;
+        let noise = Math.sin(angle * 9) * 0.3 + Math.cos(angle * 14) * 0.2 + Math.sin(angle * 4) * 0.5;
+
+        if (edgeFactor < 1.0) {
+            let displacement = 0;
+            if (edgeFactor < 0.4) {
+                displacement = -0.05 + noise * 0.01;
+            } else if (edgeFactor < 0.7) {
+                let slopeFactor = (edgeFactor - 0.4) / 0.3; 
+                displacement = -0.05 + Math.pow(slopeFactor, 1.5) * 0.15 * (1.0 + noise * 0.4);
+            } else {
+                let downFactor = 1.0 - ((edgeFactor - 0.7) / 0.3); 
+                displacement = 0.005 + downFactor * 0.095 * (1.0 + noise * 0.5);
+            }
+            cV.normalize().multiplyScalar(GLOBE_R + displacement);
+        } else {
+             cV.normalize().multiplyScalar(GLOBE_R + 0.001);
+        }
+        cratPos.setXYZ(i, cV.x, cV.y, cV.z);
+    }
+    craterGeo.computeVertexNormals();
+
+    const craterMat = new THREE.MeshLambertMaterial({
+        color: 0x052a0a,
+        side: THREE.FrontSide,
+        flatShading: true,
+        depthWrite: true
+    });
+    
+    const meteorCrater = new THREE.Mesh(craterGeo, craterMat);
+    const craterCenterPos = ll2v(30.0, -90.0, GLOBE_R);
+    
+    meteorCrater.position.set(0, 0, 0);
+    meteorCrater.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), craterCenterPos.clone().normalize());
+    window.greenSkinGroup.add(meteorCrater);
+
+    // --- SECOND METEOR CRATER (Twice as wide, shifted right) ---
+    const craterRadius2 = 0.50; 
+    const craterGeo2 = new THREE.SphereGeometry(GLOBE_R, 64, 32, 0, Math.PI * 2, 0, craterRadius2 * 1.3);
+    const cratPos2 = craterGeo2.attributes.position;
+    const cV2 = new THREE.Vector3();
+    
+    for (let i = 0; i < cratPos2.count; i++) {
+        cV2.fromBufferAttribute(cratPos2, i);
+        const distFromY2 = Math.sqrt(cV2.x * cV2.x + cV2.z * cV2.z);
+        const maxDist2 = Math.sin(craterRadius2 * 1.3) * GLOBE_R;
+        const angle2 = Math.atan2(cV2.z, cV2.x);
+        
+        let edgeFactor = distFromY2 / maxDist2;
+        let noise = Math.sin(angle2 * 9) * 0.3 + Math.cos(angle2 * 14) * 0.2 + Math.sin(angle2 * 4) * 0.5;
+
+        if (edgeFactor < 1.0) {
+            let displacement = 0;
+            if (edgeFactor < 0.4) {
+                displacement = -0.05 + noise * 0.01;
+            } else if (edgeFactor < 0.7) {
+                let slopeFactor = (edgeFactor - 0.4) / 0.3; 
+                displacement = -0.05 + Math.pow(slopeFactor, 1.5) * 0.15 * (1.0 + noise * 0.4);
+            } else {
+                let downFactor = 1.0 - ((edgeFactor - 0.7) / 0.3); 
+                displacement = 0.005 + downFactor * 0.095 * (1.0 + noise * 0.5);
+            }
+            cV2.normalize().multiplyScalar(GLOBE_R + displacement);
+        } else {
+             cV2.normalize().multiplyScalar(GLOBE_R + 0.001);
+        }
+        cratPos2.setXYZ(i, cV2.x, cV2.y, cV2.z);
+    }
+    craterGeo2.computeVertexNormals();
+
+    const meteorCrater2 = new THREE.Mesh(craterGeo2, craterMat); 
+    const crater2CenterPos = ll2v(20.0, -40.0, GLOBE_R); 
+    
+    meteorCrater2.position.set(0, 0, 0);
+    meteorCrater2.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), crater2CenterPos.clone().normalize());
+    meteorCrater2.rotateY(Math.random() * Math.PI);
+    
+    window.greenSkinGroup.add(meteorCrater2);
+
     window.greenSkinGroup.add(window.greenMoonsGroup);
 
     // Market data arrays
@@ -15050,7 +15484,7 @@
       hexMesh.position.x = -(surfaceR * Math.sin(phi) * Math.cos(theta));
       hexMesh.position.z = (surfaceR * Math.sin(phi) * Math.sin(theta));
       hexMesh.position.y = (surfaceR * Math.cos(phi));
-      hexMesh.lookAt(new THREE.Vector3(0,0,0));
+      hexMesh.lookAt(new THREE.Vector3(0, 0, 0));
 
       window.blkCorpGroup.add(hexMesh);
 
@@ -15067,13 +15501,13 @@
       tex.minFilter = THREE.LinearFilter;
       const spriteMat = new THREE.SpriteMaterial({ map: tex, color: 0x777777, sizeAttenuation: true, depthTest: false });
       const sprite = new THREE.Sprite(spriteMat);
-      
+
       // Scale and push slightly off the globe surface next to marker
       sprite.scale.set(0.6, 0.075, 1);
       sprite.position.copy(hexMesh.position).multiplyScalar(1.02);
-      
+
       // Shift it slightly right so it doesn't overlap the hex marker completely
-      const right = new THREE.Vector3(1,0,0).applyEuler(hexMesh.rotation);
+      const right = new THREE.Vector3(1, 0, 0).applyEuler(hexMesh.rotation);
       sprite.position.addScaledVector(right, 0.05);
 
       window.blkCorpGroup.add(sprite);
@@ -15365,12 +15799,12 @@
       requestAnimationFrame(animate);
       const dt = Math.min(clock3.getDelta(), .05);
       time3 += dt;
-      
+
       // Cyber Company Warfare Hack Animation (BLK Skin Only)
       if (window.blkCorpGroup && window.blkCorpGroup.visible && window.corpNodes) {
         window.corpNodes.forEach(node => {
           node.timer -= dt * node.hackSpeed;
-          
+
           // State Machine: neutral -> hacking -> hacked
           if (node.timer <= 0) {
             if (node.state === 'neutral') {
@@ -15390,24 +15824,24 @@
 
             // Redraw Sprite Label based on new state
             node.ctx.clearRect(0, 0, node.canvas.width, node.canvas.height);
-            let color = '#777777'; 
+            let color = '#777777';
             let prefix = '';
-            
+
             if (node.state === 'hacking') {
-               color = (node.target === 'gemini') ? '#00bb33' : '#bb0000';
-               prefix = '[BREACHING] ';
-               // Random binary glitch effect during hack
-               if (Math.random() > 0.5) node.hex.material.color.setHex(0xffffff);
+              color = (node.target === 'gemini') ? '#00bb33' : '#bb0000';
+              prefix = '[BREACHING] ';
+              // Random binary glitch effect during hack
+              if (Math.random() > 0.5) node.hex.material.color.setHex(0xffffff);
             } else if (node.state === 'gemini') {
-               color = '#00ff44';
-               prefix = '[GEMINI] ';
-               node.hex.material.color.setHex(0x00ff44);
+              color = '#00ff44';
+              prefix = '[GEMINI] ';
+              node.hex.material.color.setHex(0x00ff44);
             } else if (node.state === 'claude') {
-               color = '#ff0033';
-               prefix = '[CLAUS] ';
-               node.hex.material.color.setHex(0xff0033);
+              color = '#ff0033';
+              prefix = '[CLAUS] ';
+              node.hex.material.color.setHex(0xff0033);
             } else {
-               node.hex.material.color.setHex(0x333333);
+              node.hex.material.color.setHex(0x333333);
             }
 
             node.ctx.fillStyle = color;
@@ -15416,7 +15850,7 @@
             node.ctx.fillText(prefix + node.name, 10, 48);
             node.tex.needsUpdate = true;
           }
-          
+
           // Flash effect while hacking
           if (node.state === 'hacking') {
             const flash = Math.sin(time3 * 20) > 0;
@@ -15426,9 +15860,13 @@
           }
         });
       }
-      
+
       if (window.greenGlobeShader) {
         window.greenGlobeShader.uniforms.uTime.value += dt;
+      }
+      
+      if (window.greenFogMatShader) {
+        window.greenFogMatShader.uniforms.uTime.value += dt;
       }
 
       if (window.greenFogGroup && window.greenSkinGroup && window.greenSkinGroup.visible) {
@@ -15813,15 +16251,15 @@
           window.npLightningGroup.children.forEach(bridge => {
             // Periodically pick a new random target node every 3 to 6 seconds
             if (!bridge.userData.changeTimer) {
-               bridge.userData.changeTimer = time3 + 3.0 + Math.random() * 3.0;
+              bridge.userData.changeTimer = time3 + 3.0 + Math.random() * 3.0;
             }
 
             if (!bridge.userData.targetNode || time3 > bridge.userData.changeTimer) {
-               const allNodes = window.datacentersGroup.children.filter(n => !n.userData.isNorthPole);
-               if (allNodes.length > 0) {
-                 bridge.userData.targetNode = allNodes[Math.floor(Math.random() * allNodes.length)];
-                 bridge.userData.changeTimer = time3 + 3.0 + Math.random() * 3.0; // Reset timer for next jump
-               }
+              const allNodes = window.datacentersGroup.children.filter(n => !n.userData.isNorthPole);
+              if (allNodes.length > 0) {
+                bridge.userData.targetNode = allNodes[Math.floor(Math.random() * allNodes.length)];
+                bridge.userData.changeTimer = time3 + 3.0 + Math.random() * 3.0; // Reset timer for next jump
+              }
             }
 
             if (bridge.userData.targetNode) {
@@ -15939,6 +16377,14 @@
           const grnPulse = 1.05 + Math.sin(Date.now() * 0.002) * 0.015;
           window.grnGlowSphere.scale.set(grnPulse, grnPulse, grnPulse);
         }
+
+        if (window.cyberFogSystem) {
+          window.cyberFogSystem.rotation.y -= 0.001;
+        }
+        if (window.cyberGlowSphere) {
+          const cPulse = 1.05 + Math.sin(Date.now() * 0.002) * 0.015;
+          window.cyberGlowSphere.scale.set(cPulse, cPulse, cPulse);
+        }
       }
 
       // ---------------------------------------------------------------------
@@ -15954,13 +16400,28 @@
       */
       // ---------------------------------------------------------------------
 
-      // Pulsing animation for Dexmond Hub (Black Market)
+      // Orbiting animation for Dexmond Hub (Black Market Moon)
       if (window.dexmondHubGroup && window.dexmondHubGroup.visible && window.currentSkinIndex === 4) {
-        const hubScale = 1.5 + Math.sin(Date.now() * 0.005) * 0.15; // Rapid visible pulse
+        // Remove rapid scaling, replace with smooth moon-like orbit
+        const hubScale = 1.5;
         window.dexmondHubGroup.scale.set(hubScale, hubScale, hubScale);
 
-        // Make it slowly rotate
-        window.dexmondHubGroup.rotation.y += 0.01;
+        // Orbit around the globe at a fixed distance
+        const r = typeof GLOBE_R !== 'undefined' ? GLOBE_R + 2.7 : 3.7; // Float extremely high above the globe
+        const orbitSpeed = 0.0005; // Slow, majestic orbit
+        const time = Date.now() * orbitSpeed;
+
+        // Calculate orbital position
+        window.dexmondHubGroup.position.set(
+          r * Math.cos(time),              // X axis orbit
+          (r * 0.2) * Math.sin(time * 2),  // Slight Y axis wave to make it feel natural
+          r * Math.sin(time)               // Z axis orbit
+        );
+
+        // Keep the bottom of the building facing the surface of the planet
+        window.dexmondHubGroup.lookAt(new THREE.Vector3(0, 0, 0));
+        window.dexmondHubGroup.rotateX(Math.PI / 2); // Stand it upright
+        window.dexmondHubGroup.rotateY(Math.PI / 2); // Face it outward, traveling forward
       }
 
       // Rotate Realistic LIVE Skin Clouds
@@ -16394,23 +16855,23 @@
       // Update Datacenter Photons (CYBER Skin only)
       if (window.dcPulses && window.dcPulses.length > 0) {
         const isCyberSkin = (window.currentSkinIndex === 3);
-        
+
         for (let i = 0; i < window.dcPulses.length; i++) {
           const pulseObj = window.dcPulses[i];
-          
+
           if (!isCyberSkin) {
-             pulseObj.mesh.visible = false;
-             continue;
+            pulseObj.mesh.visible = false;
+            continue;
           }
-          
+
           pulseObj.mesh.visible = true;
           pulseObj.progress += dt * pulseObj.speed; // usually 0.2 to 0.8
-          
+
           // Loop back to start when reaching the destination datacenter
           if (pulseObj.progress >= 1.0) {
             pulseObj.progress = 0;
           }
-          
+
           // Update physical position along the Bezier Curve
           if (pulseObj.curve) {
             const newPos = pulseObj.curve.getPoint(pulseObj.progress);
@@ -16422,26 +16883,26 @@
       const _currSkin = window.SKINS && window.SKINS[window.currentSkinIndex];
       const isCleanGlobe = _currSkin && (_currSkin.cleanGlobe || _currSkin.hideTroops);
       const camDir = camera.position.clone().normalize();
-      
+
       for (const [iso, sprite] of Object.entries(troopSprites)) {
         if (!sprite.position) continue;
         if (isCleanGlobe) {
           sprite.visible = false;
           continue;
         }
-        
+
         let targetPos = sprite.position;
         // Frenetic "bounce" or "hover" for LIVE skin mapping (+30% activity request)
         if (window.currentSkinIndex === 0) {
-           const cd = countryData[iso];
-           if (cd && cd.lat !== undefined && cd.lon !== undefined) {
-             // Generate a rapid sine wave based on time + a geographic offset to unsync them
-             const pulseHeight = 0.02 * (Math.sin(time3 * 15 + cd.lat + cd.lon) * 0.5 + 0.5); 
-             targetPos = ll2v(cd.lat, cd.lon, GLOBE_R + .04 + pulseHeight);
-             sprite.position.copy(targetPos);
-           }
+          const cd = countryData[iso];
+          if (cd && cd.lat !== undefined && cd.lon !== undefined) {
+            // Generate a rapid sine wave based on time + a geographic offset to unsync them
+            const pulseHeight = 0.02 * (Math.sin(time3 * 15 + cd.lat + cd.lon) * 0.5 + 0.5);
+            targetPos = ll2v(cd.lat, cd.lon, GLOBE_R + .04 + pulseHeight);
+            sprite.position.copy(targetPos);
+          }
         }
-        
+
         const sDir = targetPos.clone().normalize();
         // dot > 0 = facing camera side. Use a threshold so edge countries don't flicker
         sprite.visible = camDir.dot(sDir) > 0.08;
@@ -16514,7 +16975,7 @@
         });
       }
 
-      // --- CYBER WARFARE ANIMATION LOOP (BLK SKIN) ---
+      // --- BLACK WARFARE ANIMATION LOOP (BLK SKIN) ---
       if (!window.cyberWarfareStats) window.cyberWarfareStats = { fundsStolen: 0, companiesBreached: 0, companyLog: [] };
       if (window.activeAttacks && Object.keys(window.activeAttacks).length > 0) {
         const now = Date.now();
@@ -17400,7 +17861,7 @@
       else if (budget >= 50 && budget < 100) ecoAdvice.push(`Funds sufficient (${budget} MIL) for Espionage (Intel/Cyberattack) or Infrastructure development.`);
       else ecoAdvice.push(`Budget LOW (${budget} MIL). Hold position and accumulate capital.`);
 
-      if (pts >= 100 && !hasTech('CYBER_WARFARE')) ecoAdvice.push(`Research Points available (${pts}). Prioritize CYBER WARFARE for +30% Espionage success.`);
+      if (pts >= 100 && !hasTech('CYBER_WARFARE')) ecoAdvice.push(`Research Points available (${pts}). Prioritize BLACK WARFARE for +30% Espionage success.`);
       else if (pts >= 200 && !hasTech('NUCLEAR_TRIAD')) ecoAdvice.push(`Research Points available (${pts}). Nuclear tech is accessible.`);
 
       // 3) Weather Check
@@ -17893,7 +18354,8 @@
       { name: 'BLK', color: 0x050505, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false },
       { name: 'WTR', color: 0x00aaff, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false },
       { name: 'CYBER', color: 0xffffff, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false },
-      { name: 'GREEN', color: 0x22ff22, btnText: 'parallel layers', btnClass: 'active-normal', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: true, showArms: true, showBoats: false, isPremium: false }
+      { name: 'GREEN', color: 0x22ff22, btnText: 'parallel layers', btnClass: 'active-normal', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: true, showArms: true, showBoats: false, isPremium: false },
+      { name: 'REAL_EARTH', color: 0xffffff, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: false, hideTroops: false, showResources: false, showArms: false, showBoats: true, isPremium: false }
     ];
     Object.freeze(SKINS);
     window.SKINS = SKINS;
@@ -17922,13 +18384,13 @@
       // Clear any temporary effects
       scene.fog = null;
 
-        // Apply Globe Color & Reset Glass Physical Properties
+      // Apply Globe Color & Reset Glass Physical Properties
       if (typeof globeMat !== 'undefined') {
         globeMat.color.setHex(skin.color);
         globeMat.emissive.setHex(0x000000); // Reset emissive
         globeMat.map = null; // Reset map
         globeMat.emissiveMap = null; // Reset emissiveMap
-        
+
         // Restore pristine Glass Properties for LIVE and BLK
         globeMat.transmission = 1.0;
         globeMat.opacity = 1.0;
@@ -17937,6 +18399,7 @@
         globeMat.metalness = 0.1;
         globeMat.clearcoat = 1.0;
         globeMat.depthWrite = false;
+        globeMat.wireframe = false; // Add explicit wireframe reset
 
         // Reset Geometry
         if (typeof window.globeMesh !== 'undefined' && typeof cyberGlobeGeo !== 'undefined' && typeof globeGeo !== 'undefined') {
@@ -17949,13 +18412,18 @@
           window['applySkin_' + window.currentSkinIndex](skin);
         }
 
+        // Specifically for REAL_EARTH, enforce material update
+        if (skin.name === 'REAL_EARTH') {
+          globeMat.needsUpdate = true;
+        }
+
         globeMat.clippingPlanes = [];
         if (window.earthCutawayGroup) window.earthCutawayGroup.visible = false;
       }
 
       // Update UI Button
       btn.innerHTML = skin.btnText;
-      
+
       // Force Three.js to recompile the shader with the dynamic canvas mappings.
       if (globeMat) globeMat.needsUpdate = true;
       if (globeMat.map) globeMat.map.needsUpdate = true;
@@ -17981,6 +18449,10 @@
       // Toggle CYBER solid core layer
       if (typeof window.cyberBaseMesh !== 'undefined') {
         window.cyberBaseMesh.visible = (skin.name === 'CYBER');
+      }
+
+      if (typeof cyberSkinGroup !== 'undefined') {
+        cyberSkinGroup.visible = (skin.name === 'CYBER');
       }
 
       // Toggle visibility of overlays (Webcams, Sats, Yellow Dots)
@@ -18125,8 +18597,8 @@
 
       // Handle Cyber Warfare mechanics on BLK and CYBER skins
       if (skin.name === 'BLK' || skin.name === 'CYBER') {
-        if (!window.cyberWarfareInterval) {
-          window.cyberWarfareInterval = setInterval(() => {
+        if (!window.blackWarfareInterval) {
+          window.blackWarfareInterval = setInterval(() => {
             if (window.SKINS[window.currentSkinIndex].name === 'BLK') window.launchCyberAttack();
             if (window.SKINS[window.currentSkinIndex].name === 'CYBER') window.launchDatacenterAttack();
           }, 1000 + Math.random() * 3000); // 1-4 seconds
@@ -18139,9 +18611,9 @@
           }, 300); // Slight delay for smooth transition
         }
       } else {
-        if (window.cyberWarfareInterval) {
-          clearInterval(window.cyberWarfareInterval);
-          window.cyberWarfareInterval = null;
+        if (window.blackWarfareInterval) {
+          clearInterval(window.blackWarfareInterval);
+          window.blackWarfareInterval = null;
         }
         // Reset any active flashing
         for (const uuid in window.activeAttacks) {
@@ -18154,7 +18626,7 @@
       }
 
       // Toggle Map Labels for Respective Skins
-      const cyberLabel = document.getElementById('cybercrime-map-label');
+      const cyberLabel = document.getElementById('blackwarfare-map-label');
       const liveLabel = document.getElementById('live-simulation-label');
       const intelLabel = document.getElementById('global-intelligence-label');
       const datacenterLabel = document.getElementById('datacenter-warfare-label');
@@ -19225,7 +19697,7 @@
     })();
 
     // =====================================================================
-    // CYBER WARFARE LOGIC (RAINCLAUDE VS GEMINI)
+    // BLACK WARFARE LOGIC (RAINCLAUDE VS GEMINI)
     // =====================================================================
     window.launchDatacenterAttack = function () {
       if (window.SKINS[window.currentSkinIndex].name !== 'CYBER') return;
@@ -19430,7 +19902,7 @@
     }, 60000);
 
     // =====================================================================
-    // BLACK SKIN 5-MINUTE CYBER WARFARE POPUP
+    // BLACK SKIN 5-MINUTE BLACK WARFARE POPUP
     // =====================================================================
     setInterval(() => {
       if (window.SKINS[window.currentSkinIndex].name !== 'BLK') return;
@@ -19999,15 +20471,21 @@
         style="color:#0f8; text-align:center; font-family:'Share Tech Mono', monospace; font-weight:normal; font-size: 1.5vw; text-shadow:0 0 10px #0f8;">
         BOND ADDRESS: <span id="treasury-bond-address" style="color:#fff;">[ PENDING CONNECTION ]</span></h3>
 
-      <div style="display:grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap:30px; flex:1; margin-top:20px; margin-bottom:20px; box-sizing:border-box;">
-        
+      <div
+        style="display:grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap:30px; flex:1; margin-top:20px; margin-bottom:20px; box-sizing:border-box;">
+
         <!-- BOX 1: FEDERAL RESERVES -->
-        <div style="background:rgba(0,20,10,0.8); border:1px solid #0f8; box-shadow:0 0 20px rgba(0,255,136,0.1); padding:20px; border-radius:4px; display:flex; flex-direction:column;">
-          <h2 style="color:#0f8; font-family:'Share Tech Mono', monospace; border-bottom:1px solid #0f8; padding-bottom:10px; margin-top:0; font-size:1.5vw; text-shadow:0 0 5px #0f8;">FEDERAL RESERVES</h2>
-          <table style="width:100%; color:#fff; font-family:'Courier New', monospace; font-size:1.1vw; margin-top:20px; border-spacing:0 15px;">
+        <div
+          style="background:rgba(0,20,10,0.8); border:1px solid #0f8; box-shadow:0 0 20px rgba(0,255,136,0.1); padding:20px; border-radius:4px; display:flex; flex-direction:column;">
+          <h2
+            style="color:#0f8; font-family:'Share Tech Mono', monospace; border-bottom:1px solid #0f8; padding-bottom:10px; margin-top:0; font-size:1.5vw; text-shadow:0 0 5px #0f8;">
+            FEDERAL RESERVES</h2>
+          <table
+            style="width:100%; color:#fff; font-family:'Courier New', monospace; font-size:1.1vw; margin-top:20px; border-spacing:0 15px;">
             <tr>
               <td style="color:#aaa;">TREASURY FUNDS (D3X)</td>
-              <td style="text-align:right; font-weight:bold; color:#0f8; font-size:1.5vw;" id="treasury-d3x-balance">0.00</td>
+              <td style="text-align:right; font-weight:bold; color:#0f8; font-size:1.5vw;" id="treasury-d3x-balance">
+                0.00</td>
             </tr>
             <tr>
               <td style="color:#aaa;">BOND YIELD (Est. APY)</td>
@@ -20021,34 +20499,63 @@
         </div>
 
         <!-- BOX 2: METALS INVENTORY -->
-        <div style="background:rgba(0,20,10,0.8); border:1px solid #0f8; box-shadow:0 0 20px rgba(0,255,136,0.1); padding:20px; border-radius:4px; display:flex; flex-direction:column; overflow-y:auto;">
-          <h2 style="color:#0f8; font-family:'Share Tech Mono', monospace; border-bottom:1px solid #0f8; padding-bottom:10px; margin-top:0; font-size:1.5vw; text-shadow:0 0 5px #0f8;">METALS INVENTORY</h2>
-          <table id="treasury-metals-table" style="width:100%; color:#aaa; font-family:'Courier New', monospace; font-size:1vw; margin-top:15px; border-spacing:0 10px;">
-            <tr><td><i>ESTABLISHING SECURE HANDSHAKE...</i></td></tr>
+        <div
+          style="background:rgba(0,20,10,0.8); border:1px solid #0f8; box-shadow:0 0 20px rgba(0,255,136,0.1); padding:20px; border-radius:4px; display:flex; flex-direction:column; overflow-y:auto;">
+          <h2
+            style="color:#0f8; font-family:'Share Tech Mono', monospace; border-bottom:1px solid #0f8; padding-bottom:10px; margin-top:0; font-size:1.5vw; text-shadow:0 0 5px #0f8;">
+            METALS INVENTORY</h2>
+          <table id="treasury-metals-table"
+            style="width:100%; color:#aaa; font-family:'Courier New', monospace; font-size:1vw; margin-top:15px; border-spacing:0 10px;">
+            <tr>
+              <td><i>ESTABLISHING SECURE HANDSHAKE...</i></td>
+            </tr>
           </table>
         </div>
 
         <!-- BOX 3: TREASURY OPERATIONS -->
-        <div style="background:rgba(0,20,10,0.8); border:1px solid #0f8; box-shadow:0 0 20px rgba(0,255,136,0.1); padding:20px; border-radius:4px; display:flex; flex-direction:column;">
-          <h2 style="color:#0f8; font-family:'Share Tech Mono', monospace; border-bottom:1px solid #0f8; padding-bottom:10px; margin-top:0; font-size:1.5vw; text-shadow:0 0 5px #0f8;">TREASURY OPERATIONS</h2>
+        <div
+          style="background:rgba(0,20,10,0.8); border:1px solid #0f8; box-shadow:0 0 20px rgba(0,255,136,0.1); padding:20px; border-radius:4px; display:flex; flex-direction:column;">
+          <h2
+            style="color:#0f8; font-family:'Share Tech Mono', monospace; border-bottom:1px solid #0f8; padding-bottom:10px; margin-top:0; font-size:1.5vw; text-shadow:0 0 5px #0f8;">
+            TREASURY OPERATIONS</h2>
           <div style="display:flex; flex-direction:column; gap:15px; margin-top:20px; flex:1; justify-content:center;">
-            <button style="background:linear-gradient(90deg, #002211, #004422); border:1px solid #0f8; color:#0f8; padding:15px; font-family:'Share Tech Mono', monospace; font-size:1.2vw; cursor:pointer; text-transform:uppercase; transition:0.3s; box-shadow:0 0 10px rgba(0,255,136,0.2);" onmouseover="this.style.background='linear-gradient(90deg, #004422, #006633)'" onmouseout="this.style.background='linear-gradient(90deg, #002211, #004422)'" onclick="if(typeof _sfxClick!=='undefined')_sfxClick(); alert('AUTHORIZING... INSUFFICIENT CLEARANCE.');">ISSUE FEDERAL BONDS</button>
-            <button style="background:linear-gradient(90deg, #220000, #440000); border:1px solid #f55; color:#f55; padding:15px; font-family:'Share Tech Mono', monospace; font-size:1.2vw; cursor:pointer; text-transform:uppercase; transition:0.3s; box-shadow:0 0 10px rgba(255,85,85,0.2);" onmouseover="this.style.background='linear-gradient(90deg, #440000, #660000)'" onmouseout="this.style.background='linear-gradient(90deg, #220000, #440000)'" onclick="if(typeof _sfxClick!=='undefined')_sfxClick(); alert('LIQUIDATION PROTOCOL ENGAGED... OVERRIDDEN.');">LIQUIDATE METALS</button>
-            <button style="background:linear-gradient(90deg, #001133, #002266); border:1px solid #0af; color:#0af; padding:15px; font-family:'Share Tech Mono', monospace; font-size:1.2vw; cursor:pointer; text-transform:uppercase; transition:0.3s; box-shadow:0 0 10px rgba(0,170,255,0.2);" onmouseover="this.style.background='linear-gradient(90deg, #002266, #003399)'" onmouseout="this.style.background='linear-gradient(90deg, #001133, #002266)'" onclick="if(typeof _sfxClick!=='undefined')_sfxClick(); alert('MINTING NEW D3X... ALLOCATING.');">MINT TREASURY D3X</button>
+            <button
+              style="background:linear-gradient(90deg, #002211, #004422); border:1px solid #0f8; color:#0f8; padding:15px; font-family:'Share Tech Mono', monospace; font-size:1.2vw; cursor:pointer; text-transform:uppercase; transition:0.3s; box-shadow:0 0 10px rgba(0,255,136,0.2);"
+              onmouseover="this.style.background='linear-gradient(90deg, #004422, #006633)'"
+              onmouseout="this.style.background='linear-gradient(90deg, #002211, #004422)'"
+              onclick="if(typeof _sfxClick!=='undefined')_sfxClick(); alert('AUTHORIZING... INSUFFICIENT CLEARANCE.');">ISSUE
+              FEDERAL BONDS</button>
+            <button
+              style="background:linear-gradient(90deg, #220000, #440000); border:1px solid #f55; color:#f55; padding:15px; font-family:'Share Tech Mono', monospace; font-size:1.2vw; cursor:pointer; text-transform:uppercase; transition:0.3s; box-shadow:0 0 10px rgba(255,85,85,0.2);"
+              onmouseover="this.style.background='linear-gradient(90deg, #440000, #660000)'"
+              onmouseout="this.style.background='linear-gradient(90deg, #220000, #440000)'"
+              onclick="if(typeof _sfxClick!=='undefined')_sfxClick(); alert('LIQUIDATION PROTOCOL ENGAGED... OVERRIDDEN.');">LIQUIDATE
+              METALS</button>
+            <button
+              style="background:linear-gradient(90deg, #001133, #002266); border:1px solid #0af; color:#0af; padding:15px; font-family:'Share Tech Mono', monospace; font-size:1.2vw; cursor:pointer; text-transform:uppercase; transition:0.3s; box-shadow:0 0 10px rgba(0,170,255,0.2);"
+              onmouseover="this.style.background='linear-gradient(90deg, #002266, #003399)'"
+              onmouseout="this.style.background='linear-gradient(90deg, #001133, #002266)'"
+              onclick="if(typeof _sfxClick!=='undefined')_sfxClick(); alert('MINTING NEW D3X... ALLOCATING.');">MINT
+              TREASURY D3X</button>
           </div>
         </div>
 
         <!-- BOX 4: SYSTEM STATUS -->
-        <div style="background:rgba(0,20,10,0.8); border:1px solid #0f8; box-shadow:0 0 20px rgba(0,255,136,0.1); padding:20px; border-radius:4px; display:flex; flex-direction:column;">
-          <h2 style="color:#0f8; font-family:'Share Tech Mono', monospace; border-bottom:1px solid #0f8; padding-bottom:10px; margin-top:0; font-size:1.5vw; text-shadow:0 0 5px #0f8;">SYSTEM STATUS</h2>
-          <div style="margin-top:20px; font-family:'Courier New', monospace; font-size:0.9vw; color:#0f8; display:flex; flex-direction:column; gap:10px; overflow-y:auto;">
+        <div
+          style="background:rgba(0,20,10,0.8); border:1px solid #0f8; box-shadow:0 0 20px rgba(0,255,136,0.1); padding:20px; border-radius:4px; display:flex; flex-direction:column;">
+          <h2
+            style="color:#0f8; font-family:'Share Tech Mono', monospace; border-bottom:1px solid #0f8; padding-bottom:10px; margin-top:0; font-size:1.5vw; text-shadow:0 0 5px #0f8;">
+            SYSTEM STATUS</h2>
+          <div
+            style="margin-top:20px; font-family:'Courier New', monospace; font-size:0.9vw; color:#0f8; display:flex; flex-direction:column; gap:10px; overflow-y:auto;">
             <div>> CONNECTION VERIFIED...</div>
             <div>> SMART CONTRACT HANDSHAKE: [OK]</div>
             <div>> RESERVES AUDIT: IN PROGRESS...</div>
             <div style="color:#aaa;">> NO RECENT WITHDRAWALS DETECTED.</div>
             <div style="color:#aaa;">> GLOBAL INFLATION INDEX: 2.1%</div>
             <div style="color:#aaa;">> SECURITY PROTOCOLS: MAXIMUM</div>
-            <div style="margin-top:20px; border:1px solid rgba(0,255,136,0.3); height:60px; display:flex; align-items:flex-end; gap:5px; padding:5px; opacity:0.8;">
+            <div
+              style="margin-top:20px; border:1px solid rgba(0,255,136,0.3); height:60px; display:flex; align-items:flex-end; gap:5px; padding:5px; opacity:0.8;">
               <!-- Mock Graph -->
               <div style="width:10%; background:#0f8; height:20%;"></div>
               <div style="width:10%; background:#0f8; height:40%;"></div>
@@ -20082,7 +20589,8 @@
         style="color:#0f8; text-align:center; font-family:'Share Tech Mono', monospace; font-weight:normal; font-size: 1.5vw; text-shadow:0 0 10px #0f8;">
         VAULT ADDRESS: <span style="color:#fff;">37De9qFqKoyPDoM4eCWCGKkgAFFxBtJYQNJjHmL9wK8k</span></h3>
 
-      <div style="display:flex; flex:1; justify-content:space-between; margin-top:20px; margin-bottom:20px; gap:40px; height: 100%;">
+      <div
+        style="display:flex; flex:1; justify-content:space-between; margin-top:20px; margin-bottom:20px; gap:40px; height: 100%;">
 
         <!-- LEFT COL: RESERVES -->
         <div

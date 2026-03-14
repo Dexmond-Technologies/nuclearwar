@@ -10,21 +10,26 @@ window.applySkin_1 = function(skin) {
   }
 
   if (typeof globeMat !== 'undefined') {
-    globeMat.color.setHex(0x111111);
+    // 8-Ball Highly Polished Black Aesthetic
+    globeMat.color.setHex(0x0c0c0c); // Deep solid black
     globeMat.emissive.setHex(0x000000);
-    globeMat.map = window.earthTex; // Default mapped earth texture
+    globeMat.map = null; // Remove standard earth texture for pure pool ball look
     globeMat.emissiveMap = null;
-    globeMat.specular.setHex(0x777777);
-    globeMat.shininess = 35;
+    globeMat.specular.setHex(0xaaaaaa); // Brighter specular reflection
+    globeMat.shininess = 60; // Sharper reflection gloss
     globeMat.wireframe = false;
     
-    // Opaque layer
-    globeMat.transparent = false;
-    globeMat.opacity = 1.0;
-    globeMat.transmission = 1.0;
-    globeMat.roughness = 0.05;
-    globeMat.metalness = 0.1;
+    // Near-opaque shiny layer (90% per user request)
+    globeMat.transparent = true;
+    globeMat.opacity = 0.9;
+    globeMat.transmission = 0.0; // Disable glassy transmission illusion
+    globeMat.ior = 1.0;          // Reset Index of Refraction to disable volume bending
+    globeMat.thickness = 0.0;    // Reset glass volume thickness
+    globeMat.specularIntensity = 1.0; 
+    globeMat.roughness = 0.0;    // Extremely smooth pool ball surface
+    globeMat.metalness = 0.2;
     globeMat.clearcoat = 1.0;
+    globeMat.clearcoatRoughness = 0.0;
     globeMat.depthWrite = true;
   }
 };
