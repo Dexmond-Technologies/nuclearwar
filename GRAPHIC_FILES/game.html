@@ -6359,6 +6359,18 @@
         company.color = color;
         // Store data for raycaster
         sprite.userData = company;
+        company.ctx = ctx;
+        company.canvas = c;
+        company.tex = tex;
+        company.state = 'neutral';
+        company.timer = Math.random() * 5.0 + Math.random() * 5.0; // Random stagger
+        company.hackSpeed = 0.5 + Math.random();
+        company.target = 'neutral';
+        company.originalColor = color;
+        company.isWorldBank = isWorldBank;
+        company.displayName = displayName;
+        if (typeof window.corpNodes === 'undefined') window.corpNodes = [];
+        window.corpNodes.push({ sprite: sprite, data: company });
 
         // Draw Logo (Stylized Square with First Letter)
         ctx.fillStyle = isWorldBank ? '#ffd700' : color;
@@ -6403,6 +6415,11 @@
         }
         dotSprite.position.copy(ll2v(company.lat, company.lon, GLOBE_R + 0.05));
         dotSprite.userData = company;
+        let lastNode = window.corpNodes[window.corpNodes.length - 1];
+        lastNode.data.dotCtx = dotCtx;
+        lastNode.data.dotTex = dotTex;
+        lastNode.data.dotCanvas = dotC;
+        lastNode.dotSprite = dotSprite;
         window.companiesGroup.add(dotSprite);
       });
       console.log("Global Companies Overlay Initialized.");
@@ -6616,6 +6633,18 @@
         sprite.position.copy(pos);
         window.mediumCompaniesGroup.add(sprite);
         sprite.userData = company;
+        company.ctx = ctx;
+        company.canvas = c;
+        company.tex = tex;
+        company.state = 'neutral';
+        company.timer = Math.random() * 5.0 + Math.random() * 5.0; // Random stagger
+        company.hackSpeed = 0.5 + Math.random();
+        company.target = 'neutral';
+        company.originalColor = color;
+        company.isWorldBank = isWorldBank;
+        company.displayName = displayName;
+        if (typeof window.corpNodes === 'undefined') window.corpNodes = [];
+        window.corpNodes.push({ sprite: sprite, data: company });
 
         // Glowing pinpoint YELLOW SQUARE (instead of dot)
         const dotC = document.createElement('canvas'); dotC.width = 64; dotC.height = 64;
@@ -6631,6 +6660,11 @@
         dotSprite.scale.set(0.08, 0.08, 1);
         dotSprite.position.copy(ll2v(company.lat, company.lon, GLOBE_R + 0.05));
         dotSprite.userData = company;
+        let lastNode = window.corpNodes[window.corpNodes.length - 1];
+        lastNode.data.dotCtx = dotCtx;
+        lastNode.data.dotTex = dotTex;
+        lastNode.data.dotCanvas = dotC;
+        lastNode.dotSprite = dotSprite;
         window.mediumCompaniesGroup.add(dotSprite);
       });
       console.log("Medium Companies Overlay Initialized.");
@@ -6692,6 +6726,18 @@
         window.africaCompaniesGroup.add(sprite);
         company.color = color;
         sprite.userData = company;
+        company.ctx = ctx;
+        company.canvas = c;
+        company.tex = tex;
+        company.state = 'neutral';
+        company.timer = Math.random() * 5.0 + Math.random() * 5.0; // Random stagger
+        company.hackSpeed = 0.5 + Math.random();
+        company.target = 'neutral';
+        company.originalColor = color;
+        company.isWorldBank = isWorldBank;
+        company.displayName = displayName;
+        if (typeof window.corpNodes === 'undefined') window.corpNodes = [];
+        window.corpNodes.push({ sprite: sprite, data: company });
 
         // Glowing pinpoint PURPLE SQUARE
         const dotC = document.createElement('canvas'); dotC.width = 64; dotC.height = 64;
@@ -6707,6 +6753,11 @@
         dotSprite.scale.set(0.08, 0.08, 1);
         dotSprite.position.copy(ll2v(company.lat, company.lon, GLOBE_R + 0.05));
         dotSprite.userData = company;
+        let lastNode = window.corpNodes[window.corpNodes.length - 1];
+        lastNode.data.dotCtx = dotCtx;
+        lastNode.data.dotTex = dotTex;
+        lastNode.data.dotCanvas = dotC;
+        lastNode.dotSprite = dotSprite;
         window.africaCompaniesGroup.add(dotSprite);
       });
       console.log("Africa Companies Overlay Initialized.");
@@ -6768,6 +6819,18 @@
         window.microCompaniesGroup.add(sprite);
         company.color = color;
         sprite.userData = company;
+        company.ctx = ctx;
+        company.canvas = c;
+        company.tex = tex;
+        company.state = 'neutral';
+        company.timer = Math.random() * 5.0 + Math.random() * 5.0; // Random stagger
+        company.hackSpeed = 0.5 + Math.random();
+        company.target = 'neutral';
+        company.originalColor = color;
+        company.isWorldBank = isWorldBank;
+        company.displayName = displayName;
+        if (typeof window.corpNodes === 'undefined') window.corpNodes = [];
+        window.corpNodes.push({ sprite: sprite, data: company });
 
         // Glowing pinpoint ORANGE SQUARE
         const dotC = document.createElement('canvas'); dotC.width = 64; dotC.height = 64;
@@ -6783,6 +6846,11 @@
         dotSprite.scale.set(0.08, 0.08, 1);
         dotSprite.position.copy(ll2v(company.lat, company.lon, GLOBE_R + 0.05));
         dotSprite.userData = company;
+        let lastNode = window.corpNodes[window.corpNodes.length - 1];
+        lastNode.data.dotCtx = dotCtx;
+        lastNode.data.dotTex = dotTex;
+        lastNode.data.dotCanvas = dotC;
+        lastNode.dotSprite = dotSprite;
         window.microCompaniesGroup.add(dotSprite);
       });
       console.log("Micro Companies Overlay Initialized.");
@@ -6844,6 +6912,18 @@
         window.russiaAsiaCompaniesGroup.add(sprite);
         company.color = color;
         sprite.userData = company;
+        company.ctx = ctx;
+        company.canvas = c;
+        company.tex = tex;
+        company.state = 'neutral';
+        company.timer = Math.random() * 5.0 + Math.random() * 5.0; // Random stagger
+        company.hackSpeed = 0.5 + Math.random();
+        company.target = 'neutral';
+        company.originalColor = color;
+        company.isWorldBank = isWorldBank;
+        company.displayName = displayName;
+        if (typeof window.corpNodes === 'undefined') window.corpNodes = [];
+        window.corpNodes.push({ sprite: sprite, data: company });
 
         // Glowing pinpoint WHITE SQUARE
         const dotC = document.createElement('canvas'); dotC.width = 64; dotC.height = 64;
@@ -6859,6 +6939,11 @@
         dotSprite.scale.set(0.08, 0.08, 1);
         dotSprite.position.copy(ll2v(company.lat, company.lon, GLOBE_R + 0.05));
         dotSprite.userData = company;
+        let lastNode = window.corpNodes[window.corpNodes.length - 1];
+        lastNode.data.dotCtx = dotCtx;
+        lastNode.data.dotTex = dotTex;
+        lastNode.data.dotCanvas = dotC;
+        lastNode.dotSprite = dotSprite;
         window.russiaAsiaCompaniesGroup.add(dotSprite);
       });
       console.log("Russia & Asia Companies Overlay Initialized.");
@@ -15329,71 +15414,114 @@
     const clock3 = new THREE.Clock();
     let time3 = 0;
 
+    function redrawCyberCompany(node) {
+      const data = node.data;
+      const ctx = data.ctx;
+      const isWorldBank = data.isWorldBank;
+      const displayName = data.displayName;
+      let drawColor = data.originalColor;
+      let textPrefix = '';
+
+      if (data.state === 'hacking') {
+        drawColor = (data.target === 'gemini') ? '#00eebb' : '#ff4444';
+        textPrefix = '[BREACHING] ';
+      } else if (data.state === 'gemini') {
+        drawColor = '#00ff44';
+        textPrefix = '[GEMINI] ';
+      } else if (data.state === 'claude') {
+        drawColor = '#ff3333';
+        textPrefix = '[CLAUS] ';
+      }
+
+      ctx.clearRect(0,0,data.canvas.width, data.canvas.height);
+
+      ctx.fillStyle = 'rgba(5, 10, 15, 0.85)';
+      ctx.strokeStyle = drawColor;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(20, 10);
+      ctx.lineTo(240, 10);
+      ctx.lineTo(240, 40);
+      ctx.lineTo(220, 54);
+      ctx.lineTo(10, 54);
+      ctx.lineTo(10, 20);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = isWorldBank ? '#ffd700' : drawColor;
+      if (isWorldBank) {
+        ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 10;
+        ctx.fillRect(18, 14, 36, 36);
+        ctx.shadowBlur = 0;
+      } else {
+        ctx.fillRect(18, 14, 36, 36);
+      }
+
+      ctx.fillStyle = '#000000';
+      ctx.font = 'bold 24px "Courier New", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(displayName.charAt(0).toUpperCase(), 36, 34);
+
+      if (data.state === 'hacking') {
+        ctx.fillStyle = Math.random() > 0.5 ? drawColor : '#ffffff';
+      } else {
+        ctx.fillStyle = isWorldBank ? '#ffd700' : '#ffffff';
+      }
+      ctx.font = 'bold 20px "Courier New", monospace';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(textPrefix + displayName.toUpperCase(), 64, 32);
+
+      data.tex.needsUpdate = true;
+
+      if (data.dotCtx) {
+        data.dotCtx.clearRect(0,0,64,64);
+        data.dotCtx.fillStyle = isWorldBank ? '#ffffff' : drawColor;
+        data.dotCtx.shadowBlur = isWorldBank ? 30 : 20;
+        data.dotCtx.shadowColor = isWorldBank ? '#ffd700' : drawColor;
+        data.dotCtx.beginPath(); data.dotCtx.arc(32, 32, 16, 0, Math.PI * 2); data.dotCtx.fill();
+        data.dotTex.needsUpdate = true;
+      }
+    }
+
     function animate() {
       requestAnimationFrame(animate);
       const dt = Math.min(clock3.getDelta(), .05);
       time3 += dt;
       
       // Cyber Company Warfare Hack Animation (BLK Skin Only)
-      if (window.blkCorpGroup && window.blkCorpGroup.visible && window.corpNodes) {
+      if (window.companiesGroup && window.companiesGroup.visible && window.corpNodes) {
         window.corpNodes.forEach(node => {
-          node.timer -= dt * node.hackSpeed;
+          node.data.timer -= dt * node.data.hackSpeed;
           
-          // State Machine: neutral -> hacking -> hacked
-          if (node.timer <= 0) {
-            if (node.state === 'neutral') {
-              // Begin hack
-              node.target = Math.random() > 0.5 ? 'gemini' : 'claude';
-              node.state = 'hacking';
-              node.timer = 1.0 + Math.random() * 2.0;
-            } else if (node.state === 'hacking') {
-              // Complete hack
-              node.state = node.target;
-              node.timer = 5.0 + Math.random() * 10.0; // Hold for a while
+          if (node.data.timer <= 0) {
+            if (node.data.state === 'neutral') {
+              node.data.target = Math.random() > 0.5 ? 'gemini' : 'claude';
+              node.data.state = 'hacking';
+              node.data.timer = 1.0 + Math.random() * 2.0;
+            } else if (node.data.state === 'hacking') {
+              node.data.state = node.data.target;
+              node.data.timer = 5.0 + Math.random() * 10.0;
             } else {
-              // Reset to neutral or get counter-hacked
-              node.state = 'neutral';
-              node.timer = 2.0 + Math.random() * 3.0;
+              node.data.state = 'neutral';
+              node.data.timer = 2.0 + Math.random() * 3.0;
             }
-
-            // Redraw Sprite Label based on new state
-            node.ctx.clearRect(0, 0, node.canvas.width, node.canvas.height);
-            let color = '#777777'; 
-            let prefix = '';
-            
-            if (node.state === 'hacking') {
-               color = (node.target === 'gemini') ? '#00bb33' : '#bb0000';
-               prefix = '[BREACHING] ';
-               // Random binary glitch effect during hack
-               if (Math.random() > 0.5) node.hex.material.color.setHex(0xffffff);
-            } else if (node.state === 'gemini') {
-               color = '#00ff44';
-               prefix = '[GEMINI] ';
-               node.hex.material.color.setHex(0x00ff44);
-            } else if (node.state === 'claude') {
-               color = '#ff0033';
-               prefix = '[CLAUS] ';
-               node.hex.material.color.setHex(0xff0033);
-            } else {
-               node.hex.material.color.setHex(0x333333);
-            }
-
-            node.ctx.fillStyle = color;
-            node.ctx.font = 'bold 36px "Orbitron", sans-serif';
-            node.ctx.textAlign = 'left';
-            node.ctx.fillText(prefix + node.name, 10, 48);
-            node.tex.needsUpdate = true;
+            redrawCyberCompany(node);
           }
           
-          // Flash effect while hacking
-          if (node.state === 'hacking') {
+          if (node.data.state === 'hacking') {
             const flash = Math.sin(time3 * 20) > 0;
             node.sprite.material.opacity = flash ? 1.0 : 0.3;
+            if (node.dotSprite) node.dotSprite.material.opacity = flash ? 1.0 : 0.3;
           } else {
             node.sprite.material.opacity = 1.0;
+            if (node.dotSprite) node.dotSprite.material.opacity = 1.0;
           }
         });
       }
+
       
       if (window.greenGlobeShader) {
         window.greenGlobeShader.uniforms.uTime.value += dt;
@@ -18129,9 +18257,6 @@
         window.africaCompaniesGroup.visible = (skin.name === 'BLK');
         window.microCompaniesGroup.visible = (skin.name === 'BLK');
         window.russiaAsiaCompaniesGroup.visible = (skin.name === 'BLK');
-      }
-      if (typeof window.blkCorpGroup !== 'undefined') {
-        window.blkCorpGroup.visible = (skin.name === 'BLK');
       }
 
       // Toggle Economy Marker
