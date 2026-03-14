@@ -2621,14 +2621,6 @@
               onclick="loginWithRonin()">
               LOGIN RONIN
             </div>
-
-            <div id="btn-login-polkadot"
-              style="position:relative; min-width:190px; height:40px; display:flex; align-items:center; justify-content:center; background:rgba(40,0,20,0.8); border:1px solid rgba(230,0,122,0.4); border-radius:4px; overflow:hidden; cursor:pointer; color:#E6007A; font-family:'Courier New', monospace; font-size:13px; font-weight:bold; letter-spacing:1px; transition:all 0.2s; box-shadow:0 0 10px rgba(230,0,122,0.1); margin-top:5px;"
-              onmouseover="this.style.background='rgba(80,0,40,0.9)'; this.style.borderColor='#E6007A'; this.style.boxShadow='0 0 15px rgba(230,0,122,0.5)';"
-              onmouseout="this.style.background='rgba(40,0,20,0.8)'; this.style.borderColor='rgba(230,0,122,0.4)'; this.style.boxShadow='0 0 10px rgba(230,0,122,0.1)';"
-              onclick="loginWithPolkadot()">
-              LOGIN POLKADOT
-            </div>
           </div>
 
           <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
@@ -5867,9 +5859,9 @@
           geo.computeVertexNormals();
         }
 
-        // Base center peak
-        const centerGeo = new THREE.ConeGeometry(0.12 * scaleMulti, 0.4 * scaleMulti, 32, 16);
-        displace(centerGeo, 0.12 * scaleMulti, 0.4 * scaleMulti);
+        // Base center peak (Doubled base width)
+        const centerGeo = new THREE.ConeGeometry(0.24 * scaleMulti, 0.4 * scaleMulti, 32, 16);
+        displace(centerGeo, 0.24 * scaleMulti, 0.4 * scaleMulti);
         const center = new THREE.Mesh(centerGeo, mat);
         center.position.y = 0.2 * scaleMulti;
         center.renderOrder = 9999;
@@ -8555,6 +8547,126 @@
     const globeMesh = new THREE.Mesh(globeGeo, globeMat);
     window.globeMesh = globeMesh;
     scene.add(globeMesh);
+
+    // GREEN SKIN PROCEDURAL SHADER MATERIAL
+    const greenGlobeMat = new THREE.MeshPhongMaterial({
+      color: 0xffffff,
+      emissive: 0x051a05,
+      specular: 0x001100,
+      shininess: 5,
+      side: THREE.FrontSide,
+      transparent: false,
+      depthWrite: true
+    });
+    
+    greenGlobeMat.onBeforeCompile = function (shader) {
+      shader.uniforms.uTime = { value: 0 };
+      shader.vertexShader = `
+        varying vec3 vPosition;
+        ${shader.vertexShader}
+      `.replace(
+        `#include <begin_vertex>`,
+        `#include <begin_vertex>
+        vPosition = position;`
+      );
+
+      shader.fragmentShader = `
+        uniform float uTime;
+        varying vec3 vPosition;
+
+        // Simplex 3D Noise 
+        // by Ian McEwan, Ashima Arts
+        vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
+        vec4 taylorInvSqrt(vec4 r){return 1.79284291400159 - 0.85373472095314 * r;}
+        float snoise(vec3 v){ 
+          const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
+          const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
+          vec3 i  = floor(v + dot(v, C.yyy) );
+          vec3 x0 = v - i + dot(i, C.xxx) ;
+          vec3 g = step(x0.yzx, x0.xyz);
+          vec3 l = 1.0 - g;
+          vec3 i1 = min( g.xyz, l.zxy );
+          vec3 i2 = max( g.xyz, l.zxy );
+          vec3 x1 = x0 - i1 + 1.0 * C.xxx;
+          vec3 x2 = x0 - i2 + 2.0 * C.xxx;
+          vec3 x3 = x0 - 1.0 + 3.0 * C.xxx;
+          i = mod(i, 289.0 ); 
+          vec4 p = permute( permute( permute( 
+                     i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
+                   + i.y + vec4(0.0, i1.y, i2.y, 1.0 )) 
+                   + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
+          float n_ = 1.0/7.0; // N=7
+          vec3  ns = n_ * D.wyz - D.xzx;
+          vec4 j = p - 49.0 * floor(p * ns.z *ns.z);
+          vec4 x_ = floor(j * ns.z);
+          vec4 y_ = floor(j - 7.0 * x_ );
+          vec4 x = x_ *ns.x + ns.yyyy;
+          vec4 y = y_ *ns.x + ns.yyyy;
+          vec4 h = 1.0 - abs(x) - abs(y);
+          vec4 b0 = vec4( x.xy, y.xy );
+          vec4 b1 = vec4( x.zw, y.zw );
+          vec4 s0 = floor(b0)*2.0 + 1.0;
+          vec4 s1 = floor(b1)*2.0 + 1.0;
+          vec4 sh = -step(h, vec4(0.0));
+          vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
+          vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
+          vec3 p0 = vec3(a0.xy,h.x);
+          vec3 p1 = vec3(a0.zw,h.y);
+          vec3 p2 = vec3(a1.xy,h.z);
+          vec3 p3 = vec3(a1.zw,h.w);
+          vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+          p0 *= norm.x;
+          p1 *= norm.y;
+          p2 *= norm.z;
+          p3 *= norm.w;
+          vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+          m = m * m;
+          return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3) ) );
+        }
+
+        // FBM 
+        float fbm(vec3 p) {
+            float value = 0.0;
+            float amplitude = 0.5;
+            for (int i = 0; i < 4; i++) {
+                value += amplitude * snoise(p);
+                p *= 2.0;
+                amplitude *= 0.5;
+            }
+            return value;
+        }
+
+        ${shader.fragmentShader}
+      `.replace(
+        `#include <map_fragment>`,
+        `#include <map_fragment>
+        
+        // Use object space position directly for procedural texture mapped to globe surface
+        vec3 p = normalize(vPosition) * 4.0;
+        float noiseVal = fbm(p + uTime * 0.02);
+        
+        // Three-tier vegetation logic
+        vec3 colorMoss = vec3(0.05, 0.25, 0.05); // Ground-level
+        vec3 colorBush = vec3(0.1, 0.35, 0.1); // Mid-level
+        vec3 colorCanopy = vec3(0.15, 0.45, 0.15); // Canopy
+        
+        // Base mossy noise
+        vec3 finalColor = mix(colorMoss, colorBush, smoothstep(-0.2, 0.4, noiseVal));
+        
+        // Canopy structure
+        float canopyNoise = fbm(p * 2.5);
+        finalColor = mix(finalColor, colorCanopy, smoothstep(0.2, 0.6, canopyNoise));
+
+        // Deep shadow variations
+        float shadowNoise = snoise(p * 5.0);
+        finalColor *= mix(0.5, 1.2, shadowNoise);
+
+        diffuseColor = vec4(finalColor, 1.0);
+        `
+      );
+      window.greenGlobeShader = shader;
+    };
+    window.greenGlobeMat = greenGlobeMat;
 
     // Solid base mesh for CYBER skin so it's not see-through
     const cyberBaseMat = new THREE.MeshBasicMaterial({ color: 0x00020a, side: THREE.FrontSide, depthWrite: true });
@@ -15218,6 +15330,10 @@
       requestAnimationFrame(animate);
       const dt = Math.min(clock3.getDelta(), .05);
       time3 += dt;
+      
+      if (window.greenGlobeShader) {
+        window.greenGlobeShader.uniforms.uTime.value += dt;
+      }
 
       updateDroneBattle(dt);
 
@@ -15579,7 +15695,7 @@
         });
 
         // Elaborate Electricity Bridges Animation
-        if (npTowers.length === 3 && window.npLightningGroup && window.currentSkinIndex === 4) { // CYBER skin
+        if (npTowers.length === 3 && window.npLightningGroup && window.currentSkinIndex === 3) { // CYBER skin
           window.npLightningGroup.visible = true;
           window.npLightningGroup.children.forEach(bridge => {
             // Removed timed rotation; bridges are now statically locked to their target nodes
@@ -15657,7 +15773,7 @@
         } else if (window.npLightningGroup) {
           window.npLightningGroup.visible = false;
         }
-      } else if (window.npLightningGroup && window.currentSkinIndex !== 4) {
+      } else if (window.npLightningGroup && window.currentSkinIndex !== 3) {
         window.npLightningGroup.visible = false;
       } // <-- End of Cyber Skin Block
 
@@ -17622,7 +17738,8 @@
       { name: 'RED_PLANET', color: 0xff0000, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false },
       { name: 'CYBER', color: 0x00f0ff, btnText: 'parallel layers', btnClass: 'active-premium', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false },
       { name: 'GREEN', color: 0x22ff22, btnText: 'parallel layers', btnClass: 'active-normal', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: true, showArms: true, showBoats: false, isPremium: false },
-      { name: 'REAL', color: 0xffffff, btnText: 'parallel layers', btnClass: 'active-normal', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false }
+      { name: 'REAL', color: 0xffffff, btnText: 'parallel layers', btnClass: 'active-normal', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false },
+      { name: 'MARS', color: 0xff4400, btnText: 'parallel layers', btnClass: 'active-normal', showOverlays: false, cleanGlobe: true, hideTroops: true, showResources: false, showArms: false, showBoats: false, isPremium: false }
     ];
     window.SKINS = SKINS;
 
@@ -17647,6 +17764,9 @@
         return toggleRedSkin(); // Recursively call to move to next
       }
 
+      // Clear any temporary effects
+      scene.fog = null;
+
       // Apply Globe Color
       if (typeof globeMat !== 'undefined') {
         globeMat.color.setHex(skin.color);
@@ -17656,6 +17776,7 @@
         // Reset Geometry
         if (typeof window.globeMesh !== 'undefined' && typeof cyberGlobeGeo !== 'undefined' && typeof globeGeo !== 'undefined') {
           window.globeMesh.geometry = (skin.name === 'CYBER') ? cyberGlobeGeo : globeGeo;
+          window.globeMesh.material = (skin.name === 'GREEN' && typeof window.greenGlobeMat !== 'undefined') ? window.greenGlobeMat : globeMat;
         }
 
         if (skin.name === 'CYBER') {
@@ -17699,20 +17820,14 @@
           globeMat.opacity = 1.0;
           globeMat.depthWrite = true;
         } else if (skin.name === 'GREEN') {
-          globeMat.map = greenForestTex; // Apply user requested forest texture
-          globeMat.emissiveMap = null;
-          // Apply solid dark forest green aesthetic fallback
-          globeMat.color.setHex(0xffffff); // Use white so the texture colors show purely 
-          globeMat.emissive.setHex(0x051a05);
-          globeMat.specular.setHex(0x001100);
-          globeMat.shininess = 5;
-          globeMat.wireframe = false;
-          globeMat.transparent = false; // Solid planet!
-          globeMat.opacity = 1.0;
-          globeMat.depthWrite = true;
+          // greenGlobeMat is applied directly to the mesh
           // Clean up realism maps if exiting REAL skin
           globeMat.specularMap = null;
           globeMat.normalMap = null;
+          if (window.greenMountainsGroup) {
+            window.greenMountainsGroup.scale.set(1, 1.0 / 3.0, 1);
+          }
+          scene.fog = new THREE.FogExp2(0x0b290b, 0.05);
         } else if (skin.name === 'REAL') {
           // Photorealistic Texture Configuration
           globeMat.map = realEarthTex;
@@ -17723,6 +17838,20 @@
           globeMat.color.setHex(0xffffff);
           globeMat.specular.setHex(0x333333); // Reflect sun lightly off oceans
           globeMat.shininess = 15;
+          globeMat.wireframe = false;
+          globeMat.transparent = false;
+          globeMat.opacity = 1.0;
+          globeMat.depthWrite = true;
+        } else if (skin.name === 'MARS') {
+          // Photorealistic Mars Configuration (Reusing Earth maps)
+          globeMat.map = realEarthTex;
+          globeMat.specularMap = null; // No water specular highlights
+          globeMat.normalMap = realEarthNorm; // Use earth normals for terrain depth
+          globeMat.emissiveMap = null;
+          globeMat.emissive.setHex(0x000000);
+          globeMat.color.setHex(0xff5500); // Rusty orange/red tint
+          globeMat.specular.setHex(0x000000); // Completely matte
+          globeMat.shininess = 0;
           globeMat.wireframe = false;
           globeMat.transparent = false;
           globeMat.opacity = 1.0;
@@ -17988,14 +18117,14 @@
       }
       if (typeof countryBorders !== 'undefined') {
         Object.values(countryBorders).forEach(group => {
-          group.visible = (skin.name !== 'REAL');
+          group.visible = (skin.name !== 'REAL' && skin.name !== 'MARS');
         });
       }
 
       // Toggle Realistic Lighting Setup
       if (typeof window.sunLight !== 'undefined') {
-        window.sunLight.visible = (skin.name === 'REAL');
-        window.ambientLight.visible = (skin.name === 'REAL');
+        window.sunLight.visible = (skin.name === 'REAL' || skin.name === 'MARS');
+        window.ambientLight.visible = (skin.name === 'REAL' || skin.name === 'MARS');
       }
 
       // Clear ambient visual flights immediately when toggling to clean skin

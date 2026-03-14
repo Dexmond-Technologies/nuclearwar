@@ -4,3 +4,4 @@ Wallet/
 check_balances.js
 output.log
 SEED_*
+env

@@ -22,6 +22,7 @@
     "pg": "^8.11.0",
     "playwright": "^1.58.2",
     "process": "^0.11.10",
+    "puppeteer": "^24.39.1",
     "radio-browser-api": "^6.0.3",
     "stream-browserify": "^3.0.0",
     "stripe": "^20.4.1",
