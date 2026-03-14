@@ -2581,6 +2581,7 @@ let isFetchingBalancesLock = false;
 async function fetchAndBroadcastAIBalances() {
   if (isFetchingBalancesLock) return;
   isFetchingBalancesLock = true;
+  const isMockAllowed = process.env.MOCK_VALUES === 'y' || process.env.MOCK_VALUES === 'Y';
   try {
     let geminiBalance = cachedGeminiBalance;
     let claudeBalance = cachedClaudeBalance;
@@ -2608,7 +2609,7 @@ async function fetchAndBroadcastAIBalances() {
         }
 
         if (!foundD3X && geminiBalance === 0) {
-          geminiBalance = cachedGeminiBalance || 50000; // Database state if no token account yet
+          geminiBalance = isMockAllowed ? (cachedGeminiBalance || 50000) : 0; // Honor true 0 unless mocked
         }
       }
     } catch (e) {
@@ -2642,7 +2643,7 @@ async function fetchAndBroadcastAIBalances() {
       }
 
       if (!foundD3X && claudeBalance === 0) {
-        claudeBalance = cachedClaudeBalance || 50000;
+        claudeBalance = isMockAllowed ? (cachedClaudeBalance || 50000) : 0; // Honor true 0 unless mocked
       }
     } catch (e) {
       console.error('Claude balance error:', e.message);

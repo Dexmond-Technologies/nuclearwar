@@ -35,7 +35,7 @@ _(Machine constraint: `AMBIENT=FRONTEND`. Only modifies HTML, CSS, JS frontend l
 
 _(Machine constraint: modifies server logic, DB schemas, API endpoints.)_
 
-- **Current Objective**: Successfully refactored the root repository. Organized stray CSV/TXT/JS files into `DATA`, `DOCS`, and `SCRIPTS`. Created the `GRAPHIC_FILES` directory for the graphics team and updated `server.js` static routing to make it the live source of truth for the frontend codebase. Implemented continuous drone battles and fixed the `createGlowCanvas` animation crash.
+- **Current Objective**: Successfully refactored the root repository. Organized stray CSV/TXT/JS files into `DATA`, `DOCS`, and `SCRIPTS`. Created the `GRAPHIC_FILES` directory for the graphics team and updated `server.js` static routing to make it the live source of truth for the frontend codebase. Implemented continuous drone battles and fixed the `createGlowCanvas` animation crash. Fixed the Phantom 89M D3X balance bug where the Solana API payload defaulted to legacy `AI_Spending.txt` cache on true zero accounts instead of broadcasting `0` to the UI.
 - **Active Files/Folders**: `server.js` and all root subdirectories except `GRAPHIC_FILES`.
 - **Next Sync Needed?**: No. The architecture is stable. Waiting for the Frontend AI to push graphics updates from inside the `GRAPHIC_FILES` folder.
 
