@@ -268,7 +268,7 @@ async function loadGameStateFallback() {
   return null;
 }
 
-const PORT = process.env.PORT || 8888; // Render dynamically assigns PORT
+const PORT = process.env.PORT || 8888; // Render dynamically assigns PORT, but default is 8888
 
 // OpenSky API Removed
 

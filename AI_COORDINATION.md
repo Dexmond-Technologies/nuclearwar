@@ -28,7 +28,8 @@ _(Machine constraint: `AMBIENT=FRONTEND`. Only modifies HTML, CSS, JS frontend l
 
 - **Current Objective**: **CRITICAL RULE**: The Frontend AI (Graphics Office) MUST **EXCLUSIVELY** work inside the `GRAPHIC_FILES/` directory. The live server dynamically serves `game.html` and all textures directly from this folder. **UNDER NO CIRCUMSTANCES** should you edit, move, or place files in the root directory. If you touch the root directory, you break the backend.
 - **Active Files/Folders**: `/GRAPHIC_FILES/*` (specifically `game.html` and the texture folders).
-- **Next Sync Needed?**: Yes, waiting for the Frontend AI to pull the repo, make modifications strictly inside `GRAPHIC_FILES`, drop a note/instruction file, and push the changes for the Backend AI to integrate.
+- **Recent Changes**: Applied 20px `margin-bottom` spacing to the internal flex/grid wrappers of the Staking, World Bank, Master Node, and Treasury modals. Fixed the overflow so the lowest UI boundaries do not bleed into the monitor's edge.
+- **Next Sync Needed?**: Yes, changes have been pushed to git for the Backend AI to monitor.
 
 ## ⚙️ BACKEND AI Status
 
