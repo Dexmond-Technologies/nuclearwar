@@ -3122,7 +3122,7 @@
         <div class="us-row"><span class="us-label">Dmg</span> <span class="us-val" id="us-damage"
             style="color:#fa0">0</span></div>
         <button id="btn-show-google-wallet" onclick="showGoogleWalletModal()"
-          style="margin-top:8px; display:none; width:100%; border:1px solid #0f8; background:rgba(0,255,136,0.1); color:#0f8; padding:4px; font-family:'Courier New', monospace; font-size:10px; font-weight:bold; cursor:pointer; border-radius:3px;">🔑
+          style="pointer-events:auto; margin-top:8px; display:none; width:100%; border:1px solid #0f8; background:rgba(0,255,136,0.1); color:#0f8; padding:4px; font-family:'Courier New', monospace; font-size:10px; font-weight:bold; cursor:pointer; border-radius:3px;">🔑
           WALLET KEYS</button>
       </div>
 
@@ -4203,7 +4203,7 @@
 
   <!-- D3X Mine Digging Clicker Modal (Green Skin) -->
   <div id="d3x-resource-staking-modal"
-    style="position:absolute;inset:0;background:rgba(0,15,5,.95);display:none;align-items:center;justify-content:center;z-index:1060;backdrop-filter:blur(8px);">
+    style="position:absolute;inset:0;background:rgba(0,15,5,.95);display:none;align-items:center;justify-content:center;z-index:1060;backdrop-filter:blur(8px);pointer-events:auto;">
     <div class="rep-card"
       style="width:500px; max-width:95vw; border-color:#0f8; box-shadow:0 0 40px rgba(0,255,136,.2); text-align:center;">
       <div class="rep-title" style="color:#0f8; text-shadow:0 0 15px rgba(0,255,136,.8);" id="d3x-stake-title">D3X DEEP
@@ -5935,8 +5935,8 @@
       mount12.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pos12.clone().normalize());
       greenMountainsGroup.add(mount12);
 
-      // 13-36. 24 Random Procedural Mountains (Focus South/Equator)
-      for (let i = 0; i < 24; i++) {
+      // 13-18. Random Procedural Mountains disabled by user preference
+      for (let i = 0; i < 0; i++) {
         const mount = createJaggedMountain(1.0 + Math.random() * 0.8);
         const lat = (Math.random() * -120) + 30; // Mostly between 30 and -90
         const lon = (Math.random() * 360) - 180;
@@ -13832,7 +13832,15 @@
             break;
           }
           case 'error':
-            document.getElementById('lobby-msg').textContent = msg.msg; break;
+            const lbyMsg = document.getElementById('lobby-msg');
+            if (lbyMsg) lbyMsg.textContent = msg.msg;
+            
+            // Route error to D3X Mine Log if actively open
+            const stakeModal = document.getElementById('d3x-resource-staking-modal');
+            if (window.activeMineModalId && stakeModal && stakeModal.style.display === 'flex') {
+              if (typeof appendDigLog === 'function') appendDigLog(`<span style="color:#f55">SERVER REJECTED:</span> ${msg.msg}`);
+            }
+            break;
         }
       };
       ws.onclose = () => setLog('⚠ Lost connection to global command');
@@ -17936,94 +17944,9 @@
           window.globeMesh.material = (skin.name === 'GREEN' && typeof window.greenGlobeMat !== 'undefined') ? window.greenGlobeMat : globeMat;
         }
 
-        if (skin.name === 'CYBER') {
-          globeMat.transmission = 0.0; // Turn off glass for cyber
-          globeMat.emissive.setHex(0x001144); // Further darkened emissive blue
-          // Apply the high-density grid texture map
-          globeMat.map = window.cyberGridTex;
-          globeMat.emissiveMap = window.cyberGridTex;
-          globeMat.transparent = true; 
-          globeMat.opacity = 0.35; // Further reduced opacity per user request
-          globeMat.depthWrite = true; 
-        } else if (skin.name === 'WTR') {
-          globeMat.map = earthTex; // Reset default earth texture
-          globeMat.emissiveMap = null;
-          globeMat.emissive.setHex(0x0055aa); // Deep ocean blue emissive base
-          globeMat.wireframe = false;
-          globeMat.transparent = true;
-          globeMat.opacity = 0.5; // WTR default
-          globeMat.depthWrite = false;
-        } else if (skin.name === 'BLK') {
-          globeMat.map = earthTex; // Reset default earth texture
-          globeMat.emissiveMap = null;
-          globeMat.color.setHex(0x111111);
-          globeMat.specular.setHex(0x777777);
-          globeMat.shininess = 35;
-          globeMat.emissive.setHex(0x000000);
-          globeMat.wireframe = false;
-          globeMat.transparent = false;
-          globeMat.opacity = 1.0;
-          globeMat.depthWrite = true;
-
-        } else if (skin.name === 'RED_PLANET') {
-          globeMat.map = window.risikoTexture; // Dynamically generated Risiko state!
-          if (typeof window.updateRisikoMap === 'function') window.updateRisikoMap();
-          globeMat.emissiveMap = null;
-          // Apply neutral white lighting base so the canvas colors shine perfectly accurately
-          globeMat.color.setHex(0xffffff);
-          globeMat.emissive.setHex(0x222222);
-          globeMat.wireframe = false;
-          globeMat.transparent = true;
-          globeMat.opacity = 0.2;
-          globeMat.depthWrite = false;
-        } else if (skin.name === 'GREEN') {
-          // greenGlobeMat is applied directly to the mesh
-          // Clean up realism maps if exiting REAL skin
-          globeMat.specularMap = null;
-          globeMat.normalMap = null;
-          if (window.greenMountainsGroup) {
-            window.greenMountainsGroup.scale.set(1, 1.0 / 3.0, 1);
-          }
-          scene.fog = new THREE.FogExp2(0x0b290b, 0.05);
-        } else if (skin.name === 'REAL') {
-          // Photorealistic Texture Configuration
-          globeMat.map = realEarthTex;
-          globeMat.specularMap = realEarthSpec;
-          globeMat.normalMap = realEarthNorm;
-          globeMat.emissiveMap = null;
-          globeMat.emissive.setHex(0x000000);
-          globeMat.color.setHex(0xffffff);
-          globeMat.specular.setHex(0x333333); // Reflect sun lightly off oceans
-          globeMat.shininess = 15;
-          globeMat.wireframe = false;
-          globeMat.transparent = false;
-          globeMat.opacity = 1.0;
-          globeMat.depthWrite = true;
-        } else if (skin.name === 'MARS') {
-          // Photorealistic Mars Configuration (Reusing Earth maps)
-          globeMat.map = realEarthTex;
-          globeMat.specularMap = null; // No water specular highlights
-          globeMat.normalMap = realEarthNorm; // Use earth normals for terrain depth
-          globeMat.emissiveMap = null;
-          globeMat.emissive.setHex(0x000000);
-          globeMat.color.setHex(0xff5500); // Rusty orange/red tint
-          globeMat.specular.setHex(0x000000); // Completely matte
-          globeMat.shininess = 0;
-          globeMat.wireframe = false;
-          globeMat.transparent = false;
-          globeMat.opacity = 1.0;
-          globeMat.depthWrite = true;
-        } else {
-          globeMat.map = earthTex; // Reset default earth texture
-          globeMat.emissiveMap = null;
-          // Clean up realism maps if exiting REAL skin
-          globeMat.specularMap = null;
-          globeMat.normalMap = null;
-          globeMat.emissive.setHex(0x000000);
-          globeMat.wireframe = false;
-          globeMat.transparent = true;
-          globeMat.opacity = 0.0;
-          globeMat.depthWrite = false;
+        // Dynamically invoke the plugin
+        if (typeof window['applySkin_' + window.currentSkinIndex] === 'function') {
+          window['applySkin_' + window.currentSkinIndex](skin);
         }
 
         globeMat.clippingPlanes = [];
@@ -18713,8 +18636,8 @@
           statusText.innerText = 'EXTRACTING MINERALS...';
 
           // Dispatch to server to roll RNG and get actual items
-          if (window.ws && window.ws.readyState === WebSocket.OPEN) {
-            window.ws.send(JSON.stringify({ type: 'mountain_dig_complete' }));
+          if (typeof ws !== 'undefined' && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'mountain_dig_complete' }));
           }
         }
       }, 100);
@@ -18760,7 +18683,8 @@
       if (!window.activeMineModalId) return;
 
       // Validate we actually have some D3X to afford the 2-4 D3X dig cost
-      if (window.localD3XBalance < 4) {
+      const currentBal = window.localD3XBalance || 0;
+      if (currentBal < 4) {
         appendDigLog(`<span style="color:#f55">ERROR: Insufficient D3X</span> to power excavation rig (up to 4 D3X required).`);
         return;
       }
@@ -20741,6 +20665,13 @@
       </div>
     </div>
   </div>
+  <script src="GLOBE_SKINS/0/skin.js"></script>
+  <script src="GLOBE_SKINS/1/skin.js"></script>
+  <script src="GLOBE_SKINS/2/skin.js"></script>
+  <script src="GLOBE_SKINS/3/skin.js"></script>
+  <script src="GLOBE_SKINS/4/skin.js"></script>
+  <script src="GLOBE_SKINS/5/skin.js"></script>
+
 </body>
 
 </html>

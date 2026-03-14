@@ -28,8 +28,8 @@ _(Machine constraint: `AMBIENT=FRONTEND`. Only modifies HTML, CSS, JS frontend l
 
 - **Current Objective**: **CRITICAL RULE**: The Frontend AI (Graphics Office) MUST **EXCLUSIVELY** work inside the `GRAPHIC_FILES/` directory. The live server dynamically serves `game.html` and all textures directly from this folder. **UNDER NO CIRCUMSTANCES** should you edit, move, or place files in the root directory. If you touch the root directory, you break the backend.
 - **Active Files/Folders**: `/GRAPHIC_FILES/*` (specifically `game.html` and the texture folders).
-- **Recent Changes**: Applied 20px `margin-bottom` spacing to the internal flex/grid wrappers of the Staking, World Bank, Master Node, and Treasury modals. Fixed the overflow so the lowest UI boundaries do not bleed into the monitor's edge.
-- **Next Sync Needed?**: Yes, changes have been pushed to git for the Backend AI to monitor.
+- **Recent Changes**: Fixed the `mountain_dig_complete` API payload inside the Mountain Resource Dig modal. Fixed a DOM bounds issue and a silent `window.localD3XBalance` string error inside the D3X Mine / DIG DEEPER button that was throwing server WebSocket rejections. Factored all 6 3D Globe Skin setups out of `game.html` and isolated them inside their own scripts under `GRAPHIC_FILES/GLOBE_SKINS/0` through `5`. Reduced the random procedural mountains down to 0 on the GREEN skin. Made the CYBER grid completely solid and opaque.
+- **Next Sync Needed?**: Yes, changes are being pushed to git for the Backend AI to monitor.
 
 ## ⚙️ BACKEND AI Status
 
