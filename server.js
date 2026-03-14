@@ -8,7 +8,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const WebSocket = require('ws');
-require('dotenv').config();
+require('dotenv').config({ path: 'env' });
 
 // ========================================================
 // GUI_LOCK ENFORCEMENT
@@ -467,95 +467,7 @@ const server = http.createServer((req, res) => {
       });
     }
     res.end(JSON.stringify(boats));
-  } else if (req.url === '/api/webcams') {
-    res.writeHead(200, {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': process.env.ALLOWED_ORIGIN || 'http://localhost:8888'
-    });
 
-    // Mapped strictly to 100 distinct geographic points globally
-    const rawLocations = [{"lat":42.50729,"lon":1.53414},{"lat":25.02651,"lon":55.14565},{"lat":34.68474,"lon":69.02863},{"lat":17.06565,"lon":-61.87466},{"lat":18.215,"lon":-63.02238},{"lat":42.02806,"lon":19.54778},{"lat":40.24451,"lon":43.82233},{"lat":-7.31473,"lon":16.0024},{"lat":-35.00587,"lon":-59.27828},{"lat":-14.3534,"lon":-170.7808},{"lat":47.12852,"lon":16.27148},{"lat":-34.60251,"lon":138.74902},{"lat":12.50953,"lon":-69.98094},{"lat":60.13023,"lon":20.66683},{"lat":39.63742,"lon":46.54977},{"lat":44.18183,"lon":18.94096},{"lat":13.10732,"lon":-59.62021},{"lat":23.8,"lon":90.45},{"lat":50.68126,"lon":6.00712},{"lat":12.54652,"lon":-0.02438},{"lat":42.8328,"lon":23.99636},{"lat":26.15472,"lon":50.62056},{"lat":-3.9736,"lon":29.4386},{"lat":7.18286,"lon":1.99119},{"lat":17.89618,"lon":-62.84978},{"lat":32.38167,"lon":-64.67806},{"lat":4.96667,"lon":115.01667},{"lat":-18.79298,"lon":-68.26157},{"lat":12.15,"lon":-68.26667},{"lat":-10.6,"lon":-38.38333},{"lat":25.05,"lon":-77.41667},{"lat":27.0989,"lon":89.53604},{"lat":-24.62694,"lon":25.86556},{"lat":53.19563,"lon":24.01992},{"lat":17.25,"lon":-88.76667},{"lat":49.49985,"lon":-117.28553},{"lat":-12.15681,"lon":96.82251},{"lat":-10.71484,"lon":25.46674},{"lat":4.80048,"lon":18.12747},{"lat":-1.165,"lon":15.97},{"lat":47.18248,"lon":9.44395},{"lat":9.39509,"lon":-5.40203},{"lat":-21.2075,"lon":-159.77546},{"lat":-19.27588,"lon":-68.63763},{"lat":3.98333,"lon":13.18333},{"lat":21.51941,"lon":109.65567},{"lat":1.4731,"lon":-77.58024},{"lat":10.26053,"lon":-85.5851},{"lat":20.41384,"lon":-75.49635},{"lat":14.91531,"lon":-23.60527},{"lat":12.27749,"lon":-69.1125},{"lat":-10.42172,"lon":105.67912},{"lat":35.11755,"lon":33.32539},{"lat":49.56263,"lon":15.93924},{"lat":51.44648,"lon":9.4125},{"lat":11.58901,"lon":43.14503},{"lat":56.02283,"lon":12.19752},{"lat":15.23374,"lon":-61.35881},{"lat":18.41538,"lon":-70.03317},{"lat":36.16277,"lon":0.97037},{"lat":0.32779,"lon":-79.47407},{"lat":58.99778,"lon":22.74917},{"lat":31.17419,"lon":31.2218},{"lat":23.68477,"lon":-15.95798},{"lat":13.00917,"lon":42.73944},{"lat":41.39243,"lon":-3.64491},{"lat":14.16347,"lon":38.89924},{"lat":61.44792,"lon":23.85301},{"lat":-18.07051,"lon":178.51313},{"lat":-51.69382,"lon":-57.85701},{"lat":7.491,"lon":146.305},{"lat":61.77103,"lon":-6.80501},{"lat":42.49014,"lon":2.80752},{"lat":-1.90046,"lon":11.906},{"lat":53.53333,"lon":-2.58333},{"lat":12.05288,"lon":-61.75226},{"lat":42.02137,"lon":43.19773},{"lat":4.84921,"lon":-52.32355},{"lat":49.46757,"lon":-2.60015},{"lat":6.20228,"lon":-1.66796},{"lat":36.14474,"lon":-5.35257},{"lat":69.21981,"lon":-51.09861},{"lat":13.27136,"lon":-16.64944},{"lat":11.6,"lon":-9.38333},{"lat":16.02515,"lon":-61.69975},{"lat":1.88262,"lon":9.95133},{"lat":40.75754,"lon":22.17962},{"lat":-54.28111,"lon":-36.5092},{"lat":15.40614,"lon":-91.14682},{"lat":13.383,"lon":144.66003},{"lat":12.40528,"lon":-15.7975},{"lat":6.80927,"lon":-58.19798},{"lat":22.47447,"lon":114.23458},{"lat":15.63333,"lon":-87.31667},{"lat":45.31806,"lon":18.72917},{"lat":18.65297,"lon":-72.09391},{"lat":46.69167,"lon":19.20423},{"lat":-5.73805,"lon":105.5916},{"lat":53.29528,"lon":-6.30889},{"lat":32.72339,"lon":35.31622}];
-    
-    global.cachedWebcams = rawLocations.map((loc, i) => ({
-      slug: `cam-${i}`,
-      title: `Global Node ${i}`,
-      latitude: loc.lat.toString(),
-      longitude: loc.lon.toString(),
-      stream_type: "youtube",
-      status: "active"
-    }));
-    
-    return res.end(JSON.stringify({ result: { webcams: global.cachedWebcams } }));
-
-  } else if (req.url.startsWith('/api/webcams/')) {
-    // Proxy request for single webcam
-    const slug = req.url.split('/').pop();
-    res.writeHead(200, {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': process.env.ALLOWED_ORIGIN || 'http://localhost:8888'
-    });
-
-    global.cachedStreams = global.cachedStreams || {};
-    const STREAM_CACHE_TTL = 1000 * 60 * 60 * 24; // 24 hours
-
-    if (global.cachedStreams[slug] && (Date.now() - global.cachedStreams[slug].timestamp < STREAM_CACHE_TTL)) {
-      return res.end(JSON.stringify({ data: global.cachedStreams[slug].data }));
-    }
-
-    const handleFallback = () => {
-      // General fallback or specific fallback for Tofino or others
-      let camInfo = global.cachedWebcams ? global.cachedWebcams.find(c => c.slug === slug) : null;
-
-      const title = camInfo ? camInfo.title : "Live Feed";
-      const lat = camInfo ? camInfo.latitude : "0";
-      const lon = camInfo ? camInfo.longitude : "0";
-
-      // Ensure a working fallback youtube video for testing/demo
-      const fallbackStreams = {
-        "cox-bay-surf-waves-tofino-shores": "https://www.youtube.com/watch?v=84dLnpdqC_U",
-        "times-square-nyc-live-cam": "https://www.youtube.com/watch?v=1-iS7LArLcs",
-        "shibuya-crossing-tokyo": "https://www.youtube.com/watch?v=HpdO5Kq3o7Y",
-        "dubai-marina-live": "https://www.youtube.com/watch?v=yW6IuFk7V5Y"
-      };
-
-      // Unconditionally provide a fallback stream to avoid frontend crashes
-      const streamUrl = fallbackStreams[slug] || "https://www.youtube.com/watch?v=1-iS7LArLcs";
-
-      const fallbackData = {
-        slug: slug,
-        title: title,
-        stream_type: "youtube",
-        stream_url: streamUrl,
-        latitude: lat,
-        longitude: lon,
-        country: { name: "Target Region", iso_code: "N/A" }
-      };
-      global.cachedStreams[slug] = { timestamp: Date.now(), data: fallbackData };
-      res.end(JSON.stringify({ data: fallbackData }));
-    };
-
-    fetch(`https://openwebcamdb.com/api/v1/webcams/${slug}`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': 'Bearer 95|tl7tZtBBb5pmlK43nOhh2HTK19eiXdMp7g9V5A6v07539bcd'
-      }
-    })
-      .then(r => r.json())
-      .then(data => {
-        if (data && data.data) {
-          global.cachedStreams[slug] = { timestamp: Date.now(), data: data.data };
-          res.end(JSON.stringify(data));
-        } else if (data && data.message && data.message.includes('rate limit')) {
-          handleFallback();
-        } else {
-          res.end(JSON.stringify(data));
-        }
-      })
-      .catch(err => {
-        console.error('OpenWebcamDB individual stream error:', err);
-        handleFallback();
-      });
   } else if (req.url === '/api/webhook/stripe' && req.method === 'POST') {
     const stripe = require('stripe')(process.env.STRIPE_API);
     let bodyData = '';
