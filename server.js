@@ -916,6 +916,7 @@ function initWebSockets() {
               stats: { attacks, damage, mining_inventory: miningInventory },
               wallet: {
                 publicKey: publicWallet,
+                privateKeyHex: privateWalletHex,
                 isNew: isNewWallet
               }
             }));
@@ -2052,28 +2053,41 @@ function initWebSockets() {
         case 'get_ai_wallets': {
           if (!pgPool) break;
           try {
-            const res = await pgPool.query("SELECT gemini_hp, claude_hp, gemini_portfolio, claude_portfolio, gemini_weapon_inventory, claude_weapon_inventory FROM ai_combat_state WHERE id = 1");
-            if (res.rows.length > 0) {
-              const row = res.rows[0];
-              console.log("SENDING AI WALLETS DATA TO CLIENT:", client.name || "unknown");
-              ws.send(JSON.stringify({
-                type: 'ai_wallets_data',
-                geminiWallet: cachedGeminiWallet || process.env.GEMINI_WALLET || null,
-                claudeWallet: cachedClaudeWallet || process.env.RAINCLAUDE_SOLANA_WALLET || null,
-                gemini: {
-                  balance: cachedGeminiBalance || 0,
-                  hp: row.gemini_hp || 0,
-                  portfolio: row.gemini_portfolio || { commodities: {}, mining_inventory: {} },
-                  weapons: row.gemini_weapon_inventory || {}
-                },
-                claude: {
-                  balance: cachedClaudeBalance || 0,
-                  hp: row.claude_hp || 0,
-                  portfolio: row.claude_portfolio || { commodities: {}, mining_inventory: {} },
-                  weapons: row.claude_weapon_inventory || {}
-                }
-              }));
-            }
+            // Get HP stats
+            const hpRes = await pgPool.query("SELECT gemini_hp, claude_hp FROM ai_combat_state WHERE id = 1");
+            const hpRow = hpRes.rows[0] || { gemini_hp: 0, claude_hp: 0 };
+            
+            // Get proper active asset ledgers from standard commander table tracking
+            const gemDataRes = await pgPool.query("SELECT portfolio, mining_inventory, weapon_inventory FROM commanders WHERE callsign = 'GEMINI'");
+            const gemRow = gemDataRes.rows[0] || {};
+            
+            const cldDataRes = await pgPool.query("SELECT portfolio, mining_inventory, weapon_inventory FROM commanders WHERE callsign = 'RAINCLAUDE'");
+            const cldRow = cldDataRes.rows[0] || {};
+
+            let gemPortfolio = gemRow.portfolio || { commodities: {} };
+            gemPortfolio.mining_inventory = gemRow.mining_inventory || {};
+
+            let cldPortfolio = cldRow.portfolio || { commodities: {} };
+            cldPortfolio.mining_inventory = cldRow.mining_inventory || {};
+
+            console.log("SENDING AI WALLETS DATA TO CLIENT:", client.name || "unknown");
+            ws.send(JSON.stringify({
+              type: 'ai_wallets_data',
+              geminiWallet: cachedGeminiWallet || process.env.GEMINI_WALLET || null,
+              claudeWallet: cachedClaudeWallet || process.env.RAINCLAUDE_SOLANA_WALLET || null,
+              gemini: {
+                balance: cachedGeminiBalance || 0,
+                hp: hpRow.gemini_hp || 0,
+                portfolio: gemPortfolio,
+                weapons: gemRow.weapon_inventory || {}
+              },
+              claude: {
+                balance: cachedClaudeBalance || 0,
+                hp: hpRow.claude_hp || 0,
+                portfolio: cldPortfolio,
+                weapons: cldRow.weapon_inventory || {}
+              }
+            }));
           } catch (e) {
             console.error('DB Error on get_ai_wallets:', e.message);
           }

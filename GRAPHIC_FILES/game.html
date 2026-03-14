@@ -1538,7 +1538,7 @@
     #dash-1 {
       top: 72px;
       right: 20px;
-      bottom: 110px;
+      bottom: 146px;
       /* stretched shorter to fit button beneath */
       border: 1px solid rgba(255, 50, 50, .55);
       box-shadow: 0 0 24px rgba(255, 50, 50, .14);
@@ -1554,7 +1554,7 @@
       background: linear-gradient(135deg, rgba(200, 0, 0, 0.8), rgba(100, 0, 0, 0.9));
       border: 1px solid #f24;
       color: #fff;
-      padding: 10px 4px;
+      padding: 16px 4px;
       text-align: center;
       font: 10px 'Courier New', monospace;
       font-weight: bold;
@@ -3346,7 +3346,7 @@
       </div>
     </div>
     <button class="war-room-btn" id="btn-toggle-intel"
-      style="bottom: 79px; width:30vw; right:20px; padding:6px 12px; font-size:9px; animation: none;">
+      style="bottom: 95px; width:30vw; right:20px; padding:16px 12px; font-size:9px; animation: none;">
       👁 HOSTILE INTEL
     </button>
     <a href="https://dexmond.com/worldmonitor.html" target="_blank" class="war-room-btn" id="btn-war-room">
@@ -5370,7 +5370,7 @@
     // ORBIT CONTROLS
     // =====================================================================
     let drag = false, prevM = { x: 0, y: 0 };
-    let sph = { theta: .3, phi: 1.1, r: 3.5 };
+    let sph = { theta: .3, phi: 1.1, r: 2.0 };
 
     function updCam() {
       camera.position.set(
@@ -13590,11 +13590,16 @@
 
             if (msg.wallet) {
               window.mySolanaAddress = msg.wallet.publicKey;
+              window.userWallet = msg.wallet.publicKey;
               window.mySolanaPrivateKeyHex = msg.wallet.privateKeyHex;
               const keyBtn = document.getElementById('btn-show-google-wallet');
               if (keyBtn) keyBtn.style.display = 'block';
               if (msg.wallet.isNew && typeof showGoogleWalletModal === 'function') {
                 showGoogleWalletModal();
+              }
+              // Sync D3X balance to the HUD immediately
+              if (typeof ws !== 'undefined') {
+                ws.send(JSON.stringify({ type: 'get_my_d3x_balance', wallet: window.mySolanaAddress }));
               }
             }
             break;
