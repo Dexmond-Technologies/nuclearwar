@@ -2058,7 +2058,7 @@ function initWebSockets() {
             const hpRow = hpRes.rows[0] || { gemini_hp: 0, claude_hp: 0 };
             
             // Get proper active asset ledgers from standard commander table tracking
-            const gemDataRes = await pgPool.query("SELECT portfolio, mining_inventory, weapon_inventory FROM commanders WHERE callsign = 'GEMINI'");
+            const gemDataRes = await pgPool.query("SELECT portfolio, mining_inventory, weapon_inventory FROM commanders WHERE callsign = 'GEMINI CORE'");
             const gemRow = gemDataRes.rows[0] || {};
             
             const cldDataRes = await pgPool.query("SELECT portfolio, mining_inventory, weapon_inventory FROM commanders WHERE callsign = 'RAINCLAUDE'");
@@ -3603,6 +3603,23 @@ async function startServer() {
         console.log('☢ token_ledger table ready');
       } catch (e) {
         console.error("token_ledger setup failed:", e.message);
+      }
+
+      // Initialize AI Commanders
+      try {
+        await pgPool.query(`
+              INSERT INTO commanders (callsign, d3x_balance, portfolio, mining_inventory) 
+              VALUES ($1, 0, '{}', '{}') 
+              ON CONFLICT (callsign) DO NOTHING
+          `, ['GEMINI CORE']);
+        await pgPool.query(`
+              INSERT INTO commanders (callsign, d3x_balance, portfolio, mining_inventory) 
+              VALUES ($1, 0, '{}', '{}') 
+              ON CONFLICT (callsign) DO NOTHING
+          `, ['RAINCLAUDE']);
+        console.log('☢ PostgreSQL Initialized GEMINI CORE and RAINCLAUDE AI profiles');
+      } catch (e) {
+        console.error("Failed to inject AIs into DB:", e.message);
       }
 
       console.log('☢ PostgreSQL connected — game_state and commanders tables ready');

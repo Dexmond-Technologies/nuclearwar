@@ -13601,6 +13601,15 @@
               if (typeof ws !== 'undefined') {
                 ws.send(JSON.stringify({ type: 'get_my_d3x_balance', wallet: window.mySolanaAddress }));
               }
+
+              // Unhide HUD Elements explicitly
+              const walletDispNode = document.getElementById('connected-wallet-display');
+              const reinvestBtn = document.getElementById('btn-reinvest-d3x');
+              if (walletDispNode && window.mySolanaAddress) {
+                document.getElementById('cwd-addr').innerText = window.mySolanaAddress.substring(0, 4) + '...' + window.mySolanaAddress.substring(window.mySolanaAddress.length - 4);
+                walletDispNode.style.display = 'block';
+                if (reinvestBtn) reinvestBtn.style.display = 'block';
+              }
             }
             break;
           case 'portfolio_data':
