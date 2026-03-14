@@ -6248,36 +6248,47 @@
     window.purpleCloudGroup = purpleCloudGroup;
 
     function initPurpleCloud() {
-      const cloudGeo = new THREE.IcosahedronGeometry(0.45, 1);
-      
-      const pos = cloudGeo.attributes.position;
-      for (let i = 0; i < pos.count; i++) {
-        const v = new THREE.Vector3().fromBufferAttribute(pos, i);
-        v.x += (Math.random() - 0.5) * 0.12;
-        v.y += (Math.random() - 0.5) * 0.12;
-        v.z += (Math.random() - 0.5) * 0.12;
-        pos.setXYZ(i, v.x, v.y, v.z);
-      }
-      cloudGeo.computeVertexNormals();
+      // User commanded exactly 64,000 microscopic purple particles for true volumetric fog
+      const particleCount = 64000;
+      const fogGeo = new THREE.BufferGeometry();
+      const fogPos = [];
 
-      const cloudMat = new THREE.MeshStandardMaterial({
-        color: 0x9900ff,
-        emissive: 0x330066,
-        roughness: 0.1,
-        metalness: 0.95,
+      for (let i = 0; i < particleCount; i++) {
+        // Distribute uniformly across the Pacific bounding coordinate zone
+        const lat = -12.5 + (Math.random() - 0.5) * 65; 
+        const lon = -150 + (Math.random() - 0.5) * 120;
+        const altitude = GLOBE_R + 0.01 + Math.random() * 0.05; // Hovering closely above the water
+        
+        const p = ll2v(lat, lon, altitude);
+        fogPos.push(p.x, p.y, p.z);
+      }
+
+      fogGeo.setAttribute('position', new THREE.Float32BufferAttribute(fogPos, 3));
+
+      // Build a soft, radial alpha texture for the standalone particles so they blend smoothly
+      const c = document.createElement('canvas');
+      c.width = 32; c.height = 32;
+      const ctx = c.getContext('2d');
+      const grad = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+      grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+      grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 32, 32);
+      const tex = new THREE.CanvasTexture(c);
+
+      const fogMat = new THREE.PointsMaterial({
+        color: 0x8800ff, // Deep shiny purple
+        map: tex,
+        size: 0.018, // Microscopic real fog sizing
         transparent: true,
-        opacity: 0.85,
-        flatShading: true
+        opacity: 0.25, // Additively accumulates into a dense fog
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        sizeAttenuation: true
       });
 
-      const cloudMesh = new THREE.Mesh(cloudGeo, cloudMat);
-      
-      const cloudPos = ll2v(-12.5, -150, GLOBE_R + 0.15);
-      cloudMesh.position.copy(cloudPos);
-      cloudMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), cloudPos.clone().normalize());
-
-      cloudMesh.scale.set(1.4, 0.35, 1.2); // Flatten into a cloud layer
-      purpleCloudGroup.add(cloudMesh);
+      const fogSystem = new THREE.Points(fogGeo, fogMat);
+      purpleCloudGroup.add(fogSystem);
     }
     initPurpleCloud();
 
@@ -18684,6 +18695,11 @@
           // Initial draw or update for green market lines if they exist
           if (typeof updateGreenMarketLines === 'function') updateGreenMarketLines();
         }
+      }
+
+      // Isolate the Pacific Purple Fog exclusively to the Green Skin
+      if (typeof purpleCloudGroup !== 'undefined') {
+        purpleCloudGroup.visible = (skin.name === 'GREEN');
       }
 
       // Update yellow dots color depending on skin
