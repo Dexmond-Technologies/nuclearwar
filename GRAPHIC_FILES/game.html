@@ -7903,7 +7903,7 @@
           // Elaborate Electricity Bridges for North Pole
           window.npLightningGroup = new THREE.Group();
           scene.add(window.npLightningGroup);
-          const bridgeMat = new THREE.LineBasicMaterial({ color: 0x00eaff, transparent: true, opacity: 0.0, blending: THREE.AdditiveBlending });
+          const bridgeMat = new THREE.LineBasicMaterial({ color: 0x00eaff, transparent: true, opacity: 0.8, linewidth: 2 });
 
           // Neon Light Blue glow texture for the strings
           const cAura = document.createElement('canvas');
@@ -8247,7 +8247,8 @@
       // Position precisely at the user's Micronesia screenshot target
       const lat = 5;
       const lon = 150;
-      const r = typeof GLOBE_R !== 'undefined' ? GLOBE_R + 0.005 : 1.005;
+      // Lifted 49 times higher in orbit per user request
+      const r = typeof GLOBE_R !== 'undefined' ? GLOBE_R + 0.245 : 1.245;
       const latRad = lat * Math.PI / 180;
       const lonRad = -lon * Math.PI / 180;
 
@@ -10019,6 +10020,82 @@
             if (typeof _sfxClick !== 'undefined') _sfxClick();
             showBoatInfo(objData, intersects[0].object);
             return; // Consume click
+          }
+        }
+      }
+
+      // 1.2 Check WTR Minigame Boats
+      if (typeof wtrBoatMarkers !== 'undefined' && wtrBoatMarkers.length > 0) {
+        mouse.x = (e.clientX / innerWidth) * 2 - 1;
+        mouse.y = -(e.clientY / innerHeight) * 2 + 1;
+        ray.setFromCamera(mouse, camera);
+        const intersects = ray.intersectObjects(wtrBoatMarkers);
+        if (intersects.length > 0) {
+          const hitBox = intersects[0].object;
+          const objData = hitBox.userData;
+          if (objData.isWTRBoat && objData.parent) {
+             if (typeof _sfxClick !== 'undefined') _sfxClick();
+             const ship = objData.parent;
+             const shipData = ship.userData;
+             
+             // Explosion Effect
+             if (typeof spawnExplosion3D === 'function') {
+               spawnExplosion3D(shipData.lat, shipData.lon, shipData.faction === 'RAINCLAUDA' ? 0x0055ff : 0xff0044);
+             }
+             if (typeof spawnFloatingText3D === 'function') {
+                spawnFloatingText3D(shipData.lat, shipData.lon, '💥 SINK!', shipData.faction === 'RAINCLAUDA' ? 0x00aaff : 0xff4444);
+             }
+             
+             // Log output
+             setLog(`💥 ${shipData.faction} SHIP SUNK IN NAVAL SKIRMISH!`);
+             
+             // Remove from scene
+             ship.children.forEach(c => {
+               if(c.material) c.material.dispose();
+               if(c.geometry) c.geometry.dispose();
+             });
+             scene.remove(ship);
+             wtrBoatMarkers = wtrBoatMarkers.filter(m => m !== hitBox);
+             
+             return; // Consume click
+          }
+        }
+      }
+
+      // 1.3 Check WTR Minigame Planes
+      if (typeof wtrPlaneMarkers !== 'undefined' && wtrPlaneMarkers.length > 0) {
+        mouse.x = (e.clientX / innerWidth) * 2 - 1;
+        mouse.y = -(e.clientY / innerHeight) * 2 + 1;
+        ray.setFromCamera(mouse, camera);
+        const intersects = ray.intersectObjects(wtrPlaneMarkers);
+        if (intersects.length > 0) {
+          const hitBox = intersects[0].object;
+          const objData = hitBox.userData;
+          if (objData.isWTRPlane && objData.parent) {
+             if (typeof _sfxClick !== 'undefined') _sfxClick();
+             const plane = objData.parent;
+             const planeData = plane.userData;
+             
+             // Mid-Air Explosion Effect
+             if (typeof spawnExplosion3D === 'function') {
+               spawnExplosion3D(planeData.lat, planeData.lon, planeData.faction === 'RAINCLAUDA' ? 0x0055ff : 0xff0044);
+             }
+             if (typeof spawnFloatingText3D === 'function') {
+                spawnFloatingText3D(planeData.lat, planeData.lon, '🎯 SPLASH!', planeData.faction === 'RAINCLAUDA' ? 0x00aaff : 0xff4444);
+             }
+             
+             // Log output
+             setLog(`🎯 ${planeData.faction} JET SHOT DOWN IN DOGFIGHT!`);
+             
+             // Remove from scene
+             plane.children.forEach(c => {
+               if(c.material) c.material.dispose();
+               if(c.geometry) c.geometry.dispose();
+             });
+             scene.remove(plane);
+             wtrPlaneMarkers = wtrPlaneMarkers.filter(m => m !== hitBox);
+             
+             return; // Consume click
           }
         }
       }
@@ -15692,7 +15769,7 @@
     const wtrGlowMat = new THREE.MeshBasicMaterial({
       color: 0x00aaff,
       transparent: true,
-      opacity: 0.2,
+      opacity: 0.04, // Reduced by 80% (was 0.2)
       blending: THREE.AdditiveBlending,
       side: THREE.BackSide,
       depthWrite: false
@@ -15719,10 +15796,10 @@
     const supernovaMat = new THREE.MeshPhongMaterial({
       color: 0x0055ff,
       emissive: 0x00aaff,
-      emissiveIntensity: 0.8,
+      emissiveIntensity: 0.16, // Reduced by 80% (was 0.8)
       wireframe: true,
       transparent: true,
-      opacity: 0.15,
+      opacity: 0.03, // Reduced by 80% (was 0.15)
       blending: THREE.AdditiveBlending,
       depthWrite: false
     });
@@ -15748,7 +15825,7 @@
       map: wtrFogTex,
       size: 2.5,
       transparent: true,
-      opacity: 0.2,
+      opacity: 0.04, // Reduced by 80% (was 0.2)
       blending: THREE.AdditiveBlending,
       depthWrite: false,
       sizeAttenuation: true
@@ -15776,7 +15853,7 @@
     const staticMat = new THREE.LineBasicMaterial({
       color: 0x00ffff,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.16, // Reduced by 80% (was 0.8)
       linewidth: 2,
       blending: THREE.AdditiveBlending
     });
@@ -16912,6 +16989,58 @@
           scene.remove(fj.group);
           fakeJets3D.splice(i, 1);
         }
+      }
+      
+      // Update WTR Minigame Ships and Planes
+      if (window.SKINS && window.SKINS[window.currentSkinIndex] && window.SKINS[window.currentSkinIndex].name === 'WTR') {
+         if (typeof wtrBoatMarkers !== 'undefined') {
+            wtrBoatMarkers.forEach(hitBox => {
+               if (!hitBox.userData || !hitBox.userData.parent) return;
+               const ship = hitBox.userData.parent;
+               const ud = ship.userData;
+               
+               // Move boat forward based on COG
+               ud.lon += (Math.sin(ud.cog * Math.PI/180) * ud.speed * dt);
+               ud.lat += (Math.cos(ud.cog * Math.PI/180) * ud.speed * dt);
+               
+               // Keep in bounds
+               if (ud.lon > 180) ud.lon -= 360;
+               if (ud.lon < -180) ud.lon += 360;
+               if (ud.lat > 90) { ud.lat = 90; ud.cog = 180 - ud.cog; }
+               if (ud.lat < -90) { ud.lat = -90; ud.cog = 180 - ud.cog; }
+               
+               const R = typeof GLOBE_R !== 'undefined' ? GLOBE_R + 0.025 : 1.025;
+               const newPos = ll2v(ud.lat, ud.lon, R);
+               ship.position.copy(newPos);
+               ship.lookAt(new THREE.Vector3(0,0,0));
+               ship.rotateZ(-ud.cog * (Math.PI/180));
+            });
+         }
+         
+         if (typeof wtrPlaneMarkers !== 'undefined') {
+            wtrPlaneMarkers.forEach(hitBox => {
+               if (!hitBox.userData || !hitBox.userData.parent) return;
+               const plane = hitBox.userData.parent;
+               const ud = plane.userData;
+               
+               // Move plane forward based on COG (faster than boats)
+               ud.lon += (Math.sin(ud.cog * Math.PI/180) * ud.speed * dt * 4);
+               ud.lat += (Math.cos(ud.cog * Math.PI/180) * ud.speed * dt * 4);
+               
+               // Keep in bounds
+               if (ud.lon > 180) ud.lon -= 360;
+               if (ud.lon < -180) ud.lon += 360;
+               if (ud.lat > 90) { ud.lat = 90; ud.cog = 180 - ud.cog; }
+               if (ud.lat < -90) { ud.lat = -90; ud.cog = 180 - ud.cog; }
+               
+               const R = typeof GLOBE_R !== 'undefined' ? GLOBE_R + 0.1 : 1.1;
+               const newPos = ll2v(ud.lat, ud.lon, R);
+               plane.position.copy(newPos);
+               plane.lookAt(new THREE.Vector3(0,0,0));
+               plane.rotateX(Math.PI / 2);
+               plane.rotateY(-ud.cog * (Math.PI/180));
+            });
+         }
       }
 
       // Update Squadron Formations
@@ -18471,6 +18600,209 @@
       });
     }
 
+    // =====================================================================
+    // WTR SKIN: RAINCLAUDA VS GEMINI NAVAL & AIR MINIGAMES
+    // =====================================================================
+    let wtrBoatInterval = null;
+    let wtrBoatMarkers = [];
+    
+    function clearWTRBoats() {
+      if (typeof scene === 'undefined') return;
+      wtrBoatMarkers.forEach(b => {
+        const parent = b.userData ? b.userData.parent : null;
+        if (parent) {
+          parent.children.forEach(c => {
+            if (c.material) c.material.dispose();
+            if (c.geometry) c.geometry.dispose();
+          });
+          scene.remove(parent);
+        } else {
+          if (b.material) b.material.dispose();
+          if (b.geometry) b.geometry.dispose();
+          scene.remove(b);
+        }
+      });
+      wtrBoatMarkers = [];
+    }
+    
+    window.spawnWTRBoats = function() {
+      if (typeof scene === 'undefined' || typeof THREE === 'undefined') return;
+      if (window.SKINS[window.currentSkinIndex].name !== 'WTR') return;
+
+      clearWTRBoats();
+      
+      const R = typeof GLOBE_R !== 'undefined' ? GLOBE_R + 0.025 : 1.025;
+      const data = [];
+      
+      for (let i = 0; i < 50; i++) {
+        data.push({
+          lat: (Math.random() - 0.5) * 160,
+          lon: (Math.random() - 0.5) * 360,
+          cog: Math.random() * 360,
+          faction: Math.random() > 0.5 ? 'RAINCLAUDA' : 'GEMINI'
+        });
+      }
+
+      data.forEach((boat, index) => {
+        const boatGroup = new THREE.Group();
+        
+        const isRainclauda = boat.faction === 'RAINCLAUDA';
+        const factionColor = isRainclauda ? 0x0055ff : 0xff0044; // Blue vs Red
+        const hullColor = isRainclauda ? 0x112244 : 0x441111;
+        
+        const hullMat = new THREE.MeshBasicMaterial({ color: hullColor, depthTest: true });
+        const deckMat = new THREE.MeshBasicMaterial({ color: 0x222222, depthTest: true });
+        const trimMat = new THREE.MeshBasicMaterial({ color: factionColor, depthTest: true });
+
+        // Destroyer/Cruiser Shape
+        const hullGeo = new THREE.BoxGeometry(0.04, 0.09, 0.02);
+        const hull = new THREE.Mesh(hullGeo, hullMat);
+        hull.position.set(0, -0.01, 0);
+
+        const bowGeo = new THREE.ConeGeometry(0.02, 0.04, 3);
+        const bow = new THREE.Mesh(bowGeo, trimMat);
+        bow.position.set(0, 0.055, 0);
+        bow.rotation.z = Math.PI;
+
+        const deckGeo = new THREE.BoxGeometry(0.036, 0.086, 0.002);
+        const deck = new THREE.Mesh(deckGeo, deckMat);
+        deck.position.set(0, -0.01, 0.011);
+
+        const bridgeGeo = new THREE.BoxGeometry(0.03, 0.02, 0.025);
+        const bridge = new THREE.Mesh(bridgeGeo, trimMat);
+        bridge.position.set(0, -0.01, 0.015);
+
+        boatGroup.add(hull);
+        boatGroup.add(bow);
+        boatGroup.add(deck);
+        boatGroup.add(bridge);
+
+        const pos = ll2v(boat.lat, boat.lon, R);
+        boatGroup.position.copy(pos);
+        boatGroup.lookAt(new THREE.Vector3(0, 0, 0));
+        boatGroup.rotateZ(-boat.cog * (Math.PI / 180));
+
+        // Click Hitbox
+        const hitGeo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+        const hitMat = new THREE.MeshBasicMaterial({ visible: false });
+        const hit = new THREE.Mesh(hitGeo, hitMat);
+        boatGroup.add(hit);
+        
+        // Add velocity data for movement in animation loop
+        boatGroup.userData = { 
+            isWTRBoat: true, 
+            faction: boat.faction,
+            lat: boat.lat,
+            lon: boat.lon,
+            speed: 0.1 + Math.random() * 0.2,
+            cog: boat.cog
+        };
+        
+        hit.userData = { isWTRBoat: true, parent: boatGroup };
+
+        scene.add(boatGroup);
+        wtrBoatMarkers.push(hit);
+      });
+    };
+    
+    let wtrPlaneInterval = null;
+    let wtrPlaneMarkers = [];
+    
+    function clearWTRPlanes() {
+      if (typeof scene === 'undefined') return;
+      wtrPlaneMarkers.forEach(p => {
+        const parent = p.userData ? p.userData.parent : null;
+        if (parent) {
+          parent.children.forEach(c => {
+            if (c.material) c.material.dispose();
+            if (c.geometry) c.geometry.dispose();
+          });
+          scene.remove(parent);
+        } else {
+          if (p.material) p.material.dispose();
+          if (p.geometry) p.geometry.dispose();
+          scene.remove(p);
+        }
+      });
+      wtrPlaneMarkers = [];
+    }
+    
+    window.spawnWTRPlanes = function() {
+      if (typeof scene === 'undefined' || typeof THREE === 'undefined') return;
+      if (window.SKINS[window.currentSkinIndex].name !== 'WTR') return;
+
+      clearWTRPlanes();
+      
+      const R = typeof GLOBE_R !== 'undefined' ? GLOBE_R + 0.1 : 1.1; // Fly higher than boats
+      const data = [];
+      
+      for (let i = 0; i < 50; i++) {
+        data.push({
+          lat: (Math.random() - 0.5) * 160,
+          lon: (Math.random() - 0.5) * 360,
+          cog: Math.random() * 360,
+          faction: Math.random() > 0.5 ? 'RAINCLAUDA' : 'GEMINI'
+        });
+      }
+
+      data.forEach((plane, index) => {
+        const planeGroup = new THREE.Group();
+        
+        const isRainclauda = plane.faction === 'RAINCLAUDA';
+        const trimColor = isRainclauda ? 0x0055ff : 0xff0044; // Blue vs Red
+        const hullColor = isRainclauda ? 0x334466 : 0x663333;
+        
+        const hullMat = new THREE.MeshBasicMaterial({ color: hullColor, depthTest: true });
+        const trimMat = new THREE.MeshBasicMaterial({ color: trimColor, depthTest: true });
+
+        // Jet Fighter Shape
+        const bodyGeo = new THREE.CylinderGeometry(0.005, 0.015, 0.08, 8);
+        const body = new THREE.Mesh(bodyGeo, hullMat);
+        body.rotation.x = Math.PI / 2;
+
+        const wingsGeo = new THREE.BoxGeometry(0.08, 0.005, 0.03);
+        const wings = new THREE.Mesh(wingsGeo, trimMat);
+        wings.position.set(0, 0, 0.01);
+
+        const tailGeo = new THREE.BoxGeometry(0.005, 0.02, 0.015);
+        const tail = new THREE.Mesh(tailGeo, trimMat);
+        tail.position.set(0, 0.01, -0.035);
+
+        planeGroup.add(body);
+        planeGroup.add(wings);
+        planeGroup.add(tail);
+
+        const pos = ll2v(plane.lat, plane.lon, R);
+        planeGroup.position.copy(pos);
+        planeGroup.lookAt(new THREE.Vector3(0, 0, 0));
+        
+        // Orient plane nose-first
+        planeGroup.rotateX(Math.PI / 2);
+        planeGroup.rotateY(-plane.cog * (Math.PI / 180));
+
+        // Click Hitbox (Very large since planes move fast)
+        const hitGeo = new THREE.BoxGeometry(0.3, 0.3, 0.3);
+        const hitMat = new THREE.MeshBasicMaterial({ visible: false });
+        const hit = new THREE.Mesh(hitGeo, hitMat);
+        planeGroup.add(hit);
+        
+        // Add velocity data for movement in animation loop
+        planeGroup.userData = { 
+            isWTRPlane: true, 
+            faction: plane.faction,
+            lat: plane.lat,
+            lon: plane.lon,
+            speed: 0.5 + Math.random() * 0.5,
+            cog: plane.cog
+        };
+        
+        hit.userData = { isWTRPlane: true, parent: planeGroup };
+
+        scene.add(planeGroup);
+        wtrPlaneMarkers.push(hit);
+      });
+    };
+
 
     document.getElementById('btn-toggle-intel').addEventListener('click', () => {
       SFX.playClick();
@@ -18961,6 +19293,28 @@
           clearInterval(boatInterval);
           boatInterval = null;
         }
+      }
+
+      if (skin.name === 'WTR') {
+        if (!wtrBoatInterval) {
+          window.spawnWTRBoats();
+          wtrBoatInterval = setInterval(window.spawnWTRBoats, 30000); // Respawn every 30s
+        }
+        if (!wtrPlaneInterval) {
+          window.spawnWTRPlanes();
+          wtrPlaneInterval = setInterval(window.spawnWTRPlanes, 20000); // Respawn every 20s
+        }
+      } else {
+         clearWTRBoats();
+         if (wtrBoatInterval) {
+           clearInterval(wtrBoatInterval);
+           wtrBoatInterval = null;
+         }
+         clearWTRPlanes();
+         if (wtrPlaneInterval) {
+           clearInterval(wtrPlaneInterval);
+           wtrPlaneInterval = null;
+         }
       }
 
       // Force instant UI render for specific skins (prevents interval delay)
@@ -19565,31 +19919,26 @@
       overlay.id = 'software-shop-modal';
       overlay.style.cssText = `
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-        background: rgba(10, 0, 15, 0.85); backdrop-filter: blur(8px);
+        background: #000;
         z-index: 10000; display: flex; align-items: center; justify-content: center;
         font-family: 'Orbitron', sans-serif;
     `;
 
       const modal = document.createElement('div');
       modal.style.cssText = `
-        width: 90%; max-width: 1200px; height: 90vh; max-height: 900px;
-        background: linear-gradient(135deg, rgba(0,40,80,0.8) 0%, rgba(0,10,20,0.9) 100%);
-        border: 2px solid #0af; border-radius: 12px;
-        box-shadow: 0 0 40px rgba(0,170,255,0.4), inset 0 0 20px rgba(0,170,255,0.2);
-        padding: 30px; display: flex; flex-direction: column; position: relative;
+        width: 100vw; height: 100vh;
+        background: #000;
+        display: flex; flex-direction: column; position: relative; margin: 0; padding: 0; border: none;
     `;
 
       modal.innerHTML = `
-        <button id="close-software-shop" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#0af; font-size:30px; cursor:pointer; font-weight:bold; transition:0.2s; z-index:1000;">&times;</button>
-        <h1 style="color:#0af; font-size:32px; text-shadow: 0 0 10px #0af; margin-top:0; border-bottom:1px solid rgba(0,170,255,0.5); padding-bottom:15px; text-align:center; letter-spacing:4px;">
-            DEXMOND.COM HUB
-        </h1>
-        <div id="dexmond-iframe-container" style="flex-grow:1; width:100%; border:1px solid rgba(0,170,255,0.3); border-radius:8px; overflow:hidden; background:#000;">
+        <button id="close-software-shop" style="position:absolute; top:20px; right:30px; background:rgba(0,0,0,0.5); border:1px solid #0af; border-radius:50%; width:40px; height:40px; color:#0af; font-size:30px; cursor:pointer; font-weight:bold; transition:0.2s; z-index:1000; display:flex; align-items:center; justify-content:center;">&times;</button>
+        <div id="dexmond-iframe-container" style="flex-grow:1; width:100%; height:100%; background:#000;">
             <!-- Iframe injected via JS to avoid parser bugs -->
         </div>
     `;
 
-      const iframeHtml = '<iframe src="https://dexmond.com" style="width:100%; height:100%; border:none;"><' + '/iframe>';
+      const iframeHtml = '<iframe src="https://dexmond.com" style="width:100%; height:100%; border:none; margin:0; padding:0; display:block;"><' + '/iframe>';
       modal.querySelector('#dexmond-iframe-container').innerHTML = iframeHtml;
 
       overlay.appendChild(modal);
