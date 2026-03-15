@@ -18597,7 +18597,7 @@
             window.blackGlobeMat = new THREE.MeshStandardMaterial({
               color: 0x010101, // Deep black base
               emissive: 0x050505, // Emissive glow to retain silhouette
-              roughness: 0.1, // Shiny
+              roughness: 0.3, // Shiny but with broader specular highlight
               metalness: 0.9, // Glossy environmental catch
               transparent: false,
               opacity: 1.0, // Solid opaque ball
@@ -18607,13 +18607,13 @@
             });
             
             // Generate Rim Lights (Soft 3-point lighting setup, dimmed per user request)
-            window.blackSkinRimLight = new THREE.DirectionalLight(0xffffff, 2.8); // 30% dimmer than 4.0
+            window.blackSkinRimLight = new THREE.DirectionalLight(0xffffff, 1.96); // 30% dimmer than 2.8
             window.blackSkinRimLight.position.set(20, 0, 0); // Purely from the X-Right axis (Key Light)
 
-            window.blackSkinRimLight2 = new THREE.DirectionalLight(0xffffff, 2.0); // Softer Fill Light
+            window.blackSkinRimLight2 = new THREE.DirectionalLight(0xffffff, 1.4); // Softer Fill Light
             window.blackSkinRimLight2.position.set(-20, 15, 10); // Top-Left
 
-            window.blackSkinRimLight3 = new THREE.DirectionalLight(0xffffff, 1.5); // Subtle Back Rim Light
+            window.blackSkinRimLight3 = new THREE.DirectionalLight(0xffffff, 1.05); // Subtle Back Rim Light
             window.blackSkinRimLight3.position.set(0, -20, -15); // Bottom-Back
 
             if (typeof scene !== 'undefined') {
